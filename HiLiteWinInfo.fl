@@ -1,0 +1,48 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0105 
+header_name {.h} 
+code_name {.cc}
+decl {\#include "TBmeshWin.h"} {selected
+} 
+
+decl {class TBmeshWin;} {public
+} 
+
+class HiLiteInfoWin {} {
+  decl {TBmeshWin *mw;} {}
+  Function {HiLiteInfoWin(TBmeshWin *a)} {} {
+    code {mw = a;} {}
+    Fl_Window window {
+      label {Highlighted information}
+      callback {this->window->hide();} open
+      xywh {200 55 265 665} type Double hide resizable
+    } {
+      Fl_Browser hilighttext {
+        callback {mw->select_hi(o->value());}
+        xywh {0 0 265 645} type Select resizable
+      }
+      Fl_Button {} {
+        label Close
+        callback {window->hide();}
+        xywh {0 645 265 20}
+      }
+    }
+  }
+  Function {clear()} {} {
+    code {hilighttext->clear();} {}
+  }
+  Function {add(const char *s, void *d=0 )} {} {
+    code {hilighttext->add( s, d );} {}
+  }
+  Function {text(int n)} {return_type {const char *}
+  } {
+    code {return hilighttext->text(n);} {}
+  }
+  Function {topline( int a )} {} {
+    code {hilighttext->topline( a );} {}
+  }
+  Function {topline( void )} {return_type int
+  } {
+    code {return hilighttext->topline();} {}
+  }
+} 

@@ -1,0 +1,653 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0107 
+header_name {.h} 
+code_name {.cc}
+decl {\#include "TBmeshWin.h"} {public
+} 
+
+decl {\#include <math.h>} {public
+} 
+
+class ClipPlane {open
+} {
+  Function {ClipPlane( TBmeshWin *tb )} {open
+  } {
+    Fl_Window window {
+      label {Clipping Plane} open
+      xywh {229 164 575 495} type Double hide
+    } {
+      Fl_Group Clip0 {
+        label {Clipping Plane 1} open
+        xywh {5 20 185 220} box UP_BOX
+      } {
+        Fl_Group {} {
+          label {Plane Normal1}
+          xywh {15 75 115 145} box UP_BOX
+        } {
+          Fl_Value_Input xdir0 {
+            label {X:}
+            callback {normcb(0);}
+            xywh {35 85 80 25} maximum 0 step 0.01 value 1
+          }
+          Fl_Value_Input ydir0 {
+            label {Y:}
+            callback {normcb(0);}
+            xywh {35 120 80 25} maximum 0 step 0.01
+          }
+          Fl_Value_Input zdir0 {
+            label {Z:}
+            callback {normcb(0);}
+            xywh {35 155 80 25} maximum 0 step 0.01
+          }
+          Fl_Button unit0 {
+            label Unitize
+            callback {unitize(xdir0,ydir0,zdir0);
+normcb(0);}
+            tooltip {set to unit normal} xywh {20 190 55 20}
+          }
+          Fl_Button {} {
+            label Flip
+            callback {flip(0);}
+            xywh {80 190 40 20}
+          }
+        }
+        Fl_Value_Slider intercept0 {
+          label Intercept
+          callback {normcb(0);}
+          tooltip {control intercept of plane with axes} xywh {145 25 25 195} selection_color 10 minimum -1 step 0.01
+        }
+        Fl_Choice dispas0 {
+          xywh {20 30 110 20} down_box BORDER_BOX
+        } {
+          MenuItem {} {
+            label Off
+            callback {drawIntercept( 0, false );
+tbmw->redraw();}
+            xywh {0 0 30 20}
+          }
+          MenuItem {} {
+            label On
+            callback {drawIntercept( 0, false );
+tbmw->redraw();}
+            xywh {0 0 30 20}
+          }
+          MenuItem {} {
+            label {Whole Plane}
+            callback {drawIntercept( 0, false );
+tbmw->redraw();}
+            xywh {0 0 30 20}
+          }
+          MenuItem {} {
+            label Intersection
+            callback {drawIntercept( 0, true );
+tbmw->determine_cutplane(0);
+tbmw->redraw();}
+            xywh {0 0 30 20}
+          }
+          MenuItem {} {
+            label Datified
+            callback {drawIntercept( 0, true );
+tbmw->determine_cutplane(0);
+tbmw->redraw();}
+            xywh {0 0 30 20}
+          }
+        }
+      }
+      Fl_Group Clip1 {
+        label {Clipping Plane 2}
+        xywh {195 20 185 220} box UP_BOX
+      } {
+        Fl_Group {} {
+          label {Plane Normal2} open
+          xywh {205 75 115 145} box UP_BOX
+        } {
+          Fl_Value_Input xdir1 {
+            label {X:}
+            callback {normcb(1);}
+            xywh {225 85 80 25} maximum 0 step 0.01
+          }
+          Fl_Value_Input ydir1 {
+            label {Y:}
+            callback {normcb(1);}
+            xywh {225 120 80 25} maximum 0 step 0.01 value 1
+          }
+          Fl_Value_Input zdir1 {
+            label {Z:}
+            callback {normcb(1);}
+            xywh {225 155 80 25} maximum 0 step 0.01
+          }
+          Fl_Button unit1 {
+            label Unitize
+            callback {unitize(xdir1,ydir1,zdir1);
+normcb(1);}
+            tooltip {set to unit normal} xywh {210 190 55 20}
+          }
+          Fl_Button {} {
+            label Flip
+            callback {flip(1);}
+            xywh {270 190 40 20}
+          }
+        }
+        Fl_Value_Slider intercept1 {
+          label Intercept
+          callback {normcb(1);}
+          tooltip {control intercept of plane with axes} xywh {335 25 25 195} selection_color 178 minimum -1 step 0.01
+        }
+        Fl_Choice dispas1 {
+          xywh {210 30 110 20} down_box BORDER_BOX
+        } {
+          MenuItem {} {
+            label Off
+            callback {drawIntercept( 1, false );
+tbmw->redraw();}
+            xywh {10 10 30 20}
+          }
+          MenuItem {} {
+            label On
+            callback {drawIntercept( 1, false );
+tbmw->redraw();}
+            xywh {10 10 30 20}
+          }
+          MenuItem {} {
+            label {Whole Plane}
+            callback {drawIntercept( 1, false );
+tbmw->redraw();}
+            xywh {10 10 30 20}
+          }
+          MenuItem {} {
+            label Intersection
+            callback {drawIntercept( 1, true );
+tbmw->determine_cutplane(1);
+tbmw->redraw();}
+            xywh {10 10 30 20}
+          }
+          MenuItem {} {
+            label Datified
+            callback {drawIntercept( 1, true );
+tbmw->determine_cutplane(1);
+tbmw->redraw();}
+            xywh {10 10 30 20}
+          }
+        }
+      }
+      Fl_Group Clip2 {
+        label {Clipping Plane 3}
+        xywh {375 20 195 220} box UP_BOX
+      } {
+        Fl_Group {} {
+          label {Plane Normal3} open
+          xywh {395 75 115 145} box UP_BOX
+        } {
+          Fl_Value_Input xdir2 {
+            label {X:}
+            callback {normcb(2);}
+            xywh {415 85 80 25} maximum 0 step 0.01
+          }
+          Fl_Value_Input ydir2 {
+            label {Y:}
+            callback {normcb(2);}
+            xywh {415 120 80 25} maximum 0 step 0.01
+          }
+          Fl_Value_Input zdir2 {
+            label {Z:}
+            callback {normcb(2);}
+            xywh {415 155 80 25} maximum 0 step 0.01 value 1
+          }
+          Fl_Button unit2 {
+            label Unitize
+            callback {unitize(xdir2,ydir2,zdir2);
+normcb(2);}
+            tooltip {set to unit normal} xywh {400 190 55 20}
+          }
+          Fl_Button {} {
+            label Flip
+            callback {flip(2);}
+            xywh {460 190 45 20}
+          }
+        }
+        Fl_Value_Slider intercept2 {
+          label Intercept
+          callback {normcb(2);}
+          tooltip {control intercept of plane with axes} xywh {525 30 25 190} selection_color 148 minimum -1 step 0.01
+        }
+        Fl_Choice dispas2 {
+          xywh {395 30 110 20} down_box BORDER_BOX
+        } {
+          MenuItem {} {
+            label Off
+            callback {drawIntercept( 2, false );
+tbmw->redraw();}
+            xywh {20 20 30 20}
+          }
+          MenuItem {} {
+            label On
+            callback {drawIntercept( 2, false );
+tbmw->redraw();}
+            xywh {20 20 30 20}
+          }
+          MenuItem {} {
+            label {Whole Plane}
+            callback {drawIntercept( 2, false );
+tbmw->redraw();}
+            xywh {20 20 30 20}
+          }
+          MenuItem {} {
+            label Intersection
+            callback {drawIntercept( 2, true );
+tbmw->determine_cutplane(2);
+tbmw->redraw();}
+            xywh {20 20 30 20}
+          }
+          MenuItem {} {
+            label Datified
+            callback {drawIntercept( 2, true );
+tbmw->determine_cutplane(2);
+tbmw->redraw();}
+            xywh {20 20 30 20}
+          }
+        }
+      }
+      Fl_Group Clip3 {
+        label {Clipping Plane 4} open
+        xywh {5 250 185 220} box UP_BOX align 2
+      } {
+        Fl_Group {} {
+          label {Plane Normal4} open
+          xywh {15 305 115 145} box UP_BOX
+        } {
+          Fl_Value_Input xdir3 {
+            label {X:}
+            callback {normcb(3);}
+            xywh {35 315 80 25} maximum 0 step 0.01 value -1
+          }
+          Fl_Value_Input ydir3 {
+            label {Y:}
+            callback {normcb(3);}
+            xywh {35 350 80 25} maximum 0 step 0.01
+          }
+          Fl_Value_Input zdir3 {
+            label {Z:}
+            callback {normcb(3);}
+            xywh {35 385 80 25} maximum 0 step 0.01
+          }
+          Fl_Button unit3 {
+            label Unitize
+            callback {unitize(xdir3,ydir3,zdir3);
+normcb(3);}
+            tooltip {set to unit normal} xywh {20 420 55 20}
+          }
+          Fl_Button {} {
+            label Flip
+            callback {flip(3);}
+            xywh {80 420 40 20}
+          }
+        }
+        Fl_Value_Slider intercept3 {
+          label Intercept
+          callback {normcb(3);}
+          tooltip {control intercept of plane with axes} xywh {145 255 25 195} selection_color 10 minimum -1 step 0.01
+        }
+        Fl_Choice dispas3 {
+          xywh {20 260 110 20} down_box BORDER_BOX
+        } {
+          MenuItem {} {
+            label Off
+            callback {drawIntercept( 3, false );
+tbmw->redraw();}
+            xywh {30 30 30 20}
+          }
+          MenuItem {} {
+            label On
+            callback {drawIntercept( 3, false );
+tbmw->redraw();}
+            xywh {30 30 30 20}
+          }
+          MenuItem {} {
+            label {Whole Plane}
+            callback {drawIntercept( 3, false );
+tbmw->redraw();}
+            xywh {30 30 30 20}
+          }
+          MenuItem {} {
+            label Intersection
+            callback {drawIntercept( 3, true );
+tbmw->determine_cutplane(3);
+tbmw->redraw();}
+            xywh {30 30 30 20}
+          }
+          MenuItem {} {
+            label Datified
+            callback {drawIntercept( 3, true );
+tbmw->determine_cutplane(3);
+tbmw->redraw();}
+            xywh {30 30 30 20}
+          }
+        }
+      }
+      Fl_Group Clip4 {
+        label {Clipping Plane 5}
+        xywh {195 250 185 220} box UP_BOX align 2
+      } {
+        Fl_Group {} {
+          label {Plane Normal5} open
+          xywh {205 305 115 145} box UP_BOX
+        } {
+          Fl_Value_Input xdir4 {
+            label {X:}
+            callback {normcb(4);}
+            xywh {225 315 80 25} maximum 0 step 0.01
+          }
+          Fl_Value_Input ydir4 {
+            label {Y:}
+            callback {normcb(4);}
+            xywh {225 350 80 25} maximum 0 step 0.01 value -1
+          }
+          Fl_Value_Input zdir4 {
+            label {Z:}
+            callback {normcb(4);}
+            xywh {225 385 80 25} maximum 0 step 0.01
+          }
+          Fl_Button unit4 {
+            label Unitize
+            callback {unitize(xdir4,ydir4,zdir4);
+normcb(4);}
+            tooltip {set to unit normal} xywh {210 420 55 20}
+          }
+          Fl_Button {} {
+            label Flip
+            callback {flip(4);}
+            xywh {270 420 40 20}
+          }
+        }
+        Fl_Value_Slider intercept4 {
+          label Intercept
+          callback {normcb(4);}
+          tooltip {control intercept of plane with axes} xywh {335 255 25 195} selection_color 178 minimum -1 step 0.01
+        }
+        Fl_Choice dispas4 {
+          xywh {210 260 110 20} down_box BORDER_BOX
+        } {
+          MenuItem {} {
+            label Off
+            callback {drawIntercept( 4, false );
+tbmw->redraw();}
+            xywh {40 40 30 20}
+          }
+          MenuItem {} {
+            label On
+            callback {drawIntercept( 4, false );
+tbmw->redraw();}
+            xywh {40 40 30 20}
+          }
+          MenuItem {} {
+            label {Whole Plane}
+            callback {drawIntercept( 4, false );
+tbmw->redraw();}
+            xywh {40 40 30 20}
+          }
+          MenuItem {} {
+            label Intersection
+            callback {drawIntercept( 4, true );
+tbmw->determine_cutplane(4);
+tbmw->redraw();}
+            xywh {40 40 30 20}
+          }
+          MenuItem {} {
+            label Datified
+            callback {drawIntercept( 4, true );
+tbmw->determine_cutplane(4);
+tbmw->redraw();}
+            xywh {40 40 30 20}
+          }
+        }
+      }
+      Fl_Group Clip5 {
+        label {Clipping Plane 6}
+        xywh {385 250 185 220} box UP_BOX align 2
+      } {
+        Fl_Group {} {
+          label {Plane Normal6} open
+          xywh {395 305 115 145} box UP_BOX
+        } {
+          Fl_Value_Input xdir5 {
+            label {X:}
+            callback {normcb(5);}
+            xywh {415 315 80 25} maximum 0 step 0.01
+          }
+          Fl_Value_Input ydir5 {
+            label {Y:}
+            callback {normcb(5);}
+            xywh {415 350 80 25} maximum 0 step 0.01
+          }
+          Fl_Value_Input zdir5 {
+            label {Z:}
+            callback {normcb(5);}
+            xywh {415 385 80 25} maximum 0 step 0.01 value -1
+          }
+          Fl_Button unit5 {
+            label Unitize
+            callback {unitize(xdir5,ydir5,zdir5);
+normcb(5);}
+            tooltip {set to unit normal} xywh {400 420 55 20}
+          }
+          Fl_Button {} {
+            label Flip
+            callback {flip(5);}
+            xywh {460 420 45 20}
+          }
+        }
+        Fl_Value_Slider intercept5 {
+          label Intercept
+          callback {normcb(5);}
+          tooltip {control intercept of plane with axes} xywh {525 260 25 190} selection_color 148 minimum -1 step 0.01
+        }
+        Fl_Choice dispas5 {
+          xywh {400 260 110 20} down_box BORDER_BOX
+        } {
+          MenuItem {} {
+            label Off
+            callback {drawIntercept( 5, false );
+tbmw->redraw();}
+            xywh {50 50 30 20}
+          }
+          MenuItem {} {
+            label On
+            callback {drawIntercept( 5, false );
+tbmw->redraw();}
+            xywh {50 50 30 20}
+          }
+          MenuItem {} {
+            label {Whole Plane}
+            callback {drawIntercept( 5, false );
+tbmw->redraw();}
+            xywh {50 50 30 20}
+          }
+          MenuItem {} {
+            label Intersection
+            callback {drawIntercept( 5, true );
+tbmw->determine_cutplane(5);
+tbmw->redraw();}
+            xywh {50 50 30 20}
+          }
+          MenuItem {} {
+            label Datified
+            callback {drawIntercept( 5, true );
+tbmw->determine_cutplane(5);
+tbmw->redraw();}
+            xywh {50 50 30 20}
+          }
+        }
+      }
+    }
+    code {tbmw = tb;
+dim = 1;
+for( int i=0; i<4; i++ )
+	for( int j=0; j<6; j++ )
+		x[j][i] = 0;
+x[0][0] = 1;
+x[1][1] = 1;
+x[2][2] = 1;
+x[3][0] = -1;
+x[4][1] = -1;
+x[5][2] = -1;
+
+for( int i=0; i<6; i++ ) intercept[i] = 0;} {selected
+    }
+  }
+  decl {GLdouble x[6][4];} {}
+  decl {bool intercept[6];} {}
+  decl {float dim;} {}
+  decl {TBmeshWin* tbmw;} {}
+  Function {on(int cp)} {return_type bool
+  } {
+    code {if( cp==0 )
+  return dispas0->value()>0;
+else if( cp==1 )
+  return dispas1->value()>0;
+else if( cp==2 )
+  return dispas2->value()>0;
+else if( cp==3 )
+  return dispas3->value()>0;
+else if( cp==4 )
+  return dispas4->value()>0;
+else if( cp==5 )
+  return dispas5->value()>0;} {}
+  }
+  Function {plane(int cp)} {return_type {GLdouble*}
+  } {
+    code {return x[cp];} {}
+  }
+  Function {normcb( int cp)} {private return_type void
+  } {
+    code {if( !cp ) {
+  x[cp][0] = xdir0->value();
+  x[cp][1] = ydir0->value(); 
+  x[cp][2] = zdir0->value();
+  x[cp][3] = intercept0->value()*dim;
+  if( drawIntercept(0) ) tbmw->determine_cutplane( 0 );
+  if( dispas0->value()>0 ) tbmw->redraw();
+} else if (cp==1) {
+  x[cp][0] = xdir1->value();
+  x[cp][1] = ydir1->value();
+  x[cp][2] = zdir1->value();
+  x[cp][3] = intercept1->value()*dim;
+  if( drawIntercept(1) ) tbmw->determine_cutplane( 1 );
+  if( dispas1->value()>0 ) tbmw->redraw();
+}else if (cp==2) {
+  x[cp][0] = xdir2->value();
+  x[cp][1] = ydir2->value();
+  x[cp][2] = zdir2->value();
+  x[cp][3] = intercept2->value()*dim;
+  if( drawIntercept(2) ) tbmw->determine_cutplane( 2 );
+  if( dispas2->value()>0 ) tbmw->redraw();
+}else if (cp==3) {
+  x[cp][0] = xdir3->value();
+  x[cp][1] = ydir3->value();
+  x[cp][2] = zdir3->value();
+  x[cp][3] = intercept3->value()*dim;
+  if( drawIntercept(3) ) tbmw->determine_cutplane( 3 );
+  if( dispas3->value()>0 ) tbmw->redraw();
+}else if (cp==4) {
+  x[cp][0] = xdir4->value();
+  x[cp][1] = ydir4->value();
+  x[cp][2] = zdir4->value();
+  x[cp][3] = intercept4->value()*dim;
+  if( drawIntercept(4) ) tbmw->determine_cutplane( 4 );
+  if( dispas4->value()>0 ) tbmw->redraw();
+}else if (cp==5) {
+  x[cp][0] = xdir5->value();
+  x[cp][1] = ydir5->value();
+  x[cp][2] = zdir5->value();
+  x[cp][3] = intercept5->value()*dim;
+  if( drawIntercept(5) ) tbmw->determine_cutplane( 5 );
+  if( dispas5->value()>0 ) tbmw->redraw();
+}} {}
+  }
+  Function {set_dim( float d)} {return_type void
+  } {
+    code {dim = d;} {}
+  }
+  Function {unitize(Fl_Value_Input* x, Fl_Value_Input* y,Fl_Value_Input* z)} {return_type void
+  } {
+    code {double va = x->value();
+double vb = y->value();
+double vc = z->value();
+double mag = sqrt(va*va+vb*vb+vc*vc);
+x->value(va/mag);
+y->value(vb/mag);
+z->value(vc/mag);} {}
+  }
+  Function {visible(int cp)} {return_type bool
+  } {
+    code {if( cp==0 )
+  return dispas0->value()==2;
+else if( cp==1 )
+  return dispas1->value()==2;
+else if( cp==2 )
+  return dispas2->value()==2;
+else if( cp==3 )
+  return dispas3->value()==2;
+else if( cp==4 )
+  return dispas4->value()==2;
+else if( cp==5 )
+  return dispas5->value()==2;} {}
+  }
+  Function {flip(int cp)} {private return_type void
+  } {
+    code {if( cp==0 ) {
+  xdir0->value(-xdir0->value());
+  ydir0->value(-ydir0->value());
+  zdir0->value(-zdir0->value());
+  intercept0->value(-intercept0->value());
+} else if( cp==1 ){
+  xdir1->value(-xdir1->value());
+  ydir1->value(-ydir1->value());
+  zdir1->value(-zdir1->value());
+  intercept1->value(-intercept1->value());
+} else if( cp==2 ){
+  xdir2->value(-xdir2->value());
+  ydir2->value(-ydir2->value());
+  zdir2->value(-zdir2->value());
+  intercept2->value(-intercept2->value());
+}else if( cp==3 ){
+  xdir3->value(-xdir3->value());
+  ydir3->value(-ydir3->value());
+  zdir3->value(-zdir3->value());
+  intercept3->value(-intercept3->value());
+} else if( cp==4 ){
+  xdir4->value(-xdir4->value());
+  ydir4->value(-ydir4->value());
+  zdir4->value(-zdir4->value());
+  intercept4->value(-intercept4->value());
+}else if( cp==5 ){
+  xdir5->value(-xdir5->value());
+  ydir5->value(-ydir5->value());
+  zdir5->value(-zdir5->value());
+  intercept5->value(-intercept5->value());
+}
+normcb(cp);} {}
+  }
+  Function {drawIntercept( int cp, bool b )} {private
+  } {
+    code {intercept[cp] = b;} {}
+  }
+  Function {drawIntercept( int cp )} {return_type bool
+  } {
+    code {return intercept[cp];} {}
+  }
+  Function {datafied( int cp )} {return_type bool
+  } {
+    code {if( !cp )
+  return dispas0->value()==4;
+else if( cp==1 )
+  return dispas1->value()==4;
+else if( cp==2 )
+  return dispas2->value()==4;
+else if( cp==3 )
+  return dispas3->value()==4;
+else if( cp==4 )
+  return dispas4->value()==4;
+else if( cp==5 )
+  return dispas5->value()==4;} {}
+  }
+} 

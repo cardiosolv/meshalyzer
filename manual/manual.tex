@@ -1,0 +1,669 @@
+\documentclass[12pt,onecolumn,a4paper,dvips]{article} % document style report
+
+%\usepackage {t1enc}                                  % use DC-Font with 8 bit
+%\usepackage [latin1]{inputenc}                       % Codepage latin1
+
+
+\usepackage[centertags]{amsmath}                      % include ams-packages
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+
+\usepackage{overcite}                                 % superscript notation of references
+
+\usepackage [pdftex]{graphicx}                                % Grafikpaket für Bilder laden
+\usepackage[pdftex]{hyperref}                  % Für Referenzerstellung
+\usepackage{xspace}
+
+\newcommand{\rb}[2]{\raisebox{#1ex}{#2}}
+\newcommand{\meshal}{\textbf{\emph{M\rb{-.25}{e}\rb{-.35}{s}\rb{-.45}{h}}}%
+\textsf{\rb{-0.3}{a}\rb{-.15}{l}y}%
+\texttt{\rb{.2}{\reflectbox{Z}}\rb{.1}{e}r}\xspace}
+
+\begin{document}
+
+\begin{titlepage}
+
+\DeclareGraphicsExtensions{.png,.pdf,.jpg}
+{
+\renewcommand{\baselinestretch}{1.5} \small\normalsize
+
+\begin{center}
+{\Huge \meshal}
+\\ \vspace{2cm} {\Large Mesh Display and Analysis} 
+\\ \vspace{1cm} Manual Version 0.4
+\end{center}
+}
+\end{titlepage}
+
+\tableofcontents
+ 
+\titlepage
+\section{Introduction}
+
+\subsection{Purpose}
+\meshal is a program for displaying unstructured grids, visualizing data on the
+grid, as well as examining the structure of the grid.
+It is an ever changing and ongoing project that has been in development since 2001.
+Certain file schemes and names may bear a vague resemblance to those used by
+\emph{Cool Graphics}, a program developed by Jamey Eason, but it's only because he
+thought too loudly when he was in the room beside me.
+
+\section{Input Files}
+
+\meshal assumes that there are a set of vertices to be displayed.
+Beyond that, everything is optional.
+The vertices may be connected to form structures, specifically
+cables, triangular elements, surfaces, tetrahedra,
+or simple line segments.
+Scalar data may be associated with every point on the grid and may be used to colour
+any of the connected structures.
+An auxiliary set of points may also be defined on which to display vector data,
+
+Furthermore, the points may be divided into different 
+regions which may have their
+attributes independently manipulated.
+Regions are delimited by tagged volume elements, or may be specified by
+a range of vertices,
+As well, all the structures formed by those vertices are part of the
+region.
+Vertices may belong to more than one region,
+and there is at least one region in a grid.
+If one is not specified, all belong to one default region.
+If there is a element direction file (\texttt{.ttlon} file), and no elements are
+tagged, elements with no direction will be region 0, 
+and other elements will be region 1.
+
+All files (except IGB described below) are text files.
+They may be \emph{gzipped} 
+in which case ``.gz'' should be appended to the extensions given below.
+Note that files are scanned line by line 
+and that extra information on each line is ignored by \meshal.
+
+\subsection{Vertices}
+\label{sec:pts}
+The file defining vertices in the model is the only mandatory file.
+It must have the extension ``.pts'' with the following format:
+\begin{verbatim}
+number_points
+pt0.x pt0.y pt0.z
+pt1.x pt1.y pt1.z
+.
+.
+.
+ptn.x ptn.y ptn.z
+\end{verbatim}
+The base name of this file, i.e., without the extension, is
+used as the base name for cables, connections, triangles,
+tetrahedra files, and shells files.
+
+\subsection{Cables}
+\label{sec:cabs}
+Cables are vertices joined by a continuous line.
+The points in a cable must be contiguous in the points file.
+The file defining the cables
+has the extension ``.cables'' with the following format:
+\begin{verbatim}
+number_cables
+first_vertex_in_first_cable
+first_vertex_in_second_cable
+first_vertex_in_third_cable
+.
+.
+.
+first_point_in_last_cable
+one_past_last_point_in_last_cable
+\end{verbatim}
+A cable will contain all points from the first specified in the cable until the
+point before the first of the next cable.
+\subsection{Connections}
+Connections are line segments between vertices.
+The file defining the connections
+has the extension ``.cnnx'' with the following format:
+\begin{verbatim}
+number_connections
+vertex#1 vertex#2
+vertex#1 vertex#2
+.
+.
+.
+vertex#1 vertex#2
+\end{verbatim}
+
+\subsection{Triangles}
+\label{sec:tris}
+Triangles are defined on a shell by shell basis
+in a file with the extension ``.tris'' or ``.tri''
+which has the following format:
+\begin{verbatim}
+number_triangles_in_shell0
+vertex0 vertex1 vertex2 float
+vertex0 vertex1 vertex2 float
+.
+.
+.
+vertex0 vertex1 vertex2 float
+number_triangles_in_shell1
+vertex0 vertex1 vertex2 float
+vertex0 vertex1 vertex2 float
+.
+.
+.
+number_triangles_in_shellN
+vertex0 vertex1 vertex2 float
+vertex0 vertex1 vertex2 float
+.
+.
+.
+vertex0 vertex1 vertex2 float
+\end{verbatim}
+Thus, this file implicitly defines the number of shells in a model.
+Currently, the fourth entry of the line is intended to be 
+a material property indicator but it is unused.
+
+\subsection{Volume Elements}
+
+There are two formats for defining volume elements, either the depracated
+tetrahedral file or the newer general element file. Details follow.
+
+\subsubsection{Mixed element files}
+\label{sec:elem}
+Volume elements are specified by files with the ``.elem'' extension.
+The element types and node orderings are given in Fig.~\ref{fg:voleledef}.
+The file format is as follows:
+\begin{verbatim}
+number_elements
+Hx n1 n2 n3 n4 n5 n6 n7 n8 [region]
+Py n1 n2 n3 n4 n5 [region]
+Pr n1 n2 n3 n4 n5 n6 [region]
+Tt n1 n2 n3 n4 [region]
+.
+.
+.
+\end{verbatim}
+where \texttt{Hx, Py, Pr, Tt} stand for Hexahedron, Pyramid, Prism, and
+Tetrahedron respectively.
+Each line may be any of the element types.
+\begin{figure}
+\centerline{\includegraphics[width=10cm]{volelemdef}}
+\caption{Volume elements}
+\end{figure}
+
+\subsubsection{Tetrahedra}
+\label{sec:tets}
+Tetrahedra are defined in a file with a ``.tetras'' extension and the following
+format:
+\begin{verbatim}
+number_tetrahedra
+vertex0 vertex1 vertex2 vertex3 [region]
+vertex0 vertex1 vertex2 vertex3 [region]
+.
+.
+.
+vertex0 vertex1 vertex2 vertex3 [region]
+\end{verbatim}
+The fifth entry of the line is a integer specifying a region. All nodes
+of the tetrahedron belong to the region so nodes may belong to several
+regions. If no region is specified, nodes are assigned to region 0.
+
+\subsection{Regions}
+Regions may be explicitly specified in a separate file with the intention 
+``.region''
+with the following format:
+\begin{verbatim}
+number_regions
+first_vertex_in_region0 last_vertex_in_region0
+first_vertex_in_region1 last_vertex_in_region1
+.
+.
+.
+first_vertex_in_regionN last_vertex_in_regionN
+\end{verbatim}
+
+\subsection{Vertex Scalar Data}
+Scalar data can be associated with each vertex.
+It can be time dependent or a time independent.
+
+\subsubsection{Time Independent}
+A data file typically has the extension ``.dat'' or ``.out'' but these extensions
+are suggested and not required.
+The file simply contains lines with one entry per line, the data value for the
+vertex.
+\subsubsection{Time}
+Files with time dependent data are typically suffixed with ``.tdat'' but this is
+not mandatory.
+The file format follows that of the Static case, but is repeated for every time
+instance.
+Thus if there are N vertices and data is sampled at 10 points in time,
+the file will comprise 10N lines with one value per line.
+
+\subsubsection{IGB format}
+IGB is a format developed at the University of Montreal and used in a visualization
+program called flounder.
+The 3D nature of the data will be ignored but xdim$\times$ ydim$\times$ zdim
+should be equal to the number of vertices.
+
+\subsection{Vector Data}
+An auxillary set of points on which to display vector/scalar data is 
+defined by a file with the ``.vpts'' suffix.
+It follows the same format as the vertex file.
+A file with the same base name but the extension ``.vec'' defines the 
+vector and scalar data. It has the following format:
+\begin{verbatim}
+data.x data.y data.z [scalar_datum]
+data.x data.y data.z [scalar_datum]
+.
+.
+.
+data.x data.y data.z [scalar_datum]
+\end{verbatim}
+The scalar datum, as indicated, is optional.
+
+\subsection{CG meta format}
+Cool Graphics (CG) is a visualization program written chiefly by Jamey Eason
+and its file format was pretty much copied for this program.
+There must be a vertex file (as previously described) and there
+may a file for tetrahedra. These files must share a common basename.
+\emph{Note that a major difference between CG format and the previously described
+formats is that \textbf{CG vertex numbering starts at one instead of
+zero}.}
+This will not affect the vertex file but means that if the same grid is
+described by the two formats, the tetrahedral indices for the CG file will
+all be one greater than for the regular format.
+In addition, there is a metafile listing the surfaces and
+there may be a sequence of data files. 
+The file formats for the metafile and data files follow.
+\subsubsection{CG metafile}
+This file must have the suffix ``.cg\_in'' and adheres to
+the following format:
+\begin{verbatim}
+number_surface_files
+0
+surface_file_1
+surface_file_2
+.
+.
+.
+surface_file_n
+\end{verbatim}
+where \texttt{surface\_files}
+are triangle files (see section~\ref{sec:tri}) for
+format) with the ``.tri'' extension. 
+The extension is \emph{not} 
+given in the CG metafile, eg, if the actual file name is \texttt{endo.tri},
+only \texttt{endo} is given.
+\subsubsection{Data files}
+Data is given in a set of ASCII files with the extensions ``.t\#'' where
+\texttt{\#} is the time of the data, i.e., it is composed of digits.
+For each file, the format is
+\begin{verbatim}
+t = #
+a b c
+a b c
+.
+.
+.
+a b c
+\end{verbatim}
+where the first line indicates the time (\# same as in file extension)
+and each line contains three data.
+Currently, the first 2 are ignored but must be present.
+
+\section{Invocation}
+The program is run by typing\\[1ex]
+\centerline{
+{\texttt{meshalyzer cg\_in|[pts [vpts] [dat|tdat|out] [tri tri ...]] 
+\raisebox{-2Ex}{\rule{0em}{3Ex}}
+}}}\\
+where the extensions of the required file types are given.
+If no file is specified, a file input box will pop up.
+Note that for the ``pts'' file, the dot of the extension can be left in to facilitate
+using tab completion. 
+For example, if the vertices file was called \emph{model.pts},
+one could specify ``model.pts'', ``model.'', or ``model'' on the command line.
+This only applies to the vertices file.
+
+\section{GUI}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=8cm]{controls}}
+\caption{The control widget.}
+\end{figure}
+
+\subsection{Tetrahedral Mesh}
+To display the tetrahedral mesh, click on the  \emph{Tetrahedral Mesh} 
+radio button in the
+\emph{Display as:} box.
+The colour of the tetrahedra can be changed with the \emph{Tet colour} button.
+No other structure types will be displayed.
+
+\subsection{Regions}
+To not display the mesh as a set of tetrahedra, click on the  \emph{Surfaces} 
+radio button in the
+\emph{Display as:} box.
+This will display all structures except tetrahedra.
+
+Display of each structure type can be toggled on and off on a
+region-by-region basis or all-at-once.
+The regions in which changes will take place are selected
+by hoghlighting them in the list.
+Any changes made to display structures will only occur to the regions selected.
+The opacity value of a region
+is changed by dragging in the opacity bar. It affects
+all structures in a  region equally.
+Sometimes rendering with opaque objects does not look quite
+right because of drawing
+order.
+The order can be reversed by checking ``Reverse Draw order'' under the ``Image''
+menu.
+
+For each structure, there is a button toggling its display, a button to select its
+colour when it is not displaying data, and a 
+input widget for selecting the output stride.
+
+Different structures in different layers can be coloured differently.
+Under ``Image/Randomly colour'', one can select which structure types gets randomly
+coloured based on the region to which it belongs.
+``Image/Background colour'' changes the colour of the background.
+
+\subsection{Tab Widget}
+
+\subsubsection{Highlighting}
+
+Highlighting allows one to investigate the structure of the mesh.
+One of each type of structure can be highlighted. 
+A highlighted element is drawn in a special highlight colour.
+The highlighted structure can be chosen by typing its number. Values can be changed
+by using the up/down arrow keys and by dragging the mouse. See the FLTK manual for
+a full explanation of the latter.
+Pressing CTRL causes the arrow keys to increment by 10 while pressing
+SHIFT causes them to increment by 100.
+Volume elements can be selected to be drawn as a wireframe (\texttt{Vol Ele})
+or a solid faced object (\texttt{Solid Vol Ele}).
+Clicking on the ``current reg/surf'' button highlights the first
+structure of each
+type for the currently selected shell (0 if \emph{All} is chosen).
+
+The highlighted vertex can also be selected with the mouse.
+clicking on the ``Pick Vertex'' button will enter vertex picking mode
+with the button turning red to indicate this.
+A vertex can then be selected by clicking on it.
+To properly pick a vertex, it is necessary to display vertices or 
+outlined surfaces.
+If you are having trouble selecting a vertex, turn off all unnecessary
+surfaces and regions, and click right on top of it.
+In the event of nearby vertices, the one closest to the viewer's eye (minimum z
+window coordinate) will be selected.
+For each vertex, its associated scalar data value
+is displayed in the gold widget.
+You can choose to display the triangles in which the vertex is a node, or
+the volume elements that it is part of.
+The volume elements can be drawn as wireframe or with filled sides.
+The inside surfaces of the sides (facing the node) 
+will be coloured pink while the outside will be gold.
+
+\subsubsection{Time Plot}
+The time series at the highlighted vertex can be displayed by clicking the 
+``plot time series'' button.
+The current time is indicated by a vertical green line.
+A trace can be saved by clicking on the ``Hold'' button.
+Up to 8 traces can be saved this way.
+To clear the held traces, click on mouse button 3 and select 
+``clear static curves.''
+The plotted traces can be saved in ascii format by clicking
+the ``Save'' button.
+Normally, when a new point is clicked, the x and y range are recalculated
+and the scale adjusted accordingly.
+To prevent this behaviour, deselect the ``Autoscale'' button.
+Within the time plot, a zooming rectangle can be selected with mouse button 1.
+Clicking the middle mouse button will pop up the coordinates of the mouse.
+Clicking on mouse button 3 will pop up a menu which includes ``reset view'' 
+to rescale the graph and selections for setting the \emph{X} and \emph{Y}
+range displayed.
+\begin{figure}[htb]
+\centerline{\includegraphics[width=10cm]{timeplot}}
+\caption{Time series window.}
+\end{figure}
+
+\subsubsection{Information Window}
+Clicking on the gold ``?'' button pops up a information window with details of the
+selected structures.
+For the highlighted node, all the structures of which it is a part are listed.
+Clicking on any of those highlights them.
+For each structure, the defining nodes are listed.
+Clicking on any defining node causes that node to become the 
+highlighted node.
+For tetrahedra and triangles, the vertex scalar data values are displayed and for
+tetrahedra, the solid angle of each node is also computed.
+
+
+
+
+\subsubsection{Lighting}
+
+Lighting is turned on with the \emph{illuminate} button and
+only works well when a surface has been specified and either has
+its vertices consistently ordered so that the normals 
+point out when
+calculated, or a normal file has also been read in.
+The light is directional and its direction can be specified by the 3 sliders.
+If \emph{fixed}, the light is constant and the object rotates.
+If not \emph{fixed}, the light rotates with the object.
+The direction of the light is graphically illustrated when the
+``show direction'' button is on.
+The intensity of the different lighting components can be adjusted with
+the sliders.
+With ``facet shading'' enabled, Gouraud shading is turned off and lines
+are not antialiased. This may speed up rendering on slow platforms.
+
+\subsubsection{Scalar Data}
+
+Scalar data is read under the ``File'' menu in the top bar.
+It can be static or time-dependent.
+If time-dependent, animation can be played by clicking the green double arrow button
+in the bottom panel.
+The delay between frames in $\mu$s is selectable.
+``\#frames'' selects how many frames to increment at a time.
+
+If data is present, each vertex has associated scalar data which is linearly
+mapped to a colour.
+Clicking ``optimal'' maps the currently displayed minimum data value to 
+level 0 and the currently displayed 
+maximum data value to the maximum colour level.
+The number of entries in the colour map is determined by the ``levels'' widget.
+When ``auto cs'' is selected, the colour map is re-calibrated whenever the displayed
+time changes.
+It is equivalent to pressing ``optimal'' every time that time is changed.
+The values corresponding to the minimum and maximum colour values are 
+available for editing.
+
+Different structures may be coloured according to the data.
+The ``Data on:'' choice widget selects which structure types are coloured according
+to the data values associated with the vertices defining the structures.
+
+\subsubsection{Vector Data}
+
+Vector data is specified on the command line or by selecting ``Read Vector Data''
+under the ``File'' menu item.
+Arrows are drawn at each vector grid point.
+The size of all arrows can be scaled with the roller.
+The relative length of the arrow can be based on the magnitude of the vector data,
+by the optional scalar data value, or be fixed.
+Colour can be based on vector magnitude, scalar data or be constant.
+The constant value is selected by the ``colour'' button.
+Magnitude and scalar data are mapped to a selectable colour map as with
+vertex scalar data.
+
+\subsubsection{Surfaces}
+
+The fill colour of the elements composing surfaces can be selected as well
+as the outline colour. Outlining and filling the elements can also be
+controlled. In the surface tab, the surfaces to which the changes are
+applied are chosen by the drop down menu.
+Surfaces can also be randomly coloured by Image/Randomly Color/Surfaces.
+
+\subsection{Image Menu}
+
+\subsubsection{Reset Transform}
+Restore the original default transformation.
+
+\subsubsection{View}
+Choose from standardized views. The first submenu indicates the axis which
+is sticking out of the screen and the diagrams show the positive axes of
+the other two dimensions.
+
+\subsubsection{Randomly colour}
+
+For each region, assign the same random colour to all of the element
+types chosen.
+
+\subsubsection{Background colour}
+
+Select the background colour.
+
+\subsubsection{Reverse draw order}
+
+Draw the surfaces in the opposite order. This can be useful when surfaces
+overlap and different perspectives are chosen.
+
+\subsection{Data Menu}
+
+\subsubsection{Data Opacity}
+Data opacity is the ability to draw structures with an alpha value based on the
+values of data associated with the structure.
+For data below a minimum value, the data is draw with the ``minimum opacity''.
+For data above a maximum value, it is drawn with the ``maximum opacity''.
+In between the two data values, linear interpolation of the opacity values is used.
+The opacity for each structure type is independent.
+\begin{figure}[htb]
+\centerline{\includegraphics[width=8cm]{opacity_dialog}}
+\caption{Data opacity dialogue.}
+\end{figure}
+
+A common use is the draw surfaces as translucent and then draw excited regions as
+fully opaque.
+
+\subsubsection{Clipping Planes}
+
+By selecting ``Clipping'' from the ``Data'' menu item,
+the clipping widget is popped open.
+Six clipping planes are available.
+They are defined by the normal to the clipping plane and the intercept of the
+plane.
+Only structures located on the side of the plane to which the normal points are drawn.
+To flip the normal to point in the opposite direction, click on ``Flip''.
+After adjusting the normal direction, click on ``Unitize'' so that
+the normal has unit magnitude.
+This ensures that when changing the intercept with the slider, one can move the
+plane through the whole object.
+For each clipping plane, several different modes are available:
+\begin{description}
+	\item[Off] The clipping plane is inactive and not visible
+	\item[On]  The clipping plane is active but not visible
+	\item[Whole Plane] The plane is active and can be seen
+	\item[Intersection] The plane is on and can be seen only where it
+		 intersects the object
+    \item[Datafied] The plane is on, can be seen only where it
+		 intersects the object, and if data is present and displayed,
+		 will have data interpolated on to it. This surface will also be
+		 affected by the ``Surface Opacity.''
+ \end{description}
+\begin{figure}[htb]
+\centerline{\includegraphics[width=12cm]{clip}}
+\caption{Clipping plane dialogue.}
+\end{figure}
+
+\subsection{Output Menu}
+
+\subsubsection{Single Images}
+Images can be saved in several formats under the ``Output'' menu.
+Make sure that the window is unobstructed.
+Formats that cab be selected include PNG and
+high quality vector EPS and PDF images.
+With EPS and PDF, however, 
+transparency is not supported due to a limitation of
+the underlying third party software (GL2PS).
+These images may be blown up to arbitrary size without pixelation effects.
+
+\subsubsection{Animation Sequences}
+For animation data, one can save a sequence of images in PNG format under the 
+``Output'' menu.
+For sequences, one selects a base name for the files and then 5 numbers for
+the time frame number are appended, eg., image00012.png, image00013.png, etc.
+These images are raster plots, based on the screen buffer, so larger 
+windows will scale better.
+
+\subsubsection{Recording Event Sequences}
+It is possible to automatically write an image every time the contents of the window
+change because of an event.
+Thus, one can make a sequence of the model rotating or a sequence of the model as a
+cutting plane is passed through it.
+To begin recording, select ``Recording/start'' under the ``Output'' menu.
+``Output'' will turn green to indicate that it is in recording mode.
+As above, you will be prompted for a base file name which will have frame numbers
+appended to it.
+A blue ``Redraw'' label will also appear on the main menu bar.
+Use this to force the output of the image, even if nothing has changed.
+Manipulate the model any way you wish and when finished, select ``stop''.
+A dialogue will pop up indicating how many frames were written.
+
+\subsubsection{Visible nodes}
+
+A list of the visible nodes and clipping planes can be generated by
+selecting
+``Output/Visible vertices''.
+You will be proompted for a filename and a file with the following format
+will be produced:
+\begin{verbatim}
+number_clip_planes
+a1 b1 c1 d1
+a2 b2 c2 d2
+.
+.
+.
+an bn cn dn
+visible_node1
+visible_node2
+.
+.
+.
+visible_nodeN
+\end{verbatim}
+The coefficients (a,b,c,d) 
+for the clipping plane are those as defined by the OpenGL standard.
+
+\subsection{Saving The Current View}
+
+The current view can be saved by clicking on ``Save transform'' under the ``File'' menu.
+You will be prompted for a file in which to save the current modelling transformation.
+The current rotation, scaling and translation of the grid will be written to a file with
+the extension \emph{.xfrm}.
+Once saved, it can be restored later by choosing ``Read transform'' and selecting the file.
+
+Standard views are available under the ``Image'' menu under ``View''.
+The normal which points directly out of (+) or into (-) the screen is
+first selected and then the positive direction of the other axes.
+
+\section{Grid window}
+
+The grid is displayed in a window which has a virtual trackball.
+Mouse button 1 (the left one for right-handed mice) rotates the grid.
+Mouse button 2 translates the grid. This can also be achieved by pressing
+\emph{SHIFT} while pressing mouse button 1.
+Mouse button 3, or equivalently pressing \emph{CTRL} and mouse button 1,
+changes the scale.
+
+The axes showing the orientation of the window may be displayed by clicking on the
+\emph{Axes} button.
+
+The left and right arrow keys change the displayed time, one frame per press.
+
+To recalibrate the colour scale to the optimal for the displayed data,
+press ``o''.
+
+Depressing the ``p'' key will enter vertex picking mode. It is a short cut for the
+``Pick Vertex'' button.
+
+To reread the current data file, press ``r''.
+\end{document}

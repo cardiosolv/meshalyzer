@@ -1,0 +1,138 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0106 
+header_name {.h} 
+code_name {.cc}
+decl {\#include "TBmeshWin.h"} {} 
+
+decl {class TBmeshWin;} {public
+} 
+
+class dataOpac {open
+} {
+  Function {dataOpac()} {open
+  } {
+    code {_on = false;
+omin = 0;
+omax = 1.;
+dmin = 0;
+dmax = 0;
+ofactor = 0;} {}
+  }
+  decl {float ofactor;} {public
+  }
+  decl {float dmin;} {public
+  }
+  decl {float dmax;} {public
+  }
+  decl {float omin;} {public
+  }
+  decl {float omax;} {public
+  }
+  decl {bool _on;} {public
+  }
+  Function {alpha( float data )} {open return_type float
+  } {
+    code {if( data <= dmin )
+	return omin;
+if( data >= dmax )
+	return omax;
+return omin+(data-dmin*ofactor);} {}
+  }
+  Function {on()} {open return_type bool
+  } {
+    code {return _on;} {}
+  }
+} 
+
+class DataOpacity {open
+} {
+  Function {DataOpacity( TBmeshWin *tbmw )} {open
+  } {
+    Fl_Window window {
+      label {Data Opacity Controls} open selected
+      xywh {662 65 380 150} type Double visible
+    } {
+      Fl_Value_Slider minopacval {
+        label {Minimum Opacity}
+        callback {Object_t a=get_ot(objtype->value());
+dop[a].omin = o->value();
+dop[a].ofactor = (dop[a].omax-dop[a].omin)/(dop[a].dmax-dop[a].dmin);
+mwtb->redraw();}
+        xywh {125 55 120 30} type {Horz Fill} align 4 value 0.5
+      }
+      Fl_Value_Slider maxopacval {
+        label {Maximum Opacity}
+        callback {Object_t a=get_ot(objtype->value());
+dop[a].omax    = o->value();
+dop[a].ofactor = (dop[a].omax-dop[a].omin)/(dop[a].dmax-dop[a].dmin);
+mwtb->redraw();}
+        xywh {125 100 120 30} type {Horz Fill} align 4 value 1
+      }
+      Fl_Light_Button onbut {
+        label {Data Opacity }
+        callback {Object_t a=get_ot(objtype->value());
+dop[a]._on = o->value();
+dop[a].ofactor = (dop[a].omax-dop[a].omin)/(dop[a].dmax-dop[a].dmin);
+mwtb->redraw();}
+        xywh {225 10 120 30} labelsize 16
+      }
+      Fl_Value_Input mindatval {
+        label {below:}
+        callback {Object_t a=get_ot(objtype->value());
+dop[a].dmin    = o->value();
+dop[a].ofactor = (dop[a].omax-dop[a].omin)/(dop[a].dmax-dop[a].dmin);
+mwtb->redraw();}
+        tooltip {data below this value gets minimum opacity} xywh {295 55 80 30}
+      }
+      Fl_Value_Input maxdatval {
+        label {above:}
+        callback {Object_t a=get_ot(objtype->value());
+dop[a].dmax    = o->value();
+dop[a].ofactor = (dop[a].omax-dop[a].omin)/(dop[a].dmax-dop[a].dmin);
+mwtb->redraw();}
+        tooltip {data above this value gets maximum opacity} xywh {295 100 80 30}
+      }
+      Fl_Choice objtype {
+        label {Object:}
+        callback {Object_t a=get_ot(objtype->value());
+minopacval->value(dop[a].omin);
+maxopacval->value(dop[a].omax);
+mindatval->value(dop[a].dmin);
+maxdatval->value(dop[a].dmax);onbut->value(dop[a]._on);}
+        tooltip {apply to which object type} xywh {75 10 120 30} down_box BORDER_BOX
+      } {
+        menuitem {} {
+          label Vertex
+          xywh {0 0 100 20}
+        }
+        menuitem {} {
+          label Surface
+          xywh {0 0 100 20}
+        }
+        menuitem {} {
+          label Triangle
+          xywh {0 0 100 20}
+        }
+        menuitem {} {
+          label Cable
+          xywh {0 0 100 20}
+        }
+      }
+    }
+    code {mwtb = tbmw;} {}
+  }
+  decl {TBmeshWin *mwtb;} {}
+  decl {dataOpac dop[7];} {public
+  }
+  Function {get_ot( int a )} {return_type Object_t
+  } {
+    code {if( a==0 )
+return Vertex;
+else if( a==1 )
+return Surface;
+else if( a==2 )
+return SurfEle;
+else if( a==3 )
+return Cable;} {}
+  }
+} 

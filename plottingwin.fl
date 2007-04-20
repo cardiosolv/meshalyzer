@@ -1,0 +1,92 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0106 
+header_name {.h} 
+code_name {.cc}
+decl {\#include "Graph.h"} {} 
+
+decl {using namespace std;} {} 
+
+class PlotWin {open
+} {
+  decl {double *data;} {}
+  decl {int datasize;} {}
+  decl {double datamin;} {}
+  decl {int tm;        // datum to highlight} {}
+  decl {double *xv;} {}
+  decl {double tmx[2], tmy[2];} {}
+  decl {Fl_Button *but;} {public
+  }
+  decl {bool rotated;} {}
+  decl {void set_data( int, double *, int t=-1, double* xd=NULL);} {public
+  }
+  decl {void set_data( int, float *, int t=-1, float* xd=NULL);} {public
+  }
+  decl {void highlight( int );} {public
+  }
+  decl {void rotate( bool );} {public
+  }
+  decl {void writedata();} {}
+  Function {PlotWin(  string title )} {open
+  } {
+    Fl_Window window {
+      label {Time plot}
+      user_data this
+      callback {this->window->hide();} open
+      xywh {539 100 525 195} type Double box UP_BOX resizable
+      code0 {\#include <cstring>}
+      code1 {\#include <string>}
+      code2 {using namespace std;} visible
+    } {
+      Fl_Box graph {selected
+        xywh {5 5 515 165} resizable
+        code0 {\#include "Graph.h"}
+        class Graph
+      }
+      Fl_Group button_grp {open
+        xywh {5 170 515 30} box ENGRAVED_BOX color 52
+      } {
+        Fl_Return_Button {} {
+          label Close
+          callback {this->window->hide();}
+          xywh {15 175 75 15} labelsize 10
+        }
+        Fl_Button {} {
+          label Write
+          callback {writedata();}
+          xywh {275 175 70 15} labelsize 10
+        }
+        Fl_Light_Button rotbut {
+          label Rotate
+          callback {rotate(o->value());}
+          xywh {105 175 70 15} labelsize 10
+        }
+        Fl_Button {} {
+          label Pop
+          xywh {190 175 70 15} labelsize 10
+        }
+        Fl_Light_Button autoscalebut {
+          label Autoscale
+          callback {autoscale(o->value());}
+          xywh {440 175 70 15} value 1 labelsize 10
+        }
+        Fl_Button {} {
+          label Hold
+          callback {graph->copy_curve(0);}
+          xywh {360 175 70 15} labelsize 10
+        }
+      }
+    }
+    code {xv = new double[1];
+data = new double[1];
+tm = 0;
+datasize = -1;
+rotated = false;
+window->label(strdup(title.c_str()));
+window->user_data(this);} {}
+  }
+  decl {~PlotWin()} {public
+  }
+  Function {autoscale(int a)} {} {
+    code {graph->autoscale(a);} {}
+  }
+} 

@@ -1,0 +1,45 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0106 
+header_name {.h} 
+code_name {.cc}
+decl {\#include "TBmeshWin.h"} {public
+} 
+
+class Sequence {open
+} {
+  Function {Sequence( TBmeshWin *tb )} {open
+  } {
+    Fl_Window window {
+      label {Write PNG Sequence} open
+      xywh {672 35 295 190} type Double visible
+    } {
+      Fl_Progress movieprog {selected
+        xywh {15 10 265 35} selection_color 91
+      }
+      Fl_Return_Button {} {
+        label {Start sequence}
+        callback {mwtb->output_png( fname->value(), this );}
+        xywh {15 145 265 35}
+      }
+      Fl_File_Input fname {
+        label {output file base name:}
+        xywh {15 65 215 35} align 1
+      }
+      Fl_Button {} {
+        label browse
+        callback {const char* fn=fl_file_chooser("Choose output file name base", "*.png",fname->value() );
+if( fn != NULL ) fname->value(fn);}
+        xywh {240 65 40 35} labelsize 10
+      }
+      Fl_Value_Input lastFrameNum {
+        label {End Frame:}
+        xywh {160 110 55 25} step 1
+      }
+    }
+    code {mwtb = tb;
+fname->value("image.png");
+lastFrameNum->value( mwtb->numframes-1 );
+lastFrameNum->maximum( mwtb->numframes-1 );} {}
+  }
+  decl {TBmeshWin *mwtb;} {}
+} 
