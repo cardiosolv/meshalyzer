@@ -808,7 +808,7 @@ TBmeshWin :: select_hi( int n )
 	} else if( strstr(  hinfo->text(i), "triangle" ) ){
 	  objtype=SurfEle;
 	  break;
-	} else if( strstr(  hinfo->text(i), "tetrahed" ) ){
+	} else if( strstr(  hinfo->text(i), "volume" ) ){
 	  objtype=Tetrahedron;
 	  break;
 	} else if( strstr(  hinfo->text(i), "cable" ) ){

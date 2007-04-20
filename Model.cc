@@ -401,32 +401,32 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
   char* txt  = new char[256];
   char* ts   = NULL;
 
-  // Tetrahedra
+  // Volume ELements
   if( _numVol ){
-	sprintf( txt, "@b@C%6dTetrahedron: %d of %d", FL_RED, hilight[Tetrahedron],
-			_numVol );
+	int hivol=hilight[Tetrahedron];
+	sprintf( txt, "@b@C%6dVolume Element: %d of %d", FL_RED, hivol, _numVol );
 	hinfo->add( txt );
 	hinfo->add( "nodes:\t" );
-	const int* tet=_vol[0]->obj();
-	int tnde = hilight[Tetrahedron]*4;
-	for( int i=0; i<4; i++ ) {
+	const int* tet=_vol[hivol]->obj();
+	for( int i=0; i<_vol[hivol]->ptsPerObj(); i++ ) {
 	  if( data != NULL )
-		sprintf(txt, "%6d -> %f", tet[tnde+1], data[tet[tnde]] );
+		sprintf(txt, "%6d -> %f", tet[i], data[tet[i]] );
 	  else
-		sprintf( txt, "%6d", tet[tnde+i] );
-	  if( tet[tnde+i]==hilight[Vertex] ) 
+		sprintf( txt, "%6d", tet[i] );
+	  if( tet[i]==hilight[Vertex] ) 
 		sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
 	  hinfo->add( txt );
 	}
-	hinfo->add("");
-	if( ts != NULL ){
-	  free(ts);
-	  ts=NULL;
-	}
   }
-  // SurfEles
-  if( _triele->num() ) {
-	sprintf(txt, "@b@C%6dTriangle: %d of %d", FL_BLUE, hilight[SurfEle],
+  hinfo->add("");
+  if( ts != NULL ){
+	free(ts);
+	ts=NULL;
+  }
+
+// SurfEles
+if( _triele->num() ) {
+  sprintf(txt, "@b@C%6dTriangle: %d of %d", FL_BLUE, hilight[SurfEle],
 					_triele->num());
 	hinfo->add( txt );
 	hinfo->add( "nodes:\t" );
@@ -512,14 +512,12 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
 	sprintf( txt, "Attached cables:" );
 	hinfo->add( txt );
 	const int* cab = _cable->obj();
-	for( int i=0; i<2*_cable->num(); i++ )
-	  if( cab[i]==hilight[Vertex] ){
-		sprintf( txt, "\t%6d", i/2 );
-		if( i/2==hilight[Cable] ) 
+	for( int i=0; i<_cable->num(); i++ )
+	  if( cab[i]<=hilight[Vertex] && cab[i+1]>hilight[Vertex]){
+		sprintf( txt, "\t%6d", i );
+		if( i==hilight[Cable] ) 
 		  sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
 		hinfo->add( txt );
-		for( int j=2*(i/2); j<2*(i/2)+2; j++ )
-		  if( cab[j]!=hilight[Vertex] ) att_nodes.insert(cab[j]);
 	  }
 	if( ts != NULL ){
 	  free(ts);
@@ -545,19 +543,21 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
 	}
   }
   if( _numVol ) {
-	sprintf( txt, "Attached _tetrahedra:" );
+	sprintf( txt, "Attached volume elements:" );
 	hinfo->add( txt );
-	const int* tet=_vol[0]->obj();
-	for( int i=0; i<4*_numVol; i++ )
-	  if( tet[i]==hilight[Vertex] ) {
-		sprintf( txt, "\t%d", i/4 );
-		if( i/4==hilight[Tetrahedron] ) 
+	for( int i=0; i<_numVol; i++ ) {
+	  const int* tet=_vol[i]->obj();
+	  for( int j=0; j<_vol[i]->ptsPerObj(); j++ )
+	    if( tet[j]==hilight[Vertex] ) {
+		  sprintf( txt, "\t%d", i );
+		if( tet[j]==hilight[Tetrahedron] ) 
 		  sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
 		hinfo->add( txt );
-		for( int j=4*(i/4); j<4*(i/4)+4; j++ ){
-		  if( tet[j]!=hilight[Vertex] ) att_nodes.insert(tet[j]);
+		for( int k=0; k<_vol[i]->ptsPerObj(); k++ ){
+		  if( tet[k]!=hilight[Vertex] ) att_nodes.insert(tet[k]);
 		}
 	  }	  
+	}
 	if( ts != NULL ){
 	  free(ts);
 	  ts=NULL;
