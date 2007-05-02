@@ -52,7 +52,6 @@ OBJS = Fl_Gl_Tb_Window.o\
 	Surfaces.o\
 	TBmeshWin.o\
 	Tetrahedral.o\
-	ThreadBuffer.o\
 	Trackball.o\
 	Triangle.o\
 	trimesh.o\

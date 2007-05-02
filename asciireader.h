@@ -13,7 +13,6 @@ class asciireader : public DataReader<T> {
   ~asciireader();
   virtual void reader();
   virtual void local_maxmin();
-  virtual void abs_maxmin();
   virtual void tmsr();   
   virtual void find_maxtm();
 
@@ -95,21 +94,6 @@ void asciireader<T>::tmsr()
     if( sscanf(buff, mthread->scanstr, sthread->data+t) != 1 ) throw(1);
   }
   gzrewind( in );
-}
-
-
-template<class T>
-void asciireader<T>::abs_maxmin()
-{
-  maxmin_ptr->abs_max = maxmin_ptr->lmax[0];
-  maxmin_ptr->abs_min = maxmin_ptr->lmin[0];
-
-  for( int t=1; t<=mthread->maxtm; t++ ) {
-	if( maxmin_ptr->lmin[t] < maxmin_ptr->abs_min )
-      maxmin_ptr->abs_min = maxmin_ptr->lmin[t];
-	if( maxmin_ptr->lmax[t] > maxmin_ptr->abs_max )
-      maxmin_ptr->abs_max = maxmin_ptr->lmax[t];
-  }
 }
 
 

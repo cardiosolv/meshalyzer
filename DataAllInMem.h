@@ -6,6 +6,7 @@
 #include <zlib.h>
 #include<string>
 
+/** reader for case when all data can fit in computer RAM at once */
 template<class T>
 class DataAllInMem : public DataClass<T> {
 
@@ -20,7 +21,7 @@ class DataAllInMem : public DataClass<T> {
 		~DataAllInMem( );
 		virtual T         max(int);	        // maximum value at a time instance
 		virtual T         max();	        // maximum value
-		virtual T         min(int);         // minimum value at a one time
+		virtual T         min(int);         // minimum value at a time
 		virtual T         min();            // minimum value 
 		virtual T*        slice(int);       // return pointer to data slice  
 		virtual void      time_series( int, T* );  // time series for a point

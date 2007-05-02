@@ -14,7 +14,6 @@ class FileSeqCGreader : public DataReader<T> {
   ~FileSeqCGreader();
   virtual void reader();
   virtual void local_maxmin();
-  virtual void abs_maxmin();
   virtual void tmsr();   
   virtual void find_maxtm();
   
@@ -129,21 +128,6 @@ void FileSeqCGreader<T>::tmsr()
     if( sscanf(buff, scanner.c_str(), sthread->data+t) != 1 ) throw(1);
 
 	gzclose(in);
-  }
-}
-
-
-template<class T>
-void FileSeqCGreader<T>::abs_maxmin() 
-{
-  maxmin_ptr->abs_max = maxmin_ptr->lmax[0];
-  maxmin_ptr->abs_min = maxmin_ptr->lmin[0];
-
-  for( int t=1; t<=mthread->maxtm; t++ ) {
-	if( maxmin_ptr->lmin[t] < maxmin_ptr->abs_min )
-      maxmin_ptr->abs_min = maxmin_ptr->lmin[t];
-	if( maxmin_ptr->lmax[t] > maxmin_ptr->abs_max )
-      maxmin_ptr->abs_max = maxmin_ptr->lmax[t];
   }
 }
 

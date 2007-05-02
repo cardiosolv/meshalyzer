@@ -11,7 +11,6 @@ class IGBreader : public DataReader<T> {
   ~IGBreader();
   virtual void reader();
   virtual void local_maxmin();
-  virtual void abs_maxmin();
   virtual void tmsr();
   virtual void  find_maxtm();
 
@@ -102,31 +101,6 @@ void IGBreader<T>::local_maxmin() {
   }
 }
 
-
-/** find the min and max over all time */
-template<class T>
-void IGBreader<T>::abs_maxmin() {
-
-  // Set file pointer to location 1024
-  gzseek(in, 1024, SEEK_SET);
-  read_IGB_data(data, 1, head, buf); 
-
-  maxmin_ptr->abs_max = data[0];
-  maxmin_ptr->abs_min = data[0];
-
-  // Read in time slices and check for max and min
-  for (int i=0; i<mthread->maxtm+1; i++){
-	for (int j=0; j<mthread->slsz; j++){
-	  if ( data[j] > maxmin_ptr->abs_max ){
-		maxmin_ptr->abs_max = data[j];	
-	  }
-	  else if ( data[j] < maxmin_ptr->abs_min ){
-		maxmin_ptr->abs_min = data[j];
-	  }
-	}
-	read_IGB_data(data, 1, head, buf);
-  }
-}
 
 /** get the time series for a point */
 template<class T>

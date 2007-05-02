@@ -14,6 +14,7 @@ FileType FileTypeFinder ( const char *fn );
 
 void CG_file_list( map<int,string>&filelist, const char *fn );
 
+/** The basic class for reading data */
 template<class T>
 class DataClass {
 	public:
@@ -32,11 +33,11 @@ class DataClass {
 		DataClass():data(NULL),maxtm(0),last_tm(-1),slice_size(0){}
 
 	protected:
-		T*     data;
-		int    maxtm;
-		int    last_tm;
-		int    slice_size;
-		string filename;
+		T*     data;       //!< data 
+		int    maxtm;      //!< number of time slice
+		int    last_tm;    //!< last time that can be requested
+		int    slice_size; //!< amountof data in one time slice
+		string filename;   //!< file containing data
 };
 
 #endif

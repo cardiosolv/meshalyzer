@@ -3,14 +3,13 @@
 
 #define BLOCK_SLSZ 20              //!< Number of intermediary slice pointers 
 
-
+/** virtual class for threaded data reading */
 template<class T>
 class DataReader {
 
  public:
   virtual void reader()=0;
   virtual void local_maxmin()=0;
-  virtual void abs_maxmin()=0;
   virtual void tmsr()=0;
   virtual void find_maxtm()=0;
 
@@ -56,13 +55,6 @@ class DataReader {
 //      If necessary, find the byte offset at the beginning of each slice of time.
 //      Set maxmin->del_sl_ptr to 1 or 0 depending on whether byte offset was found: 1 for found, 0 for not found
 //
-// abs_maxmin():
-//   Given:
-//      Same given as constructor
-//   Required:
-//      Find the maximum and minimum values of the entire data set.  Put the results in maxmin->abs_max and maxmin->abs_min
-//      NOTE: maxmin->abs_max, maxmin->abs_min is type void.  You must type cast to proper type before assigning any values
-//      
 // tmsr():
 //   Given:
 //      Same given as constructor except that slave->unlock has the offset value and slave->unlock has the slave->data has the array location where the value is to be stored

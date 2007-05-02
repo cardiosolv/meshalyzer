@@ -15,12 +15,15 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <fstream>
+#include <time.h>
 
 
 #define READ_AHEAD  2            //!< Number of time slice to read ahead(>=1)
 #define READ_BEHIND 2            //!< Number of time slice to read behind(>=0)
 
 #define THREADS (READ_AHEAD+READ_BEHIND+1)    //!< Number of threads 
+
+const struct timespec sleepwait = {0, 10000};
 
 //! class to hold maxima and minima
 template<class T>
@@ -61,13 +64,13 @@ Maxmin<T>::~Maxmin()
 template<class T>
 class Master{
   public:
-  Master(const char *fn,int s):slsz(s),fname(fn),maxtm(0),maxmin_ptr(NULL){}
+  Master(const char *fn,int s):slsz(s),fname(fn),maxtm(0),maxmin(NULL){}
   FileType    ftype;      //!< What type of file is it?
   string      fname;      //!< Argument sent to the class
   char*       scanstr;    //!< Scan string
   int         slsz;       //!< \#points in a time slice (not bytes)
   int         maxtm;      //!< Max time (=\#slices-1)
-  Maxmin<T>*  maxmin_ptr; //!< Pointer to maxmin structure
+  Maxmin<T>*  maxmin;     //!< Pointer to maxmin structure
 };
 
 
@@ -81,18 +84,18 @@ template<class T>
 class Slave {
   public:
   Slave(Master<T>*m=NULL, int datasize=0);
-  ~Slave(){ delete DataReader_ptr; delete[] data; }
+  ~Slave(){ delete datareader; delete[] data; }
   Master<T>*       mthread;        // Pointer to master
   int              rdtm;           // Read time
   T*               data;           // thread data buffer
   int              size;           // size of data buffer
   bool             v_bit;          // Valid bit for data 
-  int              unlock;         // Indicates to post a semaphore in case when the thread is waiting.
   pthread_t        threadID;       // Thread ID
-  sem_t            semaphores;     // Semaphore
-  sem_t            slice;          // Semaphore
+  sem_t            start;          // Semaphore to start slave task
+  sem_t            done;           // Semaphore to signal slave done
+  int              unlock;         // Indicates slave to post a done semaphore when finished
   pthread_mutex_t  mutex_slave;    // Mutex to slave
-  DataReader<T>*   DataReader_ptr; // pointer to derived DataReader class
+  DataReader<T>*   datareader;     // pointer to derived DataReader class
   void resize( int s ){if(size)delete data; data = new T[s];size=s;}
   void master(Master<T>*m,int s){mthread=m;resize(s);}
 };
@@ -101,8 +104,8 @@ template<class T>
 Slave<T>::Slave( Master<T>*_mthread, int datasize ): mthread(_mthread),
 	size(datasize), rdtm(-10000), v_bit(false), unlock(0), data(NULL)
 {
-    sem_init( &semaphores, 0, 0 );
-    sem_init( &slice, 0, 0 );
+    sem_init( &start, 0, 0 );
+    sem_init( &done, 0, 0 );
     pthread_mutex_init ( &mutex_slave, NULL );
 	if( size ) data = new T[size];
 }
@@ -124,10 +127,9 @@ class ThreadedData : public DataClass<T> {
  public:
                     ThreadedData( const char *fn, int slsz);  
                     ~ThreadedData( );                  
-  static    void*   ThreadCaller( void* _sthread );     //!< Thread to read in a requested time slice
-  static    void*   absCollector( void* _sthread );     //!< Thread to read in the absolute max and min times
-  static    void*   localCollector( void* _sthread );   //!< Thread to read in the local max and min times
-  static    void*   tmsrCollector( void* _sthread );    //!< Thread to read in a requested time series
+  static    void*   ThreadCaller( void* _sthread );     //!< read in a time slice
+  static    void*   minimax( void* _sthread );          //!< read max and min times
+  static    void*   tmsrCollector( void* _sthread );    //!< read in a time series
   virtual   T       max(int);	        //!< Maximum value at a slice of time
   virtual   T       max();	            //!< Maximum value of the entire series
   virtual   T       min(int);           //!< Minimum value at a slice of time
@@ -136,14 +138,14 @@ class ThreadedData : public DataClass<T> {
   virtual   void    time_series( int, T* );    //!< Pointer to time series
   virtual   void    increment(int increment);  //!< Sets increment
  private:
-  Master<T>*        mthread;               //!< Pointer to master
-  Slave<T>*         sthread;               //!< Pointer to slave
-  Slave<T>*         stmsr;                 //!< Pointer to slave
-  Maxmin<T>*        maxmin_ptr;            //!< Pointer to maxmin
-  int               incrementation;        //!< Incremenationl value
+  Master<T>*        mthread;               //!< master thread
+  Slave<T>*         sthread;               //!< slice reading threads
+  Slave<T>*         stmsr;                 //!< thread to read time series
+  Maxmin<T>*        maxmin;            //!< Pointer to maxmin
+  int               incrementation;        //!< Increment value
   pthread_mutex_t   mutex_incrementation;  //!< Mutex to incrementation
   int               element;               //!< Value to decide the next thread
-  gzFile            in;
+  gzFile            in;                    //!< file to read
   bool              replaceable( Slave<T>*, int );
 };
 
@@ -161,7 +163,7 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
   slice_size=slsz;
 
   mthread->ftype = FileTypeFinder( fn );
-  mthread->maxmin_ptr = maxmin_ptr = new Maxmin<T>;
+  mthread->maxmin = maxmin = new Maxmin<T>;
  
   // ugly but I don't know what else to do besides specialization which is ugly 
   if     ( typeid(T) == typeid(double) ) mthread->scanstr = "%lf";
@@ -190,34 +192,34 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
   ////////////////////////////////////////////////////////////////////////////
   switch ( mthread->ftype ) {
   case FTIGB:
-    sabs->DataReader_ptr   = new IGBreader<T>(mthread, sabs, maxmin_ptr);
-    slocal->DataReader_ptr = new IGBreader<T>(mthread, slocal, maxmin_ptr);
-    stmsr->DataReader_ptr  = new IGBreader<T>(mthread, stmsr, maxmin_ptr);
+    sabs->datareader   = new IGBreader<T>(mthread, sabs, maxmin);
+    slocal->datareader = new IGBreader<T>(mthread, slocal, maxmin);
+    stmsr->datareader  = new IGBreader<T>(mthread, stmsr, maxmin);
     for ( int k=0; k<THREADS; k++ )
-      sthread[k].DataReader_ptr = new IGBreader<T>( mthread,
-			  									sthread+k, maxmin_ptr);
+      sthread[k].datareader = new IGBreader<T>( mthread,
+			  									sthread+k, maxmin);
     break;
   case FTascii:
-    sabs->DataReader_ptr   = new asciireader<T>(mthread, sabs, maxmin_ptr);
-    slocal->DataReader_ptr = new asciireader<T>(mthread, slocal, maxmin_ptr);
-    stmsr->DataReader_ptr  = new asciireader<T>(mthread, stmsr, maxmin_ptr);
+    sabs->datareader   = new asciireader<T>(mthread, sabs, maxmin);
+    slocal->datareader = new asciireader<T>(mthread, slocal, maxmin);
+    stmsr->datareader  = new asciireader<T>(mthread, stmsr, maxmin);
     for ( int k=0; k<THREADS; k++ )
-      sthread[k].DataReader_ptr = new asciireader<T>(mthread, 
-			  									sthread+k, maxmin_ptr);
+      sthread[k].datareader = new asciireader<T>(mthread, 
+			  									sthread+k, maxmin);
     break;
   case FTfileSeqCG:
     {
 	map<int,string>   CGfiles;
 	CG_file_list( CGfiles, fn );
-    sabs->DataReader_ptr =   new FileSeqCGreader<T>( mthread, 
-										sabs, maxmin_ptr, CGfiles );
-    slocal->DataReader_ptr = new FileSeqCGreader<T>( mthread, slocal,
-										maxmin_ptr, CGfiles);
-    stmsr->DataReader_ptr =  new FileSeqCGreader<T>( mthread, stmsr, 
-			 							maxmin_ptr, CGfiles);
+    sabs->datareader =   new FileSeqCGreader<T>( mthread, 
+										sabs, maxmin, CGfiles );
+    slocal->datareader = new FileSeqCGreader<T>( mthread, slocal,
+										maxmin, CGfiles);
+    stmsr->datareader =  new FileSeqCGreader<T>( mthread, stmsr, 
+			 							maxmin, CGfiles);
     for ( int k=0; k<THREADS; k++ )
-      sthread[k].DataReader_ptr = new FileSeqCGreader<T>( mthread, 
-			  						sthread+k, maxmin_ptr, CGfiles);
+      sthread[k].datareader = new FileSeqCGreader<T>( mthread, 
+			  						sthread+k, maxmin, CGfiles);
 	}
     break;
   default:
@@ -227,16 +229,12 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
   filename = fn;
 
   // Finds and sets maxtm
-  sabs->DataReader_ptr->find_maxtm();
+  sabs->datareader->find_maxtm();
   maxtm = mthread->maxtm;
-  maxmin_ptr->size(maxtm+1);
-
-  // Call a thread to read in global max min times
-  //if ( pthread_create( &sabs->threadID, NULL, absCollector, (void*)sabs) )
-    //throw(1);
+  maxmin->size(maxtm+1);
 
   // Call a thread to read in each time slice and get max&min times
-  if(pthread_create(&(slocal->threadID), NULL, localCollector, (void*)slocal) )
+  if(pthread_create(&(slocal->threadID), NULL, minimax, (void*)slocal) )
     throw(1);
 
   for ( int i=0; i<THREADS; i++ ){
@@ -245,7 +243,7 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
       throw(1);
   }
 
-  // Create a thread to read in slices
+  // Create a thread to read in time series
   if( pthread_create( &stmsr->threadID, NULL, tmsrCollector, (void*)stmsr) ) 
     throw(1);
 }
@@ -254,32 +252,32 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
 template<class T>
 ThreadedData<T>::~ThreadedData() 
 {
-  delete maxmin_ptr;
+  delete maxmin;
   delete [] sthread;  
   delete stmsr;
 }
 
 
-//! static function to find the extrema over all times
-template<class T>
-void* ThreadedData<T>::absCollector( void* _sthread ) 
-{
-  Slave<T>*  sthr = (Slave<T>*)_sthread;
-
-  while( !sthr->mthread->v_bit_local ) {}
-  sthr->DataReader_ptr->abs_maxmin();
-  sthr->mthread->maxmin_ptr->v_bit_abs = true;
-  delete sthr;
-}
-
-
 //! static function to find the extrema for each time
 template<class T>
-void* ThreadedData<T>::localCollector( void* _sthread )
+void* ThreadedData<T>::minimax( void* _sthread )
 {
   Slave<T>*  sthr = (Slave<T>*)_sthread;
-  sthr->DataReader_ptr->local_maxmin();
-  sthr->mthread->maxmin_ptr->v_bit_local = true;
+  sthr->datareader->local_maxmin();
+  
+  sthr->mthread->maxmin->v_bit_local = true;
+
+  // now determine absolute max and min
+  sthr->mthread->maxmin->abs_max = sthr->mthread->maxmin->lmax[0];
+  sthr->mthread->maxmin->abs_min = sthr->mthread->maxmin->lmin[0];
+
+  for( int t=1; t<=sthr->mthread->maxtm; t++ ) {
+	if( sthr->mthread->maxmin->lmin[t] < sthr->mthread->maxmin->abs_min )
+      sthr->mthread->maxmin->abs_min = sthr->mthread->maxmin->lmin[t];
+	if( sthr->mthread->maxmin->lmax[t] > sthr->mthread->maxmin->abs_max )
+      sthr->mthread->maxmin->abs_max = sthr->mthread->maxmin->lmax[t];
+  }
+  sthr->mthread->maxmin->v_bit_abs = true;
   delete sthr;
 }
 
@@ -292,10 +290,10 @@ void* ThreadedData<T>::tmsrCollector( void* _sthread )
   sthr->resize(sthr->mthread->maxtm+1);
 
   while(1){
-    sem_wait( &sthr->semaphores );
-	while( !sthr->mthread->maxmin_ptr->v_bit_local ){}
-    sthr->DataReader_ptr->tmsr();
-    sem_post( &sthr->slice );
+    sem_wait( &sthr->start );
+	while( !sthr->mthread->maxmin->v_bit_local ){}
+    sthr->datareader->tmsr();
+    sem_post( &sthr->done );
   }
 }
 
@@ -308,13 +306,8 @@ T ThreadedData<T>::max( int tm ) {
   if( tm>maxtm && maxtm != -1 )
     return 0;
 
-  // If v_bit_local is 1 send back local max
-  if( maxmin_ptr->v_bit_local )
-    return maxmin_ptr->lmax[tm];
-
-  // When lv_bit == 1, send back localmax
-  while( !maxmin_ptr->lv_bit[tm] ){}    
-  return maxmin_ptr->lmax[tm];  
+  while( !maxmin->lv_bit[tm] ){ nanosleep( &sleepwait, NULL); }    
+  return maxmin->lmax[tm];  
 }
 
 
@@ -323,23 +316,24 @@ template<class T>
 T ThreadedData<T>::max() 
 {
   // When v_bit_abs, send back abs max
-  while( !maxmin_ptr->v_bit_abs ) {}
-  return maxmin_ptr->abs_max;
+  while( !maxmin->v_bit_abs ) {nanosleep( &sleepwait, NULL);}
+  return maxmin->abs_max;
 }
 
 
+/** minimum
+ *
+ * \param time slice to find minimum for
+ */
 template<class T>
 T ThreadedData<T>::min( int tm ) 
 {
   // If tm exceeds maxtm, error
   if( tm>maxtm && maxtm != -1 )
     return 0;
-  // If v_bit_local is set, send back local min
-  if( maxmin_ptr->v_bit_local )
-    return maxmin_ptr->lmin[tm];
   // When lv_bit set, send back local min
-  while( !maxmin_ptr->lv_bit[tm] ){}    
-  return maxmin_ptr->lmin[tm];      
+  while( !maxmin->lv_bit[tm] ){ nanosleep( &sleepwait, NULL); }    
+  return maxmin->lmin[tm];      
 }
 
 
@@ -347,10 +341,18 @@ T ThreadedData<T>::min( int tm )
 template<class T>
 T ThreadedData<T>::min() 
 {
-  while( !maxmin_ptr->v_bit_abs ) {}
-  return maxmin_ptr->abs_min;
+  while( !maxmin->v_bit_abs ) { nanosleep(&sleepwait,NULL); }
+  return maxmin->abs_min;
 }
 
+
+
+/** read in a time slice
+ *
+ *  \param tm slice to read
+ *
+ *  \return pointer to buffer with data
+ */
 template<class T>
 T* ThreadedData<T>::slice( int tm )
 {
@@ -366,7 +368,7 @@ T* ThreadedData<T>::slice( int tm )
   for ( int i=0; i<THREADS; i++ ){
     if( sthread[i].rdtm == tm ){
 	  not_found = false;
-      while( !sthread[i].v_bit ){}
+      while( !sthread[i].v_bit ){ nanosleep( &sleepwait, NULL ); }
 	  retval = sthread[i].data;    
 	  break;
     }
@@ -378,8 +380,8 @@ T* ThreadedData<T>::slice( int tm )
 		sthread[element].rdtm   = tm;
 		sthread[element].v_bit  = false;	
 		sthread[element].unlock = 1;
-		sem_post( &sthread[element].semaphores );
-		sem_wait( &sthread[element].slice );
+		sem_post( &sthread[element].start );
+		sem_wait( &sthread[element].done );
 		retval = sthread[element].data;    
 		element = (element+1)%THREADS;
 		break;
@@ -408,7 +410,7 @@ T* ThreadedData<T>::slice( int tm )
 		if( replaceable( sthread+element, tm ) ){
 		  sthread[element].rdtm = read_time;
 		  sthread[element].v_bit = false;
-		  sem_post( &sthread[element].semaphores );
+		  sem_post( &sthread[element].start );
 		  element = (element+1)%THREADS;
 		  break;
 		}
@@ -428,12 +430,12 @@ void* ThreadedData<T>::ThreadCaller( void* _sthread )
   Slave<T>* sthr = (Slave<T>*)_sthread;
 
   while(1){
-    sem_wait( &(sthr->semaphores) );
-    sthr->DataReader_ptr->reader();
+    sem_wait( &(sthr->start) );
+    sthr->datareader->reader();
     
     if( sthr->unlock ){
-      sem_post( &(sthr->slice) );
       sthr->unlock = 0;
+      sem_post( &(sthr->done) );
     }
     pthread_mutex_unlock( &sthr->mutex_slave );
   }
@@ -444,11 +446,11 @@ void* ThreadedData<T>::ThreadCaller( void* _sthread )
 template<class T>
 void ThreadedData<T>::time_series( int offset, T* buffer ) 
 {
-  while ( !maxmin_ptr->read ) {}
+  while ( !maxmin->read ) {}
   stmsr->unlock = offset;
   stmsr->data = buffer;
-  sem_post( &stmsr->semaphores );
-  sem_wait( &stmsr->slice );
+  sem_post( &stmsr->start );
+  sem_wait( &stmsr->done );
 }
 
 

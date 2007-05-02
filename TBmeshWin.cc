@@ -1226,7 +1226,10 @@ void TBmeshWin::timeplot()
 }
 
 
-//! Draw the cliiping plane
+/** Draw the clipping plane
+ *
+ * \param cp the clipping plane
+ */
 void TBmeshWin::draw_clip_plane( int cp )
 {
   const GLfloat clipPlaneOpacity = 0.3;
@@ -1266,7 +1269,7 @@ void TBmeshWin::draw_clip_plane( int cp )
 }
 
 
-/* write out the frame buffer after a change to it is has been made
+/** write out the frame buffer after a change to it is has been made
  *
  * \param fname base name for output files
  */
