@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public
@@ -11,7 +11,11 @@ decl {\#include <GL/gl.h>} {public
 decl {class TBmeshWin;} {public
 } 
 
-decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" "<<double(a->value())<<endl;} {} 
+decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {} 
+
+decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);}} {} 
+
+decl {\#define TEST_MENUVAR(A,B,C) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();}} {} 
 
 decl {\#include "Model.h"} {public
 } 
@@ -42,22 +46,21 @@ winny->size_range(50,50,1200,1200,5,5,1);} {}
 
 class Controls {open
 } {
-  Function {Controls()} {open
-  } {
+  Function {Controls()} {} {
     Fl_Window window {
-      label {Meshalyzer Controls}
-      xywh {416 25 350 650} type Double box UP_BOX
+      label {Meshalyzer Controls} open
+      xywh {582 46 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {
         xywh {0 0 350 30} labelcolor 1
       } {
-        Submenu {} {
+        submenu {} {
           label File
           xywh {0 0 100 20}
         } {
-          MenuItem {} {
+          menuitem {} {
             label {Add surface}
             callback {char *fn=fl_file_chooser("Surface", "*.tri",NULL);
 int sn;
@@ -71,7 +74,7 @@ if( fn != NULL ) if( (sn=mwtb->add_surface( fn ))>=0 ){
 }}
             xywh {0 0 100 20} divider
           }
-          MenuItem {} {
+          menuitem {} {
             label {Read data}
             callback {char *fn=fl_file_chooser("Data file","*{out,dat}*",NULL);
 if(fn != NULL) mwtb->get_data(fn,tmslider);
@@ -80,7 +83,7 @@ maxcolval->value(mwtb->cs->max());}
             xywh {0 0 100 20}
             code0 {\#include <FL/fl_file_chooser.h>}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Read IGB data}
             callback {char *fn=fl_file_chooser("Data file","*igb*",NULL);
 if(fn != NULL) mwtb->get_data(fn,tmslider);
@@ -89,7 +92,7 @@ maxcolval->value(mwtb->cs->max());}
             xywh {20 20 100 20}
             code0 {\#include <FL/fl_file_chooser.h>}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Read Vector Data}
             callback {if( !mwtb->getVecData(tmslider) ) {
   vectorgrp->activate();
@@ -97,11 +100,11 @@ maxcolval->value(mwtb->cs->max());}
 }}
             xywh {0 0 100 20}
           }
-          MenuItem read_recalibrate {
+          menuitem read_recalibrate {
             label {Recalibrate on read}
             xywh {0 0 100 20} type Toggle value 1 divider
           }
-          MenuItem {} {
+          menuitem {} {
             label {Save transform}
             callback {char*fn;
 fn=fl_file_chooser("Save Xfrm","*.xfrm",NULL);
@@ -109,7 +112,7 @@ if( fn != NULL )
  mwtb->trackball.save(fn);}
             xywh {0 0 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Read transform}
             callback {char *fn = fl_file_chooser("Xfrm file","*.xfrm",NULL);
 if( fn != NULL ){
@@ -118,22 +121,27 @@ if( fn != NULL ){
 }}
             xywh {0 0 100 20} divider
           }
-          MenuItem {} {
+          menuitem {} {
             label {Save state}
             callback {save_state();}
             xywh {0 0 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
+            label {Restore state}
+            callback {restore_state();}
+            xywh {10 10 100 20} divider
+          }
+          menuitem {} {
             label Quit
             callback {exit(0);}
             xywh {0 0 100 20}
           }
         }
-        Submenu imgmenu {
-          label Image open
+        submenu imgmenu {
+          label Image
           xywh {0 0 100 20}
         } {
-          MenuItem {} {
+          menuitem {} {
             label {Reset transform}
             callback {mwtb->trackball.Reset();
 float md = mwtb->get_maxdim();
@@ -141,242 +149,242 @@ mwtb->trackball.mouse.SetOglPosAndSize(-md, md, 2*md, 2*md );
 mwtb->trackball.size = md;mwtb->redraw();}
             xywh {0 0 100 20}
           }
-          Submenu {} {
+          submenu {} {
             label View
             xywh {0 0 100 20}
           } {
-            Submenu {} {
+            submenu {} {
               label {+X}
               xywh {0 0 100 20}
             } {
-              MenuItem {} {
+              menuitem {} {
                 callback {set_rot('X',0,0);}
                 image {ppaxis.png} xywh {0 0 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('X',0,1);}
                 image {npaxis.png} xywh {10 10 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('X',0,2);}
                 image {nnaxis.png} xywh {20 20 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('X',0,3);}
                 image {pnaxis.png} xywh {30 30 100 20}
               }
             }
-            Submenu {} {
+            submenu {} {
               label {+Y}
               xywh {5 5 100 20}
             } {
-              MenuItem {} {
+              menuitem {} {
                 callback {set_rot('Y',0,0);}
                 image {ppaxis.png} xywh {10 10 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Y',0,1);}
                 image {npaxis.png} xywh {20 20 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Y',0,2);}
                 image {nnaxis.png} xywh {30 30 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Y',0,3);}
                 image {pnaxis.png} xywh {40 40 100 20}
               }
             }
-            Submenu {} {
+            submenu {} {
               label {+Z}
               xywh {20 20 100 20}
             } {
-              MenuItem {} {
+              menuitem {} {
                 callback {set_rot('Z',0,0);}
                 image {ppaxis.png} xywh {20 20 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Z',0,1);}
                 image {npaxis.png} xywh {30 30 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Z',0,2);}
                 image {nnaxis.png} xywh {40 40 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Z',0,3);}
                 image {pnaxis.png} xywh {50 50 100 20}
               }
             }
-            Submenu {} {
+            submenu {} {
               label {-X}
               xywh {25 25 100 20}
             } {
-              MenuItem {} {
+              menuitem {} {
                 callback {set_rot('X',1,0);}
                 image {ppaxis.png} xywh {10 10 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('X',1,1);}
                 image {npaxis.png} xywh {20 20 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('X',1,2);}
                 image {nnaxis.png} xywh {30 30 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('X',1,3);}
                 image {pnaxis.png} xywh {40 40 100 20}
               }
             }
-            Submenu {} {
+            submenu {} {
               label {-Y}
               xywh {35 35 100 20}
             } {
-              MenuItem {} {
+              menuitem {} {
                 callback {set_rot('Y',1,0);}
                 image {ppaxis.png} xywh {20 20 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Y',1,1);}
                 image {npaxis.png} xywh {30 30 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Y',1,2);}
                 image {nnaxis.png} xywh {40 40 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Y',1,3);}
                 image {pnaxis.png} xywh {50 50 100 20}
               }
             }
-            Submenu {} {
+            submenu {} {
               label {-Z}
               xywh {45 45 100 20}
             } {
-              MenuItem {} {
+              menuitem {} {
                 callback {set_rot('Z',1,0);}
                 image {ppaxis.png} xywh {30 30 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Z',1,1);}
                 image {npaxis.png} xywh {40 40 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Z',1,2);}
                 image {nnaxis.png} xywh {50 50 100 20}
               }
-              MenuItem {} {
+              menuitem {} {
                 label item
                 callback {set_rot('Z',1,3);}
                 image {pnaxis.png} xywh {60 60 100 20}
               }
             }
           }
-          Submenu {} {
+          submenu {} {
             label {Randomly colour}
             xywh {0 0 100 20}
           } {
-            MenuItem {} {
+            menuitem {} {
               label vertices
               callback {mwtb->randomize_color(Vertex);}
               xywh {15 15 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label cables
               callback {mwtb->randomize_color(Cable);}
               xywh {15 15 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label triangles
               callback {mwtb->randomize_color(SurfEle);}
               xywh {0 0 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label surfaces
               callback {mwtb->randomize_color(Surface);}
               xywh {5 5 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label voxele
               callback {mwtb->randomize_color(Tetrahedron);}
               xywh {0 0 30 20}
             }
           }
-          Submenu {} {
+          submenu {} {
             label {Background colour}
             xywh {0 0 100 20}
           } {
-            MenuItem {} {
+            menuitem {} {
               label White
               callback {mwtb->bgd(1);}
               xywh {0 0 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label Gray
               callback {mwtb->bgd(0.6);}
               xywh {10 10 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label Black
               callback {mwtb->bgd(0);}
               xywh {20 20 100 20}
             }
           }
-          MenuItem revdraworder {
+          menuitem revdraworder {
             label {Reverse draw order}
             callback {mwtb->revdraworder( (bool)(o->mvalue()->value()) );}
             xywh {0 0 100 20} type Toggle
           }
         }
-        Submenu {} {
+        submenu {} {
           label Data
           xywh {0 0 100 20}
         } {
-          MenuItem {} {
+          menuitem {} {
             label Opacity
             callback {mwtb->dataopac->window->show();}
             xywh {0 0 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Clipping
             callback {mwtb->cplane->window->show();}
             xywh {10 10 100 20}
           }
         }
-        Submenu outmenu {
+        submenu outmenu {
           label Output
           xywh {0 0 100 20}
         } {
-          Submenu {} {
+          submenu {} {
             label PNG
             xywh {5 5 100 20}
           } {
-            MenuItem {} {
+            menuitem {} {
               label Image
               callback {char *fn = fl_file_chooser("PNG image", "*.png", "image.png" );
 if( fn!=NULL)
 mwtb->output_png(fn);}
               xywh {10 10 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label Sequence
               callback {Sequence *s=new Sequence( mwtb );
 s->window->show();}
@@ -384,30 +392,30 @@ s->window->show();}
               code0 {\#include "Sequence.h"}
             }
           }
-          MenuItem {} {
+          menuitem {} {
             label PDF
             callback {char* fn = fl_file_chooser("PDF file name", "*.pdf", "image.pdf");
 if( fn==NULL) return;
 mwtb->output_pdf( fn,true );}
             xywh {5 5 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label EPS
             callback {char* fn = fl_file_chooser("EPS file name", "*.eps", "image.eps");
 if( fn==NULL) return;
 mwtb->output_pdf( fn, false );}
             xywh {5 5 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Visible vertices}
             callback {mwtb->dump_vertices();}
             xywh {0 0 100 20}
           }
-          Submenu recordmenu {
+          submenu recordmenu {
             label Record
             xywh {0 0 100 20}
           } {
-            MenuItem {} {
+            menuitem {} {
               label start
               callback {if( !mwtb->recording ) {
   char* fn=fl_file_chooser( "Pick base name", "*.png", "frame.png" );
@@ -420,7 +428,7 @@ mwtb->output_pdf( fn, false );}
 }}
               xywh {0 0 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label stop
               callback {mwtb->recording = false;
 outmenu->labelcolor(FL_BLACK);
@@ -430,7 +438,7 @@ mainbar->redraw();}
             }
           }
         }
-        MenuItem redrawbut {
+        menuitem redrawbut {
           label Redraw
           callback {mwtb->redraw();}
           xywh {0 0 100 20} labelcolor 180 hide
@@ -441,42 +449,42 @@ mainbar->redraw();}
         tooltip {use data to color which elements} xywh {75 50 110 25} down_box BORDER_BOX
         code0 {o->value(3);}
       } {
-        MenuItem {} {
+        menuitem {} {
           label Vertices
           callback {mwtb->datify(Vertex);}
           xywh {5 5 100 20}
         }
-        MenuItem {} {
+        menuitem {} {
           label Cables
           callback {mwtb->datify(Cable);}
           xywh {5 5 100 20}
         }
-        MenuItem {} {
+        menuitem {} {
           label Connections
           callback {mwtb->datify(Cnnx);}
           xywh {15 15 100 20}
         }
-        MenuItem {} {
+        menuitem {} {
           label Triangles
           callback {mwtb->datify(SurfEle);}
           xywh {5 5 100 20}
         }
-        MenuItem {} {
+        menuitem {} {
           label Surfaces
           callback {mwtb->datify(Surface);}
           xywh {5 5 100 20}
         }
-        MenuItem {} {
+        menuitem {} {
           label Tetrahedra
           callback {mwtb->datify(Tetrahedron);}
           xywh {0 0 100 20}
         }
-        MenuItem {} {
+        menuitem {} {
           label Nothing
           callback {mwtb->datify(Nothing);}
           xywh {0 0 100 20}
         }
-        MenuItem {} {
+        menuitem {} {
           label All
           callback {mwtb->datify(All);}
           xywh {0 0 100 20}
@@ -594,7 +602,7 @@ if( l && reglist->selected(l) )
         }
       }
       Fl_Tabs tabwidget {
-        xywh {5 270 335 215} align 0
+        xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
           label Highlight
@@ -645,22 +653,22 @@ vertvalout->value(mwtb->vertex_val(int(o->value())));}
             label attached
             tooltip {draw which objects associated with vertex} xywh {90 435 100 20} down_box BORDER_BOX align 2 when 1
           } {
-            MenuItem {} {
+            menuitem {} {
               label triangles
               callback {mwtb->assc_obj(SurfEle);}
               xywh {5 5 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label Vols
               callback {mwtb->assc_obj(Tetrahedron);}
               xywh {5 5 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label {filled Vols}
               callback {mwtb->assc_obj(Tetrahedron, 1 );}
               xywh {5 5 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label nothing
               callback {mwtb->assc_obj(Nothing);}
               xywh {5 5 100 20}
@@ -683,13 +691,13 @@ vertvalout->value(mwtb->vertex_val(int(o->value())));}
           Fl_Choice hitettype {open
             tooltip {display style} xywh {15 345 85 25} down_box BORDER_BOX textsize 10
           } {
-            MenuItem {} {
+            menuitem {} {
               label {Vol Ele}
               callback {mwtb->solid_hitet(false);
 mwtb->redraw();}
               xywh {5 5 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label {Solid Vol Ele}
               callback {mwtb->solid_hitet(true);
 mwtb->redraw();}
@@ -741,27 +749,27 @@ mwtb->redraw();}
             code0 {\#include "Colourscale.h"}
             code1 {o->value(1);}
           } {
-            MenuItem {} {
+            menuitem {} {
               callback {mwtb->vecdata->cs->scale(CS_RAINBOW);
 mwtb->redraw();}
               image {rainbow.xpm} xywh {15 15 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               callback {mwtb->vecdata->cs->scale(CS_BL_RAINBOW);
 mwtb->redraw();}
               image {blrainbow.xpm} xywh {15 15 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               callback {mwtb->vecdata->cs->scale(CS_HOT);
 mwtb->redraw();}
               image {hot.xpm} xywh {15 15 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               callback {mwtb->vecdata->cs->scale(CS_COLD_HOT);
 mwtb->redraw();}
               image {coldhot.xpm} xywh {15 15 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               callback {mwtb->vecdata->cs->scale(CS_GREY);
 mwtb->redraw();}
               image {blwhite.xpm} xywh {15 15 100 20}
@@ -771,19 +779,19 @@ mwtb->redraw();}
             label Length
             tooltip {determinant of vector length} xywh {20 375 90 25}
           } {
-            MenuItem {} {
+            menuitem {} {
               label {Vector mag}
               callback {mwtb->vecdata->length_det(Vector);
 mwtb->redraw();}
               xywh {5 5 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label Scalar
               callback {mwtb->vecdata->length_det(Scalar);
 mwtb->redraw();}
               xywh {5 5 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label Fixed
               callback {mwtb->vecdata->length_det(FixedVCdata);
 mwtb->redraw();}
@@ -794,19 +802,19 @@ mwtb->redraw();}
             label Colour
             tooltip {determinant of vector colour} xywh {140 375 90 25}
           } {
-            MenuItem {} {
+            menuitem {} {
               label {Vector mag}
               callback {mwtb->vecdata->colour_det(Vector);
 mwtb->redraw();}
               xywh {15 15 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label Scalar
               callback {mwtb->vecdata->colour_det(Scalar);
 mwtb->redraw();}
               xywh {15 15 100 20}
             }
-            MenuItem {} {
+            menuitem {} {
               label Fixed
               callback {mwtb->vecdata->colour_det(FixedVCdata);
 mwtb->redraw();}
@@ -827,17 +835,17 @@ mwtb->redraw();}
           Fl_Value_Slider lightx {
             label {X direction}
             callback {mwtb->redraw();}
-            tooltip {X component of light direction} xywh {15 330 120 20} type Horizontal selection_color 71 labelsize 12 minimum -1 step 0.01
+            tooltip {X component of light direction} xywh {15 330 120 20} type Horizontal selection_color 71 labelsize 12 minimum -1
           }
           Fl_Value_Slider lighty {
             label {Y direction}
             callback {mwtb->redraw();}
-            tooltip {Y component of light direction} xywh {15 370 120 20} type Horizontal selection_color 190 labelsize 12 minimum -1 step 0.01
+            tooltip {Y component of light direction} xywh {15 370 120 20} type Horizontal selection_color 190 labelsize 12 minimum -1
           }
           Fl_Value_Slider lightz {
             label {Z directtion}
             callback {mwtb->redraw();}
-            tooltip {z component of light direction} xywh {15 410 120 20} type Horizontal selection_color 244 labelsize 12 minimum -1 step 0.01 value 1
+            tooltip {z component of light direction} xywh {15 410 120 20} type Horizontal selection_color 244 labelsize 12 minimum -1 value 1
           }
           Fl_Button {} {
             label reset
@@ -878,7 +886,7 @@ mwtb->redraw();}
           Fl_Value_Slider ambientslide {
             label Ambient
             callback {mwtb->redraw();}
-            tooltip {ambient lighting component level} xywh {150 330 25 95} selection_color 3 labelsize 12 step 0.01 value 0.2
+            tooltip {ambient lighting component level} xywh {150 330 25 95} selection_color 3 labelsize 12 value 0.2
           }
           Fl_Light_Button facetshadBut {
             label {facet shading}
@@ -893,17 +901,17 @@ mwtb->redraw();}
           Fl_Value_Slider specularslide {
             label Specular
             callback {mwtb->redraw();}
-            tooltip {specular lighting component level} xywh {200 330 25 95} selection_color 6 labelsize 12 step 0.01 value 0.65
+            tooltip {specular lighting component level} xywh {200 330 25 95} selection_color 6 labelsize 12 value 0.65
           }
           Fl_Value_Slider diffuseslide {
             label Diffuse
             callback {mwtb->redraw();}
-            tooltip {specular lighting component level} xywh {245 330 25 95} selection_color 6 labelsize 12 step 0.01 value 0.65
+            tooltip {specular lighting component level} xywh {245 330 25 95} selection_color 6 labelsize 12 value 0.65
           }
           Fl_Value_Slider backintensityslide {
             label Backside
             callback {mwtb->redraw();}
-            tooltip {intensity of back side of surface} xywh {300 330 25 95} selection_color 6 labelsize 12 step 0.01 value 0.5
+            tooltip {intensity of back side of surface} xywh {300 330 25 95} selection_color 6 labelsize 12 value 0.5
           }
         }
         Fl_Group {} {
@@ -920,7 +928,7 @@ mwtb->redraw();}
             callback {update_surfGUI( o->value()-1 );}
             tooltip {shells affected by settings} xywh {150 320 120 30} down_box BORDER_BOX
           } {
-            MenuItem {} {
+            menuitem {} {
               label All
               xywh {5 5 100 20}
             }
@@ -937,7 +945,7 @@ mwtb->redraw();}
           }
           Fl_Button {} {
             label {Outline colour}
-            callback {pick_surf_color( SurfEle, "Outline Colour" );} selected
+            callback {pick_surf_color( SurfEle, "Outline Colour" );}
             xywh {135 405 85 25} labelsize 12
           }
           Fl_Button {} {
@@ -963,27 +971,27 @@ maxcolval->value(mwtb->cs->max());}
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
         } {
-          MenuItem {} {
+          menuitem {} {
             callback {mwtb->cs->scale(CS_RAINBOW);
 mwtb->redraw();}
             image {rainbow.xpm} xywh {0 0 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
             callback {mwtb->cs->scale(CS_BL_RAINBOW);
 mwtb->redraw();}
             image {blrainbow.xpm} xywh {0 0 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
             callback {mwtb->cs->scale(CS_HOT);
 mwtb->redraw();}
             image {hot.xpm} xywh {0 0 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
             callback {mwtb->cs->scale(CS_COLD_HOT);
 mwtb->redraw();}
             image {coldhot.xpm} xywh {0 0 100 20}
           }
-          MenuItem {} {
+          menuitem {} {
             callback {mwtb->cs->scale(CS_GREY);
 mwtb->redraw();}
             image {blwhite.xpm} xywh {0 0 100 20}
@@ -1051,7 +1059,7 @@ mwtb->redraw();}
     code {mwtb = w;} {}
   }
   decl {TBmeshWin *mwtb;} {}
-  Function {pickcolor(Object_t obj, const char* wintitle )} {open
+  Function {pickcolor(Object_t obj, const char* wintitle )} {selected
   } {
     code {bool* sel=regselected();
 for( int i=0; i<reglist->size(); i++ )
@@ -1070,15 +1078,14 @@ surfvisbut->value( mwtb->model->surface(s)->visible() );
 surfoutlinebut->value( mwtb->model->surface(s)->outline() );
 surffillbut->value( mwtb->model->surface(s)->filled() );} {}
   }
-  Function {update_regionGUI( int r )} {return_type void
+  Function {update_regionGUI( int r )} {open return_type void
   } {
     code {visbut->value( mwtb->visibility(r) );
 vertbut->value( mwtb->showobj(Vertex, r) );
 cabbut->value( mwtb->showobj(Cable, r) );
 cnnxbut->value( mwtb->showobj(Cnnx, r) );} {}
   }
-  Function {highlight_region()} {open
-  } {
+  Function {highlight_region()} {} {
     code {int regnum;
 for( regnum=0; regnum<reglist->size(); regnum++ )
   if( reglist->selected(regnum) )
@@ -1129,7 +1136,7 @@ mwtb->redraw();} {}
   reglist->select(i+1);
 }} {}
   }
-  Function {regselected()} {open return_type {bool *}
+  Function {regselected()} {return_type {bool *}
   } {
     code {bool *sel = new bool[reglist->size()];
 for( int i=1; i<=reglist->size(); i++ )
@@ -1143,6 +1150,14 @@ if( fn==NULL) return;
 string xfn( fn );
 if( xfn.rfind(".mshz") == string::npos ) xfn += ".mshz";
 ofstream mshzf( xfn.c_str() );
+
+mshzf << "TRACKBALL ======" << endl;
+mwtb->trackball.save(mshzf);
+mshzf << "CLIPPING ======" << endl;
+mwtb->cplane->save(mshzf);
+mshzf << "DATA_OPACITY ======" << endl;
+mwtb->dataopac->save(mshzf);
+
 SAVE_WIDGET(mshzf,read_recalibrate);
 SAVE_WIDGET(mshzf,revdraworder);
 SAVE_WIDGET(mshzf,datachc);
@@ -1158,6 +1173,7 @@ SAVE_WIDGET(mshzf,cnnxstridein);
 SAVE_WIDGET(mshzf,hilighton);
 SAVE_WIDGET(mshzf,hitettype);
 SAVE_WIDGET(mshzf,tethi);
+SAVE_WIDGET(mshzf,elehi);
 SAVE_WIDGET(mshzf,verthi);
 SAVE_WIDGET(mshzf,cnnxhi);
 SAVE_WIDGET(mshzf,verthi);
@@ -1193,16 +1209,35 @@ SAVE_WIDGET(mshzf,cstype);
 // animation
 SAVE_WIDGET(mshzf,tmslider);
 SAVE_WIDGET(mshzf,frameskip);
-SAVE_WIDGET(mshzf,animdelay);} {}
+SAVE_WIDGET(mshzf,animdelay);
+
+mshzf << "SURFACE_COLOURS = " << mwtb->model->numSurf << endl;
+for( int i=0; i<mwtb->model->numSurf; i++ ) {
+  save_colour( mshzf, mwtb->model->surface(i)->fillcolor() );
+  mshzf << " ";
+  save_colour( mshzf, mwtb->model->surface(i)->outlinecolor() );
+  mshzf << " " << mwtb->model->surface(i)->visible();
+  mshzf << " " << mwtb->model->surface(i)->filled();
+  mshzf << " " << mwtb->model->surface(i)->outline();
+  mshzf << endl;
+}
+
+mshzf << "REGION_COLOURS = " << mwtb->model->_numReg << endl;
+for( int i=0; i<mwtb->model->_numReg; i++ ) {
+  save_colour( mshzf, mwtb->model->region(i)->get_color(Vertex) );
+  mshzf << " " << mwtb->model->region(i)->show(Vertex) << " ";
+  save_colour( mshzf, mwtb->model->region(i)->get_color(Cable) );
+  mshzf << " " << mwtb->model->region(i)->show(Cable) << " ";
+  save_colour( mshzf, mwtb->model->region(i)->get_color(Cnnx) );
+  mshzf << " " << mwtb->model->region(i)->show(Cnnx) << " " 
+        << mwtb->model->region(i)->visible() << endl; 
+}} {}
   }
-  Function {save_colour( ofstream&ofs, char *label, GLfloat *col )} {open
-  } {
-    code {ofs << label;
-for( int c=0; c<4; c++ ) ofs << " " << col[c];
-ofs << endl;} {}
+  Function {save_colour( ofstream&ofs, GLfloat *col )} {} {
+    code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
+ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, const char *winlab)} {open
-  } {
+  Function {pick_surf_color(Object_t ot, const char *winlab)} {} {
     code {int msz = currsurf->size()-2;
 
 if( msz==0 ) return;
@@ -1224,5 +1259,112 @@ if( picked==-1 ) {
 colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
+  }
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
+    code {ifstream mshzf;
+if( fname==NULL ) {
+  char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
+  if( fn==NULL) return;
+  mshzf.open(fn);
+} else
+  mshzf.open(fname);
+
+int BUFLEN=1024;
+char buf[BUFLEN];
+while( mshzf.getline( buf, BUFLEN ) ) {
+  
+  float val;
+  char  var[1024];
+  if( sscanf( buf, "%s = %f", var, &val ) <1 )
+    continue;
+  if( !strcmp( var, "TRACKBALL" ) )mwtb->trackball.read(mshzf); else
+  if( !strcmp( var, "DATA_OPACITY" )) mwtb->dataopac->read(mshzf); else
+  if( !strcmp( var, "CLIPPING" )) mwtb->cplane->read(mshzf); else
+  if( !strcmp( var, "SURFACE_COLOURS" ) ) {
+    for( int i=0; i<val; i++ ) {
+      if( i >= mwtb->model->numSurf ){
+        mshzf.getline(var, 1024);
+        continue;
+      }
+      float r,g,b,a;
+      mshzf >> r >> g >> b >> a;
+      mwtb->model->surface(i)->fillcolor(r,g,b,a);
+      mshzf >> r >> g >> b >> a;
+      mwtb->model->surface(i)->outlinecolor(r,g,b,a);
+      mshzf >> r >> g >> b;
+      mwtb->model->surface(i)->visible(int(r));
+      mwtb->model->surface(i)->filled(int(g));
+      mwtb->model->surface(i)->outline(int(b));}
+  } else
+  if( !strcmp( var, "REGION_COLOURS" ) ) {
+    float r, g, b, a;
+    bool  v;
+    for( int i=0; i<val; i++ ) {
+      if( i >= mwtb->model->_numReg ) {
+         mshzf.getline( var, 1024 );
+         continue;
+      }     
+      mshzf >> r >> g >> b >> a >> v;
+      mwtb->model->region(i)->set_color(Vertex, r, g, b, a );
+      mwtb->model->region(i)->show( Vertex, v );
+      mshzf >> r >> g >> b >> a >> v;
+      mwtb->model->region(i)->set_color(Cable, r, g, b, a );   
+      mwtb->model->region(i)->show( Cable, v );
+      mshzf >> r >> g >> b >> a >> v;
+      mwtb->model->region(i)->set_color(Cnnx, r, g, b, a ); 
+      mwtb->model->region(i)->show( Cnnx, v );
+      mshzf >> v;
+      mwtb->model->region(i)->visible(v);
+    }
+  } else
+  TEST_MENUVAR( read_recalibrate, var, val ) else 
+  TEST_MENUVAR( revdraworder, var, val ) else 
+  TEST_VAR( datachc, var, int(val) )  else
+  TEST_VAR( draw_axes, var, int(val) )  else
+  TEST_VAR( vertbut, var, int(val) )  else
+  TEST_VAR( cabbut, var, int(val) )  else
+  TEST_VAR( cnnxbut, var, int(val) )  else
+  TEST_VAR( vertstride, var, int(val) ) else
+  TEST_VAR( cabstridein, var, int(val) ) else
+  TEST_VAR( cnnxstridein, var, int(val) ) else
+  TEST_VAR( hilighton, var, int(val) ) else
+  TEST_VAR( hitettype, var, int(val) ) else
+  TEST_VAR( tethi, var, int(val) ) else
+  TEST_VAR( elehi, var, int(val) ) else
+  TEST_VAR( verthi, var, int(val) ) else
+  TEST_VAR( cnnxhi, var, int(val) ) else
+  TEST_VAR( cabhi, var, int(val) ) else
+  TEST_VAR( attachtype, var, int(val) ) else
+  TEST_VAR( veconbut, var, int(val) ) else
+  TEST_VAR( veccstype, var, int(val) ) else
+  TEST_VAR( veclength, var, val ) else
+  TEST_VAR( vecautocal, var, int(val) ) else
+  TEST_VAR( lightx, var, val ) else
+  TEST_VAR( lighty, var, val ) else
+  TEST_VAR( lightz, var, val ) else
+  TEST_VAR( ambientslide, var, val ) else
+  TEST_VAR( specularslide, var, val ) else
+  TEST_VAR( diffuseslide, var, val ) else
+  TEST_VAR( backintensityslide, var, val ) else
+  TEST_VAR( showLightDir, var, int(val) ) else
+  TEST_VAR( facetshadBut, var, int(val) ) else
+  TEST_VAR( illBut, var, int(val) ) else
+  TEST_VAR( currsurf, var, int(val) ) else
+  TEST_VAR( surfvisbut, var, int(val) ) else
+  TEST_VAR( surfoutlinebut, var, int(val) ) else
+  TEST_VAR( surffillbut, var, int(val) ) else
+  TEST_VAR( autocalibratebut, var, int(val) ) else
+  TEST_VAR( mincolval, var, val ) else
+  TEST_VAR( maxcolval, var, val ) else
+  TEST_VAR( numcolev, var, int(val) ) else
+  TEST_VAR( cstype, var, int(val) ) else
+  TEST_VAR( tmslider, var, int(val) ) else
+  TEST_VAR( frameskip, var, int(val) ) else
+  TEST_VAR( animdelay, var, int(val) ) else {
+     cerr << "Unknown variable specified: " << var << endl;
+  }
+}
+mwtb->lights(illBut->value());} {}
   }
 } 

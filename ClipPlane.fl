@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0106 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {public
@@ -7,6 +7,10 @@ decl {\#include "TBmeshWin.h"} {public
 
 decl {\#include <math.h>} {public
 } 
+
+decl {\#define SAVE_CP(A) xdir\#\#A->value()<<" "<<ydir\#\#A->value()<<" "<<zdir\#\#A->value()<<" "<<intercept\#\#A->value()<<" "<<dispas\#\#A->value()} {} 
+
+decl {\#define READ_CP(A,S) {double val; S>>val; xdir\#\#A->value(val); S>>val; ydir\#\#A->value(val); S>>val; zdir\#\#A->value(val);S>>val; intercept\#\#A->value(val); S>>val; dispas\#\#A->value(int(val));if(val==3||val==4)tbmw->determine_cutplane(A);}} {} 
 
 class ClipPlane {open
 } {
@@ -54,37 +58,37 @@ normcb(0);}
         Fl_Value_Slider intercept0 {
           label Intercept
           callback {normcb(0);}
-          tooltip {control intercept of plane with axes} xywh {145 25 25 195} selection_color 10 minimum -1 step 0.01
+          tooltip {control intercept of plane with axes} xywh {145 25 25 195} selection_color 10 minimum -1
         }
         Fl_Choice dispas0 {
           xywh {20 30 110 20} down_box BORDER_BOX
         } {
-          MenuItem {} {
+          menuitem {} {
             label Off
             callback {drawIntercept( 0, false );
 tbmw->redraw();}
             xywh {0 0 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label On
             callback {drawIntercept( 0, false );
 tbmw->redraw();}
             xywh {0 0 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Whole Plane}
             callback {drawIntercept( 0, false );
 tbmw->redraw();}
             xywh {0 0 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Intersection
             callback {drawIntercept( 0, true );
 tbmw->determine_cutplane(0);
 tbmw->redraw();}
             xywh {0 0 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Datified
             callback {drawIntercept( 0, true );
 tbmw->determine_cutplane(0);
@@ -131,37 +135,37 @@ normcb(1);}
         Fl_Value_Slider intercept1 {
           label Intercept
           callback {normcb(1);}
-          tooltip {control intercept of plane with axes} xywh {335 25 25 195} selection_color 178 minimum -1 step 0.01
+          tooltip {control intercept of plane with axes} xywh {335 25 25 195} selection_color 178 minimum -1
         }
         Fl_Choice dispas1 {
           xywh {210 30 110 20} down_box BORDER_BOX
         } {
-          MenuItem {} {
+          menuitem {} {
             label Off
             callback {drawIntercept( 1, false );
 tbmw->redraw();}
             xywh {10 10 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label On
             callback {drawIntercept( 1, false );
 tbmw->redraw();}
             xywh {10 10 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Whole Plane}
             callback {drawIntercept( 1, false );
 tbmw->redraw();}
             xywh {10 10 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Intersection
             callback {drawIntercept( 1, true );
 tbmw->determine_cutplane(1);
 tbmw->redraw();}
             xywh {10 10 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Datified
             callback {drawIntercept( 1, true );
 tbmw->determine_cutplane(1);
@@ -208,37 +212,37 @@ normcb(2);}
         Fl_Value_Slider intercept2 {
           label Intercept
           callback {normcb(2);}
-          tooltip {control intercept of plane with axes} xywh {525 30 25 190} selection_color 148 minimum -1 step 0.01
+          tooltip {control intercept of plane with axes} xywh {525 30 25 190} selection_color 148 minimum -1
         }
         Fl_Choice dispas2 {
           xywh {395 30 110 20} down_box BORDER_BOX
         } {
-          MenuItem {} {
+          menuitem {} {
             label Off
             callback {drawIntercept( 2, false );
 tbmw->redraw();}
             xywh {20 20 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label On
             callback {drawIntercept( 2, false );
 tbmw->redraw();}
             xywh {20 20 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Whole Plane}
             callback {drawIntercept( 2, false );
 tbmw->redraw();}
             xywh {20 20 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Intersection
             callback {drawIntercept( 2, true );
 tbmw->determine_cutplane(2);
 tbmw->redraw();}
             xywh {20 20 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Datified
             callback {drawIntercept( 2, true );
 tbmw->determine_cutplane(2);
@@ -248,7 +252,7 @@ tbmw->redraw();}
         }
       }
       Fl_Group Clip3 {
-        label {Clipping Plane 4} open
+        label {Clipping Plane 4}
         xywh {5 250 185 220} box UP_BOX align 2
       } {
         Fl_Group {} {
@@ -285,37 +289,37 @@ normcb(3);}
         Fl_Value_Slider intercept3 {
           label Intercept
           callback {normcb(3);}
-          tooltip {control intercept of plane with axes} xywh {145 255 25 195} selection_color 10 minimum -1 step 0.01
+          tooltip {control intercept of plane with axes} xywh {145 255 25 195} selection_color 10 minimum -1
         }
         Fl_Choice dispas3 {
           xywh {20 260 110 20} down_box BORDER_BOX
         } {
-          MenuItem {} {
+          menuitem {} {
             label Off
             callback {drawIntercept( 3, false );
 tbmw->redraw();}
             xywh {30 30 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label On
             callback {drawIntercept( 3, false );
 tbmw->redraw();}
             xywh {30 30 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Whole Plane}
             callback {drawIntercept( 3, false );
 tbmw->redraw();}
             xywh {30 30 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Intersection
             callback {drawIntercept( 3, true );
 tbmw->determine_cutplane(3);
 tbmw->redraw();}
             xywh {30 30 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Datified
             callback {drawIntercept( 3, true );
 tbmw->determine_cutplane(3);
@@ -362,37 +366,37 @@ normcb(4);}
         Fl_Value_Slider intercept4 {
           label Intercept
           callback {normcb(4);}
-          tooltip {control intercept of plane with axes} xywh {335 255 25 195} selection_color 178 minimum -1 step 0.01
+          tooltip {control intercept of plane with axes} xywh {335 255 25 195} selection_color 178 minimum -1
         }
         Fl_Choice dispas4 {
           xywh {210 260 110 20} down_box BORDER_BOX
         } {
-          MenuItem {} {
+          menuitem {} {
             label Off
             callback {drawIntercept( 4, false );
 tbmw->redraw();}
             xywh {40 40 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label On
             callback {drawIntercept( 4, false );
 tbmw->redraw();}
             xywh {40 40 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Whole Plane}
             callback {drawIntercept( 4, false );
 tbmw->redraw();}
             xywh {40 40 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Intersection
             callback {drawIntercept( 4, true );
 tbmw->determine_cutplane(4);
 tbmw->redraw();}
             xywh {40 40 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Datified
             callback {drawIntercept( 4, true );
 tbmw->determine_cutplane(4);
@@ -439,37 +443,37 @@ normcb(5);}
         Fl_Value_Slider intercept5 {
           label Intercept
           callback {normcb(5);}
-          tooltip {control intercept of plane with axes} xywh {525 260 25 190} selection_color 148 minimum -1 step 0.01
+          tooltip {control intercept of plane with axes} xywh {525 260 25 190} selection_color 148 minimum -1
         }
         Fl_Choice dispas5 {
           xywh {400 260 110 20} down_box BORDER_BOX
         } {
-          MenuItem {} {
+          menuitem {} {
             label Off
             callback {drawIntercept( 5, false );
 tbmw->redraw();}
             xywh {50 50 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label On
             callback {drawIntercept( 5, false );
 tbmw->redraw();}
             xywh {50 50 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label {Whole Plane}
             callback {drawIntercept( 5, false );
 tbmw->redraw();}
             xywh {50 50 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Intersection
             callback {drawIntercept( 5, true );
 tbmw->determine_cutplane(5);
 tbmw->redraw();}
             xywh {50 50 30 20}
           }
-          MenuItem {} {
+          menuitem {} {
             label Datified
             callback {drawIntercept( 5, true );
 tbmw->determine_cutplane(5);
@@ -491,8 +495,7 @@ x[3][0] = -1;
 x[4][1] = -1;
 x[5][2] = -1;
 
-for( int i=0; i<6; i++ ) intercept[i] = 0;} {selected
-    }
+for( int i=0; i<6; i++ ) intercept[i] = 0;} {}
   }
   decl {GLdouble x[6][4];} {}
   decl {bool intercept[6];} {}
@@ -650,4 +653,37 @@ else if( cp==4 )
 else if( cp==5 )
   return dispas5->value()==4;} {}
   }
+  Function {save(ostream& ofs)} {open
+  } {
+    code {ofs << SAVE_CP(0) << endl;
+ofs << SAVE_CP(1) << endl;
+ofs << SAVE_CP(2) << endl;
+ofs << SAVE_CP(3) << endl;
+ofs << SAVE_CP(4) << endl;
+ofs << SAVE_CP(5) << endl;
+for( int i=0; i<6; i++ ) {
+  for( int j=0; j<4; j++ )
+    ofs << x[i][j] << " ";
+  ofs << intercept[i] << endl;
+}} {}
+  }
+  Function {read(istream& ifs)} {open
+  } {
+    code {READ_CP(0,ifs);
+READ_CP(1,ifs);
+READ_CP(2,ifs);
+READ_CP(3,ifs);
+READ_CP(4,ifs);
+READ_CP(5,ifs);
+for( int i=0; i<6; i++ ){
+  for( int j=0; j<4; j++ )
+    ifs >> x[i][j];
+  ifs >> intercept[i];
+}} {selected
+    }
+  }
 } 
+
+decl {\#include <iostream>} {} 
+
+decl {using namespace std;} {} 

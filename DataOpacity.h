@@ -3,6 +3,7 @@
 #ifndef DataOpacity_h
 #define DataOpacity_h
 #include <FL/Fl.H>
+#define NUM_OBJ 7
 class TBmeshWin;
 
 class dataOpac {
@@ -22,7 +23,6 @@ public:
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Value_Input.H>
 #include <FL/Fl_Choice.H>
-#include "DrawingObjects.h"
 
 class DataOpacity {
 public:
@@ -60,7 +60,11 @@ private:
   static Fl_Menu_Item menu_objtype[];
   TBmeshWin *mwtb;
 public:
-  dataOpac dop[7];
+  dataOpac dop[NUM_OBJ];
   Object_t get_ot( int a );
+  void save(ofstream& ofs);
+  void read(ifstream &ifs);
 };
+ostream& operator<<(ostream&ofs,dataOpac&dop);
+istream& operator>>(istream&ifs,dataOpac&dop);
 #endif

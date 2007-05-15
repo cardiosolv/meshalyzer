@@ -4,13 +4,19 @@ header_name {.h}
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {} 
 
+decl {\#include<iostream>} {} 
+
+decl {using namespace std;} {} 
+
+decl {\#define NUM_OBJ 7} {public
+} 
+
 decl {class TBmeshWin;} {public
 } 
 
 class dataOpac {open
 } {
-  Function {dataOpac()} {open
-  } {
+  Function {dataOpac()} {} {
     code {_on = false;
 omin = 0;
 omax = 1.;
@@ -30,7 +36,7 @@ ofactor = 0;} {}
   }
   decl {bool _on;} {public
   }
-  Function {alpha( float data )} {open return_type float
+  Function {alpha( float data )} {return_type float
   } {
     code {if( data <= dmin )
 	return omin;
@@ -38,7 +44,7 @@ if( data >= dmax )
 	return omax;
 return omin+(data-dmin*ofactor);} {}
   }
-  Function {on()} {open return_type bool
+  Function {on()} {return_type bool
   } {
     code {return _on;} {}
   }
@@ -49,8 +55,8 @@ class DataOpacity {open
   Function {DataOpacity( TBmeshWin *tbmw )} {open
   } {
     Fl_Window window {
-      label {Data Opacity Controls} open selected
-      xywh {662 65 380 150} type Double visible
+      label {Data Opacity Controls} open
+      xywh {854 73 380 150} type Double visible
     } {
       Fl_Value_Slider minopacval {
         label {Minimum Opacity}
@@ -122,7 +128,7 @@ maxdatval->value(dop[a].dmax);onbut->value(dop[a]._on);}
     code {mwtb = tbmw;} {}
   }
   decl {TBmeshWin *mwtb;} {}
-  decl {dataOpac dop[7];} {public
+  decl {dataOpac dop[NUM_OBJ];} {public
   }
   Function {get_ot( int a )} {return_type Object_t
   } {
@@ -135,4 +141,33 @@ return SurfEle;
 else if( a==3 )
 return Cable;} {}
   }
+  Function {save(ofstream& ofs)} {open
+  } {
+    code {for( int i=0; i<NUM_OBJ; i++ ) {
+  ofs << dop[i];
+}} {}
+  }
+  Function {read(ifstream &ifs)} {open
+  } {
+    code {for( int i=0; i<NUM_OBJ; i++ )
+  ifs >> dop[i];
+
+minopacval->value(dop[Vertex].omin);
+maxopacval->value(dop[Vertex].omax);
+mindatval->value(dop[Vertex].dmin);
+maxdatval->value(dop[Vertex].dmax);
+onbut->value(dop[Vertex]._on);} {}
+  }
+} 
+
+Function {operator<<(ostream&ofs,dataOpac&dop)} {open return_type {ostream&}
+} {
+  code {ofs<<dop.ofactor<<" "<<dop.dmin<<" "<<dop.dmax<<" "<<dop.omin<<" "<<dop.omax<<" "<<dop._on<<endl;
+return ofs;} {}
+} 
+
+Function {operator>>(istream&ifs,dataOpac&dop)} {open selected return_type {istream&}
+} {
+  code {ifs>>dop.ofactor>>dop.dmin>>dop.dmax>>dop.omin>>dop.omax>>dop._on;
+return ifs;} {}
 } 

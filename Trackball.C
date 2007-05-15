@@ -158,26 +158,37 @@ void Trackball::save( const char *fn )
   string xfn( fn );
   if( xfn.rfind( ".xfrm" ) == string::npos ) xfn += ".xfrm";
   ofstream xfrmfile( xfn.c_str() );
+  save( xfrmfile );
+  xfrmfile.close();
+}
+
+// save the transform into a file
+void Trackball::save( ofstream& xfrmfile )
+{
   xfrmfile << scale << endl;
   xfrmfile << v3f_trans.X() <<" "<<v3f_trans.Y() <<" " <<v3f_trans.Z()<< endl;
   xfrmfile << p3f_origin.X()<<" "<<p3f_origin.Y()<<" "<<p3f_origin.Z()<< endl;
   xfrmfile << qSpin << endl;
   xfrmfile << qRot << endl;
-  xfrmfile.close();
 }
-
 
 // read the tranform from a file
 void Trackball::read( const char *fn )
 {
   ifstream xfrmfile( fn );
   if( !xfrmfile ) return;
+  read( xfrmfile );
+  xfrmfile.close();
+}
+
+// read the tranform from a file
+void Trackball::read( ifstream& xfrmfile )
+{
   xfrmfile >> scale;
   xfrmfile >> v3f_trans;
   xfrmfile >> p3f_origin;
   xfrmfile >> qSpin.w >> qSpin.x >> qSpin.y >> qSpin.z;
   xfrmfile >> qRot.w >> qRot.x >> qRot.y >> qRot.z;
-  xfrmfile.close();
 }
 
 // end of Trackball.C

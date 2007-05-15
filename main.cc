@@ -81,6 +81,8 @@ main( int argc, char *argv[] )
 		win.trackballwin->get_data(argv[i]);
 	  else if( strstr( argv[i], ".xfrm" ) != NULL )
 		win.trackballwin->trackball.read( argv[i] );
+	  else if( strstr( argv[i], ".mshz" ) != NULL )
+		control.restore_state( argv[i] );
 	  else if( strstr( argv[i], ".vpts" ) != NULL )
 		vectordata = !win.trackballwin->getVecData(control.tmslider, argv[i]);
 	  else

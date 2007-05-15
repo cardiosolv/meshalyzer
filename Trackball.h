@@ -74,6 +74,8 @@ public:
   float DepthOnSphere(float x, float y);
   void  save( const char * );
   void  read( const char * );
+  void  save( ofstream& );
+  void  read( ifstream& );
 
 }; // Trackball
 

@@ -258,7 +258,10 @@ ThreadedData<T>::~ThreadedData()
 }
 
 
-//! static function to find the extrema for each time
+/** static function to find the extrema over all times
+ *
+ * \param _sthread slave thread finding extrema
+ */
 template<class T>
 void* ThreadedData<T>::minimax( void* _sthread )
 {
@@ -316,6 +319,17 @@ template<class T>
 T ThreadedData<T>::max() 
 {
   // When v_bit_abs, send back abs max
+/* 
+  if( maxmin_ptr->v_bit_abs )
+    return maxmin_ptr->abs_max;
+  else  {// return first min
+	do {
+	for( int i=0; i<=last_tm; i++ )
+	  if( maxmin_ptr->lv_bit[i] )
+		return maxmin_ptr->lmax[i];
+	} while( 1 );
+  }
+*/
   while( !maxmin->v_bit_abs ) {nanosleep( &sleepwait, NULL);}
   return maxmin->abs_max;
 }
@@ -341,17 +355,30 @@ T ThreadedData<T>::min( int tm )
 template<class T>
 T ThreadedData<T>::min() 
 {
+/*
+  if( maxmin_ptr->v_bit_abs )
+    return maxmin_ptr->abs_min;
+  else  {// return first min
+	do {
+	for( int i=0; i<=last_tm; i++ )
+	  if( maxmin_ptr->lv_bit[i] )
+		return maxmin_ptr->lmin[i];
+	} while( 1 );
+  }
+*/
   while( !maxmin->v_bit_abs ) { nanosleep(&sleepwait,NULL); }
   return maxmin->abs_min;
 }
 
 
-
-/** read in a time slice
+/** get the data for a particular time
  *
- *  \param tm slice to read
+ *  This routine also reads slices ahead and behind into 
+ *  buffers to anticipate the next slice requested
+ *  
+ *  \param tm time
  *
- *  \return pointer to buffer with data
+ *  \return a pointer to an array with the data
  */
 template<class T>
 T* ThreadedData<T>::slice( int tm )
@@ -423,7 +450,7 @@ T* ThreadedData<T>::slice( int tm )
 }
 
 
-// Slave thread used to obtain time slice
+//! Slave thread used to obtain time slice
 template<class T>
 void* ThreadedData<T>::ThreadCaller( void* _sthread ) 
 {
