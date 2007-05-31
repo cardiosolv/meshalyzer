@@ -419,9 +419,13 @@ T* ThreadedData<T>::slice( int tm )
   }
 
   // fill in the look ahead locations
-  for( int j=-READ_BEHIND; j<=READ_AHEAD; j++ ){
+  for( int j=READ_AHEAD; j>=-READ_BEHIND; j-- ){
 
-	int read_time = tm + j*incrementation;
+	int read_time;
+	if( j<0 )
+	  read_time = tm + j*incrementation;
+    else
+	  read_time = tm + ((READ_AHEAD)-j+1)*incrementation;
 
 	if( !j || read_time<0 || read_time>maxtm ) continue;
 
@@ -473,7 +477,7 @@ void* ThreadedData<T>::ThreadCaller( void* _sthread )
 template<class T>
 void ThreadedData<T>::time_series( int offset, T* buffer ) 
 {
-  while ( !maxmin->read ) {}
+  while ( !maxmin->read ) {nanosleep( &sleepwait, NULL);}
   stmsr->unlock = offset;
   stmsr->data = buffer;
   sem_post( &stmsr->start );

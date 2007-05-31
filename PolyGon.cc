@@ -10,7 +10,7 @@
  *  \param stride   draw every n'th point
  *  \param dataopac data opacity 
  */
-void Polygon::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
+void PolyGon::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 					 DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
   draw( p0, p1, colour, cs, data, stride, dataopac, NULL );
@@ -28,7 +28,7 @@ void Polygon::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
  *  \param dataopac data opacity 
  *  \param ptnrml   vertex normals (NULL for none)
  */
-void Polygon::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
+void PolyGon::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 					 DATA_TYPE* data, int stride, dataOpac* dataopac,
 					 const GLfloat* ptnrml )
 {
@@ -76,7 +76,7 @@ void Polygon::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
  *  \param colour colour to use
  *  \param size   size of element
  */
-void Polygon :: draw( int e, GLfloat *colour, float size )
+void PolyGon :: draw( int e, GLfloat *colour, float size )
 {
   if( e<_n ) {
 
@@ -104,7 +104,7 @@ void Polygon :: draw( int e, GLfloat *colour, float size )
  * \param e0 first element
  * \param e1 last element
  */
-void Polygon::compute_normals(int e0, int e1)
+void PolyGon::compute_normals(int e0, int e1)
 {
   int e, n;
 

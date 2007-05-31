@@ -115,9 +115,9 @@ class SurfaceElement : public MultiPoint {
 		GLfloat* _ptnrml;
 };
 
-class Polygon : public SurfaceElement {
+class PolyGon : public SurfaceElement {
 	public:
-		Polygon( Point *p, int n ):SurfaceElement(p,n) {}
+		PolyGon( Point *p, int n ):SurfaceElement(p,n) {}
 		virtual void compute_normals( int a, int b );
 		virtual void     draw( int, GLfloat*, float size=1 );
 		virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,

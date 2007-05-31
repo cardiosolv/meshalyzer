@@ -4,6 +4,8 @@
  */
 #include "DrawingObjects.h"
 
+#define USE_QUADRIC_OBJS
+
 /** draw many Points
  *  
  *  \param p0       first connection of region
@@ -16,6 +18,7 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 					 DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
   if( p0>=_n || p1>=_n ) return;
+
   glBegin(GL_LINES);
   for( int i=p0; i<=p1; i+=stride ) {
 	if( !_pt->vis(_node[i*2]) || !_pt->vis(_node[i*2+1]) )

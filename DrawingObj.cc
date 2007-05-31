@@ -283,7 +283,7 @@ VolElement::planecut( char *pd, GLfloat* cp,
   if( num_int==3 )
     se = new Triangle( pt );
   else
-    se = new Polygon( pt, num_int );
+    se = new PolyGon( pt, num_int );
   int nl[num_int];
   for( int i=0; i<num_int; i++ ) nl[i]=i;
   se->add( nl );
