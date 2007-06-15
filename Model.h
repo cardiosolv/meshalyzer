@@ -51,6 +51,7 @@ class Model {
 		 const GLfloat* pt_offset() const {return pt.offset();}
 		       bool  base1() const {return _base1; }
 	     const GLfloat* vertex_normals(int);
+		       int   maxtm(){ return _numtm-1 ; }
 
 		Point          pt;
 		Connection*    _cnnx;
@@ -76,6 +77,7 @@ class Model {
         void       determine_regions();
         bool       read_elem_file(const char *);
 		vector<bool> allvis;
+		int        _numtm;     
 };
 
 #endif

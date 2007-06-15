@@ -157,14 +157,14 @@ void FileSeqCGreader<T>::local_maxmin()
 {
   map<int,string>::iterator CGp;
 
-  maxmin_ptr->sl_ptr  = new long int *[mthread->maxtm+1];
+  maxmin_ptr->sl_ptr  = new z_off_t *[mthread->maxtm+1];
   maxmin_ptr->num_slc = mthread->maxtm+1;
   
   int t=0;
   for( CGp=files.begin(); CGp!=files.end(); CGp++, t++ ) {
     T   temp;
 
-    maxmin_ptr->sl_ptr[t] = new long int[BLOCK_SLSZ];
+    maxmin_ptr->sl_ptr[t] = new z_off_t[BLOCK_SLSZ];
 	
 	gzFile in = gzopen( CGp->second.c_str(), "r" );
 	if( gzgets(in, buff, bufsize) == Z_NULL ) break; //throw away first line

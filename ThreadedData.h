@@ -33,7 +33,7 @@ class Maxmin{
 		   			v_bit_local(false), v_bit_abs(false), num_slc(0){}
   ~Maxmin();
   bool        read;			//!< offsets calculated
-  long int**  sl_ptr;       //!< Slice pointer (byte offset)
+  z_off_t**   sl_ptr;       //!< Slice pointer (byte offset)
   int         num_slc;		//!< number of time slices
   T*          lmax;         //!< Local maxima
   T*          lmin;         //!< Local minima

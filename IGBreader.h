@@ -64,7 +64,12 @@ IGBreader<T>::~IGBreader() {
 template<class T>
 void IGBreader<T>::reader() {
 
-  gzseek( in, 1024+sthread->rdtm*slsz, SEEK_SET );
+  // make sure all intermediate results are not truncated
+  z_off_t seekbyte = sthread->rdtm;
+  seekbyte *= slsz;
+  seekbyte += 1024;
+
+  gzseek( in, seekbyte, SEEK_SET );
   read_IGB_data(data, 1, head, buf); 
 
   sthread->data = data;

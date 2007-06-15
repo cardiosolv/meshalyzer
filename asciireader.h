@@ -120,13 +120,13 @@ void asciireader<T>::tmsr()
 template<class T>
 void asciireader<T>::local_maxmin() {
 
-  maxmin_ptr->sl_ptr  = new long int *[mthread->maxtm+1]; 
+  maxmin_ptr->sl_ptr  = new z_off_t *[mthread->maxtm+1]; 
   maxmin_ptr->num_slc = mthread->maxtm+1;
 
   for( int t=0; t<=mthread->maxtm; t++ ) {
     T   temp;
 
-    maxmin_ptr->sl_ptr[t]    = new long int[BLOCK_SLSZ];
+    maxmin_ptr->sl_ptr[t]    = new z_off_t[BLOCK_SLSZ];
 	maxmin_ptr->sl_ptr[t][0] = gztell( in );
 	
 	if( gzgets(in, buff, bufsize) == Z_NULL ) break;

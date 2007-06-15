@@ -744,6 +744,7 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
 	return;
   if( tm>=numframes )
 	tm = 0;
+  data = dataBuffer->slice(tm);
 
   timevec = (DATA_TYPE *)realloc( timevec, numframes*sizeof(DATA_TYPE) );
 
