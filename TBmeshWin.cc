@@ -239,7 +239,7 @@ void TBmeshWin :: draw()
 		model->pt.setVis(model->region(r)->membership());
 
 	    for( int i=0; i<model->numVol(); i++ )
-	      model->_vol[i]->draw( 0, model->_vol[i]->num(), 
+	      model->_vol[i]->draw( 0, model->_vol[i]->num()-1, 
 				  model->region(r)->get_color(Tetrahedron), 
 				  				cs, datcolor?data:NULL ); 
 	  }
@@ -429,7 +429,7 @@ void TBmeshWin::draw_cables(Region* sf)
 	if( dataopac->dop[Cable].on() ) translucency(false);
 	glPopAttrib();
   } else 
-	model->_cable->register_vertices(0,model->_cnnx->num(),ptDrawn);
+	model->_cable->register_vertices(0,model->_cable->num(),ptDrawn);
 }
 
 

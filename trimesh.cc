@@ -2885,6 +2885,7 @@ for( int i=0; i<mwtb->model->_numReg; i++ ) {
   mshzf << " " << mwtb->model->region(i)->show(Cnnx) << " " 
         << mwtb->model->region(i)->visible() << endl; 
 }
+mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;
 }
 
 void Controls::save_colour( ofstream&ofs, GLfloat *col ) {
@@ -3036,6 +3037,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( tmslider, var, int(val) ) 
   TEST_VAR( frameskip, var, int(val) ) 
   TEST_VAR( animdelay, var, int(val) ) 
+  if( !strcmp( "BGD_COLOUR", var )) { mwtb->bgd(val); continue; }
+
   cerr << "Unknown variable specified: " << var << endl;
 }
 mwtb->lights(illBut->value());

@@ -65,13 +65,16 @@ main( int argc, char *argv[] )
 	win.trackballwin->controlwin( &control );
 	control.outputwin(win.trackballwin);
 	bool vectordata=false;
+	bool iconcontrols = false;
 	
 	string dir = argc>=2? dirname(argv[1]) : ".";
 	dir += "/";
 	
 	// deal with command line files specified
 	for( int i=2; i<argc; i++ ) {
-	  if( strstr( argv[i], ".tri" ) != NULL ){
+	  if( !strcmp( argv[i], "-iconifycontrols" ) )
+		iconcontrols = true;
+	  else if( strstr( argv[i], ".tri" ) != NULL ){
 		if( win.trackballwin->add_surface(argv[i])< 0 ) {
 		  string altdir = dir;
 		  altdir += argv[i];
@@ -107,6 +110,9 @@ main( int argc, char *argv[] )
 	control.set_tet_region( win.trackballwin->model );
 	control.window->show();
 	if( vectordata ) control.vectorgrp->activate();
+	if( iconcontrols )
+	    control.window->iconize();
+	win.winny->position(1,1);
 
 	return Fl::run();
 }

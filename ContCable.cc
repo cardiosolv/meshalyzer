@@ -104,10 +104,7 @@ void ContCable::register_vertices( int p0, int p1, vector<bool>& ptDrawn )
   for( int i=p0; i<=p1; i++ ) {
 	int p = i;
 	for( int j=_node[p]; j<_node[p+1]; j++ )
-	  if( _pt->vis( j ) )
-		continue;
-	for( int j=_node[p]; j<_node[p+1]; j++ )
-	  if( !ptDrawn[j] ) {
+	  if( _pt->vis(j) && !ptDrawn[j] ) {
 		ptDrawn[j] = true;
 		glLoadName( j );
 		glBegin(GL_POINTS);

@@ -54,6 +54,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window {
 		int add_surface( const char * );   	// add a surface
 		void get_data( const char *, Myslider* mslider=NULL );	// get data file
 		inline void bgd( float w ){bc[0]=bc[1]=bc[2]=w;valid(0);redraw();}
+		const GLfloat* bgd(){return bc;}
 		void optimize_cs( void );		// calibrate colour scale
 		void randomize_color( Object_t );	// randomize surface colours
 		inline float get_maxdim(void){ return model->maxdim(); }
