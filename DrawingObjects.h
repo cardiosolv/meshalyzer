@@ -1,11 +1,7 @@
 #ifndef DRAWINGOBJECT_H
 #define DRAWINGOBJECT_H
 
-typedef enum objects{ 
-	Vertex, Cable, Cnnx, SurfEle, Surface, Tetrahedron, RegionDef, Nothing, All } Object_t;
-
-static const int maxobject=6;
-
+#include "objects.h"
 #include <vector>
 #include "drawgl.h"
 #include "Colourscale.h"

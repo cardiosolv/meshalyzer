@@ -4,7 +4,7 @@ HOSTMACHINE := $(shell uname)
 FLTK_INC      := $(shell fltk-config --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-gl --ldflags)
 COMMON_LIBS    = -lpng -lpthread -lm -lz
-COMMON_INC     = -I. -g -DOBJ_CLASS 
+COMMON_INC     = -I. -O3 -DOBJ_CLASS 
 
 ifeq ($(HOSTMACHINE),Linux)
 LIBS   = $(FLTK_LD_FLAGS) $(COMMON_LIBS)

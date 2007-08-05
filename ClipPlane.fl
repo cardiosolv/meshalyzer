@@ -10,7 +10,9 @@ decl {\#include <math.h>} {public
 
 decl {\#define SAVE_CP(A) xdir\#\#A->value()<<" "<<ydir\#\#A->value()<<" "<<zdir\#\#A->value()<<" "<<intercept\#\#A->value()<<" "<<dispas\#\#A->value()} {} 
 
-decl {\#define READ_CP(A,S) {double val; S>>val; xdir\#\#A->value(val); S>>val; ydir\#\#A->value(val); S>>val; zdir\#\#A->value(val);S>>val; intercept\#\#A->value(val); S>>val; dispas\#\#A->value(int(val));if(val==3||val==4)tbmw->determine_cutplane(A);}} {} 
+decl {\#define READ_CP(A,S) {double val; S>>val; xdir\#\#A->value(val); S>>val; ydir\#\#A->value(val); S>>val; zdir\#\#A->value(val);S>>val; intercept\#\#A->value(val); S>>val; dispas\#\#A->value(int(val));}}{}
+
+decl {\#define CHECK_CP(A) {int val=dispas\#\#A->value();if(val==3||val==4)tbmw->determine_cutplane(A);}} {} 
 
 class ClipPlane {open
 } {
@@ -679,7 +681,13 @@ for( int i=0; i<6; i++ ){
   for( int j=0; j<4; j++ )
     ifs >> x[i][j];
   ifs >> intercept[i];
-}} {selected
+}
+CHECK_CP(0);
+CHECK_CP(1);
+CHECK_CP(2);
+CHECK_CP(3);
+CHECK_CP(4);
+CHECK_CP(5);} {selected
     }
   }
 } 
