@@ -84,7 +84,7 @@ template<class T>
 class Slave {
   public:
   Slave(Master<T>*m=NULL, int datasize=0);
-  ~Slave(){ delete datareader; delete[] data; }
+  ~Slave(){ pthread_cancel( threadID ); delete datareader; delete[] data; }
   Master<T>*       mthread;        // Pointer to master
   int              rdtm;           // Read time
   T*               data;           // thread data buffer

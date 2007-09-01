@@ -839,17 +839,17 @@ mwtb->redraw();}
           Fl_Value_Slider lightx {
             label {X direction}
             callback {mwtb->redraw();}
-            tooltip {X component of light direction} xywh {15 330 120 20} type Horizontal selection_color 71 labelsize 12 minimum -1 step 0.01
+            tooltip {X component of light direction} xywh {15 330 120 20} type Horizontal selection_color 71 labelsize 12 minimum -1
           }
           Fl_Value_Slider lighty {
             label {Y direction}
             callback {mwtb->redraw();}
-            tooltip {Y component of light direction} xywh {15 370 120 20} type Horizontal selection_color 190 labelsize 12 minimum -1 step 0.01
+            tooltip {Y component of light direction} xywh {15 370 120 20} type Horizontal selection_color 190 labelsize 12 minimum -1
           }
           Fl_Value_Slider lightz {
             label {Z directtion}
             callback {mwtb->redraw();}
-            tooltip {z component of light direction} xywh {15 410 120 20} type Horizontal selection_color 244 labelsize 12 minimum -1 step 0.01 value 1
+            tooltip {z component of light direction} xywh {15 410 120 20} type Horizontal selection_color 244 labelsize 12 minimum -1 value 1
           }
           Fl_Button {} {
             label reset
@@ -890,7 +890,7 @@ mwtb->redraw();}
           Fl_Value_Slider ambientslide {
             label Ambient
             callback {mwtb->redraw();}
-            tooltip {ambient lighting component level} xywh {150 330 25 95} selection_color 3 labelsize 12 step 0.01 value 0.2
+            tooltip {ambient lighting component level} xywh {150 330 25 95} selection_color 3 labelsize 12 value 0.2
           }
           Fl_Light_Button facetshadBut {
             label {facet shading}
@@ -905,17 +905,17 @@ mwtb->redraw();}
           Fl_Value_Slider specularslide {
             label Specular
             callback {mwtb->redraw();}
-            tooltip {specular lighting component level} xywh {200 330 25 95} selection_color 6 labelsize 12 step 0.01 value 0.65
+            tooltip {specular lighting component level} xywh {200 330 25 95} selection_color 6 labelsize 12 value 0.65
           }
           Fl_Value_Slider diffuseslide {
             label Diffuse
             callback {mwtb->redraw();}
-            tooltip {specular lighting component level} xywh {245 330 25 95} selection_color 6 labelsize 12 step 0.01 value 0.65
+            tooltip {specular lighting component level} xywh {245 330 25 95} selection_color 6 labelsize 12 value 0.65
           }
           Fl_Value_Slider backintensityslide {
             label Backside
             callback {mwtb->redraw();}
-            tooltip {intensity of back side of surface} xywh {300 330 25 95} selection_color 6 labelsize 12 step 0.01 value 0.5
+            tooltip {intensity of back side of surface} xywh {300 330 25 95} selection_color 6 labelsize 12 value 0.5
           }
         }
         Fl_Group {} {
@@ -1074,12 +1074,14 @@ for( int i=0; i<reglist->size(); i++ )
    break;
    }} {}
   }
-  Function {update_surfGUI( int s )} {return_type void
+  Function {update_surfGUI( int s )} {open return_type void
   } {
-    code {if( s==-1) s=0;
+    code {if( !mwtb->model->numSurf ) return;
+if( s==-1) s=0;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
 surfoutlinebut->value( mwtb->model->surface(s)->outline() );
-surffillbut->value( mwtb->model->surface(s)->filled() );} {}
+surffillbut->value( mwtb->model->surface(s)->filled() );} {selected
+    }
   }
   Function {update_regionGUI( int r )} {open return_type void
   } {
@@ -1146,8 +1148,7 @@ for( int i=1; i<=reglist->size(); i++ )
   sel[i-1] = reglist->selected(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1235,8 +1236,7 @@ for( int i=0; i<mwtb->model->_numReg; i++ ) {
   mshzf << " " << mwtb->model->region(i)->show(Cnnx) << " " 
         << mwtb->model->region(i)->visible() << endl; 
 }
-mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;} {selected
-    }
+mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;} {}
   }
   Function {save_colour( ofstream&ofs, GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
@@ -1265,8 +1265,7 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
+  Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );

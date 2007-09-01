@@ -2469,7 +2469,6 @@ Controls::Controls() {
           o->selection_color((Fl_Color)71);
           o->labelsize(12);
           o->minimum(-1);
-          o->step(0.01);
           o->callback((Fl_Callback*)cb_lightx);
         }
         { Fl_Value_Slider* o = lighty = new Fl_Value_Slider(15, 370, 120, 20, "Y direction");
@@ -2478,7 +2477,6 @@ Controls::Controls() {
           o->selection_color((Fl_Color)190);
           o->labelsize(12);
           o->minimum(-1);
-          o->step(0.01);
           o->callback((Fl_Callback*)cb_lighty);
         }
         { Fl_Value_Slider* o = lightz = new Fl_Value_Slider(15, 410, 120, 20, "Z directtion");
@@ -2487,7 +2485,6 @@ Controls::Controls() {
           o->selection_color((Fl_Color)244);
           o->labelsize(12);
           o->minimum(-1);
-          o->step(0.01);
           o->value(1);
           o->callback((Fl_Callback*)cb_lightz);
         }
@@ -2525,7 +2522,6 @@ Controls::Controls() {
           o->tooltip("ambient lighting component level");
           o->selection_color((Fl_Color)3);
           o->labelsize(12);
-          o->step(0.01);
           o->value(0.2);
           o->callback((Fl_Callback*)cb_ambientslide);
         }
@@ -2545,7 +2541,6 @@ Controls::Controls() {
           o->tooltip("specular lighting component level");
           o->selection_color((Fl_Color)6);
           o->labelsize(12);
-          o->step(0.01);
           o->value(0.65);
           o->callback((Fl_Callback*)cb_specularslide);
         }
@@ -2553,7 +2548,6 @@ Controls::Controls() {
           o->tooltip("specular lighting component level");
           o->selection_color((Fl_Color)6);
           o->labelsize(12);
-          o->step(0.01);
           o->value(0.65);
           o->callback((Fl_Callback*)cb_diffuseslide);
         }
@@ -2561,7 +2555,6 @@ Controls::Controls() {
           o->tooltip("intensity of back side of surface");
           o->selection_color((Fl_Color)6);
           o->labelsize(12);
-          o->step(0.01);
           o->value(0.5);
           o->callback((Fl_Callback*)cb_backintensityslide);
         }
@@ -2724,7 +2717,8 @@ for( int i=0; i<reglist->size(); i++ )
 }
 
 void Controls::update_surfGUI( int s ) {
-  if( s==-1) s=0;
+  if( !mwtb->model->numSurf ) return;
+if( s==-1) s=0;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
 surfoutlinebut->value( mwtb->model->surface(s)->outline() );
 surffillbut->value( mwtb->model->surface(s)->filled() );

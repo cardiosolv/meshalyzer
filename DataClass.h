@@ -31,6 +31,7 @@ class DataClass {
 			    string file(){return filename;}       //!< return the file
 		
 		DataClass():data(NULL),maxtm(0),last_tm(-1),slice_size(0){}
+		virtual ~DataClass(){}
 
 	protected:
 		T*     data;       //!< data 

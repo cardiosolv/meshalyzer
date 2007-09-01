@@ -56,7 +56,6 @@ IGBreader<T>::~IGBreader() {
   gzclose( in );
   delete head;
   delete [] buf;
-  delete [] data;
 }
 
 
