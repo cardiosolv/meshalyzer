@@ -168,7 +168,9 @@ void Model::determine_regions()
 
 /** add a surface by reading in a .tri file, also try reading a normal file
  *
- * \param fn       file containing tri's
+ * \param fn   file containing tri's
+ *
+ * \return     the \#surfaces, -1 if not successful
  */
 int Model::add_surface( const char *fn )
 {

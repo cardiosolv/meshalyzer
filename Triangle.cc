@@ -169,15 +169,17 @@ bool Triangle :: add( const char* fn )
   gzclose(in);
 
   // remove tri or tris suffix
-  if( nfn.substr( nfn.size()-4, 4 ) == ".tri" )
-	nfn.erase( nfn.size()-3, 3 ); 
-  if( nfn.substr( nfn.size()-5, 5 ) == ".tris" )
-	nfn.erase( nfn.size()-4, 4 ); 
+  if( nfn.substr( nfn.size()-4 ) == ".tri" )
+	nfn.erase( nfn.size()-3 ); 
+  else if( nfn.substr( nfn.size()-5 ) == ".tris" )
+	nfn.erase( nfn.size()-4 ); 
 
   try {
 	read_normals( nold, _n-1, nfn.c_str() );
   } 
-  catch(...) { compute_normals( nold, _n-1 ); }
+  catch(...) { 
+	compute_normals( nold, _n-1 ); 
+  }
 
   return true;
 }
