@@ -140,6 +140,22 @@ class Triangle : public SurfaceElement {
 };
 
 
+class Quadrilateral : public SurfaceElement {
+	public:
+		Quadrilateral(Point *p):SurfaceElement(p,4) {}
+		virtual void     draw( int, GLfloat*, float size=1 );
+		virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
+		                       int stride=1, dataOpac* dopac=NULL );
+		virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
+		                       int stride, dataOpac* dopac, const GLfloat *);
+		virtual bool     read( const char * );  
+		virtual void     compute_normals( int, int );
+		        bool     add( const char * );	
+	protected:
+		        int         countTrisInFile( const char * );
+};
+
+
 //! Volume elements
 class VolElement : public MultiPoint {
 	public:

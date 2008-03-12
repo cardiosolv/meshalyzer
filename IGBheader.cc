@@ -238,7 +238,7 @@ int my_fputs( FILE *, char * );
 int  Header_Quiet = 0;
 char Header_Message[256];
 
-char    *Header_Type[] = {
+const char    *Header_Type[] = {
     "", "byte", "char", "short", "long", "float", "double", "complex",
     "double_complex", "rgba", "structure", "pointer", "list","int","uint"
     };
@@ -287,7 +287,7 @@ long	unsigned
 		IGB_LITTLE_ENDIAN
     };
 
-char	
+const char	
 *Header_Systeme[] = {
   "unix",
   "system_v",
@@ -419,7 +419,7 @@ int IGBheader::write()
 				v_type);
 		return (0);
 	}
-	char *type = Header_Type[v_type];
+	const char *type = Header_Type[v_type];
 
 	if (v_type==IGB_STRUCTURE && v_taille<1) {
 		if (!Header_Quiet) 
@@ -1364,7 +1364,7 @@ void IGBheader::comment(char *ligne)
 	bool_comment = true;
 }
 
-char *IGBheader::systemestr( void )
+const char *IGBheader::systemestr( void )
 {
   int i;
 

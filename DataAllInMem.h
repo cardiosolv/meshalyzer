@@ -135,7 +135,7 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
   filename = fn;
 
   // ugly but I don't know what else to do besides specialization which is ugly
-  char *scanstr;
+  const char *scanstr;
   if(      typeid(T) == typeid(double) ) scanstr = "%lf";
   else if( typeid(T) == typeid(float) )  scanstr = "%f";
   else if( typeid(T) == typeid(int) )    scanstr = "%d";

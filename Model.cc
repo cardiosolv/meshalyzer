@@ -711,7 +711,7 @@ bool Model :: read_elem_file( const char *fname )
   
   _vol = new VolElement*[_numVol];
 
-  for( int i=0; i< _numVol; i++ ) {
+  for( int i=0; i<_numVol; i++ ) {
     if( gzgets(in, buf, bufsize) == Z_NULL ) return false;
 	int n[9];
 	if( tets ) 
@@ -733,7 +733,12 @@ bool Model :: read_elem_file( const char *fname )
 	  _vol[i]->add( n, n[6] );
 	} else {
 	  fprintf( stderr, "Unsupported element type\n" );
-	  exit(1);
+	  delete[] _vol;
+	  _numVol = 0;
+	  _vol = NULL;
+      gzclose(in);
+	  return false;
 	}
   }
+  gzclose(in);
 }

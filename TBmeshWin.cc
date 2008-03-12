@@ -429,7 +429,7 @@ void TBmeshWin::draw_cables(Region* sf)
 	if( dataopac->dop[Cable].on() ) translucency(false);
 	glPopAttrib();
   } else 
-	model->_cable->register_vertices(0,model->_cable->num(),ptDrawn);
+	model->_cable->register_vertices(0,model->_cable->num()-1,ptDrawn);
 }
 
 
@@ -486,7 +486,7 @@ void TBmeshWin::draw_axes()
 	gluQuadricOrientation(quado, GLU_INSIDE);
 	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	
-	char *axis_label[] = { "X", "Y", "Z" };
+	const char *axis_label[] = { "X", "Y", "Z" };
 	
 	for( int i=0; i< 3; i++ ) {
 	  glPushMatrix();

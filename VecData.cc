@@ -86,7 +86,7 @@ VecData::VecData(const GLfloat *pt_offset, char* vptfile):_length(1),maxmag(0.),
   if( gzgets( in, buff, bufsize ) == Z_NULL ) return;
   float tscal[4];
   int npl = sscanf(buff,"%f %f %f %f", tscal, tscal+1, tscal+2, tscal+3 );
-  char *scanstr;
+  const char *scanstr;
   if( npl==4 ) 
 	scanstr="%f %f %f %f";
   else if( npl==3 ) 

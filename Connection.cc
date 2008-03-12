@@ -4,7 +4,37 @@
  */
 #include "DrawingObjects.h"
 
-#define USE_QUADRIC_OBJS
+#include "VecData.h"
+
+//#define USE_QUADRIC_OBJS
+
+#ifdef USE_QUADRIC_OBJS
+
+void draw_cylinder( const GLfloat *start, const GLfloat* end, int radius )
+{  
+  GLUquadric* quado = gluNewQuadric();
+  gluQuadricDrawStyle( quado, GLU_FILL );
+  gluQuadricOrientation(quado, GLU_INSIDE);
+
+  glPushAttrib( GL_POLYGON_BIT );
+  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+  GLfloat rotvect[3], zaxis[]={0,0,1};
+  glPushMatrix();
+  glTranslatef( start[0], start[1], start[2] );
+  GLfloat h[3];
+  sub( end, start, h );
+  float height = magnitude(h);
+  // determine angle between z-axis and data vector
+  float angle = -acos( dot( h, zaxis )/height )*180./M_PI;
+  // determine rotation axis
+  cross( h, zaxis, rotvect );
+  glRotatef( angle, rotvect[0], rotvect[1], rotvect[2] );
+  gluCylinder( quado, radius, radius, height, 10, 2 );
+  glPopMatrix();
+  gluDeleteQuadric(quado);
+  glPopAttrib( );
+}
+#endif
 
 /** draw many Points
  *  
@@ -19,21 +49,34 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 {
   if( p0>=_n || p1>=_n ) return;
 
+#ifndef USE_QUADRIC_OBJS
   glBegin(GL_LINES);
+#endif
   for( int i=p0; i<=p1; i+=stride ) {
 	if( !_pt->vis(_node[i*2]) || !_pt->vis(_node[i*2+1]) )
 	  continue;
 	if( data != NULL ) {
+#ifdef USE_QUADRIC_OBJS
+	  cs->colourize( data[_node[i*2]], colour[3] );
+	  draw_cylinder( _pt->pt(_node[i*2]), _pt->pt(_node[i*2+1]), 0.4 );
+#else
 	  cs->colourize( data[_node[i*2]], colour[3] );
 	  glVertex3fv(_pt->pt(_node[i*2]));
 	  cs->colourize( data[_node[i*2+1]], colour[3] );
 	  glVertex3fv(_pt->pt(_node[i*2+1]));
+#endif
 	} else {
+#ifdef USE_QUADRIC_OBJS
+	  draw_cylinder( _pt->pt(_node[i*2]), _pt->pt(_node[i*2+1]), 0.4 );
+#else
 	  glVertex3fv(_pt->pt(_node[i*2]));
 	  glVertex3fv(_pt->pt(_node[i*2+1]));
+#endif
 	}
   }
+#ifndef USE_QUADRIC_OBJS
   glEnd();
+#endif
 }
 
 
@@ -48,10 +91,14 @@ void Connection :: draw( int p, GLfloat *colour, float size )
   if( p<_n ) {
 	glColor3fv( colour );
 	glLineWidth(size);
+#ifdef USE_QUADRIC_OBJS
+	draw_cylinder( _pt->pt(_node[p*2]), _pt->pt(_node[p*2+1]), 0.4 );
+#else
 	glBegin( GL_LINES );
 	glVertex3fv( _pt->pt(_node[p*2]   ) );
 	glVertex3fv( _pt->pt(_node[p*2+1] ) );
 	glEnd();
+#endif
 	glLineWidth(1);
   }
 }

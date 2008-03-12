@@ -67,7 +67,7 @@ class Master{
   Master(const char *fn,int s):slsz(s),fname(fn),maxtm(0),maxmin(NULL){}
   FileType    ftype;      //!< What type of file is it?
   string      fname;      //!< Argument sent to the class
-  char*       scanstr;    //!< Scan string
+  const char* scanstr;    //!< Scan string
   int         slsz;       //!< \#points in a time slice (not bytes)
   int         maxtm;      //!< Max time (=\#slices-1)
   Maxmin<T>*  maxmin;     //!< Pointer to maxmin structure

@@ -195,9 +195,9 @@ typedef union rgba {
 
 #ifndef	HEADER_GLOBALS
 extern	int		 	Header_Quiet;
-extern	char		*Header_Type[IGB_MAX_TYPE+1];
+extern	const char *Header_Type[IGB_MAX_TYPE+1];
 extern	unsigned short		 Data_Size[IGB_MAX_TYPE+1];
-extern	char		*Header_Systeme[N_SYSTEMES];
+extern	const char	*Header_Systeme[N_SYSTEMES];
 extern  unsigned long	 Header_Systeme_No[N_SYSTEMES];
 extern	char		 Header_Message[256];
 #endif
@@ -304,7 +304,7 @@ public:
 	inline int trame(void){ return v_trame; }
 	inline int trame( bool &set ){ set=bool_trame; return v_trame; }
 	inline void trame( int a ){ v_trame = a; bool_trame = true;}
-	char* systemestr(void);
+	const char* systemestr(void);
 	inline int systeme( void ){ return v_systeme; }
 	inline unsigned int lut(void){ return v_lut; }
 	inline unsigned int lut( bool &set ){ set=bool_x; return v_x; }
