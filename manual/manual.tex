@@ -8,7 +8,7 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{amsthm}
-
+\usepackage{longtable}
 
 \usepackage{overcite}                                 % superscript notation of references
 
@@ -239,10 +239,55 @@ Thus if there are N vertices and data is sampled at 10 points in time,
 the file will comprise 10N lines with one value per line.
 
 \subsubsection{IGB format}
-IGB is a format developed at the University of Montreal and used in a visualization
-program called flounder.
-The 3D nature of the data will be ignored but xdim$\times$ ydim$\times$ zdim
-should be equal to the number of vertices.
+IGB is a format developed at the University of Montreal and used in a 
+visualization program called flounder, for regularly spaced data.
+
+The file is composed of a 1024-byte long header followed by binary data.
+For irregular grids, the individual dimensions are meaningless but xdim$\times$ ydim$\times$ zdim should be equal to the number of vertices.
+The header is composed of strings of the following format, separated by
+white space:
+\centerline{ \texttt{KeyWord:value} }
+Note that the header must be padded to 1024 bytes.
+The first block of key words need to be specified. The rest are optional.
+
+\begin{longtable}{|l|l|p{0.7\textwidth}|}\hline
+	KeyWord & Type & Description \\  \hline \endhead
+    \hline \endfoot
+    x       & int    & number of samples in x \\
+	y       & int    & number of samples in y \\
+	z       & int    & number of samples in z \\
+	t       & int    & number of samples in t \\
+	systeme & string & \texttt{big\_endian} or \texttt{little\_endian} \\
+	type    & string & binary data type: byte, char, short, long,
+	                   float, double, int, uint\\ \hline
+	unites  & string & units of data \\
+	factuer & float & scaling factor for data \\
+	zero    & float & data zero: true value =
+	                            IGB\_data*\texttt{facteur}+\texttt{zero} \\
+    org\_x  & float & lower right x coordinate       \\
+	org\_y  & float & lower right y coordinate       \\
+	org\_z  & float & lower right z coordinate       \\
+	org\_t  & float & time of first slice            \\
+	inc\_x  & float & distance between x samples \\
+	inc\_y  & float & distance between y samples \\
+	inc\_z  & float & distance between z samples \\
+	inc\_t  & float & time between samples \\
+	dim\_x  & float & extent in x \\
+	dim\_y  & float & extent in y \\
+	dim\_z  & float & extent in z \\
+	dim\_t  & float & duration \\
+	fac\_x  & float & scaling factor in x \\
+	fac\_y  & float & scaling factor in x \\
+	fac\_z  & float & scaling factor in x \\
+	fac\_t  & float & scaling factor in t \\
+	unites\_x & string & units of measure for spatial x dimension \\
+	unites\_y & string & units of measure for spatial y dimension \\
+	unites\_z & string & units of measure for spatial z dimension \\
+	unites\_t & string & units of measure for time \\
+    comment   & string & arbitrary comment \\
+	aut\_name & string & author's name     \\
+    transparent & hex & value for no data  
+\end{longtable}
 
 \subsection{Vector Data}
 An auxillary set of points on which to display vector/scalar data is 
