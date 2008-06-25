@@ -32,7 +32,7 @@ void Triangle::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 					 DATA_TYPE* data, int stride, dataOpac* dataopac,
 					 const GLfloat* ptnrml )
 {
-  if( p0>=_n || p1>=_n ) return;
+  if( p0>=_n || p1>_n ) return;
 
   GLboolean lightson;
   glGetBooleanv( GL_LIGHTING, &lightson );
@@ -144,7 +144,7 @@ bool Triangle :: add( const char* fn )
   string nfn = fn;
   
   try {
-    nele = countTrisInFile( fn );
+    nele = countInFile( fn );
   }
   catch(...) { return false; }
 
@@ -194,7 +194,7 @@ bool Triangle :: add( const char* fn )
  *
  *  \return the \# of elements
  */
-int Triangle::countTrisInFile( const char* fn )
+int Triangle::countInFile( const char* fn )
 {
   int        numtri=0;
   int        a, b, c;
@@ -236,6 +236,8 @@ int Triangle::countTrisInFile( const char* fn )
 void Triangle::compute_normals(int e0, int e1)
 {
   int e, n;
+
+  if( _nrml==NULL ) _nrml=new GLfloat[e1*3+3];
 
   for( e=e0; e<=e1; e++ ) {
 

@@ -136,6 +136,21 @@ void SurfaceElement::read_normals( int e0, int e1, const char *fnb )
 }
 
 
+/** define an object
+ *
+ * \param n list of nodes defining object
+ * \param a object index
+ *
+ * \pre \p nl must be at least _ptsPerObj*\p n long
+ * \note \p n must not be deallocated and declared with new
+ */
+void  MultiPoint::define( int *nl, int n )
+{
+  _node = nl;
+  _n = n;
+}
+
+
 /** add an object to the list 
  *
  * \param n list of nodes

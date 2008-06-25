@@ -8,7 +8,8 @@
 
 class Surfaces {
 	public:
-		Surfaces(SurfaceElement **se=NULL, int st=-1, int end=0);
+		Surfaces( Point *pl);
+		Surfaces():_p(NULL){}
 		GLfloat* fillcolor( ){ return _fillcolor; }
 		void     fillcolor(float r, float g, float b, float a=1);
 		GLfloat* outlinecolor( ){ return _outlinecolor; }
@@ -19,24 +20,26 @@ class Surfaces {
 		inline void filled( bool a ){ _filled=a; }
 		inline bool outline( void ){  return _outline; }
 		inline void outline( bool a ){ _outline=a; }
-		int  start( ){ return startind; }
-		void start( int a ){ startind = a; }
-		int  end( ){ return endind; }
-		void end( int a ) {endind = a; }
 		void get_vert_norms( GLfloat *vn );
 		void determine_vert_norms( Point & );
-		SurfaceElement* ele( int a ){ return _ele[a]; }
+		SurfaceElement*& ele( int a ){ return _ele[a]; }
+		int  num() const {return _ele.size();}
+		void num(int a){_ele.resize(a);}
+		vector<SurfaceElement*>& ele(){return _ele;}
+		void draw(GLfloat*,Colourscale*,DATA_TYPE*,int,
+				                                    dataOpac*,const GLfloat*);  
+		void register_vertices( vector<bool>& );
 	protected:
-		GLfloat _fillcolor[4];
-		GLfloat _outlinecolor[4];
-		int startind;
-		int endind;
-		bool is_visible;
-		bool _filled;         //!< draw filled
-		bool _outline;        //!< draw the outline
-		SurfaceElement** _ele; //!< list of elelments to draw
+		Point   *_p;
+		GLfloat  _fillcolor[4];
+		GLfloat  _outlinecolor[4];
+		bool      is_visible;
+		bool     _filled;         //!< draw filled
+		bool     _outline;        //!< draw the outline
 		GLfloat* _vertnorm;   //!< vertex normals
 		int*     _vert;       //!< vertices for which normals are computed
+		vector<SurfaceElement*> _ele; //!< list of elelments to draw
+		int       label;
 };
 
 #endif

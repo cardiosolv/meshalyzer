@@ -2,7 +2,8 @@
 #include <string.h>
 #include <VecData.h>
 
-Surfaces::Surfaces( SurfaceElement **e, int st, int end ) :is_visible(true),_filled(true),_outline(false),_ele(e),startind(st),endind(end),_vertnorm(NULL)
+Surfaces::Surfaces( Point *pl ) : _p(pl), is_visible(true),_filled(true),
+	_outline(false),_vertnorm(NULL)
 {
   fillcolor( 1., 0.5, 0.1 );
   outlinecolor( 0.125, 0.8, 0.7 );
@@ -54,19 +55,19 @@ void Surfaces::get_vert_norms( GLfloat *vn )
  */
 void Surfaces::determine_vert_norms( Point& pt )
 {
-  vector<bool> has_norm(pt.num());  // number of elements attached to node
+  vector<bool> has_norm(pt.num());  // if elements attached to node
 
   GLfloat *tvn = new GLfloat[pt.num()*3];
   memset(  tvn, 0, pt.num()*3*sizeof(GLfloat) );
 
-  const int* tris = _ele[0]->obj()+startind*3;
   const GLfloat* n;
   
-  for( int i=startind; i<=endind; i++ ) {
-	if( (n=_ele[0]->nrml(i)) == NULL ) continue;
-	for( int j=0; j<_ele[0]->ptsPerObj(); j++ ) {
-	  for( int k=0; k<3; k++ ) tvn[*tris*3+k] += n[k];
-	  has_norm[*tris++] = true;
+  for( int i=0; i<_ele.size(); i++ ) {
+	if( (n=_ele[i]->nrml(0)) == NULL ) continue;
+	const int *pnt = _ele[i]->obj();
+	for( int j=0; j<_ele[i]->ptsPerObj(); j++ ) {
+	  for( int k=0; k<3; k++ ) tvn[3*pnt[j]+k] += n[k];
+	  has_norm[pnt[j]] = true;
 	}
   }
   // count \# nodes in surface
@@ -89,3 +90,29 @@ void Surfaces::determine_vert_norms( Point& pt )
   delete[] tvn;
 }
 
+
+/** draw the surface
+ *  \param fill     fill colour
+ *  \param cs       colour scale
+ *  \param dat      nodal data (NULL for nodata display)
+ *  \param stride   draw every n'th element
+ *  \param dataopac data opacity
+ *  \param ptnrml   vertex normals (NULL for none)
+ */
+void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
+		int stride, dataOpac* dataopac, const GLfloat*ptnrml )
+{
+  for( int i=0; i<_ele.size(); i++ )
+	_ele[i]->draw( 0, 0, fill, cs, dat, stride, dataopac, ptnrml );
+}
+
+
+/** register the vertices 
+ *
+ *  \param vb true if point already registered
+ */
+void Surfaces::register_vertices( vector<bool>& vb )
+{
+  for( int i=0; i<_ele.size(); i++ )
+	_ele[i]->register_vertices( 0, 0, vb );
+}

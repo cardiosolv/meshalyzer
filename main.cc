@@ -40,8 +40,8 @@ void process_cg_format( char *fin, Meshwin *w, Controls* control )
   gzclose( in );
 
   // compute surface normals
-  w->trackballwin->model->_triele->compute_normals(0, 
-		  							w->trackballwin->model->_triele->num()-1 );
+  //w->trackballwin->model->_triele->compute_normals(0, 
+		  							//w->trackballwin->model->_triele->num()-1 );
 
   // read in the data
   string datafile=ptfile;

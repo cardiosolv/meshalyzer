@@ -47,6 +47,7 @@ OBJS = Fl_Gl_Tb_Window.o\
 	PNGwrite.o\
 	Prism.o\
 	Pyramid.o\
+	Quadrilateral.o\
 	Region.o\
 	Sequence.o\
 	Surfaces.o\

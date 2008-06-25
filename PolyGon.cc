@@ -70,7 +70,7 @@ void PolyGon::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 }
 
 
-/** draw a triangle
+/** draw a polygon
  *
  *  \param e      element to highlight
  *  \param colour colour to use
@@ -107,6 +107,8 @@ void PolyGon :: draw( int e, GLfloat *colour, float size )
 void PolyGon::compute_normals(int e0, int e1)
 {
   int e, n;
+
+  if( _nrml==NULL ) _nrml=new GLfloat[e1*3+3];
 
   for( e=e0; e<=e1; e++ ) {
 

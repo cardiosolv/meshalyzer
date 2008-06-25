@@ -20,7 +20,7 @@ class Model {
         Model(Colourscale *cs, DataOpacity *dopac );
 		~Model();
 		bool         read(const char *fn, bool base1=false);
-		int          add_surface( const char * );  
+		int          add_surface_from_tri( const char * );  
 		inline int   reg_first( int s, Object_t t ){return _region[s]->first(t); }
 			  Surfaces* surface(int s){ return _surface[s]; }
 			  Region*   region(int s){ return _region[s]; }
@@ -28,7 +28,7 @@ class Model {
 		      int    number( Object_t );
 		const int*   volEle(int a=0)   const { return _vol[a]->obj(0); }
 		      int    numVol(){ return _numVol; }
-		const int*   element(int a=0) const{ return _triele->obj(a); }
+		SurfaceElement*  element(int s,int a=0) const{ return _surface[s]->ele(a); }
 		const int*   cable(int a=0)   const { return _cable->obj(a); }
 		const int*   cnnx(int a=0)    const { return _cnnx->obj(a); }
 		      float  maxdim()         const { return _maxdim; }
@@ -53,31 +53,32 @@ class Model {
 	     const GLfloat* vertex_normals(int);
 		       int   maxtm(){ return _numtm-1 ; }
 
-		Point          pt;
-		Connection*    _cnnx;
-		ContCable*     _cable;
-		Triangle*      _triele;
-		VolElement**   _vol;
-		int            _numVol;
-		int            numSurf;
-		int            _numReg;
+		Point             pt;
+		Connection*      _cnnx;
+		ContCable*       _cable;
+		VolElement**     _vol;
+		int              _numVol;
+		int               numSurf;
+		int              _numReg;
+		int               localElemnum(int, int& );
 	private:
-		Region**       _region;
-		Surfaces**     _surface;
-		const GLfloat* _pts;
-		float      _maxdim;				 // maximum physical dimension
-		int        _outstride[maxobject];// stride to use when outputting
-		Colourscale*  _cs;
-		DataOpacity*  _dataopac;		 // data opacity
-		bool       _base1;				 // whether node numbering starts at 1
-		void       read_region_file( gzFile, const char * );
-		void       read_normals( gzFile, const char * );
-        void       increase_ele( int );
-		GLfloat*   _vertnrml;			//!< vertex normals
-        void       determine_regions();
-        bool       read_elem_file(const char *);
-		vector<bool> allvis;
-		int        _numtm;     
+		Region**        _region;
+		Surfaces**      _surface;
+		const GLfloat*  _pts;
+		float           _maxdim;		      // maximum physical dimension
+		int             _outstride[maxobject];// stride to use when outputting
+		Colourscale*    _cs;
+		DataOpacity*    _dataopac;		      // data opacity
+		bool            _base1;  		    //whether node numbering starts at 1
+		void             read_region_file( gzFile, const char * );
+		void             read_normals( gzFile, const char * );
+        void             increase_ele( int );
+		GLfloat*        _vertnrml;			 //!< vertex normals
+        void             determine_regions();
+        bool             read_elem_file(const char *);
+        int              add_surface_from_elem( const char *fn );
+		vector<bool>     allvis;
+		int             _numtm;     
 };
 
 #endif

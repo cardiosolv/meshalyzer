@@ -1,5 +1,7 @@
 #include "Model.h"
-#include<set>
+#include <set>
+#include <map>
+#include <string>
 #include "DataOpacity.h"
 #include "gl2ps.h"
 #include "VecData.h"
@@ -58,8 +60,9 @@ bool Model::read( const char* fnt, bool base1 )
   read_region_file( in, fn );
   determine_regions();
   
-  _triele  = new Triangle( &pt );
-  add_surface( fn );
+  //_triele  = new Triangle( &pt );
+  add_surface_from_tri( fn );
+  add_surface_from_elem( fn );
 
   // find maximum dimension and bounding box
   const GLfloat *p = pt.pt();
@@ -166,16 +169,97 @@ void Model::determine_regions()
   }
 }
 
+
+/** add surface by selecting 2D elements from .elem file
+ *
+ *  \param base model name
+ */
+int Model::add_surface_from_elem( const char *fn )
+{
+  /* determine file name */
+  gzFile in;
+  string fname(fn);
+  fname += "elem";
+  if( (in=gzopen( fname.c_str(), "r" )) == NULL ) {
+	fname += ".gz";
+	if( (in=gzopen( fname.c_str(), "r" )) == NULL ) {
+	  fprintf( stderr, "Could not open surface file\n" );
+	  return -1;
+	}
+  }
+
+  // Count the number of surface elements in each surface
+  char buff[bufsize];
+  gzgets(in,buff,bufsize);           // throw away first line
+  map<string,int> surfs;
+  while( gzgets(in,buff,bufsize) !=Z_NULL ) {
+	char   surfnum[10]="";
+	if( !strncmp(buff,"Tr",2) ) {
+	  if( sscanf(buff, "%*s %*d %*d %*d %s", surfnum )<1 )
+        strcpy( surfnum, "EMPTY" );
+    } else if( !strncmp(buff,"Qd",2) ) {
+	  if( sscanf(buff, "%*s %*d %*d %*d %*d %s", &surfnum )<1 )
+        strcpy( surfnum, "EMPTY" );
+    }
+	if( strlen(surfnum) )
+	  surfs[surfnum]++;
+  }
+ 
+  // allocate new surfaces
+  _surface=(Surfaces **)realloc(_surface,
+		                 (numSurf+surfs.size())*sizeof(Surfaces *));
+  for( int s=numSurf; s<numSurf+surfs.size(); s++ )
+    _surface[s] = new Surfaces( &pt );
+  map<string,int> surfmap;
+  map<string,int> :: iterator iter = surfs.begin();
+  for( int s=numSurf; iter!=surfs.end(); iter++, s++ ) {
+    _surface[s]->num(iter->second );
+	surfmap[iter->first] = s;
+  }
+  surfs.clear();
+
+  for( int s=numSurf; s<numSurf+surfmap.size(); s++ ) {
+	gzrewind(in);
+	gzgets(in,buff,bufsize); //throw away first line
+	while( gzgets(in,buff,bufsize) !=Z_NULL ) {
+	  char etype[10],reg[10];
+	  int  *idat;
+	  string srfstr;
+	  if( !strncmp(buff,"Tr",2) ) {
+		idat = new int[3];
+		if(sscanf( buff,"%s %d %d %d %s", etype, idat, idat+1, idat+2, reg)<5 )
+		  strcpy(reg,"EMPTY");
+		_surface[surfmap[reg]]->ele(surfs[reg]) = new Triangle( &pt );
+	  } else  if( !strncmp(buff,"Qd",2) ) {
+		idat = new int[4];
+		if(sscanf( buff,"%s %d %d %d %d %s", etype, idat, idat+1, idat+2, 
+					idat+3, reg)<6 )
+		  strcpy(reg,"EMPTY");
+		_surface[surfmap[reg]]->ele(surfs[reg]) = new Quadrilateral( &pt );
+	  }
+	  _surface[surfmap[reg]]->ele(surfs[reg])->define(idat);
+	  _surface[surfmap[reg]]->ele(surfs[reg])->compute_normals(0,0);
+	  surfs[reg]++;
+	}
+  }
+  gzclose( in );
+
+  for( int s=numSurf; s<numSurf+surfs.size(); s++ )
+	_surface[s]->determine_vert_norms( pt );
+
+  numSurf += surfs.size();
+  return numSurf;
+}
+
+
 /** add a surface by reading in a .tri file, also try reading a normal file
  *
  * \param fn   file containing tri's
  *
  * \return     the \#surfaces, -1 if not successful
  */
-int Model::add_surface( const char *fn )
+int Model::add_surface_from_tri( const char *fn )
 {
-  int oldNumEle = _triele->num();
-
   /* determine file name */
   gzFile in;
   string fname(fn);
@@ -197,41 +281,45 @@ int Model::add_surface( const char *fn )
 	}
   }
 
-  try {
-	_triele->add( fname.c_str() );
-  }
-  catch(...) { return -1; }
-  
-  int sn = numSurf;
-  _surface=(Surfaces **)realloc(_surface,++numSurf*sizeof(Surfaces *));
-  _surface[numSurf-1] = new Surfaces( (SurfaceElement**)(&_triele), oldNumEle, _triele->num()-1 );
-
-  // reread tri file and see if more than 1 surface was specified
-  int o_ntri, ntri, a, b;
+  int  nd[3], ntri;
   char buff[bufsize];
-  // read first surface
-  if( gzgets(in,buff,bufsize)!=Z_NULL && 
-                 sscanf( buff, "%d %d %d", &o_ntri, &a, &b ) < 3 )
-	for( int i=0; i<o_ntri; i++ )
-      gzgets( in, buff, bufsize );	
-  // look for more surfaces
-  while( gzgets(in,buff,bufsize)!=Z_NULL && 
-		   sscanf( buff, "%d %d %d", &ntri, &a, &b ) < 3 ) {
-	for( int i=0; i<ntri; i++ )
-      gzgets( in, buff, bufsize );
-	_surface[numSurf-1]->end(oldNumEle+o_ntri-1);
-	_surface=(Surfaces **)realloc(_surface,++numSurf*sizeof(Surfaces *));
-	_surface[numSurf-1] = new Surfaces( (SurfaceElement**)(&_triele) );
-	_surface[numSurf-1]->start(_surface[numSurf-2]->end()+1);
-    _surface[numSurf-1]->end(_surface[numSurf-1]->start()+ntri-1);
-	oldNumEle += o_ntri;
-	o_ntri = ntri;
-  }
-  gzclose( in );
-  
-  for( int s=sn; s<numSurf; s++ )
-	_surface[s]->determine_vert_norms( pt );
+  gzgets(in,buff,bufsize);
+  bool multi_surface = sscanf( buff, "%d %d %d", &ntri, nd+1, nd+2 ) < 3;
 
+  if( multi_surface ) {
+	do { 
+	  _surface=(Surfaces **)realloc(_surface,++numSurf*sizeof(Surfaces *));
+	  _surface[numSurf-1] = new Surfaces( &pt );
+	  _surface[numSurf-1]->num(ntri);
+	  for( int i=0; i<ntri; i++ ) {
+		_surface[numSurf-1]->ele(i) = new Triangle( &pt );
+        int *nl = new int[3];
+		if( gzgets(in,buff,bufsize) == Z_NULL || 
+				sscanf(buff, "%d %d %d", nl, nl+1, nl+2 ) < 3 ){
+		  numSurf--;
+		  return numSurf;
+		}
+		_surface[numSurf-1]->ele(i)->define(nl);
+		_surface[numSurf-1]->ele(i)->compute_normals(0,0);
+	  } 
+	  _surface[numSurf-1]->determine_vert_norms( pt );
+	} while( gzgets(in,buff,bufsize)!=Z_NULL && sscanf(buff, "%d",&ntri)==1 );
+  } else {
+    int *nl = new int[3];
+	nl[0]=ntri;nl[1]=nd[1];nl[2]=nd[2];
+	_surface=(Surfaces **)realloc(_surface,++numSurf*sizeof(Surfaces *));
+	_surface[numSurf-1] = new Surfaces( &pt );
+	int curele = 0;
+	do {
+#define ELEINC 10000
+	  if( !(curele%ELEINC) ) _surface[numSurf-1]->num(curele+ELEINC);
+  	  _surface[numSurf-1]->ele(curele++)->define(nl);
+	  nl = new int[3];
+	}while( gzgets(in,buff,bufsize)!=Z_NULL && 
+			                          sscanf(buff, "%d",nl, nl+1, nl+2)>=3 );
+    _surface[numSurf-1]->num(curele);
+	_surface[numSurf-1]->determine_vert_norms( pt );
+  }
   return numSurf;
 }
 
@@ -338,58 +426,10 @@ Model::~Model()
   delete _cable;
   for( int i=0; i<numSurf; i++ )
 	delete _surface[i];
-  delete _triele;
+  for( int i=0; i<numSurf; i++ )
+	delete[] _surface[i];
   free( _surface );
 }
-
-
-
-#ifndef OBJ_CLASS
-void Model :: draw_triele( int ele, DataColouring datcol, GLfloat opaque,
-								DATA_TYPE* data, bool lightson )
-{
-  int eind = 3*ele;
-
-  if( !pt.vis(_element[eind]) || !pt.vis(_element[eind+1]) ||
-										  !pt.vis(_element[eind+2]) )
-	return;
-
-  if( lightson && _elemNrml[ele] ) 
-	glNormal3fv( _nrml+eind );
-
-  if( datcol == on ) {
-	if( opaque>opaque_min ) {
-	  _cs->colourize( data[_element[eind]] );
-	  glVertex3fv( _pts+3*_element[eind] );
-	  _cs->colourize( data[_element[eind+1]] );
-	  glVertex3fv( _pts+3*_element[eind+1] );
-	  _cs->colourize( data[_element[eind+2]] );
-	  glVertex3fv( _pts+3*_element[eind+2] );
-	} else {
-	  _cs->colourize( data[_element[eind]], opaque );
-	  glVertex3fv( _pts+3*_element[eind] );
-	  _cs->colourize( data[_element[eind+1]], opaque);
-	  glVertex3fv( _pts+3*_element[eind+1] );
-	  _cs->colourize( data[_element[eind+2]], opaque);
-	  glVertex3fv( _pts+3*_element[eind+2] );
-	}
-  } else if( datcol == off ) {
-	glVertex3fv( _pts+3*_element[eind] );
-	glVertex3fv( _pts+3*_element[eind+1] );
-	glVertex3fv( _pts+3*_element[eind+2] );
-  } else if( datcol == opacval ) {
-	_cs->colourize( data[_element[eind]], 
-			_dataopac->do[Surface].alpha(data[_element[eind]]) );
-	glVertex3fv( _pts+3*_element[eind] );
-	_cs->colourize( data[_element[eind+1]], 
-			_dataopac->do[Surface].alpha(data[_element[eind+1]]) );
-	glVertex3fv( _pts+3*_element[eind+1] );
-	_cs->colourize( data[_element[eind+2]], 
-			_dataopac->do[Surface].alpha(data[_element[eind+2]]) );
-	glVertex3fv( _pts+3*_element[eind+2] );
-  }
-}
-#endif
 
 
 /** output highlight information
@@ -426,15 +466,16 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
 	ts=NULL;
   }
 
-// SurfEles
-if( _triele->num() ) {
-  sprintf(txt, "@b@C%6dTriangle: %d of %d", FL_BLUE, hilight[SurfEle],
-					_triele->num());
+  // SurfEles
+  int elesurf, lele;
+  if( numSurf ) {
+	sprintf(txt, "@b@C%6dTriangle: %d of %d", FL_BLUE, hilight[SurfEle],
+			number(SurfEle) );
 	hinfo->add( txt );
 	hinfo->add( "nodes:\t" );
-	int elenode = hilight[SurfEle]*3;
+	lele = localElemnum( hilight[SurfEle], elesurf );
 	for( int i=0; i<3; i++ ) {
-	  int node=_triele->obj(hilight[SurfEle])[i];
+	  int node=surface(elesurf)->ele(lele)->obj()[i];
 	  if( data != NULL )
 		sprintf( txt,"\t%6d -> %f", node, data[node] );
 	  else
@@ -448,45 +489,40 @@ if( _triele->num() ) {
 	  ts=NULL;
 	}
 	//normal
-	const GLfloat* n=_triele->nrml(hilight[SurfEle]); 
+	const GLfloat* n=surface(elesurf)->ele(lele)->nrml(hilight[SurfEle]); 
 	if( n != NULL ) {
 	  hinfo->add( "normal:\t" );
 	  sprintf( txt, "(%f, %f, %f)", n[0], n[1], n[2] );
 	  hinfo->add( txt );
 	}
-	for( int s=0; s,numSurf; s++ ) {
-	  if( hilight[SurfEle]>=surface(s)->start() &&
-	      hilight[SurfEle]<=surface(s)->end()     ){
-	    sprintf( txt, "in surface %6d", s );
-	    hinfo->add( txt );
-	    break;
-	  }
-	}
+	sprintf( txt, "in surface %6d", elesurf );
+	hinfo->add( txt );
 	hinfo->add( "" );
   }
+
   // Vertex info
   sprintf(txt, "@b@C%6dVertex: %d of %d", FL_GREEN, hilight[Vertex],
 		  pt.num() );
   hinfo->add( txt );
   if( data != NULL ) {
 	sprintf( txt, "value: %f", data[hilight[Vertex]] );
-  	hinfo->add( txt );
+  hinfo->add( txt );
   }
   const GLfloat*offset = pt.offset();
   sprintf( txt, "( %.6g, %.6g, %.6g )", _pts[hilight[Vertex]*3]+offset[0],
 		  _pts[hilight[Vertex]*3+1]+offset[1],
-		  					_pts[hilight[Vertex]*3+2]+offset[2]);
+		  _pts[hilight[Vertex]*3+2]+offset[2]);
   hinfo->add( txt );
   /*
-  string reginfo( "in surface: " );
-  for( int s=0; s<_numReg; s++ )
-	if( hilight[Vertex]>=_surface[s]->start(Vertex) && 
-			hilight[Vertex]<=_surface[s]->end(Vertex)		){
-	  
-	  break;
-	}
-  hinfo->add( txt );
-  */
+	 string reginfo( "in surface: " );
+	 for( int s=0; s<_numReg; s++ )
+	 if( hilight[Vertex]>=_surface[s]->start(Vertex) && 
+	 hilight[Vertex]<=_surface[s]->end(Vertex)		){
+
+	 break;
+	 }
+	 hinfo->add( txt );
+	 */
   if( _cable->num() ) {
 	const int* cab=_cable->obj();
 	for( int cabnum=0; cabnum<_cable->num();cabnum++ )
@@ -526,19 +562,25 @@ if( _triele->num() ) {
 	  ts=NULL;
 	}
   }
-  if( _triele->num() ) {
-	sprintf( txt, "Attached triangles:" );
+  if( numSurf ) {
+	sprintf( txt, "Attached elements:" );
 	hinfo->add( txt );
-	const int* ele=_triele->obj();
-	for( int i=0; i<3*_triele->num(); i++ )
-	  if( ele[i]==hilight[Vertex] ){
-		sprintf( txt, "\t%6d", i/3 );
-		if( i/3==hilight[SurfEle] ) 
-		  sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-		hinfo->add( txt );
-		for( int j=3*(i/3); j<3*(i/3)+3; j++ )
-		  if( ele[j]!=hilight[Vertex] ) att_nodes.insert(ele[j]);
+	for( int i=0; i<numSurf; i++ ) {
+	  vector<SurfaceElement*> ele=surface(i)->ele();
+	  for( int j=0; j<surface(i)->num(); j++ ) {
+		const int* nl = ele[j]->obj();
+		for( int k=0; k<ele[j]->ptsPerObj(); k++ ) {
+		  if( nl[k]==hilight[Vertex] ){
+			sprintf( txt, "\t%6d", j );
+			if( j==hilight[SurfEle] ) 
+			  sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
+			hinfo->add( txt );
+			for( int m=0; m<ele[j]->ptsPerObj(); m++ )
+			  if( nl[m]!=hilight[Vertex] ) att_nodes.insert(nl[m]);
+		  }
+		}
 	  }
+	}
 	if( ts != NULL ){
 	  free(ts);
 	  ts=NULL;
@@ -550,15 +592,15 @@ if( _triele->num() ) {
 	for( int i=0; i<_numVol; i++ ) {
 	  const int* tet=_vol[i]->obj();
 	  for( int j=0; j<_vol[i]->ptsPerObj(); j++ )
-	    if( tet[j]==hilight[Vertex] ) {
+		if( tet[j]==hilight[Vertex] ) {
 		  sprintf( txt, "\t%d", i );
-		if( tet[j]==hilight[Tetrahedron] ) 
-		  sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-		hinfo->add( txt );
-		for( int k=0; k<_vol[i]->ptsPerObj(); k++ ){
-		  if( tet[k]!=hilight[Vertex] ) att_nodes.insert(tet[k]);
-		}
-	  }	  
+		  if( tet[j]==hilight[Tetrahedron] ) 
+			sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
+		  hinfo->add( txt );
+		  for( int k=0; k<_vol[i]->ptsPerObj(); k++ ){
+			if( tet[k]!=hilight[Vertex] ) att_nodes.insert(tet[k]);
+		  }
+		}	  
 	}
 	if( ts != NULL ){
 	  free(ts);
@@ -575,7 +617,7 @@ if( _triele->num() ) {
   //Cables
   if( _cable->num() ) {
 	sprintf(txt, "@b@C%6dCable: %d of %d", FL_CYAN, hilight[Cable],
-					_cable->num() );
+			_cable->num() );
 	hinfo->add( txt );
 	hinfo->add( "nodes:" );
 	sprintf( txt, "\t%6d", *(_cable->obj(hilight[Cable])) );
@@ -595,7 +637,7 @@ if( _triele->num() ) {
   //Connections
   if( _cnnx->num() ) {
 	sprintf(txt, "@b@C%6dConnection: %d of %d", FL_MAGENTA, hilight[Cnnx],
-							_cnnx->num() );
+			_cnnx->num() );
 	hinfo->add( txt );
 	hinfo->add( "nodes:\t" );
 	sprintf( txt, "\t%6d", _cnnx->obj(hilight[Cnnx])[0] ); 
@@ -648,6 +690,8 @@ void Model::read_region_file( gzFile in, const char *fnb )
 
 int Model::number(Object_t a )
 {
+  int nele=0;
+
   switch( a ) {
 	  case Vertex:
 		  return pt.num();
@@ -658,7 +702,9 @@ int Model::number(Object_t a )
 	  case Surface:
 		  return numSurf;
 	  case SurfEle:
-		  return _triele->num();
+		  for( int s=0; s<numSurf; s++ )
+            nele += surface(s)->num();
+		  return nele;
 	  case Tetrahedron:
 		  return _numVol;
 	  case RegionDef:
@@ -691,7 +737,7 @@ bool Model :: read_elem_file( const char *fname )
 {
   gzFile in;
   bool tets = false;
-  char eletype[3] = "Tt";
+  char eletype[3] = "Tt"; //default assumes tetrahedral file
   const int bufsize=1024;
   char buf[bufsize];
   
@@ -711,6 +757,7 @@ bool Model :: read_elem_file( const char *fname )
   
   _vol = new VolElement*[_numVol];
 
+  int ne=0;
   for( int i=0; i<_numVol; i++ ) {
     if( gzgets(in, buf, bufsize) == Z_NULL ) return false;
 	int n[9];
@@ -720,19 +767,27 @@ bool Model :: read_elem_file( const char *fname )
 	  sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
 			n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
     if( !strcmp( eletype, "Tt" ) ) {
-	  _vol[i] = new Tetrahedral( &pt );
-	  _vol[i]->add( n, n[4] );
+	  _vol[ne] = new Tetrahedral( &pt );
+	  _vol[ne]->add( n, n[4] );
+	  ne++;
 	} else if( !strcmp( eletype, "Hx" ) ) {
-	  _vol[i] = new Hexahedron( &pt );
-	  _vol[i]->add( n, n[8] );
+	  _vol[ne] = new Hexahedron( &pt );
+	  _vol[ne]->add( n, n[8] );
+	  ne++;
 	} else if( !strcmp( eletype, "Py" ) ) {
-	  _vol[i] = new Pyramid( &pt );
-	  _vol[i]->add( n, n[5] );
+	  _vol[ne] = new Pyramid( &pt );
+	  _vol[ne]->add( n, n[5] );
+	  ne++;
 	} else if( !strcmp( eletype, "Pr" ) ) {
-	  _vol[i] = new Prism( &pt );
-	  _vol[i]->add( n, n[6] );
+	  _vol[ne] = new Prism( &pt );
+	  _vol[ne]->add( n, n[6] );
+	  ne++;
+	} else if( !strcmp( eletype, "Tr" ) ) {
+	  // surface elements ignored
+	} else if( !strcmp( eletype, "Qd" ) ) {
+	  // surface elements ignored
 	} else {
-	  fprintf( stderr, "Unsupported element type\n" );
+	  fprintf(stderr, "Unsupported element type: %s\n", eletype);
 	  delete[] _vol;
 	  _numVol = 0;
 	  _vol = NULL;
@@ -740,5 +795,29 @@ bool Model :: read_elem_file( const char *fname )
 	  return false;
 	}
   }
+  if( ne<_numVol) {
+	_numVol=ne;
+	VolElement **nv =new VolElement*[_numVol]; 
+	memcpy( nv, _vol, ne*sizeof(VolElement*) );
+	delete[] _vol;
+	_vol = nv;
+  }
   gzclose(in);
 }
+
+
+/** find the local surface element form the global number
+ *
+ * \param gele global element number
+ * \param surf surface containing the element
+ *
+ * \return the local element number in the surface,-1 if not in range
+ */
+int Model::localElemnum( int gele, int& surf )
+{
+  for( surf=0; surf<numSurf; surf++ )
+	if( (gele-=surface(surf)->num())<0) break;
+
+  return gele+surface(surf)->num();
+}
+  

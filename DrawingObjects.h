@@ -21,7 +21,7 @@ class DrawingObj {
 		               DrawingObj( void ): _n(0){} 
 			    void   translucency( bool );            // set tranlucency
 	protected:
-		int      _n;			                    //!< \# objects
+		int      _n;			                        //!< \# objects
 };
 
 
@@ -62,6 +62,7 @@ class MultiPoint : public DrawingObj {
 		void  register_vertices(int, int, vector<bool>& );
 		void  add( int *n );
 		const Point* pt(){ return _pt; } 
+		void  define( int *nl, int n=1 );
 	protected:
 		int *  _node;			//!< list of nodes defining objects
 		Point* _pt;             //!< pointer to point list
@@ -136,7 +137,7 @@ class Triangle : public SurfaceElement {
 		virtual void     compute_normals( int, int );
 		        bool     add( const char * );	
 	protected:
-		        int         countTrisInFile( const char * );
+		        int      countInFile( const char * );
 };
 
 
@@ -152,7 +153,7 @@ class Quadrilateral : public SurfaceElement {
 		virtual void     compute_normals( int, int );
 		        bool     add( const char * );	
 	protected:
-		        int         countTrisInFile( const char * );
+		        int      countInFile( const char * );
 };
 
 

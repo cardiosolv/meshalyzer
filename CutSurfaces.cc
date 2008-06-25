@@ -25,21 +25,19 @@ CutSurfaces::CutSurfaces() : _norm(NULL),_ptarr(NULL), _interp(NULL)
 void
 CutSurfaces :: addEle( SurfaceElement *se, GLfloat *n, Interpolator<DATA_TYPE> *ni )
 {
-  if( !(endind%ADD_INC) ) {
-	_ele      = static_cast<SurfaceElement **>(realloc( _ele, 
-					(endind/ADD_INC+1)*ADD_INC*sizeof(SurfaceElement *) ));
+  int _numele = _ele.size();
+  if( !(_ele.size()%ADD_INC) ) {
 	_ptarr    = static_cast<GLfloat **>(realloc( _ptarr, 
-					(endind/ADD_INC+1)*ADD_INC*sizeof(GLfloat *) ));
+					(_numele/ADD_INC+1)*ADD_INC*sizeof(GLfloat *) ));
 	_interp = static_cast<Interpolator<DATA_TYPE> **>(realloc( _interp, 
-				(endind/ADD_INC+1)*ADD_INC*sizeof(Interpolator<DATA_TYPE> *)));
+				(_numele/ADD_INC+1)*ADD_INC*sizeof(Interpolator<DATA_TYPE> *)));
 	_norm     = static_cast<GLfloat *>(realloc( _norm, 
-					(endind/ADD_INC+1)*ADD_INC*sizeof(GLfloat)*3 ));
+					(_numele/ADD_INC+1)*ADD_INC*sizeof(GLfloat)*3 ));
   }
-  _ele[endind]    = se;
-  _ptarr[endind]  = const_cast<GLfloat *>(const_cast<Point*>(se->pt())->pt());
-  _interp[endind] = ni;
-  memcpy( _norm+3*endind, n, sizeof(GLfloat)*3 ); 
-  endind++;
+  _ele.push_back(se);
+  _ptarr[_numele]  = const_cast<GLfloat *>(const_cast<Point*>(se->pt())->pt());
+  _interp[_numele] = ni;
+  memcpy( _norm+3*_numele, n, sizeof(GLfloat)*3 ); 
 }
 
 
@@ -48,16 +46,16 @@ CutSurfaces :: addEle( SurfaceElement *se, GLfloat *n, Interpolator<DATA_TYPE> *
  */
 CutSurfaces::~CutSurfaces()
 {
-  if( endind ) {
-	for( int i=0; i<endind; i++ ) {
+  if( !_ele.empty() ) {
+	for( int i=0; i<_ele.size(); i++ ) {
 	  delete _ele[i];
 	  delete _ptarr[i];
 	  delete _interp[i];
 	}
-	free( _ele );
 	free( _ptarr );
 	free( _norm );
 	free( _interp );
+	_ele.clear();
   }
 }
 

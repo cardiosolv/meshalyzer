@@ -25,13 +25,13 @@ class Region {
 		int  first(Object_t t, int a){ startind[t]=a; }
 	private:
 		GLfloat color[maxobject+2][4];
-		int startind[maxobject+2];
-		int endind[maxobject+2];
-		bool showobj[maxobject+2];
-		bool is_visible;
-		int  _label;           //!< identifier in file for region
+		int     startind[maxobject+2];
+		int     endind[maxobject+2];
+		bool    showobj[maxobject+2];
+		bool    is_visible;
+		int    _label;           //!< identifier in file for region
 		vector<bool> _member;  //!< whether a node is part of region
-		void initialize( int, int );
+		void    initialize( int, int );
 };
 
 int Region_sort( const void *a, const void *b );

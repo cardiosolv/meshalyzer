@@ -610,7 +610,7 @@ if( l && reglist->selected(l) )
       } {
         Fl_Group hilightgrp {
           label Highlight
-          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {Tetrahedron:}
@@ -920,7 +920,7 @@ mwtb->redraw();}
         }
         Fl_Group {} {
           label Surface
-          xywh {15 310 315 165} labelsize 12 labelcolor 90
+          xywh {15 310 315 165} labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label visible
@@ -1080,8 +1080,7 @@ for( int i=0; i<reglist->size(); i++ )
 if( s==-1) s=0;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
 surfoutlinebut->value( mwtb->model->surface(s)->outline() );
-surffillbut->value( mwtb->model->surface(s)->filled() );} {selected
-    }
+surffillbut->value( mwtb->model->surface(s)->filled() );} {}
   }
   Function {update_regionGUI( int r )} {open return_type void
   } {
@@ -1090,7 +1089,8 @@ vertbut->value( mwtb->showobj(Vertex, r) );
 cabbut->value( mwtb->showobj(Cable, r) );
 cnnxbut->value( mwtb->showobj(Cnnx, r) );} {}
   }
-  Function {highlight_region()} {} {
+  Function {highlight_region()} {open
+  } {
     code {int regnum;
 for( regnum=0; regnum<reglist->size(); regnum++ )
   if( reglist->selected(regnum) )
@@ -1106,12 +1106,14 @@ cnnxhi->value( objnum );
 objnum = mwtb->reg_first( regnum, Cable );
 mwtb->highlight( Cable, objnum );
 cabhi->value( objnum );
-objnum = mwtb->model->surface(regnum)->start();
+objnum =0;
+for( int i=0; i<regnum; i++ ) objnum += mwtb->model->surface(i)->num();
 mwtb->highlight( SurfEle, objnum );
 elehi->value( objnum );
 objnum = mwtb->reg_first( regnum, Vertex );
 mwtb->highlight( Vertex, objnum );
-verthi->value( objnum );} {}
+verthi->value( objnum );} {selected
+    }
   }
   Function {set_rot( char n, int neg, int view )} {return_type void
   } {

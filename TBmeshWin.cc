@@ -288,10 +288,10 @@ void TBmeshWin :: draw()
 
 	  if( !sf->visible() ) continue;
 	  
-	  if( sf->filled() && model->_triele->num()  ) {
+	  if( sf->filled() && model->numSurf ) {
 		draw_surfaces(sf);
 	  }
-	  if( sf->outline() && model->_triele->num() ) {
+	  if( sf->outline() && model->numSurf ) {
 		draw_elements(sf);
 	  }
 	}
@@ -331,18 +331,23 @@ void TBmeshWin :: draw()
 		  }
 		glDisable(GL_POLYGON_OFFSET_FILL );
 		
-	  } else if ( model->_triele->num() && 
+	  } else if ( model->numSurf && 
 			  (!model->numVol() || vert_asc_obj==SurfEle) ){
 		//draw elements associated with highlighted node
-		const int *element = model->_triele->obj();
-		for( int i=0; i<3*model->_triele->num(); i++ ) 
-		  if( element[i] == hilight[Vertex] ){
-			model->_triele->draw( i/3, hiptobj_color );
+		for( int s=0; s<model->numSurf; s++ ) {
+		  vector<SurfaceElement*>ele = model->surface(s)->ele();
+		  for( int i=0; i<model->surface(s)->num(); i++ )
+			for( int j=0; j<ele[i]->ptsPerObj(); j++ )
+		      if( ele[i]->obj()[j] == hilight[Vertex] )
+			    ele[i]->draw( 0, hiptobj_color );
 		  }
 		glEnd();
 	  }
-	  if( model->_triele->num() )
-		model->_triele->draw(hilight[SurfEle], hiele_color );
+	  if( model->numSurf ) {
+		int lsurf, lele;
+		lele = model->localElemnum( hilight[SurfEle], lsurf );
+		model->surface(lsurf)->ele(lele)->draw( 0, hiele_color );
+	  }
 	  if( model->_cable->num() ) 
 		model->_cable->draw( hilight[Cable], hicable_color, 2 );
 	  if( model->_cnnx->num() ) 
@@ -372,8 +377,8 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
   int stride = 1;
 
   if( Fl::event_state(FL_BUTTON1|FL_BUTTON2|FL_BUTTON3)  && 
-		  						(sf->end()-sf->start()>MAX_SURFELE_REALTIME))
-	stride =  (sf->end()-sf->start())/MAX_SURFELE_REALTIME;
+		  				(sf->num()>MAX_SURFELE_REALTIME))
+	stride =  (sf->num())/MAX_SURFELE_REALTIME;
 
   glPushAttrib(GL_POLYGON_BIT);
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -386,9 +391,9 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
 	  (!showData&&sf->fillcolor()[3]<OPAQUE_LIMIT) )
 	translucency(true);
 
-  model->_triele->draw(sf->start(),sf->end(),
-     sf->fillcolor(), cs, showData?data:NULL, stride, 
- 		dataopac->dop+Surface, facetshading?NULL:model->vertex_normals(sf-model->surface(0)) );
+  sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride, 
+ 		dataopac->dop+Surface, 
+		facetshading?NULL:model->vertex_normals(sf-model->surface(0)) );
   
   if( dataopac->dop[Surface].on() ) translucency(false);
   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -408,11 +413,10 @@ void TBmeshWin::draw_elements(Surfaces* sf)
 	datacol = false;
 
   if( renderMode == GL_RENDER ) 
-    model->_triele->draw( sf->start(), sf->end(), 
-		  sf->outlinecolor(), cs, datacol?data:NULL, 
-		  		model->stride(SurfEle), dataopac->dop+SurfEle );
+    sf->draw( sf->outlinecolor(), cs, datacol?data:NULL, 
+		  		model->stride(SurfEle), dataopac->dop+SurfEle, NULL	);
   else
-	model->_triele->register_vertices( sf->start(), sf->end(), ptDrawn );
+	sf->register_vertices( ptDrawn );
 }
 
 
@@ -631,7 +635,7 @@ void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt, bool base1 )
  */
 int TBmeshWin :: add_surface( const char *fn )
 {
-  model->add_surface( fn );
+  model->add_surface_from_tri( fn );
   return model->numSurf;
 }
 
@@ -1443,7 +1447,7 @@ TBmeshWin::draw_cut_planes( Region *reg )
 
 	  glDisable( CLIP_PLANE[i] );
       
-	  for( int e=0; e<_cutsurface[i]->end(); e++ ) {
+	  for( int e=0; e<_cutsurface[i]->num(); e++ ) {
 
 		// copy normal for all nodes
 		GLfloat n[_cutsurface[i]->ele(e)->ptsPerObj()*3 ];

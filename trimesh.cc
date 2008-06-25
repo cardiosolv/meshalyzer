@@ -2283,7 +2283,6 @@ Controls::Controls() {
         o->labelsize(12);
         o->labelcolor((Fl_Color)121);
         o->align(FL_ALIGN_LEFT);
-        o->hide();
         { MyValueInput* o = tethi = new MyValueInput(100, 345, 85, 25, "Tetrahedron:");
           o->box(FL_DOWN_BOX);
           o->color(FL_BACKGROUND2_COLOR);
@@ -2563,6 +2562,7 @@ Controls::Controls() {
       { Fl_Group* o = new Fl_Group(15, 310, 315, 165, "Surface");
         o->labelsize(12);
         o->labelcolor((Fl_Color)90);
+        o->hide();
         { Fl_Light_Button* o = surfvisbut = new Fl_Light_Button(30, 365, 90, 30, "visible");
           o->value(1);
           o->selection_color((Fl_Color)2);
@@ -2747,7 +2747,8 @@ cnnxhi->value( objnum );
 objnum = mwtb->reg_first( regnum, Cable );
 mwtb->highlight( Cable, objnum );
 cabhi->value( objnum );
-objnum = mwtb->model->surface(regnum)->start();
+objnum =0;
+for( int i=0; i<regnum; i++ ) objnum += mwtb->model->surface(i)->num();
 mwtb->highlight( SurfEle, objnum );
 elehi->value( objnum );
 objnum = mwtb->reg_first( regnum, Vertex );
