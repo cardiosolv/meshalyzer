@@ -171,6 +171,9 @@ void Model::determine_regions()
 
 
 /** add surface by selecting 2D elements from .elem file
+ *  
+ *  A surface will be created for each different region specified. 
+ *  Also, all elements withoyut a region specified will form a surface.
  *
  *  \param base model name
  */
@@ -179,19 +182,16 @@ int Model::add_surface_from_elem( const char *fn )
   /* determine file name */
   gzFile in;
   string fname(fn);
-  fname += "elem";
-  if( (in=gzopen( fname.c_str(), "r" )) == NULL ) {
-	fname += ".gz";
-	if( (in=gzopen( fname.c_str(), "r" )) == NULL ) {
+  if( (in=gzopen( (fname+="elem").c_str(), "r" )) == NULL ) 
+	if( (in=gzopen( (fname+=".gz").c_str(), "r" )) == NULL ) {
 	  fprintf( stderr, "Could not open surface file\n" );
 	  return -1;
 	}
-  }
 
   // Count the number of surface elements in each surface
   char buff[bufsize];
   gzgets(in,buff,bufsize);           // throw away first line
-  map<string,int> surfs;
+  map<string,int> surfs;             // number of elements in each surface
   while( gzgets(in,buff,bufsize) !=Z_NULL ) {
 	char   surfnum[10]="";
 	if( !strncmp(buff,"Tr",2) ) {
@@ -204,7 +204,8 @@ int Model::add_surface_from_elem( const char *fn )
 	if( strlen(surfnum) )
 	  surfs[surfnum]++;
   }
- 
+  if( !surfs.size() ) return numSurf;
+
   // allocate new surfaces
   _surface=(Surfaces **)realloc(_surface,
 		                 (numSurf+surfs.size())*sizeof(Surfaces *));
@@ -214,33 +215,29 @@ int Model::add_surface_from_elem( const char *fn )
   map<string,int> :: iterator iter = surfs.begin();
   for( int s=numSurf; iter!=surfs.end(); iter++, s++ ) {
     _surface[s]->num(iter->second );
-	surfmap[iter->first] = s;
+	surfmap[iter->first] = s;   // map region to surface index
   }
-  surfs.clear();
 
-  for( int s=numSurf; s<numSurf+surfmap.size(); s++ ) {
-	gzrewind(in);
-	gzgets(in,buff,bufsize); //throw away first line
-	while( gzgets(in,buff,bufsize) !=Z_NULL ) {
-	  char etype[10],reg[10];
-	  int  *idat;
-	  string srfstr;
-	  if( !strncmp(buff,"Tr",2) ) {
-		idat = new int[3];
-		if(sscanf( buff,"%s %d %d %d %s", etype, idat, idat+1, idat+2, reg)<5 )
-		  strcpy(reg,"EMPTY");
-		_surface[surfmap[reg]]->ele(surfs[reg]) = new Triangle( &pt );
-	  } else  if( !strncmp(buff,"Qd",2) ) {
-		idat = new int[4];
-		if(sscanf( buff,"%s %d %d %d %d %s", etype, idat, idat+1, idat+2, 
-					idat+3, reg)<6 )
-		  strcpy(reg,"EMPTY");
-		_surface[surfmap[reg]]->ele(surfs[reg]) = new Quadrilateral( &pt );
-	  }
-	  _surface[surfmap[reg]]->ele(surfs[reg])->define(idat);
-	  _surface[surfmap[reg]]->ele(surfs[reg])->compute_normals(0,0);
-	  surfs[reg]++;
-	}
+  surfs.clear();                // now use for current element in each surface
+  gzrewind(in);
+  gzgets(in,buff,bufsize);      //throw away first line
+  while( gzgets(in,buff,bufsize) !=Z_NULL ) {
+	char etype[10],reg[10];
+	int  idat[4];
+	if( !strncmp(buff,"Tr",2) ) {
+	  if(sscanf( buff,"%s %d %d %d %s", etype, idat, idat+1, idat+2, reg)<5 )
+		strcpy(reg,"EMPTY");
+	  _surface[surfmap[reg]]->ele(surfs[reg]) = new Triangle( &pt );
+	} else  if( !strncmp(buff,"Qd",2) ) {
+	  if(sscanf( buff,"%s %d %d %d %d %s", etype, idat, idat+1, idat+2, 
+				  idat+3, reg)<6 )
+		strcpy(reg,"EMPTY");
+	  _surface[surfmap[reg]]->ele(surfs[reg]) = new Quadrilateral( &pt );
+	} else
+	  continue;  //ignore volume elements
+	_surface[surfmap[reg]]->ele(surfs[reg])->define(idat);
+	_surface[surfmap[reg]]->ele(surfs[reg])->compute_normals(0,0);
+	surfs[reg]++;
   }
   gzclose( in );
 
@@ -334,8 +331,10 @@ void Model :: showobj( Object_t obj, bool *r, bool f )
 }
 
 
-/*
- * return color of object for surface s
+/** return color of object for surface s
+ *
+ *  \param obj object type
+ *  \param s   region number
  */
 GLfloat* Model:: get_color( Object_t obj, int s )
 {
@@ -759,10 +758,11 @@ bool Model :: read_elem_file( const char *fname )
 
   int ne=0;
   for( int i=0; i<_numVol; i++ ) {
-    if( gzgets(in, buf, bufsize) == Z_NULL ) return false;
+    if( gzgets(in, buf, bufsize)==Z_NULL) break;
+    if( !strlen(buf) ) break;
 	int n[9];
 	if( tets ) 
-	  sscanf( buf, "%d %d %d %d %d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
+	  sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
 	else
 	  sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
 			n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
@@ -784,8 +784,10 @@ bool Model :: read_elem_file( const char *fname )
 	  ne++;
 	} else if( !strcmp( eletype, "Tr" ) ) {
 	  // surface elements ignored
+	  _numVol--;
 	} else if( !strcmp( eletype, "Qd" ) ) {
 	  // surface elements ignored
+	  _numVol--;
 	} else {
 	  fprintf(stderr, "Unsupported element type: %s\n", eletype);
 	  delete[] _vol;
@@ -796,6 +798,8 @@ bool Model :: read_elem_file( const char *fname )
 	}
   }
   if( ne<_numVol) {
+	fprintf( stderr, "Warning: truncated element file? stated: %d, read: %d\n",
+			               _numVol, ne );
 	_numVol=ne;
 	VolElement **nv =new VolElement*[_numVol]; 
 	memcpy( nv, _vol, ne*sizeof(VolElement*) );

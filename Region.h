@@ -30,7 +30,7 @@ class Region {
 		bool    showobj[maxobject+2];
 		bool    is_visible;
 		int    _label;           //!< identifier in file for region
-		vector<bool> _member;  //!< whether a node is part of region
+		vector<bool> _member;    //!< whether a node is part of region
 		void    initialize( int, int );
 };
 

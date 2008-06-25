@@ -13,12 +13,12 @@ gzFile openFile( const char*, const char* );
 
 class DrawingObj {
 	public:
+		               DrawingObj( void ): _n(0){} 
 		virtual void   draw( int, GLfloat*, float size=1 )=0;//draw single objs
 		virtual void   draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
 		         int stride=1, dataOpac* dopac=NULL )=0;//draw several objs
 		virtual bool   read( const char * ) = 0;  
 		        int    num() const { return _n; }		//!< get \#objects
-		               DrawingObj( void ): _n(0){} 
 			    void   translucency( bool );            // set tranlucency
 	protected:
 		int      _n;			                        //!< \# objects

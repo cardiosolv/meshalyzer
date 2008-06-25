@@ -235,11 +235,9 @@ int Triangle::countInFile( const char* fn )
  */
 void Triangle::compute_normals(int e0, int e1)
 {
-  int e, n;
-
   if( _nrml==NULL ) _nrml=new GLfloat[e1*3+3];
 
-  for( e=e0; e<=e1; e++ ) {
+  for( int e=e0; e<=e1; e++ ) {
 
 	const int* ele = _node+3*e;
 	Vector3D<GLfloat> a(_pt->pt(ele[0]));

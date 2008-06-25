@@ -138,23 +138,24 @@ void SurfaceElement::read_normals( int e0, int e1, const char *fnb )
 
 /** define an object
  *
- * \param n list of nodes defining object
- * \param a object index
+ * \param nl list of nodes defining object(s)
+ * \param n  \#object to define
  *
- * \pre \p nl must be at least _ptsPerObj*\p n long
- * \note \p n must not be deallocated and declared with new
+ * \pre  \p nl must be at least _ptsPerObj*\p n long
+ * \post \p _n is allocated if need be
  */
 void  MultiPoint::define( int *nl, int n )
 {
-  _node = nl;
+  delete[] _node;
+  _node = new int[n*_ptsPerObj];
+  memcpy( _node, nl, n*_ptsPerObj*sizeof(int) );
   _n = n;
 }
 
 
 /** add an object to the list 
  *
- * \param n list of nodes
- *
+ * \param n list of nodes defining object
  */
 void MultiPoint::add( int *n )
 {
@@ -167,8 +168,7 @@ void MultiPoint::add( int *n )
   } else
 	_node = new int[_ptsPerObj];
   
-  for( int j=0; j<_ptsPerObj; j++ )
-	_node[_ptsPerObj*_n-_ptsPerObj+j] = n[j];
+  memcpy( _node, n, _ptsPerObj*sizeof(int) );
 }
 
 
