@@ -2,46 +2,57 @@
 
 #include "Sequence.h"
 
-inline void Sequence::cb_Start_i(Fl_Return_Button*, void*) {
+inline void Sequence::cb_Start_i(Fl_Return_Button*, void*)
+{
   mwtb->output_png( fname->value(), this );
 }
-void Sequence::cb_Start(Fl_Return_Button* o, void* v) {
+void Sequence::cb_Start(Fl_Return_Button* o, void* v)
+{
   ((Sequence*)(o->parent()->user_data()))->cb_Start_i(o,v);
 }
 
-inline void Sequence::cb_browse_i(Fl_Button*, void*) {
+inline void Sequence::cb_browse_i(Fl_Button*, void*)
+{
   const char* fn=fl_file_chooser("Choose output file name base", "*.png",fname->value() );
-if( fn != NULL ) fname->value(fn);
+  if ( fn != NULL ) fname->value(fn);
 }
-void Sequence::cb_browse(Fl_Button* o, void* v) {
+void Sequence::cb_browse(Fl_Button* o, void* v)
+{
   ((Sequence*)(o->parent()->user_data()))->cb_browse_i(o,v);
 }
 
-Sequence::Sequence( TBmeshWin *tb ) {
+Sequence::Sequence( TBmeshWin *tb )
+{
   Fl_Double_Window* w;
-  { Fl_Double_Window* o = window = new Fl_Double_Window(295, 190, "Write PNG Sequence");
+  {
+    Fl_Double_Window* o = window = new Fl_Double_Window(295, 190, "Write PNG Sequence");
     w = o;
     o->user_data((void*)(this));
-    { Fl_Progress* o = movieprog = new Fl_Progress(15, 10, 265, 35);
+    {
+      Fl_Progress* o = movieprog = new Fl_Progress(15, 10, 265, 35);
       o->selection_color((Fl_Color)91);
     }
-    { Fl_Return_Button* o = new Fl_Return_Button(15, 145, 265, 35, "Start sequence");
+    {
+      Fl_Return_Button* o = new Fl_Return_Button(15, 145, 265, 35, "Start sequence");
       o->callback((Fl_Callback*)cb_Start);
     }
-    { Fl_File_Input* o = fname = new Fl_File_Input(15, 65, 215, 35, "output file base name:");
+    {
+      Fl_File_Input* o = fname = new Fl_File_Input(15, 65, 215, 35, "output file base name:");
       o->align(FL_ALIGN_TOP);
     }
-    { Fl_Button* o = new Fl_Button(240, 65, 40, 35, "browse");
+    {
+      Fl_Button* o = new Fl_Button(240, 65, 40, 35, "browse");
       o->labelsize(10);
       o->callback((Fl_Callback*)cb_browse);
     }
-    { Fl_Value_Input* o = lastFrameNum = new Fl_Value_Input(160, 110, 55, 25, "End Frame:");
+    {
+      Fl_Value_Input* o = lastFrameNum = new Fl_Value_Input(160, 110, 55, 25, "End Frame:");
       o->step(1);
     }
     o->end();
   }
   mwtb = tb;
-fname->value("image.png");
-lastFrameNum->value( mwtb->numframes-1 );
-lastFrameNum->maximum( mwtb->numframes-1 );
+  fname->value("image.png");
+  lastFrameNum->value( mwtb->numframes-1 );
+  lastFrameNum->maximum( mwtb->numframes-1 );
 }

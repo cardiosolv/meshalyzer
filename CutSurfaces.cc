@@ -19,25 +19,25 @@ CutSurfaces::CutSurfaces() : _norm(NULL),_ptarr(NULL), _interp(NULL)
  *  \param ni list for data interpolation
  *
  *  \pre each element pointer points to a single element and not a list
- *  
+ *
  *  \note points are not shred between elements
  */
 void
 CutSurfaces :: addEle( SurfaceElement *se, GLfloat *n, Interpolator<DATA_TYPE> *ni )
 {
   int _numele = _ele.size();
-  if( !(_ele.size()%ADD_INC) ) {
-	_ptarr    = static_cast<GLfloat **>(realloc( _ptarr, 
-					(_numele/ADD_INC+1)*ADD_INC*sizeof(GLfloat *) ));
-	_interp = static_cast<Interpolator<DATA_TYPE> **>(realloc( _interp, 
-				(_numele/ADD_INC+1)*ADD_INC*sizeof(Interpolator<DATA_TYPE> *)));
-	_norm     = static_cast<GLfloat *>(realloc( _norm, 
-					(_numele/ADD_INC+1)*ADD_INC*sizeof(GLfloat)*3 ));
+  if ( !(_ele.size()%ADD_INC) ) {
+    _ptarr    = static_cast<GLfloat **>(realloc( _ptarr,
+                                        (_numele/ADD_INC+1)*ADD_INC*sizeof(GLfloat *) ));
+    _interp = static_cast<Interpolator<DATA_TYPE> **>(realloc( _interp,
+              (_numele/ADD_INC+1)*ADD_INC*sizeof(Interpolator<DATA_TYPE> *)));
+    _norm     = static_cast<GLfloat *>(realloc( _norm,
+                                       (_numele/ADD_INC+1)*ADD_INC*sizeof(GLfloat)*3 ));
   }
   _ele.push_back(se);
   _ptarr[_numele]  = const_cast<GLfloat *>(const_cast<Point*>(se->pt())->pt());
   _interp[_numele] = ni;
-  memcpy( _norm+3*_numele, n, sizeof(GLfloat)*3 ); 
+  memcpy( _norm+3*_numele, n, sizeof(GLfloat)*3 );
 }
 
 
@@ -46,16 +46,16 @@ CutSurfaces :: addEle( SurfaceElement *se, GLfloat *n, Interpolator<DATA_TYPE> *
  */
 CutSurfaces::~CutSurfaces()
 {
-  if( !_ele.empty() ) {
-	for( int i=0; i<_ele.size(); i++ ) {
-	  delete _ele[i];
-	  delete _ptarr[i];
-	  delete _interp[i];
-	}
-	free( _ptarr );
-	free( _norm );
-	free( _interp );
-	_ele.clear();
+  if ( !_ele.empty() ) {
+    for ( int i=0; i<_ele.size(); i++ ) {
+      delete _ele[i];
+      delete _ptarr[i];
+      delete _interp[i];
+    }
+    free( _ptarr );
+    free( _norm );
+    free( _interp );
+    _ele.clear();
   }
 }
 

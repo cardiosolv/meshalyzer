@@ -6,35 +6,36 @@
 #define SCAN_STR_START "%*f %*f "
 
 template<class T>
-class FileSeqCGreader : public DataReader<T> {
+class FileSeqCGreader : public DataReader<T>
+{
 
- public:
-  FileSeqCGreader( Master<T>* _mthread, Slave<T>* _sthread, 
-		  			Maxmin<T>* _maxmin_ptr, map<int,string>& filelist );
-  ~FileSeqCGreader();
-  virtual void reader();
-  virtual void local_maxmin();
-  virtual void tmsr();   
-  virtual void find_maxtm();
-  
- private:
-  char*            buff;
-  static const int bufsize = 1024;
-  int              block_size;
-  map<int,string>  files;
-  string           scanner; 
-  using DataReader<T>:: mthread;
-  using DataReader<T>:: sthread;
-  using DataReader<T>:: maxmin_ptr;
-  using DataReader<T>:: data;
-  using DataReader<T>:: in;
+  public:
+    FileSeqCGreader( Master<T>* _mthread, Slave<T>* _sthread,
+                     Maxmin<T>* _maxmin_ptr, map<int,string>& filelist );
+    ~FileSeqCGreader();
+    virtual void reader();
+    virtual void local_maxmin();
+    virtual void tmsr();
+    virtual void find_maxtm();
+
+  private:
+    char*            buff;
+    static const int bufsize = 1024;
+    int              block_size;
+    map<int,string>  files;
+    string           scanner;
+    using DataReader<T>:: mthread;
+    using DataReader<T>:: sthread;
+    using DataReader<T>:: maxmin_ptr;
+    using DataReader<T>:: data;
+    using DataReader<T>:: in;
 };
 
 template<class T>
-FileSeqCGreader<T>::FileSeqCGreader ( Master<T>* _mthread, Slave<T>* _sthread, 
-		Maxmin<T>* _maxmin_ptr, map<int,string>& filelist ) : 
-		buff(new char[bufsize]), files(filelist)
-{ 
+FileSeqCGreader<T>::FileSeqCGreader ( Master<T>* _mthread, Slave<T>* _sthread,
+                                      Maxmin<T>* _maxmin_ptr, map<int,string>& filelist ) :
+    buff(new char[bufsize]), files(filelist)
+{
   mthread    = _mthread;
   sthread    = _sthread;
   maxmin_ptr = _maxmin_ptr;
@@ -47,7 +48,7 @@ FileSeqCGreader<T>::FileSeqCGreader ( Master<T>* _mthread, Slave<T>* _sthread,
 
 // Destructor
 template<class T>
-FileSeqCGreader<T>::~FileSeqCGreader() 
+FileSeqCGreader<T>::~FileSeqCGreader()
 {
   gzclose( in );
   delete [] buff;
@@ -62,30 +63,30 @@ FileSeqCGreader<T>::~FileSeqCGreader()
  *  \note The first line of the file is thrown away.
  */
 template<class T>
-void FileSeqCGreader<T>::reader() 
+void FileSeqCGreader<T>::reader()
 {
-  if( sthread->rdtm<0 || sthread->rdtm>mthread->maxtm ) {
-	sthread->rdtm = -1000;
+  if ( sthread->rdtm<0 || sthread->rdtm>mthread->maxtm ) {
+    sthread->rdtm = -1000;
     sthread->v_bit = false;
-	return;
+    return;
   }
 
   map<int,string>::iterator CGp = files.begin();
-  for( int i=0; i<sthread->rdtm; i++ )
+  for ( int i=0; i<sthread->rdtm; i++ )
     CGp++;
- 
-  if( in!=NULL )gzclose( in );
+
+  if ( in!=NULL )gzclose( in );
   in = gzopen( CGp->second.c_str(), "r" );
-  
+
   gzgets(in, buff, bufsize) == Z_NULL; //throw away first line
 
-  if( gzgets(in, buff, bufsize) == Z_NULL );
-  if( sscanf(buff, scanner.c_str(), data) != 1) return;
+  if ( gzgets(in, buff, bufsize) == Z_NULL );
+  if ( sscanf(buff, scanner.c_str(), data) != 1) return;
   data[1] = data[0];		// repeat since we added bogus first node
 
-  for (int i=2; i<mthread->slsz; i++){
-    if( gzgets(in, buff, bufsize) == Z_NULL ) break;
-    if( sscanf(buff, scanner.c_str(), (data+i)) != 1) break;
+  for (int i=2; i<mthread->slsz; i++) {
+    if ( gzgets(in, buff, bufsize) == Z_NULL ) break;
+    if ( sscanf(buff, scanner.c_str(), (data+i)) != 1) break;
   }
 
   sthread->data = data;
@@ -100,34 +101,34 @@ void FileSeqCGreader<T>::reader()
  *        example, actually points to the point lavbelled 101.
  */
 template<class T>
-void FileSeqCGreader<T>::tmsr() 
+void FileSeqCGreader<T>::tmsr()
 {
-  if( sthread->unlock<0||sthread->unlock>=mthread->slsz ) return;
-  
+  if ( sthread->unlock<0||sthread->unlock>=mthread->slsz ) return;
+
   map<int,string>::iterator CGp = files.begin();
-  
-  for( int t=0; t<=mthread->maxtm; t++ ) {
 
-	gzFile in = gzopen( (CGp++)->second.c_str(), "r" );
+  for ( int t=0; t<=mthread->maxtm; t++ ) {
 
-	int block, offset;
-	// account for first point actually being point 1 (point 0 = point 1 )
-	if( sthread->unlock ) {
-	  block  = (sthread->unlock-1)/block_size;
-	  offset = (sthread->unlock-1)%block_size;
-	} else {
-	  block = 0;
-	  offset = 0;
-	}
+    gzFile in = gzopen( (CGp++)->second.c_str(), "r" );
 
-	gzseek( in, maxmin_ptr->sl_ptr[t][block], SEEK_SET );
+    int block, offset;
+    // account for first point actually being point 1 (point 0 = point 1 )
+    if ( sthread->unlock ) {
+      block  = (sthread->unlock-1)/block_size;
+      offset = (sthread->unlock-1)%block_size;
+    } else {
+      block = 0;
+      offset = 0;
+    }
 
-	for( int i=0; i<=offset; i++  )
-      if( gzgets(in, buff, bufsize) == Z_NULL ) break;
+    gzseek( in, maxmin_ptr->sl_ptr[t][block], SEEK_SET );
 
-    if( sscanf(buff, scanner.c_str(), sthread->data+t) != 1 ) throw(1);
+    for ( int i=0; i<=offset; i++  )
+      if ( gzgets(in, buff, bufsize) == Z_NULL ) break;
 
-	gzclose(in);
+    if ( sscanf(buff, scanner.c_str(), sthread->data+t) != 1 ) throw(1);
+
+    gzclose(in);
   }
 }
 
@@ -139,8 +140,8 @@ void FileSeqCGreader<T>::tmsr()
  *  facilitate later picking out one point from the slice. This way, if
  *  we need the thousandth point in the slice, we do not have to read in
  *  the preceding 999. We only need to start counting from the closest
- *  previous stored offset. This is helpful since ASCII files may contain 
- *  different numbers of bytes per line. For example, a time slice with 
+ *  previous stored offset. This is helpful since ASCII files may contain
+ *  different numbers of bytes per line. For example, a time slice with
  *  2500 points and 5 blocks will have offsets to entries 0, 500,
  *  1000, 1500 and 2000.
  *
@@ -153,52 +154,52 @@ void FileSeqCGreader<T>::tmsr()
  *
  */
 template<class T>
-void FileSeqCGreader<T>::local_maxmin() 
+void FileSeqCGreader<T>::local_maxmin()
 {
   map<int,string>::iterator CGp;
 
   maxmin_ptr->sl_ptr  = new z_off_t *[mthread->maxtm+1];
   maxmin_ptr->num_slc = mthread->maxtm+1;
-  
+
   int t=0;
-  for( CGp=files.begin(); CGp!=files.end(); CGp++, t++ ) {
+  for ( CGp=files.begin(); CGp!=files.end(); CGp++, t++ ) {
     T   temp;
 
     maxmin_ptr->sl_ptr[t] = new z_off_t[BLOCK_SLSZ];
-	
-	gzFile in = gzopen( CGp->second.c_str(), "r" );
-	if( gzgets(in, buff, bufsize) == Z_NULL ) break; //throw away first line
-	
-	maxmin_ptr->sl_ptr[t][0] = gztell( in );
-	if( gzgets(in, buff, bufsize) == Z_NULL ) break;
-	if( sscanf(buff, scanner.c_str(), &temp) != 1 ) break;
 
-	maxmin_ptr->lmax[t] = maxmin_ptr->lmin[t] = temp;
-	
-	for( int i=1; i<mthread->slsz-1; i++ ){  
+    gzFile in = gzopen( CGp->second.c_str(), "r" );
+    if ( gzgets(in, buff, bufsize) == Z_NULL ) break; //throw away first line
 
-	  if( !(i%block_size) )
-		maxmin_ptr->sl_ptr[t][i/block_size] = gztell( in );
+    maxmin_ptr->sl_ptr[t][0] = gztell( in );
+    if ( gzgets(in, buff, bufsize) == Z_NULL ) break;
+    if ( sscanf(buff, scanner.c_str(), &temp) != 1 ) break;
 
-	  if( gzgets(in, buff, bufsize) == Z_NULL ) break;
-	  if( sscanf(buff, scanner.c_str(), &temp) != 1) break;
-	  
-	  if(maxmin_ptr->lmax[t] < temp)
-		maxmin_ptr->lmax[t] = temp;
-	  if(maxmin_ptr->lmin[t] > temp)
-		maxmin_ptr->lmin[t] = temp;
-	}
-	maxmin_ptr->lv_bit[t] = true;
-	gzclose( in );
+    maxmin_ptr->lmax[t] = maxmin_ptr->lmin[t] = temp;
+
+    for ( int i=1; i<mthread->slsz-1; i++ ) {
+
+      if ( !(i%block_size) )
+        maxmin_ptr->sl_ptr[t][i/block_size] = gztell( in );
+
+      if ( gzgets(in, buff, bufsize) == Z_NULL ) break;
+      if ( sscanf(buff, scanner.c_str(), &temp) != 1) break;
+
+      if (maxmin_ptr->lmax[t] < temp)
+        maxmin_ptr->lmax[t] = temp;
+      if (maxmin_ptr->lmin[t] > temp)
+        maxmin_ptr->lmin[t] = temp;
+    }
+    maxmin_ptr->lv_bit[t] = true;
+    gzclose( in );
   }
   maxmin_ptr->read = true;
 }
 
 
 template<class T>
-void FileSeqCGreader<T>::find_maxtm() 
+void FileSeqCGreader<T>::find_maxtm()
 {
   mthread->maxtm = files.size()-1;
 }
-  
+
 #endif

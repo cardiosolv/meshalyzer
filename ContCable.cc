@@ -7,7 +7,7 @@
 #include "DrawingObjects.h"
 
 /** draw many ContCables
- *  
+ *
  *  \param p0       first index of cable to draw
  *  \param p1       last index of cable to draw
  *  \param colour   colour to use if no data
@@ -15,34 +15,34 @@
  *  \param stride   draw every n'th point
  */
 void ContCable::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
-					 DATA_TYPE* data, int stride, dataOpac* dataopac )
+                      DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
-  if( p0>=_n || p1>=_n ) return;
-  
-  for( int i=p0; i<=p1; i+=stride ){
-	glBegin(GL_LINE_STRIP);
-	if( data!=NULL ) {
-	  if( dataopac->on() ){		// data opacity
-		for( int j=_node[i]; j<_node[i+1]; j++ ){
-		  if( !_pt->vis(j) ) continue;
-		  cs->colourize( data[j], dataopac->alpha( data[j]) );
-		  glVertex3fv( _pt->pt(j) );
-		} 
-	  } else {		// no data opacity
-		for( int j=_node[i]; j<_node[i+1]; j++ ){
-		  if( !_pt->vis(j) ) continue;
-		  cs->colourize( data[j], colour[3] );
-		  glVertex3fv( _pt->pt(j) );
-		} 
-	  }
-	} else {							// no data on cables
-	  glColor4fv( colour );
-	  for( int j=_node[i]; j<_node[i+1]; j++ ) {
-		if( !_pt->vis(j) ) continue;
-		glVertex3fv( _pt->pt(j) );
-	  }
-	}
-	glEnd();
+  if ( p0>=_n || p1>=_n ) return;
+
+  for ( int i=p0; i<=p1; i+=stride ) {
+    glBegin(GL_LINE_STRIP);
+    if ( data!=NULL ) {
+      if ( dataopac->on() ) {		// data opacity
+        for ( int j=_node[i]; j<_node[i+1]; j++ ) {
+          if ( !_pt->vis(j) ) continue;
+          cs->colourize( data[j], dataopac->alpha( data[j]) );
+          glVertex3fv( _pt->pt(j) );
+        }
+      } else {		// no data opacity
+        for ( int j=_node[i]; j<_node[i+1]; j++ ) {
+          if ( !_pt->vis(j) ) continue;
+          cs->colourize( data[j], colour[3] );
+          glVertex3fv( _pt->pt(j) );
+        }
+      }
+    } else {							// no data on cables
+      glColor4fv( colour );
+      for ( int j=_node[i]; j<_node[i+1]; j++ ) {
+        if ( !_pt->vis(j) ) continue;
+        glVertex3fv( _pt->pt(j) );
+      }
+    }
+    glEnd();
   }
 }
 
@@ -55,16 +55,16 @@ void ContCable::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
  */
 void ContCable :: draw( int p, GLfloat *colour, float size )
 {
-  if( p<_n ) {
-	glColor3fv( colour );
-	glLineWidth(size);
-	glBegin( GL_LINE_STRIP );
-	  for( int j=_node[p]; j<_node[p+1]; j++ ) {
-		if( !_pt->vis(j) ) continue;
-		glVertex3fv( _pt->pt(j) );
-	  }
-	glEnd();
-	glLineWidth(1);
+  if ( p<_n ) {
+    glColor3fv( colour );
+    glLineWidth(size);
+    glBegin( GL_LINE_STRIP );
+    for ( int j=_node[p]; j<_node[p+1]; j++ ) {
+      if ( !_pt->vis(j) ) continue;
+      glVertex3fv( _pt->pt(j) );
+    }
+    glEnd();
+    glLineWidth(1);
   }
 }
 
@@ -73,20 +73,19 @@ void ContCable :: draw( int p, GLfloat *colour, float size )
 bool ContCable :: read( const char *fname )
 {
   gzFile in;
-  
+
   try {
     in = openFile( fname, "cables" );
-  }
-  catch(...) { return false; }
+  } catch (...) { return false; }
 
   const int bufsize=1024;
   char      buff[bufsize];
-  if( gzgets(in, buff, bufsize) == Z_NULL ) return false;
-  if( sscanf( buff, "%d", &_n ) != 1 ) return false;
+  if ( gzgets(in, buff, bufsize) == Z_NULL ) return false;
+  if ( sscanf( buff, "%d", &_n ) != 1 ) return false;
   _node = new int[_n+1];
-  for( int i=0; i<=_n; i++ ) {
-	gzgets(in, buff, bufsize);
-	sscanf( buff, "%d", _node+i );
+  for ( int i=0; i<=_n; i++ ) {
+    gzgets(in, buff, bufsize);
+    sscanf( buff, "%d", _node+i );
   }
   gzclose(in);
   return true;
@@ -101,16 +100,16 @@ bool ContCable :: read( const char *fname )
  */
 void ContCable::register_vertices( int p0, int p1, vector<bool>& ptDrawn )
 {
-  for( int i=p0; i<=p1; i++ ) {
-	int p = i;
-	for( int j=_node[p]; j<_node[p+1]; j++ )
-	  if( _pt->vis(j) && !ptDrawn[j] ) {
-		ptDrawn[j] = true;
-		glLoadName( j );
-		glBegin(GL_POINTS);
-		  glVertex3fv( _pt->pt(j) );
-		glEnd();
-	  }
+  for ( int i=p0; i<=p1; i++ ) {
+    int p = i;
+    for ( int j=_node[p]; j<_node[p+1]; j++ )
+      if ( _pt->vis(j) && !ptDrawn[j] ) {
+        ptDrawn[j] = true;
+        glLoadName( j );
+        glBegin(GL_POINTS);
+        glVertex3fv( _pt->pt(j) );
+        glEnd();
+      }
   }
 }
 

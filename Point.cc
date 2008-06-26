@@ -1,7 +1,7 @@
 #include "DrawingObjects.h"
 
 /** draw many Points
- *  
+ *
  *  \param p0       first index of point to draw
  *  \param p1       last index of point to draw
  *  \param colour   colour to use if no data
@@ -9,36 +9,36 @@
  *  \param stride   draw every n'th point
  */
 void Point::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
-					 DATA_TYPE* data, int stride, dataOpac* dataopac )
+                  DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
-  if( p0>=_n || p1>=_n ) return;
+  if ( p0>=_n || p1>=_n ) return;
 
   glPushAttrib(GL_POLYGON_BIT);
   glBegin( GL_POINTS );
-  
-  if( data != NULL ) {					// data determines colour
-	if( dataopac!=NULL && dataopac->on() ) {        // data opacity
+
+  if ( data != NULL ) {					// data determines colour
+    if ( dataopac!=NULL && dataopac->on() ) {       // data opacity
       translucency(true);
-  	  for( int i=p0; i<=p1; i+=stride ) {
-		if( !(*_visible)[i] ) continue;
-		cs->colourize( data[i], dataopac->alpha(data[i]) );
-		glVertex3fv( _pts+3*i );
-	  }
+      for ( int i=p0; i<=p1; i+=stride ) {
+        if ( !(*_visible)[i] ) continue;
+        cs->colourize( data[i], dataopac->alpha(data[i]) );
+        glVertex3fv( _pts+3*i );
+      }
       translucency(false);
-	} else {                             // no data opacity
-	  for(int i=p0; i<=p1; i+=stride ){
-		if( !(*_visible)[i] ) continue;
-		cs->colourize( data[i], colour[3] );
-		glVertex3fv( _pts+3*i );
-	  }
-	}
+    } else {                             // no data opacity
+      for (int i=p0; i<=p1; i+=stride ) {
+        if ( !(*_visible)[i] ) continue;
+        cs->colourize( data[i], colour[3] );
+        glVertex3fv( _pts+3*i );
+      }
+    }
   } else {								 // all same colour
     glColor4fv( colour );
-    for(int i=p0; i<=p1; i+=stride )
-	  if( (*_visible)[i] )
-		glVertex3fv( _pts+3*i );
+    for (int i=p0; i<=p1; i+=stride )
+      if ( (*_visible)[i] )
+        glVertex3fv( _pts+3*i );
   }
-  
+
   glEnd();
   glPopAttrib();
 }
@@ -52,13 +52,13 @@ void Point::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
  */
 void Point :: draw( int p, GLfloat *colour, float size )
 {
-  if( p<_n ) {
-	glColor3fv( colour );
-	glPointSize(size);
-	glBegin( GL_POINTS );
-	glVertex3fv( _pts+3*p );
-	glEnd();
-	glPointSize(1);
+  if ( p<_n ) {
+    glColor3fv( colour );
+    glPointSize(size);
+    glBegin( GL_POINTS );
+    glVertex3fv( _pts+3*p );
+    glEnd();
+    glPointSize(1);
   }
 }
 
@@ -70,12 +70,12 @@ void Point :: draw( int p, GLfloat *colour, float size )
  */
 void Point::register_vertex( int p, vector<bool>& ptDrawn )
 {
-  if( !ptDrawn[p] ) {  // only register once
-	ptDrawn[p] = true;
+  if ( !ptDrawn[p] ) { // only register once
+    ptDrawn[p] = true;
     glLoadName( p );
-	glBegin(GL_POINTS);
-	  glVertex3fv( _pts+3*p );
-	glEnd();
+    glBegin(GL_POINTS);
+    glVertex3fv( _pts+3*p );
+    glEnd();
   }
 }
 
@@ -87,32 +87,32 @@ bool Point :: read( const char *fname )
 
   const int bufsize=1024;
   char      buff[bufsize];
-  if( gzgets(in, buff, bufsize) == Z_NULL ) throw 1;
-  if( sscanf( buff, "%d", &_n ) != 1 ) throw 2;
+  if ( gzgets(in, buff, bufsize) == Z_NULL ) throw 1;
+  if ( sscanf( buff, "%d", &_n ) != 1 ) throw 2;
 
-  if( _base1 ) _n++;					// add initial bogus point
+  if ( _base1 ) _n++;					// add initial bogus point
   _pts = (GLfloat *)malloc(_n*3*sizeof(GLfloat));
   float min[3], max[3];
-  for( int i=0; i<3*_n; i+=3 ){
+  for ( int i=0; i<3*_n; i+=3 ) {
 
-	if( i==3 && _base1 ) {				// copy the first point
-	  for( int j=0; j<3; j++ )
-		_pts[i+j] = _pts[i+j-3];
-	  continue;
-	}
-	if( gzgets(in, buff, bufsize) == Z_NULL ) throw 2;
-	if( sscanf( buff, "%f %f %f", _pts+i, _pts+i+1, _pts+i+2 ) < 3 ) 
-	  														throw 3;
-	for( int ti=0; ti<3; ti++ ) {
-	  if( !i || _pts[i+ti]>max[ti] ) max[ti] = _pts[i+ti];
-	  if( !i || _pts[i+ti]<min[ti] ) min[ti] = _pts[i+ti];
-	}
+    if ( i==3 && _base1 ) {				// copy the first point
+      for ( int j=0; j<3; j++ )
+        _pts[i+j] = _pts[i+j-3];
+      continue;
+    }
+    if ( gzgets(in, buff, bufsize) == Z_NULL ) throw 2;
+    if ( sscanf( buff, "%f %f %f", _pts+i, _pts+i+1, _pts+i+2 ) < 3 )
+      throw 3;
+    for ( int ti=0; ti<3; ti++ ) {
+      if ( !i || _pts[i+ti]>max[ti] ) max[ti] = _pts[i+ti];
+      if ( !i || _pts[i+ti]<min[ti] ) min[ti] = _pts[i+ti];
+    }
   }
 
   // centre the model about the origin
-  for( int ti=0; ti<3; ti++ ) _offset[ti] = (min[ti]+max[ti])/2;
-  for( int i=0; i<3*_n; i+=3 )
-	for( int ti=0; ti<3; ti++ ) _pts[i+ti] -= _offset[ti];
+  for ( int ti=0; ti<3; ti++ ) _offset[ti] = (min[ti]+max[ti])/2;
+  for ( int i=0; i<3*_n; i+=3 )
+    for ( int ti=0; ti<3; ti++ ) _pts[i+ti] -= _offset[ti];
   gzclose(in);
 
   _allvis.resize( _n );

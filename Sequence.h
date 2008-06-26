@@ -11,22 +11,23 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Value_Input.H>
 
-class Sequence {
-public:
-  Sequence( TBmeshWin *tb );
-  Fl_Double_Window *window;
-  Fl_Progress *movieprog;
-private:
-  inline void cb_Start_i(Fl_Return_Button*, void*);
-  static void cb_Start(Fl_Return_Button*, void*);
-public:
-  Fl_File_Input *fname;
-private:
-  inline void cb_browse_i(Fl_Button*, void*);
-  static void cb_browse(Fl_Button*, void*);
-public:
-  Fl_Value_Input *lastFrameNum;
-private:
-  TBmeshWin *mwtb;
+class Sequence
+{
+  public:
+    Sequence( TBmeshWin *tb );
+    Fl_Double_Window *window;
+    Fl_Progress *movieprog;
+  private:
+    inline void cb_Start_i(Fl_Return_Button*, void*);
+    static void cb_Start(Fl_Return_Button*, void*);
+  public:
+    Fl_File_Input *fname;
+  private:
+    inline void cb_browse_i(Fl_Button*, void*);
+    static void cb_browse(Fl_Button*, void*);
+  public:
+    Fl_Value_Input *lastFrameNum;
+  private:
+    TBmeshWin *mwtb;
 };
 #endif

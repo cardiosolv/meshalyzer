@@ -11,7 +11,7 @@
 #ifdef USE_QUADRIC_OBJS
 
 void draw_cylinder( const GLfloat *start, const GLfloat* end, int radius )
-{  
+{
   GLUquadric* quado = gluNewQuadric();
   gluQuadricDrawStyle( quado, GLU_FILL );
   gluQuadricOrientation(quado, GLU_INSIDE);
@@ -37,7 +37,7 @@ void draw_cylinder( const GLfloat *start, const GLfloat* end, int radius )
 #endif
 
 /** draw many Points
- *  
+ *
  *  \param p0       first connection of region
  *  \param p1       last connection of region
  *  \param colour   colour to use if no data
@@ -45,34 +45,34 @@ void draw_cylinder( const GLfloat *start, const GLfloat* end, int radius )
  *  \param stride   draw every n'th point
  */
 void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
-					 DATA_TYPE* data, int stride, dataOpac* dataopac )
+                       DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
-  if( p0>=_n || p1>=_n ) return;
+  if ( p0>=_n || p1>=_n ) return;
 
 #ifndef USE_QUADRIC_OBJS
   glBegin(GL_LINES);
 #endif
-  for( int i=p0; i<=p1; i+=stride ) {
-	if( !_pt->vis(_node[i*2]) || !_pt->vis(_node[i*2+1]) )
-	  continue;
-	if( data != NULL ) {
+  for ( int i=p0; i<=p1; i+=stride ) {
+    if ( !_pt->vis(_node[i*2]) || !_pt->vis(_node[i*2+1]) )
+      continue;
+    if ( data != NULL ) {
 #ifdef USE_QUADRIC_OBJS
-	  cs->colourize( data[_node[i*2]], colour[3] );
-	  draw_cylinder( _pt->pt(_node[i*2]), _pt->pt(_node[i*2+1]), 0.4 );
+      cs->colourize( data[_node[i*2]], colour[3] );
+      draw_cylinder( _pt->pt(_node[i*2]), _pt->pt(_node[i*2+1]), 0.4 );
 #else
-	  cs->colourize( data[_node[i*2]], colour[3] );
-	  glVertex3fv(_pt->pt(_node[i*2]));
-	  cs->colourize( data[_node[i*2+1]], colour[3] );
-	  glVertex3fv(_pt->pt(_node[i*2+1]));
+      cs->colourize( data[_node[i*2]], colour[3] );
+      glVertex3fv(_pt->pt(_node[i*2]));
+      cs->colourize( data[_node[i*2+1]], colour[3] );
+      glVertex3fv(_pt->pt(_node[i*2+1]));
 #endif
-	} else {
+    } else {
 #ifdef USE_QUADRIC_OBJS
-	  draw_cylinder( _pt->pt(_node[i*2]), _pt->pt(_node[i*2+1]), 0.4 );
+      draw_cylinder( _pt->pt(_node[i*2]), _pt->pt(_node[i*2+1]), 0.4 );
 #else
-	  glVertex3fv(_pt->pt(_node[i*2]));
-	  glVertex3fv(_pt->pt(_node[i*2+1]));
+      glVertex3fv(_pt->pt(_node[i*2]));
+      glVertex3fv(_pt->pt(_node[i*2+1]));
 #endif
-	}
+    }
   }
 #ifndef USE_QUADRIC_OBJS
   glEnd();
@@ -88,18 +88,18 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
  */
 void Connection :: draw( int p, GLfloat *colour, float size )
 {
-  if( p<_n ) {
-	glColor3fv( colour );
-	glLineWidth(size);
+  if ( p<_n ) {
+    glColor3fv( colour );
+    glLineWidth(size);
 #ifdef USE_QUADRIC_OBJS
-	draw_cylinder( _pt->pt(_node[p*2]), _pt->pt(_node[p*2+1]), 0.4 );
+    draw_cylinder( _pt->pt(_node[p*2]), _pt->pt(_node[p*2+1]), 0.4 );
 #else
-	glBegin( GL_LINES );
-	glVertex3fv( _pt->pt(_node[p*2]   ) );
-	glVertex3fv( _pt->pt(_node[p*2+1] ) );
-	glEnd();
+    glBegin( GL_LINES );
+    glVertex3fv( _pt->pt(_node[p*2]   ) );
+    glVertex3fv( _pt->pt(_node[p*2+1] ) );
+    glEnd();
 #endif
-	glLineWidth(1);
+    glLineWidth(1);
   }
 }
 
@@ -108,19 +108,18 @@ void Connection :: draw( int p, GLfloat *colour, float size )
 bool Connection :: read( const char *fname )
 {
   gzFile in;
-  
+
   try {
     in = openFile( fname, "cnnx" );
-  }
-  catch(...) { return false; }
+  } catch (...) { return false; }
 
   const int bufsize=1024;
   char      buff[bufsize];
-  if( gzgets(in, buff, bufsize) == Z_NULL ) return false;
-  if( sscanf( buff, "%d", &_n ) != 1 ) return false;
+  if ( gzgets(in, buff, bufsize) == Z_NULL ) return false;
+  if ( sscanf( buff, "%d", &_n ) != 1 ) return false;
   _node = new int[2*_n];
-	for( int i=0; i<2*_n; i+=2 ) {
-	  gzgets(in, buff, bufsize);
+  for ( int i=0; i<2*_n; i+=2 ) {
+    gzgets(in, buff, bufsize);
     sscanf( buff, "%d %d", _node+i, _node+i+1 );
   }
   gzclose(in);

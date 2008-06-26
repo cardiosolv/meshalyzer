@@ -8,26 +8,27 @@ class TBmeshWin;
 #include <FL/Fl_Browser.H>
 #include <FL/Fl_Button.H>
 
-class HiLiteInfoWin {
-  TBmeshWin *mw;
-public:
-  HiLiteInfoWin(TBmeshWin *a);
-  Fl_Double_Window *window;
-private:
-  inline void cb_window_i(Fl_Double_Window*, void*);
-  static void cb_window(Fl_Double_Window*, void*);
-public:
-  Fl_Browser *hilighttext;
-private:
-  inline void cb_hilighttext_i(Fl_Browser*, void*);
-  static void cb_hilighttext(Fl_Browser*, void*);
-  inline void cb_Close_i(Fl_Button*, void*);
-  static void cb_Close(Fl_Button*, void*);
-public:
-  void clear();
-  void add(const char *s, void *d=0 );
-  const char * text(int n);
-  void topline( int a );
-  int topline( void );
+class HiLiteInfoWin
+{
+    TBmeshWin *mw;
+  public:
+    HiLiteInfoWin(TBmeshWin *a);
+    Fl_Double_Window *window;
+  private:
+    inline void cb_window_i(Fl_Double_Window*, void*);
+    static void cb_window(Fl_Double_Window*, void*);
+  public:
+    Fl_Browser *hilighttext;
+  private:
+    inline void cb_hilighttext_i(Fl_Browser*, void*);
+    static void cb_hilighttext(Fl_Browser*, void*);
+    inline void cb_Close_i(Fl_Button*, void*);
+    static void cb_Close(Fl_Button*, void*);
+  public:
+    void clear();
+    void add(const char *s, void *d=0 );
+    const char * text(int n);
+    void topline( int a );
+    int topline( void );
 };
 #endif

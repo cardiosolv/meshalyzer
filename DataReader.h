@@ -1,26 +1,27 @@
 #ifndef DATAREADER_H
 #define DATAREADER_H
 
-#define BLOCK_SLSZ 20              //!< Number of intermediary slice pointers 
+#define BLOCK_SLSZ 20              //!< Number of intermediary slice pointers
 
 /** virtual class for threaded data reading */
 template<class T>
-class DataReader {
+class DataReader
+{
 
- public:
-  virtual void reader()=0;
-  virtual void local_maxmin()=0;
-  virtual void tmsr()=0;
-  virtual void find_maxtm()=0;
+  public:
+    virtual void reader()=0;
+    virtual void local_maxmin()=0;
+    virtual void tmsr()=0;
+    virtual void find_maxtm()=0;
 
-  DataReader():mthread(0),sthread(0),maxmin_ptr(0),data(0),in(NULL){}
+    DataReader():mthread(0),sthread(0),maxmin_ptr(0),data(0),in(NULL){}
 
- protected:
-  Master<T>*    mthread;
-  Slave<T>*     sthread;
-  Maxmin<T>*    maxmin_ptr;
-  T*            data;
-  gzFile        in;
+  protected:
+    Master<T>*    mthread;
+    Slave<T>*     sthread;
+    Maxmin<T>*    maxmin_ptr;
+    T*            data;
+    gzFile        in;
 };
 #endif
 
@@ -29,20 +30,20 @@ class DataReader {
 //
 // Constructor:
 //   Given:
-//      Guarnteed valid values: In master:ftype, fname, scanstr, slsz, 
+//      Guarnteed valid values: In master:ftype, fname, scanstr, slsz,
 //                                   maxmin_ptr, this_ptr, and btw_size
 //      All other values are either invalid or unkown.
 //   Required:
-//      Initialize anything that you may need later such as opening file 
+//      Initialize anything that you may need later such as opening file
 //      (to be determined by the programmer)
 //
 // Destructor: (Writer defined)
-// 
+//
 // reader():
 //   Given:
 //      Guarnteed valid values: master(all elements), maxmin(all elements), and slave(all elements)
 //   Required:
-//      From the given tm in slave->rdtm, find the data of the time slice; give the pointer location to slave->data 
+//      From the given tm in slave->rdtm, find the data of the time slice; give the pointer location to slave->data
 //      When the data is found, set slave->v_bit to 1
 //
 // local_maxmin():

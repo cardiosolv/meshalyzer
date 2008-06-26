@@ -14,30 +14,31 @@ to orient the scene. */
 #include "Mouse.h"
 #include "Trackball.h"
 
-#define B2_MIMIC_MASK (FL_BUTTON1 | FL_SHIFT) 
-#define B3_MIMIC_MASK (FL_BUTTON1 | FL_CTRL) 
+#define B2_MIMIC_MASK (FL_BUTTON1 | FL_SHIFT)
+#define B3_MIMIC_MASK (FL_BUTTON1 | FL_CTRL)
 
-class Fl_Gl_Tb_Window : public Fl_Gl_Window {
-public:
-	Fl_Gl_Tb_Window(int x, int y, int w, int h, const char *l = 0)
-		: Fl_Gl_Window(x, y, w, h, l), trackball(mouse) { init(); }
-	Fl_Gl_Tb_Window(int w, int h, const char *l = 0)
-		: Fl_Gl_Window(w, h, l), trackball(mouse) { init(); }
-	~Fl_Gl_Tb_Window();
+class Fl_Gl_Tb_Window : public Fl_Gl_Window
+{
+  public:
+    Fl_Gl_Tb_Window(int x, int y, int w, int h, const char *l = 0)
+        : Fl_Gl_Window(x, y, w, h, l), trackball(mouse) { init(); }
+    Fl_Gl_Tb_Window(int w, int h, const char *l = 0)
+        : Fl_Gl_Window(w, h, l), trackball(mouse) { init(); }
+    ~Fl_Gl_Tb_Window();
 
-	void DoTransform(); // Call this from draw() to transform the view
-protected:
-	int handle(int);
+    void DoTransform(); // Call this from draw() to transform the view
+  protected:
+    int handle(int);
 
-public:
-  Mouse mouse;
-  Trackball trackball;
-  
-private:
-	void init();
-	bool isIdleRedrawing;    // call redraw() in any case
-	int  map_button( int eventstate );
-	bool active;
+  public:
+    Mouse mouse;
+    Trackball trackball;
+
+  private:
+    void init();
+    bool isIdleRedrawing;    // call redraw() in any case
+    int  map_button( int eventstate );
+    bool active;
 };
 
 #endif

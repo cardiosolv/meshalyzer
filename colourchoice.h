@@ -12,27 +12,28 @@
 #include <FL/Fl_Return_Button.H>
 #include <FL/Fl_Button.H>
 
-class colourChoice {
-public:
-  colourChoice( GLfloat *c, bool *b, int nb, Object_t o, TBmeshWin *t );
-  Fl_Double_Window *window;
-  Fl_Color_Chooser *rgb_choice;
-  Fl_Slider *opacity;
-private:
-  void cb_Done_i(Fl_Return_Button*, void*);
-  static void cb_Done(Fl_Return_Button*, void*);
-public:
-  Fl_Button *apbut;
-private:
-  void cb_apbut_i(Fl_Button*, void*);
-  static void cb_apbut(Fl_Button*, void*);
-public:
-  ~colourChoice();
-private:
-  GLfloat *col;
-  int numreg;
-  Object_t obj;
-  TBmeshWin *tbmw;
-  bool *sc;
+class colourChoice
+{
+  public:
+    colourChoice( GLfloat *c, bool *b, int nb, Object_t o, TBmeshWin *t );
+    Fl_Double_Window *window;
+    Fl_Color_Chooser *rgb_choice;
+    Fl_Slider *opacity;
+  private:
+    void cb_Done_i(Fl_Return_Button*, void*);
+    static void cb_Done(Fl_Return_Button*, void*);
+  public:
+    Fl_Button *apbut;
+  private:
+    void cb_apbut_i(Fl_Button*, void*);
+    static void cb_apbut(Fl_Button*, void*);
+  public:
+    ~colourChoice();
+  private:
+    GLfloat *col;
+    int numreg;
+    Object_t obj;
+    TBmeshWin *tbmw;
+    bool *sc;
 };
 #endif

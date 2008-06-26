@@ -2,41 +2,48 @@
 
 #include "colourchoice.h"
 
-void colourChoice::cb_Done_i(Fl_Return_Button*, void*) {
+void colourChoice::cb_Done_i(Fl_Return_Button*, void*)
+{
   col[0] = rgb_choice->r();
-col[1] = rgb_choice->g();
-col[2] = rgb_choice->b();
-col[3] = opacity->value();
-for( int r=0; r<numreg; r++ )
-  if( sc[r] )
-    tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
-tbmw->redraw();
-delete window;
+  col[1] = rgb_choice->g();
+  col[2] = rgb_choice->b();
+  col[3] = opacity->value();
+  for ( int r=0; r<numreg; r++ )
+    if ( sc[r] )
+      tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
+  tbmw->redraw();
+  delete window;
 }
-void colourChoice::cb_Done(Fl_Return_Button* o, void* v) {
+void colourChoice::cb_Done(Fl_Return_Button* o, void* v)
+{
   ((colourChoice*)(o->parent()->user_data()))->cb_Done_i(o,v);
 }
 
-void colourChoice::cb_apbut_i(Fl_Button*, void*) {
+void colourChoice::cb_apbut_i(Fl_Button*, void*)
+{
   col[0] = rgb_choice->r();
-col[1] = rgb_choice->g();
-col[2] = rgb_choice->b();
-col[3] = opacity->value();
-for( int r=0; r<numreg; r++ )
-  if( sc[r] ) 
-    tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
-tbmw->redraw();
+  col[1] = rgb_choice->g();
+  col[2] = rgb_choice->b();
+  col[3] = opacity->value();
+  for ( int r=0; r<numreg; r++ )
+    if ( sc[r] )
+      tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
+  tbmw->redraw();
 }
-void colourChoice::cb_apbut(Fl_Button* o, void* v) {
+void colourChoice::cb_apbut(Fl_Button* o, void* v)
+{
   ((colourChoice*)(o->parent()->user_data()))->cb_apbut_i(o,v);
 }
 
-colourChoice::colourChoice( GLfloat *c, bool *b, int nb, Object_t o, TBmeshWin *t ) {
+colourChoice::colourChoice( GLfloat *c, bool *b, int nb, Object_t o, TBmeshWin *t )
+{
   Fl_Double_Window* w;
-  { Fl_Double_Window* o = window = new Fl_Double_Window(225, 260, "Choose colour");
+  {
+    Fl_Double_Window* o = window = new Fl_Double_Window(225, 260, "Choose colour");
     w = o;
     o->user_data((void*)(this));
-    { Fl_Color_Chooser* o = rgb_choice = new Fl_Color_Chooser(0, 0, 225, 175);
+    {
+      Fl_Color_Chooser* o = rgb_choice = new Fl_Color_Chooser(0, 0, 225, 175);
       o->box(FL_NO_BOX);
       o->color(FL_BACKGROUND_COLOR);
       o->selection_color(FL_BACKGROUND_COLOR);
@@ -47,31 +54,35 @@ colourChoice::colourChoice( GLfloat *c, bool *b, int nb, Object_t o, TBmeshWin *
       o->align(FL_ALIGN_CENTER);
       o->when(FL_WHEN_RELEASE);
     }
-    { Fl_Slider* o = opacity = new Fl_Slider(10, 190, 205, 25, "Opacity");
+    {
+      Fl_Slider* o = opacity = new Fl_Slider(10, 190, 205, 25, "Opacity");
       o->type(3);
       o->selection_color(FL_FOREGROUND_COLOR);
       o->step(0.01);
       o->value(1);
       o->align(FL_ALIGN_TOP);
     }
-    { Fl_Return_Button* o = new Fl_Return_Button(125, 225, 90, 30, "Done");
+    {
+      Fl_Return_Button* o = new Fl_Return_Button(125, 225, 90, 30, "Done");
       o->callback((Fl_Callback*)cb_Done);
     }
-    { Fl_Button* o = apbut = new Fl_Button(15, 225, 95, 30, "Apply");
+    {
+      Fl_Button* o = apbut = new Fl_Button(15, 225, 95, 30, "Apply");
       o->callback((Fl_Callback*)cb_apbut);
     }
     o->end();
   }
   col = c;
-obj = o;
-tbmw = t;
-sc = b;
-numreg = nb;
+  obj = o;
+  tbmw = t;
+  sc = b;
+  numreg = nb;
 
-rgb_choice->rgb(col[0], col[1], col[2] );
-opacity->value( col[3] );
+  rgb_choice->rgb(col[0], col[1], col[2] );
+  opacity->value( col[3] );
 }
 
-colourChoice::~colourChoice() {
+colourChoice::~colourChoice()
+{
   delete[] sc;
 }

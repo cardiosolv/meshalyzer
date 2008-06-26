@@ -41,10 +41,16 @@ template<class T> inline const T& Max (const T& a, const T& b) { return (a>b) ? 
 template<class T> inline const T& Min (const T& a, const T& b) { return (a<b) ? a : b; }
 template<class T> inline const T& Max (const T& a, const T& b, const T& c) { return (a>b) ? Max(a,c) : Max(b,c); }
 template<class T> inline const T& Min (const T& a, const T& b, const T& c) { return (a<b) ? Min(a,c) : Min(b,c); }
-template<class T> inline const T& Mid (const T& a, const T& b, const T& c) { return (a<b) ? ((b<c)?b:Max(a,c))
-                                                                               :            ((b>c)?b:Min(a,c)); }
-template<class T> inline const T& Bound(const T&a, const T& b, const T& c) { return (a<b) ? ((b<c)?b:c)
-                                                                               :            ((b>c)?b:c); }
+template<class T> inline const T& Mid (const T& a, const T& b, const T& c)
+{
+  return (a<b) ? ((b<c)?b:Max(a,c))
+             :            ((b>c)?b:Min(a,c));
+}
+template<class T> inline const T& Bound(const T&a, const T& b, const T& c)
+{
+  return (a<b) ? ((b<c)?b:c)
+             :            ((b>c)?b:c);
+}
 #define DB(var,msg) { cerr <<" "<<var<<"="<<msg; }
 #define ERROR(msg) { cerr << endl << "###Error### in file " << __FILE__ << " at line " << __LINE__ << endl; cerr << (msg) << endl; cerr << "Exiting ..." << endl; abort(); }
 
@@ -52,7 +58,7 @@ template<class T> inline const T& Bound(const T&a, const T& b, const T& c) { ret
 // avoid following warning
 // "/usr/include/CC/iostream.h", line 675: remark(1174):
 // variable "iostream_init" was declared but never referenced
-//  } iostream_init ;	
+//  } iostream_init ;
 #endif
 
 #endif // $Id: Global.h,v 1.2 2005/06/11 16:17:53 vigmond Exp $

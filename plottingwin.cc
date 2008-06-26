@@ -4,55 +4,70 @@
 #include "Graph.h"
 using namespace std;
 
-inline void PlotWin::cb_window_i(Fl_Double_Window*, void*) {
+inline void PlotWin::cb_window_i(Fl_Double_Window*, void*)
+{
   this->window->hide();
 }
-void PlotWin::cb_window(Fl_Double_Window* o, void* v) {
+void PlotWin::cb_window(Fl_Double_Window* o, void* v)
+{
   ((PlotWin*)(o->user_data()))->cb_window_i(o,v);
 }
 
-inline void PlotWin::cb_Close_i(Fl_Return_Button*, void*) {
+inline void PlotWin::cb_Close_i(Fl_Return_Button*, void*)
+{
   this->window->hide();
 }
-void PlotWin::cb_Close(Fl_Return_Button* o, void* v) {
+void PlotWin::cb_Close(Fl_Return_Button* o, void* v)
+{
   ((PlotWin*)(o->parent()->parent()->user_data()))->cb_Close_i(o,v);
 }
 
-inline void PlotWin::cb_Write_i(Fl_Button*, void*) {
+inline void PlotWin::cb_Write_i(Fl_Button*, void*)
+{
   writedata();
 }
-void PlotWin::cb_Write(Fl_Button* o, void* v) {
+void PlotWin::cb_Write(Fl_Button* o, void* v)
+{
   ((PlotWin*)(o->parent()->parent()->user_data()))->cb_Write_i(o,v);
 }
 
-inline void PlotWin::cb_rotbut_i(Fl_Light_Button* o, void*) {
+inline void PlotWin::cb_rotbut_i(Fl_Light_Button* o, void*)
+{
   rotate(o->value());
 }
-void PlotWin::cb_rotbut(Fl_Light_Button* o, void* v) {
+void PlotWin::cb_rotbut(Fl_Light_Button* o, void* v)
+{
   ((PlotWin*)(o->parent()->parent()->user_data()))->cb_rotbut_i(o,v);
 }
 
-inline void PlotWin::cb_autoscalebut_i(Fl_Light_Button* o, void*) {
+inline void PlotWin::cb_autoscalebut_i(Fl_Light_Button* o, void*)
+{
   autoscale(o->value());
 }
-void PlotWin::cb_autoscalebut(Fl_Light_Button* o, void* v) {
+void PlotWin::cb_autoscalebut(Fl_Light_Button* o, void* v)
+{
   ((PlotWin*)(o->parent()->parent()->user_data()))->cb_autoscalebut_i(o,v);
 }
 
-inline void PlotWin::cb_Hold_i(Fl_Button*, void*) {
+inline void PlotWin::cb_Hold_i(Fl_Button*, void*)
+{
   graph->copy_curve(0);
 }
-void PlotWin::cb_Hold(Fl_Button* o, void* v) {
+void PlotWin::cb_Hold(Fl_Button* o, void* v)
+{
   ((PlotWin*)(o->parent()->parent()->user_data()))->cb_Hold_i(o,v);
 }
 
-PlotWin::PlotWin(  string title ) {
+PlotWin::PlotWin(  string title )
+{
   Fl_Double_Window* w;
-  { Fl_Double_Window* o = window = new Fl_Double_Window(525, 195, "Time plot");
+  {
+    Fl_Double_Window* o = window = new Fl_Double_Window(525, 195, "Time plot");
     w = o;
     o->box(FL_UP_BOX);
     o->callback((Fl_Callback*)cb_window, (void*)(this));
-    { Graph* o = graph = new Graph(5, 5, 515, 165);
+    {
+      Graph* o = graph = new Graph(5, 5, 515, 165);
       o->box(FL_NO_BOX);
       o->color(FL_BACKGROUND_COLOR);
       o->selection_color(FL_BACKGROUND_COLOR);
@@ -64,30 +79,37 @@ PlotWin::PlotWin(  string title ) {
       o->when(FL_WHEN_RELEASE);
       Fl_Group::current()->resizable(o);
     }
-    { Fl_Group* o = button_grp = new Fl_Group(5, 170, 515, 30);
+    {
+      Fl_Group* o = button_grp = new Fl_Group(5, 170, 515, 30);
       o->box(FL_ENGRAVED_BOX);
       o->color(FL_LIGHT2);
-      { Fl_Return_Button* o = new Fl_Return_Button(15, 175, 75, 15, "Close");
+      {
+        Fl_Return_Button* o = new Fl_Return_Button(15, 175, 75, 15, "Close");
         o->labelsize(10);
         o->callback((Fl_Callback*)cb_Close);
       }
-      { Fl_Button* o = new Fl_Button(275, 175, 70, 15, "Write");
+      {
+        Fl_Button* o = new Fl_Button(275, 175, 70, 15, "Write");
         o->labelsize(10);
         o->callback((Fl_Callback*)cb_Write);
       }
-      { Fl_Light_Button* o = rotbut = new Fl_Light_Button(105, 175, 70, 15, "Rotate");
+      {
+        Fl_Light_Button* o = rotbut = new Fl_Light_Button(105, 175, 70, 15, "Rotate");
         o->labelsize(10);
         o->callback((Fl_Callback*)cb_rotbut);
       }
-      { Fl_Button* o = new Fl_Button(190, 175, 70, 15, "Pop");
+      {
+        Fl_Button* o = new Fl_Button(190, 175, 70, 15, "Pop");
         o->labelsize(10);
       }
-      { Fl_Light_Button* o = autoscalebut = new Fl_Light_Button(440, 175, 70, 15, "Autoscale");
+      {
+        Fl_Light_Button* o = autoscalebut = new Fl_Light_Button(440, 175, 70, 15, "Autoscale");
         o->value(1);
         o->labelsize(10);
         o->callback((Fl_Callback*)cb_autoscalebut);
       }
-      { Fl_Button* o = new Fl_Button(360, 175, 70, 15, "Hold");
+      {
+        Fl_Button* o = new Fl_Button(360, 175, 70, 15, "Hold");
         o->labelsize(10);
         o->callback((Fl_Callback*)cb_Hold);
       }
@@ -96,14 +118,15 @@ PlotWin::PlotWin(  string title ) {
     o->end();
   }
   xv = new double[1];
-data = new double[1];
-tm = 0;
-datasize = -1;
-rotated = false;
-window->label(strdup(title.c_str()));
-window->user_data(this);
+  data = new double[1];
+  tm = 0;
+  datasize = -1;
+  rotated = false;
+  window->label(strdup(title.c_str()));
+  window->user_data(this);
 }
 
-void PlotWin::autoscale(int a) {
+void PlotWin::autoscale(int a)
+{
   graph->autoscale(a);
 }

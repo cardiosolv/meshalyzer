@@ -11,75 +11,86 @@
 #include <strstream.h>
 #include <sys/time.h>
 
-class Timer {
-public:
-  static void	Demo (int argc, char *argv[]);
-	inline Timer ();
-  inline Timer & Reset();
-  inline Timer & Stop();
-  inline double	 ElapsedTime();
-  inline Timer & Continue();  
-  friend inline ostream & operator << (ostream & os, Timer & timer);
-  ostream & asOstream (ostream & os);
-  inline const char * c_str();
-protected:
-  inline void	UpdateTimes();
-  bool   timerIsRunning;
-  double startTime,  elapsedTime;
-  char   string[100];
-}; // Timer
+class Timer
+{
+  public:
+    static void	Demo (int argc, char *argv[]);
+    inline Timer ();
+    inline Timer & Reset();
+    inline Timer & Stop();
+    inline double	 ElapsedTime();
+    inline Timer & Continue();
+    friend inline ostream & operator << (ostream & os, Timer & timer);
+    ostream & asOstream (ostream & os);
+    inline const char * c_str();
+  protected:
+    inline void	UpdateTimes();
+    bool   timerIsRunning;
+    double startTime,  elapsedTime;
+    char   string[100];
+}
+; // Timer
 
-inline Timer::Timer () : timerIsRunning(true) {
-	Reset(); 
+inline Timer::Timer () : timerIsRunning(true)
+{
+  Reset();
 } // constructor
 
-inline Timer & Timer::Reset() {
-	startTime = 0;
-	UpdateTimes();
-	startTime  = elapsedTime; 
-	timerIsRunning = true;
-	return *this; 
+inline Timer & Timer::Reset()
+{
+  startTime = 0;
+  UpdateTimes();
+  startTime  = elapsedTime;
+  timerIsRunning = true;
+  return *this;
 } // Reset
 
-inline Timer & Timer::Stop() { 
-	if (timerIsRunning) { 
-		UpdateTimes(); 
-		timerIsRunning = false;
-	} 
-	return *this; 
+inline Timer & Timer::Stop()
+{
+  if (timerIsRunning) {
+    UpdateTimes();
+    timerIsRunning = false;
+  }
+  return *this;
 } // Stop
 
-inline double	Timer::ElapsedTime() {
-	if (timerIsRunning) 
-		UpdateTimes(); 
-	return elapsedTime; 
+inline double	Timer::ElapsedTime()
+{
+  if (timerIsRunning)
+    UpdateTimes();
+  return elapsedTime;
 } // ElapsedTime
 
-inline Timer & Timer::Continue() {
-	if (!timerIsRunning) {
-		double tmp  = elapsedTime;
-		UpdateTimes();
-		startTime += elapsedTime  - tmp;
-		timerIsRunning = true; }
-	return *this; 
+inline Timer & Timer::Continue()
+{
+  if (!timerIsRunning) {
+    double tmp  = elapsedTime;
+    UpdateTimes();
+    startTime += elapsedTime  - tmp;
+    timerIsRunning = true;
+  }
+  return *this;
 } // Continue
-  
-inline ostream & operator << (ostream & os, Timer & timer) {
-	return timer.asOstream(os);
+
+inline ostream & operator << (ostream & os, Timer & timer)
+{
+  return timer.asOstream(os);
 } // operator <<
 
-inline const char * Timer::c_str() {
-	strstream stream;
-	stream << *this;
-	strcpy(string,stream.str());
-	return string;
+inline const char * Timer::c_str()
+{
+  strstream stream;
+  stream << *this;
+  strcpy(string,stream.str());
+  return string;
 } // c_str
 
-inline void	Timer::UpdateTimes() {
-	struct timeval tv;
-	struct timezone tz;
-	gettimeofday(&tv,&tz);
-	elapsedTime = double(tv.tv_sec) + 1e-6*double(tv.tv_usec) - startTime;
+inline void	Timer::UpdateTimes()
+{
+  struct timeval tv;
+  struct timezone tz;
+  gettimeofday(&tv,&tz);
+  elapsedTime = double(tv.tv_sec) + 1e-6*double(tv.tv_usec) - startTime;
 } // UpdateTimes
 
 #endif	// _Timer_h_
