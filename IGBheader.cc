@@ -680,12 +680,10 @@ int IGBheader::write()
      Ecrit tous les items, sauf les commentaires
    */
   for (int i=0;i<n_items;i++) {
-    if (n_car+l_item[i]<71) {		/*  Ajoute a la ligne courante s'il
-      											reste de la place */
+    if (n_car+l_item[i]<71) {		/*  Ajoute a la ligne courante s'il reste de la place */
       strcat(ligne, &items[i][0]);
       n_car += l_item[i];
-    } else {				/*  Sinon, ecrit cette ligne et
-      								commence-en une autre */
+    } else {				/*  Sinon, ecrit cette ligne et commence-en une autre */
       ligne[n_car++] = '\r';
       ligne[n_car++] = '\n';
       ligne[n_car]   = '\000';
