@@ -1,0 +1,17 @@
+# astyle options file for this project.  Run
+#   astyle --options=astylerc *.cc *.h
+# before checking in the source code.
+# 
+# Documentation on these options can be found on 
+# http://astyle.sourceforge.net/astyle.html
+#
+brackets=linux
+indent=spaces=2
+indent-switches
+indent-classes
+indent-labels
+indent-preprocessor
+min-conditional-indent=0
+one-line=keep-statements
+one-line=keep-blocks
+suffix=none
