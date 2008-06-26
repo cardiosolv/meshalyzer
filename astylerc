@@ -1,5 +1,7 @@
 # astyle options file for this project.  Run
-#   astyle --options=astylerc *.cc *.h
+#   astyle --options=astylerc *.cc *.h *.c
+#   or
+#   make format
 # before checking in the source code.
 # 
 # Documentation on these options can be found on 

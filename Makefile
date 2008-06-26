@@ -70,6 +70,9 @@ all: $(OBJS)
 clean:
 	rm $(OBJS) meshalyzer
 
+format:
+	astyle --options=astylerc *.cc *.h *.c
+
 TBmeshWin.o: TBmeshWin.cc $(READER_OBJS)
 	c++ -c $(CFLAGS) $(INCLUDES) $<
 	
