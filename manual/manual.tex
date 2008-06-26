@@ -48,32 +48,49 @@ grid, as well as examining the structure of the grid.
 It is an ever changing and ongoing project that has been in development since 2001.
 Certain file schemes and names may bear a vague resemblance to those used by
 \emph{Cool Graphics}, a program developed by Jamey Eason, but it's only because he
-thought too loudly when he was in the room beside me.
+thought too loudly when he was in the beside me in the office.
 
 \section{Input Files}
 
-\meshal assumes that there are a set of vertices to be displayed.
+\meshal assumes that there is a model, defined by a set of vertices,
+which is to be displayed.
 Beyond that, everything is optional.
 The vertices may be connected to form structures, specifically
-cables, triangular elements, surfaces, tetrahedra,
+cables, triangular elements, quadrilaterals, tetrahedra,hexahedra, prisms, 
 or simple line segments.
-Scalar data may be associated with every point on the grid and may be used to colour
+Scalar data may be associated with every point on the grid and 
+may be used to colour
 any of the connected structures.
 An auxiliary set of points may also be defined on which to display vector data,
 
 Furthermore, the points may be divided into different 
 regions which may have their
 attributes independently manipulated.
-Regions are delimited by tagged volume elements, or may be specified by
-a range of vertices,
+Regions are delimited by tagged volume elements (see \S\ref{sec:voleles}),
+or may be specified by
+a range of vertices (see~\S\ref{sec:regfile}),
 As well, all the structures formed by those vertices are part of the
 region.
 Vertices may belong to more than one region,
 and there is at least one region in a grid.
-If one is not specified, all belong to one default region.
-If there is a element direction file (\texttt{.ttlon} file), and no elements are
-tagged, elements with no direction will be region 0, 
-and other elements will be region 1.
+If one is not specified, all strucutres belong to the default region.
+If there is a element direction file (\texttt{.ttlon} file), and no 
+volume elements are tagged, elements with no direction will be region~0, 
+and other elements will be region~1.
+
+Surfaces may be formed from collections of two-dimensional elements.
+Surfaces are defined by Triangle files (see \S\ref{sec:tris}).
+Also, surfaces are defined if there are any 2D elements in an \texttt{elem}
+file (see \S\ref{sec:elem}). 
+In the latter case, 
+the 2D elements are placed in different surfaces based on their region number.
+Surfaces are independent of regions, and the relationship between the points
+and model structures is described in the Fig.~\ref{fig:UML}.
+\begin{figure}
+\centerline{\includegraphics[width=13cm]{UML}}
+\caption{Relationshop between vertces (Points) and other structures.}
+\label{fig:UML}
+\end{figure}
 
 All files (except IGB described below) are text files.
 They may be \emph{gzipped} 
@@ -163,7 +180,7 @@ Currently, the fourth entry of the line is intended to be
 a material property indicator but it is unused.
 
 \subsection{Volume Elements}
-
+\label{sec:voleles}
 There are two formats for defining volume elements, either the depracated
 tetrahedral file or the newer general element file. Details follow.
 
@@ -178,16 +195,20 @@ Hx n1 n2 n3 n4 n5 n6 n7 n8 [region]
 Py n1 n2 n3 n4 n5 [region]
 Pr n1 n2 n3 n4 n5 n6 [region]
 Tt n1 n2 n3 n4 [region]
+Tr n1 n2 n3 [region]
+Qd n1 n2 n3 n4 [region]
 .
 .
 .
 \end{verbatim}
-where \texttt{Hx, Py, Pr, Tt} stand for Hexahedron, Pyramid, Prism, and
-Tetrahedron respectively.
+where \texttt{Hx, Py, Pr, Tt,Tr,Qd}
+stand for Hexahedron, Pyramid, Prism,
+Tetrahedron, Triangle and Quadrilateral respectively.
 Each line may be any of the element types.
 \begin{figure}
 \centerline{\includegraphics[width=10cm]{volelemdef}}
 \caption{Volume elements\label{fg:voleledef}}
+\label{fg:voleledef}
 \end{figure}
 
 \subsubsection{Tetrahedra}
@@ -208,6 +229,7 @@ of the tetrahedron belong to the region so nodes may belong to several
 regions. If no region is specified, nodes are assigned to region 0.
 
 \subsection{Regions}
+\label{sec:regfile}
 Regions may be explicitly specified in a separate file with the intention 
 ``.region''
 with the following format:
