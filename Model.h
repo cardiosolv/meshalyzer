@@ -36,14 +36,10 @@ class Model
     void   draw_tet( int, bool, DATA_TYPE* );
     void   hilight( HiLiteInfoWin*, int * );
     void   showobj( Object_t obj, bool *, bool f );
-    bool   showobj( Object_t o, int s )
-  {return _region[s<0?0:s]->show(o);}
-  inline bool visibility( int s ){return _region[s<0?0:s]->visible();}
+    bool   showobj( Object_t o, int s ) {return _region[s<0?0:s]->show(o);}
+    inline bool visibility( int s ){return _region[s<0?0:s]->visible();}
     inline GLfloat opacity( int s )
-    {
-      return
-        (_region[s<0?0:s]->get_color(Surface))[3];
-    }
+                         { return (_region[s<0?0:s]->get_color(Surface))[3]; }
     GLfloat* get_color( Object_t obj, int s );
     void  set_color( Object_t obj, int s, float r, float g, float b, float a );
     void  visibility( int, bool a );
@@ -54,7 +50,7 @@ class Model
     int   stride( Object_t o ) const {return _outstride[o]; }
     const GLfloat* pt_offset() const {return pt.offset();}
     bool  base1() const {return _base1; }
-    const GLfloat* vertex_normals(int);
+    const GLfloat* vertex_normals(Surfaces*);
     int   maxtm(){ return _numtm-1 ; }
 
     Point             pt;

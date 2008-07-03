@@ -141,91 +141,9 @@ bool Quadrilateral :: read( const char *fname )
  */
 bool Quadrilateral :: add( const char* fn )
 {
-  int    nele;
-  string nfn = fn;
-
-  try {
-    nele = countInFile( fn );
-  } catch (...) { return false; }
-
-  const int bufsize=1024;
-  char      buff[bufsize];
-
-  _node  = (int *)realloc( _node,  4*(_n+nele)*sizeof(int) );
-  _nrml = (GLfloat*)realloc( _nrml, (_n+nele)*sizeof(GLfloat)*3 );
-
-  int nold = _n;
-  _n += nele;
-
-  gzFile in = gzopen( fn, "r" );
-
-  for ( int i=_n-nele; i<_n; i++ ) {
-    if ( gzgets(in, buff, bufsize)==Z_NULL )
-      throw 1;
-    if ( sscanf( buff, "%d %d %d %d %*d", _node+4*i, _node+4*i+1, _node+4*i+2,
-                 _node+4*i+3 )<4 )
-      i--;
-  }
-
-  gzclose(in);
-
-  // remove tri or tris suffix
-  if ( nfn.substr( nfn.size()-4 ) == ".tri" )
-    nfn.erase( nfn.size()-3 );
-  else if ( nfn.substr( nfn.size()-5 ) == ".tris" )
-    nfn.erase( nfn.size()-4 );
-
-  try {
-    read_normals( nold, _n-1, nfn.c_str() );
-  } catch (...) {
-    compute_normals( nold, _n-1 );
-  }
-
-  return true;
+ return false;
 }
 
-
-/** Count the number of triangles in a file
- *
- *  if the first line contains less than 3 integers, assume it is the number
- *  of Quadrilaterals
- *
- *  \param fn file name 0 must have .tri or .tris suffix
- *
- *  \return the \# of elements
- */
-int Quadrilateral::countInFile( const char* fn )
-{
-  int        numtri=0;
-  int        a, b, c, d;
-  static int bufsize=1024;
-  char       buff[bufsize];
-  gzFile     in;
-
-  if ( (in=gzopen( fn, "r" )) == NULL )
-    throw(1);
-
-  gzgets(in, buff, bufsize);
-  if ( sscanf( buff, "%d %d %d", &a, &b, &c )==3 ) {
-    numtri = 1;
-    while ( gzgets(in, buff, bufsize) != Z_NULL ) {
-      if ( sscanf( buff, "%d %d %d", &a, &b, &c ) == 3 ) numtri++;
-    }
-  } else {
-    do {
-      numtri += a;
-      for ( int i=0; i<a; i++ ) gzgets(in, buff, bufsize);
-    } while ( gzgets( in, buff, bufsize)!=Z_NULL &&
-              sscanf( buff, "%d %d %d", &a, &b, &c )==1 );
-  }
-
-  gzclose( in );
-
-  if ( numtri < 1 )
-    throw(1);
-
-  return numtri;
-}
 
 
 /** for a surface with ordered node numbers, compute the normals

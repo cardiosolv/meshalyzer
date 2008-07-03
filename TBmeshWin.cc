@@ -394,9 +394,9 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
         (!showData&&sf->fillcolor()[3]<OPAQUE_LIMIT) )
     translucency(true);
 
-  sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride,
-            dataopac->dop+Surface,
-            facetshading?NULL:model->vertex_normals(sf-model->surface(0)) );
+  sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride, 
+ 		dataopac->dop+Surface, 
+		facetshading?NULL:model->vertex_normals(sf) );
 
   if ( dataopac->dop[Surface].on() ) translucency(false);
   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );

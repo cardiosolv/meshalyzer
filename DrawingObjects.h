@@ -146,7 +146,7 @@ class Triangle : public SurfaceElement
     virtual void     compute_normals( int, int );
     bool     add( const char * );
   protected:
-    int         countTrisInFile( const char * );
+    int         countInFile( const char * );
 };
 
 

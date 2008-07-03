@@ -221,23 +221,23 @@ int Model::add_surface_from_elem( const char *fn )
   surfs.clear();                // now use for current element in each surface
   gzrewind(in);
   gzgets(in,buff,bufsize);      //throw away first line
-  while ( gzgets(in,buff,bufsize) !=Z_NULL ) {
-    char etype[10],reg[10];
-    int  idat[4];
-    if ( !strncmp(buff,"Tr",2) ) {
-      if (sscanf( buff,"%s %d %d %d %s", etype, idat, idat+1, idat+2, reg)<5 )
-        strcpy(reg,"EMPTY");
-      _surface[surfmap[reg]]->ele(surfs[reg]) = new Triangle( &pt );
-    } else  if ( !strncmp(buff,"Qd",2) ) {
-      if (sscanf( buff,"%s %d %d %d %d %s", etype, idat, idat+1, idat+2,
-                  idat+3, reg)<6 )
-        strcpy(reg,"EMPTY");
-      _surface[surfmap[reg]]->ele(surfs[reg]) = new Quadrilateral( &pt );
-    } else
-      continue;  //ignore volume elements
-    _surface[surfmap[reg]]->ele(surfs[reg])->define(idat);
-    _surface[surfmap[reg]]->ele(surfs[reg])->compute_normals(0,0);
-    surfs[reg]++;
+  while( gzgets(in,buff,bufsize) !=Z_NULL ) {
+	char etype[10],reg[10];
+	int  idat[4];
+	if( !strncmp(buff,"Tr",2) ) {
+	  if(sscanf( buff,"%s %d %d %d %s", etype, idat, idat+2, idat+1, reg)<5 )
+		strcpy(reg,"EMPTY");
+	  _surface[surfmap[reg]]->ele(surfs[reg]) = new Triangle( &pt );
+	} else  if( !strncmp(buff,"Qd",2) ) {
+	  if(sscanf( buff,"%s %d %d %d %d %s", etype, idat, idat+3, idat+2, 
+				  idat+1, reg)<6 )
+		strcpy(reg,"EMPTY");
+	  _surface[surfmap[reg]]->ele(surfs[reg]) = new Quadrilateral( &pt );
+	} else
+	  continue;  //ignore volume elements
+	_surface[surfmap[reg]]->ele(surfs[reg])->define(idat);
+	_surface[surfmap[reg]]->ele(surfs[reg])->compute_normals(0,0);
+	surfs[reg]++;
   }
   gzclose( in );
 
@@ -302,18 +302,19 @@ int Model::add_surface_from_tri( const char *fn )
       _surface[numSurf-1]->determine_vert_norms( pt );
     } while ( gzgets(in,buff,bufsize)!=Z_NULL && sscanf(buff, "%d",&ntri)==1 );
   } else {
-    int *nl = new int[3];
+    int nl[3];
     nl[0]=ntri;nl[1]=nd[1];nl[2]=nd[2];
     _surface=(Surfaces **)realloc(_surface,++numSurf*sizeof(Surfaces *));
     _surface[numSurf-1] = new Surfaces( &pt );
     int curele = 0;
     do {
 #define ELEINC 10000
-      if ( !(curele%ELEINC) ) _surface[numSurf-1]->num(curele+ELEINC);
-      _surface[numSurf-1]->ele(curele++)->define(nl);
-      nl = new int[3];
-    } while ( gzgets(in,buff,bufsize)!=Z_NULL &&
-              sscanf(buff, "%d",nl, nl+1, nl+2)>=3 );
+	  if( !(curele%ELEINC) ) _surface[numSurf-1]->num(curele+ELEINC);
+	  _surface[numSurf-1]->ele(curele) = new Triangle( &pt );
+  	  _surface[numSurf-1]->ele(curele)->define(nl);
+	  _surface[numSurf-1]->ele(curele++)->compute_normals(0,0);
+	}while( gzgets(in,buff,bufsize)!=Z_NULL && 
+			                   sscanf(buff, "%d %d %d",nl, nl+1, nl+2)>=3 );
     _surface[numSurf-1]->num(curele);
     _surface[numSurf-1]->determine_vert_norms( pt );
   }
@@ -714,17 +715,12 @@ int Model::number(Object_t a )
 
 /** set vertex normals for a surface
  *
- * \param s surface \#
+ * \param sp pointer to surface
  */
-const GLfloat*
-Model::vertex_normals(int s)
+const GLfloat* 
+Model::vertex_normals(Surfaces *sp)
 {
-
-  if ( s<0 || s>=numSurf )
-    return NULL;
-
-  surface(s)->get_vert_norms( _vertnrml );
-
+  sp->get_vert_norms( _vertnrml );
   return _vertnrml;
 }
 
@@ -755,55 +751,55 @@ bool Model :: read_elem_file( const char *fname )
 
   _vol = new VolElement*[_numVol];
 
-  int ne=0;
-  for ( int i=0; i<_numVol; i++ ) {
-    if ( gzgets(in, buf, bufsize)==Z_NULL) break;
-    if ( !strlen(buf) ) break;
-    int n[9];
-    if ( tets )
-      sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
-    else
-      sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
-              n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
-    if ( !strcmp( eletype, "Tt" ) ) {
-      _vol[ne] = new Tetrahedral( &pt );
-      _vol[ne]->add( n, n[4] );
-      ne++;
-    } else if ( !strcmp( eletype, "Hx" ) ) {
-      _vol[ne] = new Hexahedron( &pt );
-      _vol[ne]->add( n, n[8] );
-      ne++;
-    } else if ( !strcmp( eletype, "Py" ) ) {
-      _vol[ne] = new Pyramid( &pt );
-      _vol[ne]->add( n, n[5] );
-      ne++;
-    } else if ( !strcmp( eletype, "Pr" ) ) {
-      _vol[ne] = new Prism( &pt );
-      _vol[ne]->add( n, n[6] );
-      ne++;
-    } else if ( !strcmp( eletype, "Tr" ) ) {
-      // surface elements ignored
-      _numVol--;
-    } else if ( !strcmp( eletype, "Qd" ) ) {
-      // surface elements ignored
-      _numVol--;
-    } else {
-      fprintf(stderr, "Unsupported element type: %s\n", eletype);
-      delete[] _vol;
-      _numVol = 0;
-      _vol = NULL;
+  int nele = _numVol;
+  int ne    = 0;
+  int surfe = 0;
+  for( int i=0; i<nele; i++ ) {
+    if( gzgets(in, buf, bufsize)==Z_NULL || !strlen(buf) ) break;
+	int n[9];
+	if( tets ) 
+	  sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
+	else
+	  sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
+			n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
+    if( !strcmp( eletype, "Tt" ) ) {
+	  _vol[ne] = new Tetrahedral( &pt );
+	  _vol[ne]->add( n, n[4] );
+	  ne++;
+	} else if( !strcmp( eletype, "Hx" ) ) {
+	  _vol[ne] = new Hexahedron( &pt );
+	  _vol[ne]->add( n, n[8] );
+	  ne++;
+	} else if( !strcmp( eletype, "Py" ) ) {
+	  _vol[ne] = new Pyramid( &pt );
+	  _vol[ne]->add( n, n[5] );
+	  ne++;
+	} else if( !strcmp( eletype, "Pr" ) ) {
+	  _vol[ne] = new Prism( &pt );
+	  _vol[ne]->add( n, n[6] );
+	  ne++;
+	} else if( !strcmp( eletype, "Tr" ) || !strcmp( eletype, "Qd" )  ) {
+	  // surface elements ignored
+	  _numVol--;
+      surfe++;
+	} else {
+	  fprintf(stderr, "Unsupported element type: %s\n", eletype);
+	  delete[] _vol;
+	  _numVol = 0;
+	  _vol = NULL;
       gzclose(in);
       return false;
     }
   }
-  if ( ne<_numVol) {
-    fprintf( stderr, "Warning: truncated element file? stated: %d, read: %d\n",
-             _numVol, ne );
-    _numVol=ne;
-    VolElement **nv =new VolElement*[_numVol];
-    memcpy( nv, _vol, ne*sizeof(VolElement*) );
-    delete[] _vol;
-    _vol = nv;
+  if( ne+surfe<nele) {
+	fprintf( stderr, "Warning: truncated element file? stated elements: %d, "
+			         " surface elements read: %d, volume elements read: %d\n",
+			            nele, surfe, ne );
+	_numVol=ne;
+	VolElement **nv =new VolElement*[_numVol]; 
+	memcpy( nv, _vol, ne*sizeof(VolElement*) );
+	delete[] _vol;
+	_vol = nv;
   }
   gzclose(in);
 }
