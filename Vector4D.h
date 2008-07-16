@@ -94,6 +94,8 @@ template <class T> class Vector4D
 
     inline T Dot        (const Vector4D<T> & v) const { return DotProduct(v); }
     inline T DotProduct (const Vector4D<T> & v) const { return (X()*v.X() + Y()*v.Y() + Z()*v.Z() + W()*v.W()); }
+
+	operator float(){return Norm();}
 }
 ; // class Vector4D
 

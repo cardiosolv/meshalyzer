@@ -120,7 +120,7 @@ void IGBreader<T>::tmsr()
   for ( int i=0; i<=mthread->maxtm; i++ ) {
     gzread( head->fileptr(), buf, head->data_size() );
     if ( head->endian() != head->systeme() ) head->swab( buf, 1 );
-    sthread->data[i] = head->convert_buffer_datum( buf, 0 );
+    sthread->data[i] = IGB_convert_buffer_datum<T>( head, buf, 0 );
     if ( i<mthread->maxtm )
       gzseek( head->fileptr(), slsz-head->data_size(), SEEK_CUR );
   }

@@ -1,21 +1,5 @@
-/*
-	flounder - copyright 2002 Edward J. Vigmond
-
-	This file is part of flounder.
-
-	flounder is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-	flounder is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License
-    along with flounder; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+/** \file This file reads and writes the headers for IGB format files
+ */
 #include<stdlib.h>
 #include<stdio.h>
 #include<iostream>
@@ -24,8 +8,7 @@
 
 using namespace std;
 
-/* -------------- Bits de statut pour Header_Read et Header_Write ------ */
-
+// -------------- Bits de statut pour Header_Read et Header_Write ------ */
 #define     MOT_CLEF_INV    2
 #define     GRANDEUR_INV    4
 
@@ -210,28 +193,25 @@ HEX2:				3	-o-o-o-o-o-	-o---o---o---o---o---o
 
 \*---------------------------------------------------------------------------*/
 
-/* -------------- Definitions pour conv_date --------------------------- */
+// -------------- Definitions pour conv_date --------------------------- */
 
 #define	FRANCAIS	0
 #define ANGLAIS		1
 #define NUMERIQUE	2
-#ifndef IGB_DATE
 #define IGB_DATE		0
-#endif
 
-/* -------------- Constantes diverses ---------------------------------- */
+// -------------- Constantes diverses ---------------------------------- */
 
-#define	    MAXL	    80	/*  Longueur maximale d'une ligne d'entete */
-#define	    N_MAX_ITEMS	    30	/*  Nombre maximal d'items optionnels */
-#define	    L_MAX_ITEM	    49  /*  Longueur maximale pour un item
-optionnel */
+#define	    MAXL	    80	//  Longueur maximale d'une ligne d'entete */
+#define	    N_MAX_ITEMS	    30	//  Nombre maximal d'items optionnels */
+#define	    L_MAX_ITEM	    49  //  Longueur maximale pour un item
 #ifndef	    VRAI
 #define	    VRAI	    1
 #endif
-
 #ifndef	    FAUX
 #define	    FAUX	    0
 #endif
+
 
 int my_fputs( FILE *, char * );
 
@@ -241,52 +221,20 @@ char Header_Message[256];
 const char    *Header_Type[] =
   {
     "", "byte", "char", "short", "long", "float", "double", "complex",
-    "double_complex", "rgba", "structure", "pointer", "list","int","uint"
+    "double_complex", "rgba", "structure", "pointer", "list","int","uint",
+	"vec3f","vec3d","vec4f","vec4d"
   };
 unsigned short   Data_Size[] =
   {
     0, sizeof(Byte), sizeof(char), sizeof(short), sizeof(long), sizeof(float),
-    sizeof(double), 0, 0, 0, 0, sizeof(void *), 0, sizeof(int), sizeof(UInt)
+    sizeof(double), 0, 0, 0, 0, sizeof(void *), 0, sizeof(int), sizeof(UInt),
+	sizeof(IGB_Vec3_f), sizeof(IGB_Vec3_d), sizeof(IGB_Vec4_f),
+	sizeof(IGB_Vec4_d)
   };
 
 long	unsigned
 Header_Systeme_No[] =
   {
-    UNIX,
-    SYSTEM_V,
-    IRIS,
-    IRIS_3000,
-    IRIS_4D,
-    BSD,
-    ULTRIX,
-    XENIX,
-    SUNOS,
-    SUN,
-    SUN2,
-    SUN3,
-    SUN4,
-    SUN386,
-    SOLARIS,
-    SPARC,
-    SOLARISPC,
-    IRIX,
-    IRIX3,
-    IRIX4,
-    IRIX5,
-    IRIX6,
-    VMS,
-    DOS,
-    DOS3,
-    DOS4,
-    DOS4,
-    DOS5,
-    OS2,
-    WINNT,
-    WINNTINTEL,
-    WINNTMIPS,
-    WINNTALPHA,
-    WINNTPOWER,
-    PC_LINUX,
     IGB_BIG_ENDIAN,
     IGB_LITTLE_ENDIAN
   };
@@ -294,41 +242,6 @@ Header_Systeme_No[] =
 const char
 *Header_Systeme[] =
   {
-    "unix",
-    "system_v",
-    "iris",
-    "iris_3000",
-    "iris_4d",
-    "bsd",
-    "ultrix",
-    "xenix",
-    "sunos",
-    "sun",
-    "sun2",
-    "sun3",
-    "sun4",
-    "sun386",
-    "solaris",
-    "sparc",
-    "solarispc",
-    "irix",
-    "irix3",
-    "irix4",
-    "irix5",
-    "irix6",
-    "vms",
-    "dos",
-    "dos3",
-    "dos4",
-    "dos5",
-    "dos6",
-    "os2",
-    "winnt",
-    "winntintel",
-    "winntmips",
-    "winntalpha",
-    "winntpower",
-    "linux",
     "big_endian",
     "little_endian"
   };
@@ -441,7 +354,7 @@ int IGBheader::write()
     return (0);
   }
 
-  /* we will now only allow writing of big or little endian */
+  // we will now only allow writing of big or little endian */
   const char* systeme=(endian()==IGB_BIG_ENDIAN)?"big_endian":"little_endian";
 
   char ligne[1024];
@@ -1321,9 +1234,6 @@ int IGBheader::read()
     gzread(file, v_vect_z, sizeof(float)*v_z);
   }
 
-  if ( v_systeme == PC_LINUX ) //assume Linux is on a PC
-    v_systeme = IGB_LITTLE_ENDIAN;
-
   return( statut ) ;
 }
 
@@ -1392,6 +1302,8 @@ int IGBheader::puts_fcn( void* f, char* s )
   }
 }
 
+
+/** swap bytes */
 void IGBheader :: swab( void *data, int nd )
 {
   unsigned char tmpb;
@@ -1400,9 +1312,22 @@ void IGBheader :: swab( void *data, int nd )
     return;
 
   unsigned char *bp = (unsigned char *)data;
+  int ds = data_size();
 
   if ( nd<0 ) nd = v_x*v_y*v_z*v_t;
-  switch ( data_size() ) {
+
+  // if vector data, treat as a longer scalar vector
+  if( v_type == IGB_VEC3_f || v_type == IGB_VEC3_d  ){
+	nd *= 3;
+	ds /= 3;
+  }
+  if( v_type == IGB_VEC4_f || v_type == IGB_VEC4_d  ) {
+	nd *= 4;
+	ds /= 3;
+  }
+
+
+  switch ( ds ) {
     case 2:
       for ( int i=0; i<nd; i++ ) {
         tmpb = bp[0];
@@ -1459,40 +1384,3 @@ int IGBheader::endian()
 }
 
 
-double IGBheader::convert_buffer_datum( void *buf, int a )
-{
-  double datum;
-
-  switch ( type() ) {
-    case IGB_BYTE:
-      datum = ((unsigned char *)buf)[a];
-      break;
-    case IGB_CHAR:
-      datum = ((signed char *)buf)[a];
-      break;
-    case IGB_SHORT:
-      datum = ((short *)buf)[a];
-      break;
-    case IGB_LONG:
-      datum = ((long *)buf)[a];
-      break;
-    case IGB_FLOAT:
-      datum = ((float *)buf)[a];
-      break;
-    case IGB_DOUBLE:
-      datum = ((double *)buf)[a];
-      break;
-    case IGB_INT:
-      datum = ((int *)buf)[a];
-      break;
-    case IGB_UINT:
-      datum = ((unsigned int *)buf)[a];
-      break;
-    case IGB_RGBA:
-      memcpy( &datum, ((unsigned char *)buf)+4*a, 4*sizeof(char) );
-      break;
-    default:
-      datum = 0;
-  }
-  return from_raw(datum);
-}

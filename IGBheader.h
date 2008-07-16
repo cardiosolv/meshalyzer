@@ -9,78 +9,16 @@
 #include <cstring>
 #include <cctype>
 #include<assert.h>
+#include "VecData.h"
 
 #define NALLOC 100
 
-/*
-    Systeme d'operation (64 possibilites)
-*/
-#define	    FACT_SYS_OP	    26
-#define	    SYS_OP	    0xFC000000
-/*
-    Sous-systeme (64 possibilites)
-*/
-#define	    FACT_S_SYS_OP   20
-#define	    S_SYS_OP	    0xFFF00000
-/*
-    Version (64 possibilites)
-*/
-#define	    FACT_VERSION    14
-#define	    VERSION	    0xFFFFC000
-/*
-    Marque (64 possibilites)
-*/
-#define	    FACT_MARQUE	    8
-#define	    MARQUE	    0xFFFFFF00
-/*
-    Modele (256 possibilites)
-*/
-#define	    FACT_MODELE	    0
-#define	    MODELE	    0xFFFFFFFF
-
 #define	    NUL		0
-
 #define	    INCONNU	0
 
-#define	    UNIX    (1<<FACT_SYS_OP)
-#define		SYSTEM_V    (UNIX+(1<<FACT_S_SYS_OP))
-#define			IRIS	(SYSTEM_V+(1<<FACT_MARQUE))
-#define			    IRIS_3000   (IRIS+(1<<FACT_MODELE))
-#define			    IRIS_4D	    (IRIS+(2<<FACT_MODELE))
-#define		BSD	    (UNIX+(2<<FACT_S_SYS_OP))
-#define		ULTRIX	    (UNIX+(3<<FACT_S_SYS_OP))
-#define		XENIX	    (UNIX+(4<<FACT_S_SYS_OP))
-#define		SUNOS	    (UNIX+(5<<FACT_S_SYS_OP))
-#define			SUN		(SUNOS+(1<<FACT_MARQUE))
-#define			    SUN2	    (SUN+(2<<FACT_MODELE))
-#define			    SUN3	    (SUN+(3<<FACT_MODELE))
-#define			    SUN4	    (SUN+(4<<FACT_MODELE))
-#define			    SUN386	    (SUN+(5<<FACT_MODELE))
-#define		SOLARIS	    (UNIX+(6<<FACT_S_SYS_OP))
-#define			SPARC		(SOLARIS+(1<<FACT_MARQUE))
-#define			SOLARISPC	(SOLARIS+(2<<FACT_MARQUE))
-#define		IRIX	    (UNIX+(7<<FACT_S_SYS_OP))
-#define		    IRIX3	(IRIX+(1<<FACT_VERSION))
-#define		    IRIX4	(IRIX+(2<<FACT_VERSION))
-#define		    IRIX5	(IRIX+(3<<FACT_VERSION))
-#define		    IRIX6	(IRIX+(4<<FACT_VERSION))
-#define	    VMS	    (2<<FACT_SYS_OP)
-#define	    DOS	    (3<<FACT_SYS_OP)
-#define		    DOS3	    (DOS+(3<<FACT_VERSION))
-#define		    DOS4	    (DOS+(4<<FACT_VERSION))
-#define		    DOS5	    (DOS+(5<<FACT_VERSION))
-#define		    DOS6	    (DOS+(6<<FACT_VERSION))
-#define	    OS2	    (4<<FACT_SYS_OP)
-#define	    WINNT   (5<<FACT_SYS_OP)
-#define			WINNTINTEL		(WINNT+(1<<FACT_MARQUE))
-#define			WINNTMIPS		(WINNT+(2<<FACT_MARQUE))
-#define			WINNTALPHA		(WINNT+(3<<FACT_MARQUE))
-#define			WINNTPOWER		(WINNT+(4<<FACT_MARQUE))
-#define     PC_LINUX    75497472
 #define     IGB_BIG_ENDIAN		666666666
 #define     IGB_LITTLE_ENDIAN	777777777
-
-#define	    N_SYSTEMES	37
+#define	    N_SYSTEMES	2
 
 
 /* ------------------------ TYPES definition ------------------------------ */
@@ -98,8 +36,12 @@
 #define	    IGB_LIST	  12 /* -- List   --------------------------------- */
 #define	    IGB_INT	      13 /* -- integer -------------------------------- */
 #define	    IGB_UINT	  14 /* -- unsigned integer------------------------ */
+#define     IGB_VEC3_f    15 /* -- 3 X float ------------------------------ */
+#define     IGB_VEC3_d    16 /* -- 3 X double ----------------------------- */
+#define     IGB_VEC4_f    17 /* -- 4 X float ------------------------------ */
+#define     IGB_VEC4_d    18 /* -- 4 X double ----------------------------- */
 #define	    IGB_MIN_TYPE	  1
-#define	    IGB_MAX_TYPE	 14
+#define	    IGB_MAX_TYPE	 18
 
 #define Byte hByte
 
@@ -112,8 +54,6 @@
     Definition des types List, bytes, Char, Double, complex d_complex
     et rgba
 */
-#ifndef PrMTYPES
-#define PrMTYPES
 typedef	    struct List
 {
   long    nitems;
@@ -123,29 +63,15 @@ List;
 typedef	    unsigned char	byte;
 #ifndef __GL_GL_H__
 typedef     unsigned char	Byte;
-#ifndef _XtIntrinsic_h
 typedef     char		*String;
 #endif
-#endif
-#if (MARQUE&IGB_SYSTEME)==SUN || (SYS_OP&IGB_SYSTEME)==VMS
-typedef	    char	    	Char;
-#else
 typedef	    signed char	    	Char;
-#endif
 typedef	    struct S_Complex	S_Complex;
-#if (MODELE&IGB_SYSTEME)==IRIS_3000
-typedef	    long float	    	Double;
-#else
 typedef	    double	    	Double;
-#endif
 typedef     struct D_Complex	D_Complex;
 typedef     float		Float;
 typedef     int			Int;
-#if (S_SYS_OP&IGB_SYSTEME)==IRIX6
-typedef     int			Long;
-#else
 typedef     long		Long;
-#endif
 typedef     int			Int;
 typedef     unsigned int        UInt;
 typedef     short		Short;
@@ -158,11 +84,7 @@ typedef     char		*RWFile;
 typedef     char		*WDir;
 typedef     char		*WFile;
 typedef     char		**Text;
-#ifdef __STDC__
 typedef     void		Any;
-#else
-typedef     char		Any;
-#endif
 struct S_Complex
 {
   Float	real, imag;
@@ -191,31 +113,44 @@ typedef union rgba {
   byte		b[4];
 } rgba ;
 
+template<class T, int M>
+class IGB_Vec {
+	public:
+		T d[M];
+        T& operator[](const int indx){return d[indx];}
+		operator float (void) {return sqrt(d[0]*d[0]+d[1]*d[1]+d[2]*d[2]);}
+};
+typedef IGB_Vec<float,3>  IGB_Vec3_f;
+typedef IGB_Vec<float,4>  IGB_Vec4_f;
+typedef IGB_Vec<double,3> IGB_Vec3_d;
+typedef IGB_Vec<double,4> IGB_Vec4_d;
+
+
 /* Indice de chaque composante dans le vecteur b[] de l'union rgba */
 #define RGBA_ROUGE 3
 #define RGBA_VERT  2
 #define RGBA_BLEU  1
 #define RGBA_ALPHA 0
-#endif /* ifndef PrMTYPES */
 
 
 /* -------------- Definition du type des variables globales de header.c - */
 
 #ifndef	HEADER_GLOBALS
-extern	int		 	Header_Quiet;
-extern	const char *Header_Type[IGB_MAX_TYPE+1];
-extern	unsigned short		 Data_Size[IGB_MAX_TYPE+1];
-extern	const char	*Header_Systeme[N_SYSTEMES];
-extern  unsigned long	 Header_Systeme_No[N_SYSTEMES];
-extern	char		 Header_Message[256];
+extern	int		 	   Header_Quiet;
+extern	const char    *Header_Type[IGB_MAX_TYPE+1];
+extern	unsigned short Data_Size[IGB_MAX_TYPE+1];
+extern	const char	  *Header_Systeme[N_SYSTEMES];
+extern  unsigned long  Header_Systeme_No[N_SYSTEMES];
+extern	char		   Header_Message[256];
 #endif
-
 
 class IGBheader;
 
 template<class T>
-int
-read_IGB_data( T* dp, int numt, IGBheader* h, char *buf=NULL );
+int read_IGB_data( T* dp, int numt, IGBheader* h, char *buf=NULL );
+
+template<class T>
+T IGB_convert_buffer_datum( IGBheader*, void *buf, int a );
 
 class IGBheader
 {
@@ -282,6 +217,7 @@ class IGBheader
     void  swab( void *, int nd=-1 );
     inline double from_raw( double a ){ return a/v_facteur+v_zero; }
     inline double to_raw( double a ){ return (a-v_zero)*v_facteur; }
+	inline int  slice_sz(){ return v_x*v_y*v_z; }
     void  comment( char* );
     inline char **comment(void){return v_comment;}
     inline int data_size(void){return Data_Size[v_type];}
@@ -407,7 +343,6 @@ class IGBheader
   inline void* transparent(void){ return v_transparent; }
     inline char* transparentstr(void){ return transstr; }
     int  endian();
-    double convert_buffer_datum( void *buf, int a );
 };
 
 
@@ -433,11 +368,76 @@ read_IGB_data( T* dp, int numt, IGBheader* h, char *buf )
   if ( numread == Z_NULL ) return 0;
   if ( h->systeme() != h->endian() ) h->swab(buf, numread);
   for ( int a=0; a<numread; a++ )
-    dp[a] = h->convert_buffer_datum( buf, a );
+    dp[a] = IGB_convert_buffer_datum<T>( h, buf, a );
   if ( alloc_buf ) delete[] buf;
   return numread;
 }
 
 
+/** convert the IGB data to the proper type
+ *
+ * \param type  type of IGB data
+ * \param buf   raw IGB data
+ * \param a     index of datum
+ */
+template<class T>
+T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
+{
+  T  datum;
+  T* dp = &datum;
+
+  switch ( h->type() ) {
+    case IGB_BYTE:
+      datum = ((unsigned char *)buf)[a];
+      break;
+    case IGB_CHAR:
+      datum = ((signed char *)buf)[a];
+      break;
+    case IGB_SHORT:
+      datum = ((short *)buf)[a];
+      break;
+    case IGB_LONG:
+      datum = ((long *)buf)[a];
+      break;
+    case IGB_FLOAT:
+      datum = ((float *)buf)[a];
+      break;
+    case IGB_DOUBLE:
+      datum = ((double *)buf)[a];
+      break;
+    case IGB_INT:
+      datum = ((int *)buf)[a];
+      break;
+    case IGB_UINT:
+      datum = ((unsigned int *)buf)[a];
+      break;
+    case IGB_RGBA:
+      memcpy( &datum, ((unsigned char *)buf)+4*a, 4*sizeof(char) );
+      break;
+	case IGB_VEC3_f:
+      datum = ((IGB_Vec3_f *)buf)[a];
+	  for( int i=0; i<3; i++ ) *(dp+i) = h->from_raw(*(dp+i));
+	  return datum;
+      break;
+	case IGB_VEC4_f:
+      datum = ((IGB_Vec4_f *)buf)[a];
+	  for( int i=0; i<4; i++ ) *(dp+i) = h->from_raw(*(dp+i));
+	  return datum;
+      break;
+	case IGB_VEC3_d:
+      datum = ((IGB_Vec3_d *)buf)[a];
+	  for( int i=0; i<3; i++ ) *(dp+i) = h->from_raw(*(dp+i));
+	  return datum;
+      break;
+	case IGB_VEC4_d:
+      datum = ((IGB_Vec4_d *)buf)[a];
+	  for( int i=0; i<4; i++ ) *(dp+i) = h->from_raw(*(dp+i));
+	  return datum;
+      break;
+    default:
+      memset(&datum,0,sizeof(datum));
+  }
+  return h->from_raw(datum);
+}
 
 #endif	//IGBheader_h

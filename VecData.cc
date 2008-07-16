@@ -7,11 +7,31 @@
 #include <zlib.h>
 #include <cstring>
 #include <iostream>
+#include "IGBheader.h"
 
 using namespace std;
 
 const float vecsize = 0.1;		// relative length of maximum vector by default
 const float REL_MIN_VEC_SIZE = 100.;
+
+template<class T, class S>
+void read_IGB_vec_data( S* vdata, S* sdata, int ntr, IGBheader& h )
+{
+  T* vd = new T[h.slice_sz()];
+
+  for( int i=0; i<h.t(); i++ ){
+	read_IGB_data( sdata, ntr, &h );
+	for( int j=0; j<h.slice_sz(); j++ ) {
+	  for( int k=0; k<3; k++ )
+		vdata[3*j+k+i*h.slice_sz()] = vd[j][k];
+	  if( ntr==4 )
+		sdata[j+i*h.slice_sz()] = vd[j][3];
+	}
+  }
+
+  delete[] vd;
+}
+
 
 /* draw an arrow
    quado     - GLU quadric object
@@ -82,40 +102,67 @@ VecData::VecData(const GLfloat *pt_offset, char* vptfile):_length(1),maxmag(0.),
       throw -1;
     }
 
-  // determine if scalar data
-  if ( gzgets( in, buff, bufsize ) == Z_NULL ) return;
-  float tscal[4];
-  int npl = sscanf(buff,"%f %f %f %f", tscal, tscal+1, tscal+2, tscal+3 );
-  const char *scanstr;
-  if ( npl==4 )
-    scanstr="%f %f %f %f";
-  else if ( npl==3 )
-    scanstr="%f %f %f";
-  else
-    return;
-  gzrewind( in );
+  IGBheader h(in);
+  if( !h.read() ) {               // IGB file
+	vdata = (float *)realloc( vdata, 3*h.t()*h.slice_sz()*sizeof(float) );
+	int ntr = 3;
+    if( h.type() == IGB_VEC4_f || h.type() == IGB_VEC4_d ) {  // scalar data
+      sdata = (float *)realloc( sdata, h.t()*h.slice_sz()*sizeof(float) );
+	  ntr = 4;
+	}
+	void *vd = new char[h.slice_sz()*h.data_size()];
 
-  int nread;
-  do {
-    vdata = (float *)realloc( vdata, 3*(++numtm)*numpt*sizeof(float) );
-    if ( npl==4) sdata = (float *)realloc( sdata, numtm*numpt*sizeof(float) );
-    float* vdp = vdata + 3*(numtm-1)*numpt;
-    float* sdp = sdata + (numtm-1)*numpt;
-    for ( nread=0; nread<numpt; nread++ ) {
-      if ( gzgets( in, buff, bufsize ) == Z_NULL ) break;
-      if ( sscanf( buff, scanstr, vdp, vdp+1, vdp+2, sdp ) != npl ) break;
-      vdp += 3;
-      sdp++;
-    }
-  } while ( nread == numpt );
-  numtm--;
-  if ( !numtm ) {
-    delete[] pts;
-    cerr << "Not enough data in file" << endl;
-    throw -1;
+	switch( h.type() ) {
+		case IGB_VEC3_f:
+			read_IGB_vec_data<IGB_Vec3_f>( vdata, sdata, ntr, h );
+			break;
+		case IGB_VEC3_d:
+			read_IGB_vec_data<IGB_Vec4_f>( vdata, sdata, ntr, h );
+			break;
+		case IGB_VEC4_f:
+			read_IGB_vec_data<IGB_Vec3_d>( vdata, sdata, ntr, h );
+			break;
+		case IGB_VEC4_d:
+			read_IGB_vec_data<IGB_Vec4_d>( vdata, sdata, ntr, h );
+			break;
+	}
+  } else {                           // text file
+	gzrewind(in);
+	// determine if scalar data
+	if ( gzgets( in, buff, bufsize ) == Z_NULL ) return;
+	float tscal[4];
+	int npl = sscanf(buff,"%f %f %f %f", tscal, tscal+1, tscal+2, tscal+3 );
+	const char *scanstr;
+	if ( npl==4 )
+	  scanstr="%f %f %f %f";
+	else if ( npl==3 )
+	  scanstr="%f %f %f";
+	else
+	  return;
+	gzrewind( in );
+
+	int nread;
+	do {
+	  vdata = (float *)realloc( vdata, 3*(++numtm)*numpt*sizeof(float) );
+	  if ( npl==4) sdata = (float *)realloc( sdata, numtm*numpt*sizeof(float) );
+	  float* vdp = vdata + 3*(numtm-1)*numpt;
+	  float* sdp = sdata + (numtm-1)*numpt;
+	  for ( nread=0; nread<numpt; nread++ ) {
+		if ( gzgets( in, buff, bufsize ) == Z_NULL ) break;
+		if ( sscanf( buff, scanstr, vdp, vdp+1, vdp+2, sdp ) != npl ) break;
+		vdp += 3;
+		sdp++;
+	  }
+	} while ( nread == numpt );
+	numtm--;
+	if ( !numtm ) {
+	  delete[] pts;
+	  cerr << "Not enough data in file" << endl;
+	  throw -1;
+	}
   }
 
-  //determine the largest magnitude vector and sclar extrema
+  //determine the largest magnitude vector and scalar extrema
   maxmag = magnitude( vdata );
   float  tmp;
   for ( int i=1; i<numpt; i++ )

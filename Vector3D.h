@@ -105,6 +105,8 @@ template <class T> class Vector3D
     inline Vector3D<T> Cross       (const Vector3D<T> v) const { return CrossProduct(v); }
     inline Vector3D<T> CrossProduct(const Vector3D<T> v) const { return Vector3D(Y()*v.Z() - Z()*v.Y(), Z()*v.X() - X()*v.Z(), X()*v.Y() - Y()*v.X()); }
 
+	operator float(){return Norm();}
+
 }
 ; // class Vector3D
 

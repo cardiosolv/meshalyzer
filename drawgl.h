@@ -12,7 +12,7 @@ typedef enum disp_t { asSurface, asTetMesh, asIsosurface } Display_t;
 typedef enum data_state_t { NoData, Static, Dynamic } Data_Type_t;
 enum DataColouring { off, on, opacval };
 
-typedef float DATA_TYPE;
+#define DATA_TYPE float
 
 static const float opaque_min = 0.95;
 

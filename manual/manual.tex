@@ -281,7 +281,8 @@ The first block of key words need to be specified. The rest are optional.
 	t       & int    & number of samples in t \\
 	systeme & string & \texttt{big\_endian} or \texttt{little\_endian} \\
 	type    & string & binary data type: byte, char, short, long,
-	                   float, double, int, uint\\ \hline
+	                   float, double, int, uint, vec3f, vec4f,
+					   vec3d, vec4d\\ \hline
 	unites  & string & units of data \\
 	factuer & float & scaling factor for data \\
 	zero    & float & data zero: true value =
@@ -326,6 +327,14 @@ data.x data.y data.z [scalar_datum]
 data.x data.y data.z [scalar_datum]
 \end{verbatim}
 The scalar datum, as indicated, is optional.
+
+Vector data can also be input as an IGB file using the types
+\texttt{vec3f, vec4f, vec3d, vec4d} where 3 or 4 refers to the number of
+elements in each datum,
+and \texttt{d} and \texttt{f} refer to float or double.
+The first 3 elements define the value of the vector field,
+and the optional 4th element is the
+scalar component as above. This file has the suffix ``.vec.igb''.
 
 \subsection{CG meta format}
 Cool Graphics (CG) is a visualization program written chiefly by Jamey Eason
