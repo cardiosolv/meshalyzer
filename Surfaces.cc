@@ -102,7 +102,7 @@ void Surfaces::determine_vert_norms( Point& pt )
 void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
                      int stride, dataOpac* dataopac, const GLfloat*ptnrml )
 {
-  for ( int i=0; i<_ele.size(); i++ )
+  for ( int i=0; i<_ele.size(); i+=stride )
     _ele[i]->draw( 0, 0, fill, cs, dat, stride, dataopac, ptnrml );
 }
 

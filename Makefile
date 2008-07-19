@@ -3,12 +3,12 @@ HOSTMACHINE := $(shell uname)
 
 FLTK_INC      := $(shell fltk-config --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-gl --ldflags)
-COMMON_LIBS    = -lpng -lpthread -lm -lz
-COMMON_INC     = -I. -O0 -g -DOBJ_CLASS 
+COMMON_LIBS    = -lpng -lpthread -ltcmalloc_minimal -lpthread -lm -lz
+COMMON_INC     = -I. -O0 -g -DOBJ_CLASS  -D_REENTRANT
 
 ifeq ($(HOSTMACHINE),Linux)
 LIBS   = $(FLTK_LD_FLAGS) $(COMMON_LIBS)
-CFLAGS = $(FLTK_INC) $(COMMON_INC)
+CFLAGS = $(FLTK_INC) $(COMMON_INC) #-fopenmp
 endif
 
 ifeq ($(HOSTMACHINE),Darwin)
