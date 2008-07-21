@@ -224,12 +224,13 @@ const char    *Header_Type[] =
     "double_complex", "rgba", "structure", "pointer", "list","int","uint",
 	"vec3f","vec3d","vec4f","vec4d"
   };
+
+//* size of the stored data, not the variable type
 unsigned short   Data_Size[] =
   {
     0, sizeof(Byte), sizeof(char), sizeof(short), sizeof(long), sizeof(float),
     sizeof(double), 0, 0, 0, 0, sizeof(void *), 0, sizeof(int), sizeof(UInt),
-	sizeof(IGB_Vec3_f), sizeof(IGB_Vec3_d), sizeof(IGB_Vec4_f),
-	sizeof(IGB_Vec4_d)
+	3*sizeof(float), 3*sizeof(double), 4*sizeof(float), 4*sizeof(double)
   };
 
 long	unsigned
@@ -871,32 +872,11 @@ int IGBheader::read()
 
       } else if ( ! strcmp( pt_1, "type" ) ) {
 
-        if ( ! strcmp( pt_2, "byte" ) ) {
-          v_type = IGB_BYTE ;
-        } else if ( ! strcmp( pt_2, "char" ) ) {
-          v_type = IGB_CHAR ;
-        } else if ( ! strcmp( pt_2, "short" ) ) {
-          v_type = IGB_SHORT ;
-        } else if ( ! strcmp( pt_2, "long" ) ) {
-          v_type = IGB_LONG ;
-        } else if ( ! strcmp( pt_2, "float" ) ) {
-          v_type = IGB_FLOAT ;
-        } else if ( ! strcmp( pt_2, "double" ) ) {
-          v_type = IGB_DOUBLE ;
-        } else if ( ! strcmp( pt_2, "complex" ) ) {
-          v_type = IGB_COMPLEX ;
-        } else if ( ! strcmp( pt_2, "double_complex" ) ) {
-          v_type = IGB_D_COMPLEX ;
-        } else if ( ! strcmp( pt_2, "rgba" ) ) {
-          v_type = IGB_RGBA ;
-        } else if ( ! strcmp( pt_2, "structure" ) ) {
-          v_type = IGB_STRUCTURE ;
-        } else if ( ! strcmp( pt_2, "int" ) ) {
-          v_type = IGB_INT;
-        } else if ( ! strcmp( pt_2, "uint" ) ) {
-          v_type = IGB_UINT;
-        }
-        bool_type = VRAI;
+		for( int htype=IGB_MIN_TYPE; htype<=IGB_MAX_TYPE; htype++ )
+		  if ( !strcmp( pt_2, Header_Type[htype] ) ) {
+			v_type = htype;
+		  }
+		bool_type = VRAI;
 
       } else if ( ! strcmp( pt_1, "taille" ) ) {
         v_taille = atoi( pt_2 ) ;
@@ -1272,6 +1252,18 @@ const char *IGBheader::systemestr( void )
     return Header_Systeme[i];
   else
     return NULL;
+}
+
+
+void IGBheader::systeme( const char* s )
+{
+  int i;
+  for ( i=0; i<N_SYSTEMES; i++ )
+    if ( !strncmp( Header_Systeme[i], s, strlen(s) ) )
+      break;
+
+  if ( i<N_SYSTEMES )
+    v_systeme = Header_Systeme_No[i];
 }
 
 

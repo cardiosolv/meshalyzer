@@ -9,7 +9,6 @@
 #include <cstring>
 #include <cctype>
 #include<assert.h>
-#include "VecData.h"
 
 #define NALLOC 100
 
@@ -119,6 +118,9 @@ class IGB_Vec {
 		T d[M];
         T& operator[](const int indx){return d[indx];}
 		operator float (void) {return sqrt(d[0]*d[0]+d[1]*d[1]+d[2]*d[2]);}
+		IGB_Vec<T,M>(void){}
+		IGB_Vec<T,M>(double &f){ for(int i=0; i<M; i++ )d[i]=*(&f+i);}
+	    IGB_Vec<T,M>& operator=(float *f){memcpy(d,f,M*sizeof(int));return *this;}
 };
 typedef IGB_Vec<float,3>  IGB_Vec3_f;
 typedef IGB_Vec<float,4>  IGB_Vec4_f;
@@ -251,6 +253,7 @@ class IGBheader
   inline void trame( int a ){ v_trame = a; bool_trame = true;}
     const char* systemestr(void);
     inline int systeme( void ){ return v_systeme; }
+    void       systeme( const char* s );
     inline unsigned int lut(void){ return v_lut; }
     inline unsigned int lut( bool &set ){ set=bool_x; return v_x; }
   inline void lut( unsigned int a ){ v_lut = a; bool_lut = true; }
@@ -384,7 +387,6 @@ template<class T>
 T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
 {
   T  datum;
-  T* dp = &datum;
 
   switch ( h->type() ) {
     case IGB_BYTE:
@@ -411,33 +413,14 @@ T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
     case IGB_UINT:
       datum = ((unsigned int *)buf)[a];
       break;
-    case IGB_RGBA:
-      memcpy( &datum, ((unsigned char *)buf)+4*a, 4*sizeof(char) );
-      break;
-	case IGB_VEC3_f:
-      datum = ((IGB_Vec3_f *)buf)[a];
-	  for( int i=0; i<3; i++ ) *(dp+i) = h->from_raw(*(dp+i));
-	  return datum;
-      break;
-	case IGB_VEC4_f:
-      datum = ((IGB_Vec4_f *)buf)[a];
-	  for( int i=0; i<4; i++ ) *(dp+i) = h->from_raw(*(dp+i));
-	  return datum;
-      break;
-	case IGB_VEC3_d:
-      datum = ((IGB_Vec3_d *)buf)[a];
-	  for( int i=0; i<3; i++ ) *(dp+i) = h->from_raw(*(dp+i));
-	  return datum;
-      break;
-	case IGB_VEC4_d:
-      datum = ((IGB_Vec4_d *)buf)[a];
-	  for( int i=0; i<4; i++ ) *(dp+i) = h->from_raw(*(dp+i));
-	  return datum;
+    case IGB_VEC3_f:
+      datum = ((float *)buf)[a];
       break;
     default:
       memset(&datum,0,sizeof(datum));
   }
   return h->from_raw(datum);
 }
+
 
 #endif	//IGBheader_h

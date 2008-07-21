@@ -14,18 +14,24 @@ using namespace std;
 const float vecsize = 0.1;		// relative length of maximum vector by default
 const float REL_MIN_VEC_SIZE = 100.;
 
-template<class T, class S>
-void read_IGB_vec_data( S* vdata, S* sdata, int ntr, IGBheader& h )
+template< class S>
+void read_IGB_vec_data( S* vdata, S* sdata, IGBheader& h )
 {
-  T* vd = new T[h.slice_sz()];
+  int nf = 3+(sdata!=NULL);
+  S* vd;
+  
+  if( nf==4 ) vd = new S[h.slice_sz()*nf];
 
   for( int i=0; i<h.t(); i++ ){
-	read_IGB_data( sdata, ntr, &h );
-	for( int j=0; j<h.slice_sz(); j++ ) {
-	  for( int k=0; k<3; k++ )
-		vdata[3*j+k+i*h.slice_sz()] = vd[j][k];
-	  if( ntr==4 )
-		sdata[j+i*h.slice_sz()] = vd[j][3];
+	if( nf==3 )
+	  read_IGB_data( vdata+nf*h.slice_sz(), nf, &h );
+	else {
+	  read_IGB_data( vd, nf, &h );
+	  for( int j=0; j<h.slice_sz(); j++ ) {
+		for( int k=0; k<3; k++ )
+		  vdata[3*j+k+i*h.slice_sz()] = vd[j*4+k];
+		  sdata[j+i*h.slice_sz()] = vd[j*4+3];
+	  }
 	}
   }
 
@@ -105,27 +111,11 @@ VecData::VecData(const GLfloat *pt_offset, char* vptfile):_length(1),maxmag(0.),
   IGBheader h(in);
   if( !h.read() ) {               // IGB file
 	vdata = (float *)realloc( vdata, 3*h.t()*h.slice_sz()*sizeof(float) );
-	int ntr = 3;
     if( h.type() == IGB_VEC4_f || h.type() == IGB_VEC4_d ) {  // scalar data
       sdata = (float *)realloc( sdata, h.t()*h.slice_sz()*sizeof(float) );
-	  ntr = 4;
 	}
-	void *vd = new char[h.slice_sz()*h.data_size()];
+	read_IGB_vec_data( vdata, sdata, h );
 
-	switch( h.type() ) {
-		case IGB_VEC3_f:
-			read_IGB_vec_data<IGB_Vec3_f>( vdata, sdata, ntr, h );
-			break;
-		case IGB_VEC3_d:
-			read_IGB_vec_data<IGB_Vec4_f>( vdata, sdata, ntr, h );
-			break;
-		case IGB_VEC4_f:
-			read_IGB_vec_data<IGB_Vec3_d>( vdata, sdata, ntr, h );
-			break;
-		case IGB_VEC4_d:
-			read_IGB_vec_data<IGB_Vec4_d>( vdata, sdata, ntr, h );
-			break;
-	}
   } else {                           // text file
 	gzrewind(in);
 	// determine if scalar data

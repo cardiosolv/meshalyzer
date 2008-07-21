@@ -290,7 +290,7 @@ int Model::add_surface_from_tri( const char *fn )
       _surface[numSurf-1]->num(ntri);
       for ( int i=0; i<ntri; i++ ) {
         _surface[numSurf-1]->ele(i) = new Triangle( &pt );
-        int *nl = new int[3];
+        int nl[3];
         if ( gzgets(in,buff,bufsize) == Z_NULL ||
              sscanf(buff, "%d %d %d", nl, nl+1, nl+2 ) < 3 ) {
           numSurf--;
