@@ -112,22 +112,6 @@ typedef union rgba {
   byte		b[4];
 } rgba ;
 
-template<class T, int M>
-class IGB_Vec {
-	public:
-		T d[M];
-        T& operator[](const int indx){return d[indx];}
-		operator float (void) {return sqrt(d[0]*d[0]+d[1]*d[1]+d[2]*d[2]);}
-		IGB_Vec<T,M>(void){}
-		IGB_Vec<T,M>(double &f){ for(int i=0; i<M; i++ )d[i]=*(&f+i);}
-	    IGB_Vec<T,M>& operator=(float *f){memcpy(d,f,M*sizeof(int));return *this;}
-};
-typedef IGB_Vec<float,3>  IGB_Vec3_f;
-typedef IGB_Vec<float,4>  IGB_Vec4_f;
-typedef IGB_Vec<double,3> IGB_Vec3_d;
-typedef IGB_Vec<double,4> IGB_Vec4_d;
-
-
 /* Indice de chaque composante dans le vecteur b[] de l'union rgba */
 #define RGBA_ROUGE 3
 #define RGBA_VERT  2

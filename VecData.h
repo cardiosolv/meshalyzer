@@ -28,8 +28,9 @@ class VecData
     void         colourize();
     GLfloat*     colour(){ return _colour; }
     bool         display(bool a) {_disp = a; }
-    void         length_det( DataType dt ){ _length_det=dt; }
-    void         colour_det( DataType dt ){ _colour_det=dt; optimize_cs(); }
+    void         length_det( DataType dt ){if(dt!=Scalar||sdata)_length_det=dt;}
+    void         colour_det( DataType dt ){if(dt!=Scalar||sdata)
+	                                          {_colour_det=dt; optimize_cs();} }
     void         auto_cs(bool a){ autocal=a; }
     void         optimize_cs();
     Colourscale *cs;			// colour scale for display

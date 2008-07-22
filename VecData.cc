@@ -45,15 +45,15 @@ void read_IGB_vec_data( S* vdata, S* sdata, IGBheader& h )
 }
 
 
-/* draw an arrow
-   quado     - GLU quadric object
-   stick     - length of stick portion
-   head      - length of head
-   stick_rad - radius of stick
-   head_rad  - radius of base
+/** draw an arrow
+   \param quado      GLU quadric object
+   \param stick      length of stick portion
+   \param head       length of head
+   \param stick_rad  radius of stick
+   \param head_rad   radius of base
 */
-void draw_arrow( GLUquadricObj* quado,
-                 GLfloat stick, GLfloat head, GLfloat stick_rad, GLfloat head_rad )
+void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
+		                         GLfloat stick_rad, GLfloat head_rad )
 {
   gluCylinder( quado, stick_rad, stick_rad, stick, 10, 2 );
   glTranslatef( 0, 0, stick );
