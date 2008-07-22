@@ -3,7 +3,6 @@ HOSTMACHINE := $(shell uname)
 
 FLTK_INC      := $(shell fltk-config --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-gl --ldflags)
-#COMMON_LIBS    = -lpng -lpthread -ltcmalloc_minimal -lm -lz
 COMMON_LIBS    = -lpng -lpthread -lm -lz
 COMMON_INC     = -I. -O0 -g -DOBJ_CLASS  -D_REENTRANT
 

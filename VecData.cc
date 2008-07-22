@@ -22,16 +22,22 @@ void read_IGB_vec_data( S* vdata, S* sdata, IGBheader& h )
   
   if( nf==4 ) vd = new S[h.slice_sz()*nf];
 
+  int nread;
+
   for( int i=0; i<h.t(); i++ ){
-	if( nf==3 )
-	  read_IGB_data( vdata+i*nf*h.slice_sz(), 1, &h );
+	if( nf==3 ) 
+	  nread = read_IGB_data( vdata+i*nf*h.slice_sz(), 1, &h );
 	else {
-	  read_IGB_data( vd, 1, &h );
+	  nread = read_IGB_data( vd, 1, &h );
 	  for( int j=0; j<h.slice_sz(); j++ ) {
 		for( int k=0; k<3; k++ )
 		  vdata[3*j+k+i*h.slice_sz()] = vd[j*4+k];
 		  sdata[j+i*h.slice_sz()] = vd[j*4+3];
 	  }
+	}
+	if( nread != h.slice_sz() ) {
+	  h.t(i);
+	  break;
 	}
   }
 
@@ -115,6 +121,7 @@ VecData::VecData(const GLfloat *pt_offset, char* vptfile):_length(1),maxmag(0.),
       sdata = (float *)realloc( sdata, h.t()*h.slice_sz()*sizeof(float) );
 	}
 	read_IGB_vec_data( vdata, sdata, h );
+	numtm = h.t();
 
   } else {                           // text file
 	gzrewind(in);
