@@ -776,6 +776,7 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
 
 void TBmeshWin :: optimize_cs( void )
 {
+  if( dataBuffer==NULL ) return;
   cs->calibrate( dataBuffer->min(tm), dataBuffer->max(tm) );
   redraw();
 }

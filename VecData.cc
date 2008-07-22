@@ -18,15 +18,15 @@ template< class S>
 void read_IGB_vec_data( S* vdata, S* sdata, IGBheader& h )
 {
   int nf = 3+(sdata!=NULL);
-  S* vd;
+  S* vd=NULL;
   
   if( nf==4 ) vd = new S[h.slice_sz()*nf];
 
   for( int i=0; i<h.t(); i++ ){
 	if( nf==3 )
-	  read_IGB_data( vdata+nf*h.slice_sz(), nf, &h );
+	  read_IGB_data( vdata+i*nf*h.slice_sz(), 1, &h );
 	else {
-	  read_IGB_data( vd, nf, &h );
+	  read_IGB_data( vd, 1, &h );
 	  for( int j=0; j<h.slice_sz(); j++ ) {
 		for( int k=0; k<3; k++ )
 		  vdata[3*j+k+i*h.slice_sz()] = vd[j*4+k];
@@ -35,7 +35,7 @@ void read_IGB_vec_data( S* vdata, S* sdata, IGBheader& h )
 	}
   }
 
-  delete[] vd;
+  if( vd ) delete[] vd;
 }
 
 
