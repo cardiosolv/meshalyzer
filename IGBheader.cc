@@ -1295,7 +1295,11 @@ int IGBheader::puts_fcn( void* f, char* s )
 }
 
 
-/** swap bytes */
+/** swap bytes ]]
+ *
+ * \param data data buffer
+ * \param nd   number of items in buffer
+ */
 void IGBheader :: swab( void *data, int nd )
 {
   unsigned char tmpb;

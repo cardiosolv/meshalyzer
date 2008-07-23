@@ -346,16 +346,21 @@ int
 read_IGB_data( T* dp, int numt, IGBheader* h, char *buf )
 {
   int    slicesize = h->data_size()*h->x()*h->y()*h->z()*numt;
+  
   bool   alloc_buf = false;
   if ( buf==NULL ) {
     buf = new char[slicesize];
     alloc_buf = true;
   }
+  
   int numread = gzread( h->fileptr(), buf, slicesize )/h->data_size();
   if ( numread == Z_NULL ) return 0;
   if ( h->systeme() != h->endian() ) h->swab(buf, numread);
-  for ( int a=0; a<numread; a++ )
+
+  int numprimitive = numread*h->data_size()/sizeof(T); // adjust vector types
+  for ( int a=0; a<numprimitive; a++ )
     dp[a] = IGB_convert_buffer_datum<T>( h, buf, a );
+  
   if ( alloc_buf ) delete[] buf;
   return numread;
 }
@@ -386,9 +391,13 @@ T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
       datum = ((long *)buf)[a];
       break;
     case IGB_FLOAT:
+    case IGB_VEC3_f:
+    case IGB_VEC4_f:
       datum = ((float *)buf)[a];
       break;
     case IGB_DOUBLE:
+    case IGB_VEC3_d:
+    case IGB_VEC4_d:
       datum = ((double *)buf)[a];
       break;
     case IGB_INT:
@@ -396,9 +405,6 @@ T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
       break;
     case IGB_UINT:
       datum = ((unsigned int *)buf)[a];
-      break;
-    case IGB_VEC3_f:
-      datum = ((float *)buf)[a];
       break;
     default:
       memset(&datum,0,sizeof(datum));
