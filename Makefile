@@ -82,3 +82,6 @@ TBmeshWin.o: TBmeshWin.cc $(READER_OBJS)
 %.o : %.C
 	c++ -c $(CFLAGS) $(INCLUDES) $<
 
+utils:
+	(cd utils; make )
+
