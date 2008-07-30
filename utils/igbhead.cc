@@ -203,7 +203,7 @@ void output_header( IGBheader* header )
 	if( tf ) {
         printf( "Pixel zero:\t%g\n", header->zero() );
     }
-    header->unites(tf);
+    header->facteur(tf);
 	if( tf ) {
         printf( "Pixel scaling:\t%g\n", header->facteur() );
     }

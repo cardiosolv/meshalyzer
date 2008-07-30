@@ -1072,55 +1072,52 @@ int IGBheader::read()
   }
 
   /* --- calcul des inc et dim --- */
-
   if ( bool_dim_x )
-    if ( bool_inc_x ) {
-      float dim_x = v_inc_x * v_x ;
-      if ( dim_x != v_dim_x ) {
-        if (!Header_Quiet) {
-          fprintf(stderr, "\nATTENTION:\n") ;
-          fprintf(stderr,
-                  "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
-                  v_x, v_inc_x, dim_x, v_dim_x) ;
-        }
-        sprintf(Header_Message,
-                "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
-                v_x, v_inc_x, dim_x, v_dim_x) ;
-        statut = 1 ;
-      }
-    } else {
-      v_inc_x = v_dim_x / v_x ;
-      bool_inc_x = VRAI;
-    }
-  else {
-    v_dim_x = v_x * v_inc_x ;
-    if ( bool_inc_x )
-      bool_dim_x = VRAI;
-  }
+	if ( bool_inc_x ) {
+	  float dim_x = v_inc_x * v_x ;
+	  if ( dim_x != v_dim_x ) {
+		if (!Header_Quiet) {
+		  fprintf(stderr, "\nATTENTION:\n") ;
+		  fprintf(stderr,
+			  "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
+				  v_x, v_inc_x, dim_x, v_dim_x) ;
+		}
+		sprintf(Header_Message,
+			"conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
+				v_x, v_inc_x, dim_x, v_dim_x) ;
+		statut = 1 ;
+	  }
+	} else {
+	  v_inc_x = v_dim_x / v_x ;
+	  bool_inc_x = VRAI;
+	}
+	else {
+	  v_dim_x = v_x * v_inc_x ;
+	  if ( bool_inc_x ) bool_dim_x = VRAI;
+	}
 
   if ( bool_dim_y )
-    if ( bool_inc_y ) {
+	if ( bool_inc_y ) {
       float dim_y = v_inc_y * v_y ;
       if ( dim_y != v_dim_y ) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
-                  "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (.12g)\n",
+              "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (.12g)\n",
                   v_y, v_inc_y, dim_y, v_dim_y) ;
         }
         sprintf(Header_Message,
-                "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (.12g)\n",
+              "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (.12g)\n",
                 v_y, v_inc_y, dim_y, v_dim_y) ;
         statut = 1 ;
       }
     } else {
       v_inc_y = v_dim_y / v_y ;
-      if ( bool_inc_y )
-        bool_inc_y = VRAI;
+      bool_inc_y = VRAI;
     }
   else {
     v_dim_y = v_y * v_inc_y ;
-    bool_dim_y = VRAI;
+    if ( bool_inc_y ) bool_dim_y = VRAI;
   }
 
   if ( bool_dim_z )
@@ -1130,11 +1127,11 @@ int IGBheader::read()
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
-                  "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
+               "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
                   v_z, v_inc_z, dim_z, v_dim_z) ;
         }
         sprintf(Header_Message,
-                "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
+               "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
                 v_z, v_inc_z, dim_z, v_dim_z) ;
         statut = 1 ;
       }
@@ -1144,8 +1141,7 @@ int IGBheader::read()
     }
   else {
     v_dim_z = v_z * v_inc_z ;
-    if ( bool_inc_z )
-      bool_dim_z = VRAI;
+    if ( bool_inc_z ) bool_dim_z = VRAI;
   }
 
   if ( bool_dim_t )
