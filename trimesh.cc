@@ -2155,7 +2155,7 @@ Controls::Controls() {
       datachc->tooltip("use data to color which elements");
       datachc->down_box(FL_BORDER_BOX);
       datachc->menu(menu_datachc);
-      o->value(3);
+      o->value(4);
     } // Fl_Choice* datachc
     { draw_axes = new Fl_Light_Button(10, 85, 80, 25, "Axes");
       draw_axes->tooltip("toggle axs display");

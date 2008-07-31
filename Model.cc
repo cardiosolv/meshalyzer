@@ -184,7 +184,6 @@ int Model::add_surface_from_elem( const char *fn )
   string fname(fn);
   if ( (in=gzopen( (fname+="elem").c_str(), "r" )) == NULL )
     if ( (in=gzopen( (fname+=".gz").c_str(), "r" )) == NULL ) {
-      fprintf( stderr, "Could not open surface file\n" );
       return -1;
     }
 

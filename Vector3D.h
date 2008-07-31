@@ -8,6 +8,7 @@
 #include "Global.h"
 #include <sstream>
 #include <iostream>
+#include <string.h>
 
 template <class T> class Vector3D
 {

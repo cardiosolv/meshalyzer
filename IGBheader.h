@@ -48,6 +48,14 @@
 #define IGB_ENDIAN_VAL -1.24e5
 #define IGB_LITTLE_END_REP 0,48,242,199
 
+// error codes
+#define ERR_EOF_IN_HEADER      1
+#define ERR_LINE_TOO_LONG      2
+#define ERR_UNPRINTABLE_CHAR   3
+#define ERR_IGB_SYNTAX         4
+#define ERR_UNDEFINED_X_Y_TYPE 5
+#define ERR_SIZE_REDEFINED     6 
+#define ERR_SIZE_NOT_DEFINED   7
 
 /*
     Definition des types List, bytes, Char, Double, complex d_complex
@@ -357,7 +365,17 @@ read_IGB_data( T* dp, int numt, IGBheader* h, char *buf )
   if ( numread == Z_NULL ) return 0;
   if ( h->systeme() != h->endian() ) h->swab(buf, numread);
 
-  int numprimitive = numread*h->data_size()/sizeof(T); // adjust vector types
+  int numprimitive = numread; // adjust vector types
+  switch( h->type() ) {
+	  case IGB_VEC3_f:
+	  case IGB_VEC3_d:
+		  numprimitive *= 3;
+		  break;
+	  case IGB_VEC4_f:
+	  case IGB_VEC4_d:
+		  numprimitive *= 4;
+		  break;
+  }
   for ( int a=0; a<numprimitive; a++ )
     dp[a] = IGB_convert_buffer_datum<T>( h, buf, a );
   
@@ -409,7 +427,7 @@ T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
     default:
       memset(&datum,0,sizeof(datum));
   }
-  return h->from_raw(datum);
+  return datum=h->from_raw(datum);
 }
 
 

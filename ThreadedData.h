@@ -394,8 +394,8 @@ T* ThreadedData<T>::slice( int tm )
   if ( tm>maxtm && maxtm != -1 ) return 0;
 
   // Locks incrementation, copies incrementation and unlock it
-  pthread_mutex_lock( &mutex_incrementation );
-  pthread_mutex_unlock( &mutex_incrementation );
+  //pthread_mutex_lock( &mutex_incrementation );
+  //pthread_mutex_unlock( &mutex_incrementation );
 
   // Searches cache for tm
   T* retval;

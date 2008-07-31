@@ -451,7 +451,7 @@ mainbar->redraw();}
       Fl_Choice datachc {
         label {Data on}
         tooltip {use data to color which elements} xywh {75 50 110 25} down_box BORDER_BOX
-        code0 {o->value(3);}
+        code0 {o->value(4);}
       } {
         MenuItem {} {
           label Vertices

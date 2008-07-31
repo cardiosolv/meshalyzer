@@ -5,6 +5,7 @@
 #include "IGBheader.h"
 #include <zlib.h>
 #include <string>
+#include <typeinfo>
 
 /** reader for case when all data can fit in computer RAM at once */
 template<class T>

@@ -734,8 +734,11 @@ int IGBheader::write()
 }
 
 
-/*
- * read in a header and return 0 if all is o.k.
+/** read in a header 
+ *
+ * \return 0 if and only if all is o.k.
+ *
+ * \pre the file has been opened
  */
 int IGBheader::read()
 {
@@ -760,7 +763,7 @@ int IGBheader::read()
                   "\nERREUR ligne trop longue (>80) dans l'entete !\n" ) ;
         sprintf(Header_Message,
                 "\nERREUR ligne trop longue (>80) dans l'entete !\n" ) ;
-        return( 0 ) ;
+        return ERR_LINE_TOO_LONG;
       }
 
       /* --- lit le caractere suivant --- */
@@ -773,7 +776,7 @@ int IGBheader::read()
                   "\nERREUR Fin de fichier dans l'entete !\n" ) ;
         sprintf(Header_Message,
                 "\nERREUR Fin de fichier dans l'entete !\n" ) ;
-        return( 0 ) ;
+        return ERR_EOF_IN_HEADER;
       }
 
       /* --- FF --> termine le header --- */
@@ -798,7 +801,7 @@ int IGBheader::read()
                   "\nERREUR caract. non imprim. 0x%.2X dans l'entete at byte number %d\n", in, gztell(file) );
         sprintf(Header_Message,
                 "\nERREUR caract. non imprim. 0x%.2X dans l'entete !\n", in );
-        return( 0 ) ;
+        return ERR_UNPRINTABLE_CHAR;
       } else {
         str[i++] = (char) in ;
       }
@@ -843,7 +846,7 @@ int IGBheader::read()
                     "\nERREUR de syntaxe dans l'entete (%s)\n", pt_1);
           sprintf(Header_Message,
                   "\nERREUR de syntaxe dans l'entete (%s)\n", pt_1);
-          return( 0 ) ;
+          return ERR_IGB_SYNTAX;
         }
 
       *pt_2++ = '\000' ;
@@ -1068,7 +1071,7 @@ int IGBheader::read()
     if (!Header_Quiet)
       fprintf(stderr, "\nERREUR x, y ou type non definis\n") ;
     sprintf(Header_Message, "\nERREUR x, y ou type non definis\n") ;
-    return( 0 ) ;
+    return ERR_UNDEFINED_X_Y_TYPE ;
   }
 
   /* --- calcul des inc et dim --- */
@@ -1176,7 +1179,7 @@ int IGBheader::read()
                 "\nERREUR taille redefinie pour type autre que structure\n") ;
       sprintf(Header_Message,
               "\nERREUR taille redefinie pour type autre que structure\n") ;
-      return( 0 ) ;
+      return ERR_SIZE_REDEFINED;
     }
   } else {
     if (v_type==IGB_STRUCTURE) {
@@ -1185,7 +1188,7 @@ int IGBheader::read()
                 "\nERREUR taille non definie pour type structure\n") ;
       sprintf(Header_Message,
               "\nERREUR taille non definie pour type structure\n") ;
-      return( 0 ) ;
+      return ERR_SIZE_NOT_DEFINED;
     } else {
       v_taille = Data_Size[v_type];
     }
@@ -1210,7 +1213,7 @@ int IGBheader::read()
     gzread(file, v_vect_z, sizeof(float)*v_z);
   }
 
-  return( statut ) ;
+  return statut;
 }
 
 /*
