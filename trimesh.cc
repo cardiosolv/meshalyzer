@@ -2890,24 +2890,19 @@ ofs << col[3];
 }
 
 void Controls::pick_surf_color(Object_t ot, const char *winlab) {
-  int msz = surflist->nchecked();
+  int msz = surflist->nitems();
 
-if( msz==0 ) return;
+if( !msz ) return;
 
 bool* cs = new bool[msz];
 GLfloat *col;
 
-if( surflist->nchecked() == surflist->nitems() ) {
-  for( int mi=0; mi<msz; mi++ ) cs[mi] = true;
-  col = mwtb->get_color(ot, 0);
-} else {
-  for( int mi=0; mi<msz; mi++ ) 
-    if( surflist->checked(mi) ){
-      cs[mi] = true;
-      col = mwtb->get_color(ot, mi);
-    } else
-      cs[mi] = false;
-}   
+for( int mi=0; mi<surflist->nitems(); mi++ ) 
+ if( surflist->checked(mi+1) ){
+   cs[mi] = true;
+   col = mwtb->get_color(ot, mi);
+ } else
+   cs[mi] = false;  
 
 colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
