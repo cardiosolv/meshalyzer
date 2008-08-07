@@ -1340,91 +1340,71 @@ void translucency( bool b )
 
 /** surface visibility
  *
- * \param s surface number, -1=all
+ * \param l list of surfaces affected
  * \param v visibility
  */
 void
-TBmeshWin::surfVis( int s, bool v )
+TBmeshWin::surfVis( vector<int>&l, bool v )
 {
-
-  if ( s != -1 )
-    model->surface(s)->visible(v);
-  else
-    for ( int i=0; i<model->numSurf; i++ )
-      model->surface(i)->visible(v);
+  for ( int i=0; i<l.size(); i++ )
+    model->surface(l[i])->visible(v);
   redraw();
 }
 
 
 /** surface element filled
  *
- * \param s surface number, -1=all
+ * \param l list of surfaces affected
  * \param v visibility
  */
 void
-TBmeshWin::surfFilled( int s, bool f )
+TBmeshWin::surfFilled( vector<int>& l, bool f )
 {
-
-  if ( s != -1 )
-    model->surface(s)->filled(f);
-  else
-    for ( int i=0; i<model->numSurf; i++ )
-      model->surface(i)->filled(f);
+  for ( int i=0; i<l.size(); i++ )
+      model->surface(l[i])->filled(f);
   redraw();
 }
 
 
 /** surface element outlined
  *
- * \param s surface number, -1=all
+ * \param l list of surfaces affected
  * \param f outlined
  */
 void
-TBmeshWin::surfOutline( int s, bool f )
+TBmeshWin::surfOutline( vector<int>&l, bool f )
 {
-
-  if ( s != -1 )
-    model->surface(s)->outline(f);
-  else
-    for ( int i=0; i<model->numSurf; i++ )
-      model->surface(i)->outline(f);
+  for ( int i=0; i<l.size(); i++ )
+      model->surface(l[i])->outline(f);
   redraw();
 }
 
 
-
 /** surface element outline color
  *
- * \param s surface number, -1=all
+ * \param l list of surfaces affected
  * \param c colour
  */
 void
-TBmeshWin::surfOutColor( int s, GLfloat* c )
+TBmeshWin::surfOutColor( vector<int>&l, GLfloat* c )
 {
-
-  if ( s != -1 )
-    model->surface(s)->outlinecolor(c[0],c[1],c[2],c[3]);
-  else
-    for ( int i=0; i<model->numSurf; i++ )
-      model->surface(i)->outlinecolor(c[0],c[1],c[2],c[3]);
+  for ( int i=0; i<l.size(); i++ )
+    model->surface(l[i])->outlinecolor(c[0],c[1],c[2],c[3]);
   redraw();
 }
 
 
 /** surface element fill color
  *
- * \param s surface number, -1=all
+ * \param l list of surfaces affected
  * \param c colour
  */
 void
-TBmeshWin::surfFillColor( int s, GLfloat *c )
+TBmeshWin::surfFillColor( vector<int>&l, GLfloat *c )
 {
 
-  if ( s != -1 )
-    model->surface(s)->fillcolor(c[0],c[1],c[2],c[3]);
-  else
-    for ( int i=0; i<model->numSurf; i++ )
-      model->surface(i)->fillcolor(c[0],c[1],c[2],c[3]);
+  for ( int i=0; i<model->numSurf; i++ )
+    model->surface(l[i])->fillcolor(c[0],c[1],c[2],c[3]);
   redraw();
 }
 

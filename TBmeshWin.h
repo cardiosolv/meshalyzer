@@ -99,11 +99,11 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      facetshade( bool a ){ facetshading=a;valid(0);redraw(); }
     void      headlamp( bool a ){ headlamp_mode=a; redraw(); };
 
-    void      surfVis( int, bool );
-    void      surfFilled( int, bool );
-    void      surfOutline( int, bool );
-    void      surfOutColor( int, GLfloat * );
-    void      surfFillColor( int, GLfloat *);
+    void      surfVis( vector<int>&, bool );
+    void      surfFilled( vector<int>&, bool );
+    void      surfOutline( vector<int>&, bool );
+    void      surfOutColor( vector<int>&, GLfloat * );
+    void      surfFillColor( vector<int>&, GLfloat *);
     void      determine_cutplane( int cp );
   private:
     int        hilight[maxobject];	// which object to highlight

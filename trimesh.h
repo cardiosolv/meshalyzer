@@ -30,7 +30,7 @@ class UserInterface {
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Check_Button.H>
 #include "MyValueInput.h"
-#include <FL/Fl_Browser.H>
+#include <FL/Fl_Check_Browser.H>
 #include <FL/Fl_Tabs.H>
 #include <FL/Fl_Value_Output.H>
 #include <FL/Fl_Roller.H>
@@ -247,13 +247,11 @@ private:
   static void cb_visbut(Fl_Light_Button*, void*);
   void cb_select_i(Fl_Button*, void*);
   static void cb_select(Fl_Button*, void*);
-  void cb_deselect_i(Fl_Button*, void*);
-  static void cb_deselect(Fl_Button*, void*);
 public:
-  Fl_Browser *reglist;
+  Fl_Check_Browser *reglist;
 private:
-  void cb_reglist_i(Fl_Browser*, void*);
-  static void cb_reglist(Fl_Browser*, void*);
+  void cb_invert_i(Fl_Button*, void*);
+  static void cb_invert(Fl_Button*, void*);
 public:
   Fl_Tabs *tabwidget;
   Fl_Group *hilightgrp;
@@ -442,12 +440,6 @@ private:
   void cb_surfvisbut_i(Fl_Light_Button*, void*);
   static void cb_surfvisbut(Fl_Light_Button*, void*);
 public:
-  Fl_Choice *currsurf;
-private:
-  void cb_currsurf_i(Fl_Choice*, void*);
-  static void cb_currsurf(Fl_Choice*, void*);
-  static Fl_Menu_Item menu_currsurf[];
-public:
   Fl_Light_Button *surfoutlinebut;
 private:
   void cb_surfoutlinebut_i(Fl_Light_Button*, void*);
@@ -461,6 +453,13 @@ private:
   static void cb_Outline(Fl_Button*, void*);
   void cb_Fill_i(Fl_Button*, void*);
   static void cb_Fill(Fl_Button*, void*);
+public:
+  Fl_Check_Browser *surflist;
+private:
+  void cb_select1_i(Fl_Button*, void*);
+  static void cb_select1(Fl_Button*, void*);
+  void cb_invert1_i(Fl_Button*, void*);
+  static void cb_invert1(Fl_Button*, void*);
 public:
   Fl_Group *colorscalegrp;
 private:
@@ -536,5 +535,6 @@ public:
   void save_colour( ofstream&ofs, GLfloat *col );
   void pick_surf_color(Object_t ot, const char *winlab);
   void restore_state(const char* fname=NULL);
+  void surfselected(vector<int>& lst);
 };
 #endif

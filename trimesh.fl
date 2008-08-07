@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public
@@ -7,6 +7,8 @@ decl {\#include "Surfaces.h"} {public
 
 decl {\#include <GL/gl.h>} {public
 } 
+
+decl {\#include <vector>} {} 
 
 decl {class TBmeshWin;} {public
 } 
@@ -50,10 +52,11 @@ winny->size_range(50,50,1200,1200,5,5,1);} {}
 
 class Controls {open
 } {
-  Function {Controls()} {} {
+  Function {Controls()} {open
+  } {
     Fl_Window window {
-      label {Meshalyzer Controls} open
-      xywh {582 46 350 650} type Double box UP_BOX
+      label {Meshalyzer Controls} open selected
+      xywh {582 50 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -61,7 +64,7 @@ class Controls {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File
+          label File open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -69,9 +72,9 @@ class Controls {open
             callback {char *fn=fl_file_chooser("Surface", "*.tri",NULL);
 int sn;
 if( fn != NULL ) if( (sn=mwtb->add_surface( fn ))>=0 ){
-  for( int s=currsurf->size()-1; s<=sn; s++ ) {
+  for( int s=surflist->nitems(); s<=sn; s++ ) {
     sprintf( fn, "%d", s-1 );	
-    currsurf->add(fn);
+    surflist->add(fn,1);
   }
   elehi->maximum(mwtb->model->number(SurfEle)-1);
   mwtb->redraw();
@@ -520,7 +523,7 @@ mainbar->redraw();}
         }
       }
       Fl_Group regiondisp {
-        label Region
+        label Region open
         xywh {10 120 330 145} box ENGRAVED_BOX align 17
       } {
         Fl_Light_Button vertbut {
@@ -589,28 +592,25 @@ delete[] selreg;}
         }
         Fl_Button {} {
           label {select all}
-          callback {for( int i=1; i<=reglist->size();i++)
-  reglist->select(i);}
-          xywh {160 240 80 20}
+          callback {reglist->check_all();}
+          xywh {160 240 90 20}
+        }
+        Fl_Check_Browser reglist {
+          xywh {25 130 120 125}
         }
         Fl_Button {} {
-          label {deselect all}
-          callback {reglist->deselect();}
-          xywh {243 240 85 20}
-        }
-        Fl_Browser reglist {
-          callback {int l=reglist->value();
-if( l && reglist->selected(l) ) 
-  update_regionGUI(l-1);}
-          xywh {20 140 125 115} type Multi
+          label {invert select}
+          callback {for( int i=0; i<=reglist->nitems(); i++ )
+  reglist->checked( i, !reglist->checked(i) );}
+          xywh {250 240 80 20} color 0 labelcolor 49
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
           label Highlight
-          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4
+          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
             label {Tetrahedron:}
@@ -919,43 +919,53 @@ mwtb->redraw();}
           }
         }
         Fl_Group {} {
-          label Surface
-          xywh {15 310 315 165} labelsize 12 labelcolor 90 hide
+          label Surface open
+          xywh {15 310 315 175} labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
             label visible
-            callback {mwtb->surfVis( currsurf->value()-1,static_cast<bool>(o->value()));}
-            xywh {30 365 90 30} value 1 selection_color 2 align 16
-          }
-          Fl_Choice currsurf {
-            label {Apply to Surface\#}
-            callback {update_surfGUI( o->value()-1 );}
-            tooltip {shells affected by settings} xywh {150 320 120 30} down_box BORDER_BOX
-          } {
-            MenuItem {} {
-              label All
-              xywh {5 5 100 20}
-            }
+            callback {vector<int>lst;
+surfselected(lst);
+mwtb->surfVis(lst,static_cast<bool>(o->value()));}
+            xywh {235 395 85 30} value 1 selection_color 2 align 16
           }
           Fl_Light_Button surfoutlinebut {
             label Outline
-            callback {mwtb->surfOutline(currsurf->value()-1,static_cast<bool>(o->value()));}
-            xywh {135 365 85 30}
+            callback {vector<int>lst;
+surfselected(lst);
+mwtb->surfOutline(lst,static_cast<bool>(o->value()));}
+            xywh {140 315 85 30}
           }
           Fl_Light_Button surffillbut {
             label Filled
-            callback {mwtb->surfFilled(currsurf->value()-1,static_cast<bool>(o->value()));}
-            xywh {235 365 85 30} value 1
+            callback {vector<int> lst;
+surfselected(lst);
+mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
+            xywh {235 315 85 30} value 1
           }
           Fl_Button {} {
             label {Outline colour}
             callback {pick_surf_color( SurfEle, "Outline Colour" );}
-            xywh {135 405 85 25} labelsize 12
+            xywh {140 355 85 30} labelsize 12
           }
           Fl_Button {} {
             label {Fill colour}
             callback {pick_surf_color( Surface, "Surface colour" );}
-            xywh {235 405 85 25} labelsize 12
+            xywh {235 355 85 30} labelsize 12
+          }
+          Fl_Check_Browser surflist {
+            xywh {20 315 110 155} type Multi
+          }
+          Fl_Button {} {
+            label {select all}
+            callback {surflist->check_all();}
+            xywh {140 445 85 20}
+          }
+          Fl_Button {} {
+            label {invert select}
+            callback {for( int i=1; i<=surflist->nitems(); i++ )
+    surflist->checked(i, !surflist->checked(i));}
+            xywh {235 445 85 20} color 0 labelcolor 49
           }
         }
       }
@@ -1063,12 +1073,13 @@ mwtb->redraw();}
     code {mwtb = w;} {}
   }
   decl {TBmeshWin *mwtb;} {}
-  Function {pickcolor(Object_t obj, const char* wintitle )} {} {
+  Function {pickcolor(Object_t obj, const char* wintitle )} {open
+  } {
     code {bool* sel=regselected();
-for( int i=0; i<reglist->size(); i++ )
+for( int i=0; i<reglist->nitems(); i++ )
   if( sel[i] ) { 
    GLfloat *c = mwtb->get_color(obj, i);
-   colourChoice *cc = new colourChoice( c, sel, reglist->size(), obj, mwtb );
+   colourChoice *cc = new colourChoice( c, sel, reglist->nitems(), obj, mwtb );
    cc->window->label(wintitle);
    cc->window->show();
    break;
@@ -1092,8 +1103,8 @@ cnnxbut->value( mwtb->showobj(Cnnx, r) );} {}
   Function {highlight_region()} {open
   } {
     code {int regnum;
-for( regnum=0; regnum<reglist->size(); regnum++ )
-  if( reglist->selected(regnum) )
+for( regnum=0; regnum<reglist->nitems(); regnum++ )
+  if( reglist->checked(regnum) )
     break;
 regnum--;
 
@@ -1112,8 +1123,7 @@ mwtb->highlight( SurfEle, objnum );
 elehi->value( objnum );
 objnum = mwtb->reg_first( regnum, Vertex );
 mwtb->highlight( Vertex, objnum );
-verthi->value( objnum );} {selected
-    }
+verthi->value( objnum );} {}
   }
   Function {set_rot( char n, int neg, int view )} {return_type void
   } {
@@ -1140,14 +1150,14 @@ mwtb->redraw();} {}
   char text[256];
   sprintf( text, "%d", (model->region(i))->label() );
   reglist->add( text, NULL );
-  reglist->select(i+1);
+  reglist->checked(i+1,1);
 }} {}
   }
-  Function {regselected()} {return_type {bool *}
+  Function {regselected()} {open return_type {bool *}
   } {
-    code {bool *sel = new bool[reglist->size()];
-for( int i=1; i<=reglist->size(); i++ )
-  sel[i-1] = reglist->selected(i);
+    code {bool *sel = new bool[reglist->nitems()];
+for( int i=1; i<=reglist->nitems(); i++ )
+  sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
   Function {save_state()} {} {
@@ -1202,7 +1212,6 @@ SAVE_WIDGET(mshzf,showLightDir);
 SAVE_WIDGET(mshzf,facetshadBut);
 SAVE_WIDGET(mshzf,illBut);
 //surface tab
-SAVE_WIDGET(mshzf,currsurf);
 SAVE_WIDGET(mshzf,surfvisbut);
 SAVE_WIDGET(mshzf,surfoutlinebut);
 SAVE_WIDGET(mshzf,surffillbut);
@@ -1245,22 +1254,23 @@ mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;} {}
 ofs << col[3];} {}
   }
   Function {pick_surf_color(Object_t ot, const char *winlab)} {} {
-    code {int msz = currsurf->size()-2;
+    code {int msz = surflist->nchecked();
 
 if( msz==0 ) return;
 
 bool* cs = new bool[msz];
 GLfloat *col;
 
-int picked = currsurf->value()-1;
-
-if( picked==-1 ) {
+if( surflist->nchecked() == surflist->nitems() ) {
   for( int mi=0; mi<msz; mi++ ) cs[mi] = true;
   col = mwtb->get_color(ot, 0);
 } else {
-  for( int mi=0; mi<msz; mi++ ) cs[mi] = false;;
-  cs[picked] = true;
-  col = mwtb->get_color(ot, picked);
+  for( int mi=0; mi<msz; mi++ ) 
+    if( surflist->checked(mi) ){
+      cs[mi] = true;
+      col = mwtb->get_color(ot, mi);
+    } else
+      cs[mi] = false;
 }   
 
 colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
@@ -1374,8 +1384,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( backintensityslide, var, val ) 
   TEST_VAR( showLightDir, var, int(val) ) 
   TEST_VAR( facetshadBut, var, int(val) ) 
-  TEST_VAR( illBut, var, int(val) ) 
-  TEST_VAR( currsurf, var, int(val) ) 
+  TEST_VAR( illBut, var, int(val) )  
   TEST_VAR( surfvisbut, var, int(val) ) 
   TEST_VAR( surfoutlinebut, var, int(val) ) 
   TEST_VAR( surffillbut, var, int(val) ) 
@@ -1392,5 +1401,11 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   cerr << "Unknown variable specified: " << var << endl;
 }
 mwtb->lights(illBut->value());} {}
+  }
+  Function {surfselected(vector<int>& lst)} {} {
+    code {lst.clear();
+for( int i=1; i<=surflist->nitems(); i++ )
+  if( surflist->checked(i) )
+    lst.push_back(i-1);} {}
   }
 } 
