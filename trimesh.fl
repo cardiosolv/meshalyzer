@@ -55,13 +55,13 @@ class Controls {open
   Function {Controls()} {open
   } {
     Fl_Window window {
-      label {Meshalyzer Controls} open selected
+      label {Meshalyzer Controls} open
       xywh {582 50 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
       Fl_Menu_Bar mainbar {
-        xywh {0 0 350 30} labelcolor 1
+        xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
           label File open
@@ -72,12 +72,14 @@ class Controls {open
             callback {char *fn=fl_file_chooser("Surface", "*.tri",NULL);
 int sn;
 if( fn != NULL ) if( (sn=mwtb->add_surface( fn ))>=0 ){
-  for( int s=surflist->nitems(); s<=sn; s++ ) {
-    sprintf( fn, "%d", s-1 );	
-    surflist->add(fn,1);
+  for( int s=surflist->nitems(); s<sn; s++ ) {
+    char surfno[100];
+    sprintf( surfno, "%d", s );
+    surflist->add(surfno,1);
   }
   elehi->maximum(mwtb->model->number(SurfEle)-1);
   mwtb->redraw();
+  surflist->redraw();
 }}
             xywh {0 0 100 20} divider
           }
@@ -523,7 +525,7 @@ mainbar->redraw();}
         }
       }
       Fl_Group regiondisp {
-        label Region open
+        label Region
         xywh {10 120 330 145} box ENGRAVED_BOX align 17
       } {
         Fl_Light_Button vertbut {
@@ -919,7 +921,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group {} {
-          label Surface open
+          label Surface open selected
           xywh {15 310 315 175} labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
@@ -954,17 +956,26 @@ mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
             xywh {235 355 85 30} labelsize 12
           }
           Fl_Check_Browser surflist {
-            xywh {20 315 110 155} type Multi
+            label {apply to}
+            xywh {20 320 110 150} type Multi align 5
           }
           Fl_Button {} {
             label {select all}
-            callback {surflist->check_all();}
+            callback {surflist->check_all();
+update_surfGUI(0);}
             xywh {140 445 85 20}
           }
           Fl_Button {} {
             label {invert select}
-            callback {for( int i=1; i<=surflist->nitems(); i++ )
-    surflist->checked(i, !surflist->checked(i));}
+            callback {bool done=false;
+
+for( int i=1; i<=surflist->nitems(); i++ ) {
+    if( !done && !surflist->checked(i) ) {
+      done = true;
+      update_surfGUI(i-1);
+    }
+    surflist->checked(i, !surflist->checked(i));
+}}
             xywh {235 445 85 20} color 0 labelcolor 49
           }
         }
@@ -1073,8 +1084,7 @@ mwtb->redraw();}
     code {mwtb = w;} {}
   }
   decl {TBmeshWin *mwtb;} {}
-  Function {pickcolor(Object_t obj, const char* wintitle )} {open
-  } {
+  Function {pickcolor(Object_t obj, const char* wintitle )} {} {
     code {bool* sel=regselected();
 for( int i=0; i<reglist->nitems(); i++ )
   if( sel[i] ) { 
@@ -1085,23 +1095,21 @@ for( int i=0; i<reglist->nitems(); i++ )
    break;
    }} {}
   }
-  Function {update_surfGUI( int s )} {open return_type void
+  Function {update_surfGUI( int s )} {return_type void
   } {
     code {if( !mwtb->model->numSurf ) return;
-if( s==-1) s=0;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
 surfoutlinebut->value( mwtb->model->surface(s)->outline() );
 surffillbut->value( mwtb->model->surface(s)->filled() );} {}
   }
-  Function {update_regionGUI( int r )} {open return_type void
+  Function {update_regionGUI( int r )} {return_type void
   } {
     code {visbut->value( mwtb->visibility(r) );
 vertbut->value( mwtb->showobj(Vertex, r) );
 cabbut->value( mwtb->showobj(Cable, r) );
 cnnxbut->value( mwtb->showobj(Cnnx, r) );} {}
   }
-  Function {highlight_region()} {open
-  } {
+  Function {highlight_region()} {} {
     code {int regnum;
 for( regnum=0; regnum<reglist->nitems(); regnum++ )
   if( reglist->checked(regnum) )
@@ -1153,7 +1161,7 @@ mwtb->redraw();} {}
   reglist->checked(i+1,1);
 }} {}
   }
-  Function {regselected()} {open return_type {bool *}
+  Function {regselected()} {return_type {bool *}
   } {
     code {bool *sel = new bool[reglist->nitems()];
 for( int i=1; i<=reglist->nitems(); i++ )

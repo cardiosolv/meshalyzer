@@ -34,12 +34,14 @@ void Controls::cb_Add_i(Fl_Menu_*, void*) {
   char *fn=fl_file_chooser("Surface", "*.tri",NULL);
 int sn;
 if( fn != NULL ) if( (sn=mwtb->add_surface( fn ))>=0 ){
-  for( int s=surflist->nitems(); s<=sn; s++ ) {
-    sprintf( fn, "%d", s-1 );	
-    surflist->add(fn,1);
+  for( int s=surflist->nitems(); s<sn; s++ ) {
+    char surfno[100];
+    sprintf( surfno, "%d", s );
+    surflist->add(surfno,1);
   }
   elehi->maximum(mwtb->model->number(SurfEle)-1);
   mwtb->redraw();
+  surflist->redraw();
 };
 }
 void Controls::cb_Add(Fl_Menu_* o, void* v) {
@@ -1935,14 +1937,22 @@ void Controls::cb_Fill(Fl_Button* o, void* v) {
 
 void Controls::cb_select1_i(Fl_Button*, void*) {
   surflist->check_all();
+update_surfGUI(0);
 }
 void Controls::cb_select1(Fl_Button* o, void* v) {
   ((Controls*)(o->parent()->parent()->parent()->user_data()))->cb_select1_i(o,v);
 }
 
 void Controls::cb_invert1_i(Fl_Button*, void*) {
-  for( int i=1; i<=surflist->nitems(); i++ )
+  bool done=false;
+
+for( int i=1; i<=surflist->nitems(); i++ ) {
+    if( !done && !surflist->checked(i) ) {
+      done = true;
+      update_surfGUI(i-1);
+    }
     surflist->checked(i, !surflist->checked(i));
+};
 }
 void Controls::cb_invert1(Fl_Button* o, void* v) {
   ((Controls*)(o->parent()->parent()->parent()->user_data()))->cb_invert1_i(o,v);
@@ -2076,7 +2086,7 @@ Controls::Controls() {
   { window = new Fl_Double_Window(350, 650, "Meshalyzer Controls");
     window->box(FL_UP_BOX);
     window->user_data((void*)(this));
-    { mainbar = new Fl_Menu_Bar(0, 0, 350, 30);
+    { mainbar = new Fl_Menu_Bar(0, -1, 350, 30);
       mainbar->labelcolor((Fl_Color)1);
       { Fl_Menu_Item* o = &menu_mainbar[16];
       o->image(image_ppaxis);
@@ -2581,8 +2591,9 @@ Controls::Controls() {
           o->labelsize(12);
           o->callback((Fl_Callback*)cb_Fill);
         } // Fl_Button* o
-        { surflist = new Fl_Check_Browser(20, 315, 110, 155);
+        { surflist = new Fl_Check_Browser(20, 320, 110, 150, "apply to");
           surflist->type(3);
+          surflist->align(FL_ALIGN_TOP_LEFT);
         } // Fl_Check_Browser* surflist
         { Fl_Button* o = new Fl_Button(140, 445, 85, 20, "select all");
           o->callback((Fl_Callback*)cb_select1);
@@ -2720,7 +2731,6 @@ for( int i=0; i<reglist->nitems(); i++ )
 
 void Controls::update_surfGUI( int s ) {
   if( !mwtb->model->numSurf ) return;
-if( s==-1) s=0;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
 surfoutlinebut->value( mwtb->model->surface(s)->outline() );
 surffillbut->value( mwtb->model->surface(s)->filled() );
