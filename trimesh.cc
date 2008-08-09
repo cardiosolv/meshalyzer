@@ -1958,6 +1958,17 @@ void Controls::cb_invert1(Fl_Button* o, void* v) {
   ((Controls*)(o->parent()->parent()->parent()->user_data()))->cb_invert1_i(o,v);
 }
 
+void Controls::cb_delete_i(Fl_Button*, void*) {
+  vector<int> lst;
+surfselected(lst);
+for( int i=lst.size()-1; i>=0; i-- )
+  mwtb->model->surfKill( lst[i] );
+refresh_surflist();
+}
+void Controls::cb_delete(Fl_Button* o, void* v) {
+  ((Controls*)(o->parent()->parent()->parent()->user_data()))->cb_delete_i(o,v);
+}
+
 void Controls::cb_optimal1_i(Fl_Button*, void*) {
   mwtb->optimize_cs();
 mincolval->value(mwtb->cs->min());
@@ -2603,6 +2614,10 @@ Controls::Controls() {
           o->labelcolor(FL_BACKGROUND_COLOR);
           o->callback((Fl_Callback*)cb_invert1);
         } // Fl_Button* o
+        { Fl_Button* o = new Fl_Button(155, 400, 50, 20, "delete");
+          o->color(FL_RED);
+          o->callback((Fl_Callback*)cb_delete);
+        } // Fl_Button* o
         o->end();
       } // Fl_Group* o
       tabwidget->end();
@@ -2730,7 +2745,7 @@ for( int i=0; i<reglist->nitems(); i++ )
 }
 
 void Controls::update_surfGUI( int s ) {
-  if( !mwtb->model->numSurf ) return;
+  if( !mwtb->model->numSurf() ) return;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
 surfoutlinebut->value( mwtb->model->surface(s)->outline() );
 surffillbut->value( mwtb->model->surface(s)->filled() );
@@ -2870,8 +2885,8 @@ SAVE_WIDGET(mshzf,tmslider);
 SAVE_WIDGET(mshzf,frameskip);
 SAVE_WIDGET(mshzf,animdelay);
 
-mshzf << "SURFACE_COLOURS = " << mwtb->model->numSurf << endl;
-for( int i=0; i<mwtb->model->numSurf; i++ ) {
+mshzf << "SURFACE_COLOURS = " << mwtb->model->numSurf() << endl;
+for( int i=0; i<mwtb->model->numSurf(); i++ ) {
   save_colour( mshzf, mwtb->model->surface(i)->fillcolor() );
   mshzf << " ";
   save_colour( mshzf, mwtb->model->surface(i)->outlinecolor() );
@@ -2950,7 +2965,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   } 
   if( !strcmp( var, "SURFACE_COLOURS" ) ) {
     for( int i=0; i<val; i++ ) {
-      if( i >= mwtb->model->numSurf ){
+      if( i >= mwtb->model->numSurf() ){
         mshzf.getline(var, 1024);
         continue;
       }
@@ -3050,4 +3065,16 @@ void Controls::surfselected(vector<int>& lst) {
 for( int i=1; i<=surflist->nitems(); i++ )
   if( surflist->checked(i) )
     lst.push_back(i-1);
+}
+
+void Controls::refresh_surflist() {
+  surflist->clear(); 
+for( int s=0; s<mwtb->model->numSurf(); s++ ) {
+    char surfno[100];
+    sprintf( surfno, "%d", s );
+    surflist->add(surfno,1);
+  }
+  elehi->maximum(mwtb->model->number(SurfEle)-1);
+  mwtb->redraw();
+  surflist->redraw();
 }

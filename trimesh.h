@@ -460,6 +460,8 @@ private:
   static void cb_select1(Fl_Button*, void*);
   void cb_invert1_i(Fl_Button*, void*);
   static void cb_invert1(Fl_Button*, void*);
+  void cb_delete_i(Fl_Button*, void*);
+  static void cb_delete(Fl_Button*, void*);
 public:
   Fl_Group *colorscalegrp;
 private:
@@ -536,5 +538,6 @@ public:
   void pick_surf_color(Object_t ot, const char *winlab);
   void restore_state(const char* fname=NULL);
   void surfselected(vector<int>& lst);
+  void refresh_surflist();
 };
 #endif

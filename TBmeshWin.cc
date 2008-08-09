@@ -282,19 +282,19 @@ void TBmeshWin :: draw()
   // draw surfaces
   Surfaces *sf;
   model->pt.setVis( true );
-  for ( int s=0; s<model->numSurf; s++ ) {
+  for ( int s=0; s<model->numSurf(); s++ ) {
 
     if ( revDrawOrder )
-      sf = model->surface(model->numSurf-s-1);
+      sf = model->surface(model->numSurf()-s-1);
     else
       sf = model->surface(s);
 
     if ( !sf->visible() ) continue;
 
-    if ( sf->filled() && model->numSurf ) {
+    if ( sf->filled() && model->numSurf() ) {
       draw_surfaces(sf);
     }
-    if ( sf->outline() && model->numSurf ) {
+    if ( sf->outline() && model->numSurf() ) {
       draw_elements(sf);
     }
   }
@@ -334,10 +334,10 @@ void TBmeshWin :: draw()
           }
       glDisable(GL_POLYGON_OFFSET_FILL );
 
-    } else if ( model->numSurf &&
+    } else if ( model->numSurf() &&
                 (!model->numVol() || vert_asc_obj==SurfEle) ) {
       //draw elements associated with highlighted node
-      for ( int s=0; s<model->numSurf; s++ ) {
+      for ( int s=0; s<model->numSurf(); s++ ) {
         vector<SurfaceElement*>ele = model->surface(s)->ele();
         for ( int i=0; i<model->surface(s)->num(); i++ )
           for ( int j=0; j<ele[i]->ptsPerObj(); j++ )
@@ -346,7 +346,7 @@ void TBmeshWin :: draw()
       }
       glEnd();
     }
-    if ( model->numSurf ) {
+    if ( model->numSurf() ) {
       int lsurf, lele;
       lele = model->localElemnum( hilight[SurfEle], lsurf );
       model->surface(lsurf)->ele(lele)->draw( 0, hiele_color );
@@ -639,7 +639,7 @@ void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt, bool base1 )
 int TBmeshWin :: add_surface( const char *fn )
 {
   model->add_surface_from_tri( fn );
-  return model->numSurf;
+  return model->numSurf();
 }
 
 
@@ -652,9 +652,9 @@ GLfloat* TBmeshWin:: get_color( Object_t obj, int s )
 
   if ( obj == Tetrahedron )
     return tet_color;
-  else if ( obj == SurfEle && model->numSurf )
+  else if ( obj == SurfEle && model->numSurf() )
     return model->surface(s)->outlinecolor();
-  else if ( obj == Surface && model->numSurf )
+  else if ( obj == Surface && model->numSurf() )
     return model->surface(s)->fillcolor();
   else
     return model->get_color(obj, s );
@@ -1403,7 +1403,7 @@ void
 TBmeshWin::surfFillColor( vector<int>&l, GLfloat *c )
 {
 
-  for ( int i=0; i<model->numSurf; i++ )
+  for ( int i=0; i<model->numSurf(); i++ )
     model->surface(l[i])->fillcolor(c[0],c[1],c[2],c[3]);
   redraw();
 }

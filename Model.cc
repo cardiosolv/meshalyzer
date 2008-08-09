@@ -9,7 +9,7 @@
 
 Model::Model(Colourscale *cs, DataOpacity *dopac ):
     _cs(cs),_dataopac(dopac),_base1(false),
-    _surface(NULL), numSurf(0), _vertnrml(NULL),
+    _surface(NULL), _vertnrml(NULL),
     _numReg(0), _region(NULL), _numVol(0), _vol(NULL)
 {
   for ( int i=0; i<maxobject; i++ ) _outstride[i] = 1;
@@ -203,16 +203,15 @@ int Model::add_surface_from_elem( const char *fn )
     if ( strlen(surfnum) )
       surfs[surfnum]++;
   }
-  if ( !surfs.size() ) return numSurf;
+  if ( !surfs.size() ) return numSurf();
 
   // allocate new surfaces
-  _surface=(Surfaces **)realloc(_surface,
-                                (numSurf+surfs.size())*sizeof(Surfaces *));
-  for ( int s=numSurf; s<numSurf+surfs.size(); s++ )
-    _surface[s] = new Surfaces( &pt );
+  int oldnumSurf = _surface.size();
+  for ( int s=oldnumSurf; s<oldnumSurf+surfs.size(); s++ )
+    _surface.push_back( new Surfaces( &pt ) );
   map<string,int> surfmap;
   map<string,int> :: iterator iter = surfs.begin();
-  for ( int s=numSurf; iter!=surfs.end(); iter++, s++ ) {
+  for ( int s=oldnumSurf; iter!=surfs.end(); iter++, s++ ) {
     _surface[s]->num(iter->second );
     surfmap[iter->first] = s;   // map region to surface index
   }
@@ -240,11 +239,10 @@ int Model::add_surface_from_elem( const char *fn )
   }
   gzclose( in );
 
-  for ( int s=numSurf; s<numSurf+surfs.size(); s++ )
+  for ( int s=oldnumSurf; s<_surface.size(); s++ )
     _surface[s]->determine_vert_norms( pt );
 
-  numSurf += surfs.size();
-  return numSurf;
+  return _surface.size();
 }
 
 
@@ -284,40 +282,38 @@ int Model::add_surface_from_tri( const char *fn )
 
   if ( multi_surface ) {
     do {
-      _surface=(Surfaces **)realloc(_surface,++numSurf*sizeof(Surfaces *));
-      _surface[numSurf-1] = new Surfaces( &pt );
-      _surface[numSurf-1]->num(ntri);
+      _surface.push_back( new Surfaces( &pt ) );
+      _surface.back()->num(ntri);
       for ( int i=0; i<ntri; i++ ) {
-        _surface[numSurf-1]->ele(i) = new Triangle( &pt );
+        _surface.back()->ele(i) = new Triangle( &pt );
         int nl[3];
         if ( gzgets(in,buff,bufsize) == Z_NULL ||
              sscanf(buff, "%d %d %d", nl, nl+1, nl+2 ) < 3 ) {
-          numSurf--;
-          return numSurf;
+          _surface.pop_back();
+          return numSurf();
         }
-        _surface[numSurf-1]->ele(i)->define(nl);
-        _surface[numSurf-1]->ele(i)->compute_normals(0,0);
+        _surface.back()->ele(i)->define(nl);
+        _surface.back()->ele(i)->compute_normals(0,0);
       }
-      _surface[numSurf-1]->determine_vert_norms( pt );
+      _surface.back()->determine_vert_norms( pt );
     } while ( gzgets(in,buff,bufsize)!=Z_NULL && sscanf(buff, "%d",&ntri)==1 );
   } else {
     int nl[3];
     nl[0]=ntri;nl[1]=nd[1];nl[2]=nd[2];
-    _surface=(Surfaces **)realloc(_surface,++numSurf*sizeof(Surfaces *));
-    _surface[numSurf-1] = new Surfaces( &pt );
+    _surface.push_back( new Surfaces( &pt ) );
     int curele = 0;
     do {
 #define ELEINC 10000
-	  if( !(curele%ELEINC) ) _surface[numSurf-1]->num(curele+ELEINC);
-	  _surface[numSurf-1]->ele(curele) = new Triangle( &pt );
-  	  _surface[numSurf-1]->ele(curele)->define(nl);
-	  _surface[numSurf-1]->ele(curele++)->compute_normals(0,0);
+	  if( !(curele%ELEINC) ) _surface.back()->num(curele+ELEINC);
+	  _surface.back()->ele(curele) = new Triangle( &pt );
+  	  _surface.back()->ele(curele)->define(nl);
+	  _surface.back()->ele(curele++)->compute_normals(0,0);
 	}while( gzgets(in,buff,bufsize)!=Z_NULL && 
 			                   sscanf(buff, "%d %d %d",nl, nl+1, nl+2)>=3 );
-    _surface[numSurf-1]->num(curele);
-    _surface[numSurf-1]->determine_vert_norms( pt );
+    _surface.back()->num(curele);
+    _surface.back()->determine_vert_norms( pt );
   }
-  return numSurf;
+  return _surface.size();
 }
 
 
@@ -346,16 +342,16 @@ void Model:: set_color( Object_t obj, int s, float r, float g, float b, float a 
 {
   if ( obj==Surface) {
     if ( s<0 )
-      for ( int i=0; i<numSurf; i++ )
-        surface(i)->fillcolor( r, g, b, a );
+      for ( int i=0; i<numSurf(); i++ )
+        _surface[i]->fillcolor( r, g, b, a );
     else
-      surface(s)->fillcolor( r, g, b, a );
+      _surface[s]->fillcolor( r, g, b, a );
   } else if ( obj==SurfEle) {
     if ( s<0 )
-      for ( int i=0; i<numSurf; i++ )
-        surface(i)->outlinecolor( r, g, b, a );
+      for ( int i=0; i<numSurf(); i++ )
+        _surface[i]->outlinecolor( r, g, b, a );
     else
-      surface(s)->outlinecolor( r, g, b, a );
+      _surface[s]->outlinecolor( r, g, b, a );
   } else {
     if ( s<0 )
       for ( int i=0; i<_numReg; i++ )
@@ -388,7 +384,7 @@ void Model :: randomize_color( Object_t obj )
   long maxl = ~0;
   int num;
   if ( obj==Surface || obj==SurfEle )
-    num = numSurf;
+    num = numSurf();
   else
     num = _numReg;
 
@@ -423,11 +419,9 @@ Model::~Model()
     delete _vol[i];
   delete _vol;
   delete _cable;
-  for ( int i=0; i<numSurf; i++ )
+  for ( int i=0; i<numSurf(); i++ )
     delete _surface[i];
-  for ( int i=0; i<numSurf; i++ )
-    delete[] _surface[i];
-  free( _surface );
+  _surface.clear();
 }
 
 
@@ -467,7 +461,7 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
 
   // SurfEles
   int elesurf, lele;
-  if ( numSurf ) {
+  if ( numSurf() ) {
     sprintf(txt, "@b@C%6dTriangle: %d of %d", FL_BLUE, hilight[SurfEle],
             number(SurfEle) );
     hinfo->add( txt );
@@ -561,10 +555,10 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
       ts=NULL;
     }
   }
-  if ( numSurf ) {
+  if ( numSurf() ) {
     sprintf( txt, "Attached elements:" );
     hinfo->add( txt );
-    for ( int i=0; i<numSurf; i++ ) {
+    for ( int i=0; i<numSurf(); i++ ) {
       vector<SurfaceElement*> ele=surface(i)->ele();
       for ( int j=0; j<surface(i)->num(); j++ ) {
         const int* nl = ele[j]->obj();
@@ -699,9 +693,9 @@ int Model::number(Object_t a )
     case Cable:
       return _cable->num();
     case Surface:
-      return numSurf;
+      return _surface.size();
     case SurfEle:
-      for ( int s=0; s<numSurf; s++ )
+      for ( int s=0; s<_surface.size(); s++ )
         nele += surface(s)->num();
       return nele;
     case Tetrahedron:
@@ -813,9 +807,19 @@ bool Model :: read_elem_file( const char *fname )
  */
 int Model::localElemnum( int gele, int& surf )
 {
-  for ( surf=0; surf<numSurf; surf++ )
-    if ( (gele-=surface(surf)->num())<0) break;
+  for ( surf=0; surf<_surface.size(); surf++ )
+    if ( (gele-=_surface[surf]->num())<0) break;
 
-  return gele+surface(surf)->num();
+  return gele+_surface[surf]->num();
 }
 
+
+
+void
+Model::surfKill( int s )
+{
+  vector<Surfaces *>:: iterator it = _surface.begin();
+  for( int i=0; i<s; i++ )
+	it++;
+  _surface.erase(it);
+}

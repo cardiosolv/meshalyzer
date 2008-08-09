@@ -94,7 +94,7 @@ main( int argc, char *argv[] )
 
   win.winny->show();
   win.trackballwin->show();
-  for ( int i=0; i<win.trackballwin->model->numSurf; i++ ) {
+  for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
     char s[256];
     sprintf( s, "%d", i );
     control.surflist->add( s, 1 );

@@ -24,6 +24,7 @@ class Model
     int          add_surface_from_tri( const char * );
     inline int   reg_first( int s, Object_t t ){return _region[s]->first(t); }
     Surfaces* surface(int s){ return _surface[s]; }
+	void      surfKill( int s );
     Region*   region(int s){ return _region[s]; }
     const GLfloat*  pts(int t=0)const {return pt.pt(0);} // in future, pts move
     int    number( Object_t );
@@ -58,12 +59,12 @@ class Model
     ContCable*       _cable;
     VolElement**     _vol;
     int              _numVol;
-    int               numSurf;
+    int               numSurf(void){return _surface.size();}
     int              _numReg;
     int               localElemnum(int, int& );
   private:
     Region**        _region;
-    Surfaces**      _surface;
+    vector<Surfaces*> _surface;
     const GLfloat*  _pts;
     float           _maxdim;		      // maximum physical dimension
     int             _outstride[maxobject];// stride to use when outputting

@@ -60,7 +60,7 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {selected
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -921,7 +921,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group {} {
-          label Surface open selected
+          label Surface open
           xywh {15 310 315 175} labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
@@ -977,6 +977,15 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
     surflist->checked(i, !surflist->checked(i));
 }}
             xywh {235 445 85 20} color 0 labelcolor 49
+          }
+          Fl_Button {} {
+            label delete
+            callback {vector<int> lst;
+surfselected(lst);
+for( int i=lst.size()-1; i>=0; i-- )
+  mwtb->model->surfKill( lst[i] );
+refresh_surflist();}
+            xywh {155 400 50 20} color 88
           }
         }
       }
@@ -1097,7 +1106,7 @@ for( int i=0; i<reglist->nitems(); i++ )
   }
   Function {update_surfGUI( int s )} {return_type void
   } {
-    code {if( !mwtb->model->numSurf ) return;
+    code {if( !mwtb->model->numSurf() ) return;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
 surfoutlinebut->value( mwtb->model->surface(s)->outline() );
 surffillbut->value( mwtb->model->surface(s)->filled() );} {}
@@ -1234,8 +1243,8 @@ SAVE_WIDGET(mshzf,tmslider);
 SAVE_WIDGET(mshzf,frameskip);
 SAVE_WIDGET(mshzf,animdelay);
 
-mshzf << "SURFACE_COLOURS = " << mwtb->model->numSurf << endl;
-for( int i=0; i<mwtb->model->numSurf; i++ ) {
+mshzf << "SURFACE_COLOURS = " << mwtb->model->numSurf() << endl;
+for( int i=0; i<mwtb->model->numSurf(); i++ ) {
   save_colour( mshzf, mwtb->model->surface(i)->fillcolor() );
   mshzf << " ";
   save_colour( mshzf, mwtb->model->surface(i)->outlinecolor() );
@@ -1261,8 +1270,7 @@ mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;} {}
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, const char *winlab)} {open
-  } {
+  Function {pick_surf_color(Object_t ot, const char *winlab)} {} {
     code {int msz = surflist->nitems();
 
 if( !msz ) return;
@@ -1312,7 +1320,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   } 
   if( !strcmp( var, "SURFACE_COLOURS" ) ) {
     for( int i=0; i<val; i++ ) {
-      if( i >= mwtb->model->numSurf ){
+      if( i >= mwtb->model->numSurf() ){
         mshzf.getline(var, 1024);
         continue;
       }
@@ -1411,5 +1419,17 @@ mwtb->lights(illBut->value());} {}
 for( int i=1; i<=surflist->nitems(); i++ )
   if( surflist->checked(i) )
     lst.push_back(i-1);} {}
+  }
+  Function {refresh_surflist()} {open
+  } {
+    code {surflist->clear(); 
+for( int s=0; s<mwtb->model->numSurf(); s++ ) {
+    char surfno[100];
+    sprintf( surfno, "%d", s );
+    surflist->add(surfno,1);
+  }
+  elehi->maximum(mwtb->model->number(SurfEle)-1);
+  mwtb->redraw();
+  surflist->redraw();} {}
   }
 } 
