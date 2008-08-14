@@ -60,7 +60,7 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {selected
+      Fl_Menu_Bar mainbar {
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -921,7 +921,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group {} {
-          label Surface open
+          label Surface open selected
           xywh {15 310 315 175} labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
@@ -929,7 +929,7 @@ mwtb->redraw();}
             callback {vector<int>lst;
 surfselected(lst);
 mwtb->surfVis(lst,static_cast<bool>(o->value()));}
-            xywh {235 395 85 30} value 1 selection_color 2 align 16
+            xywh {140 395 85 30} value 1 selection_color 2 align 16
           }
           Fl_Light_Button surfoutlinebut {
             label Outline
@@ -963,7 +963,7 @@ mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
             label {select all}
             callback {surflist->check_all();
 update_surfGUI(0);}
-            xywh {140 445 85 20}
+            xywh {140 445 85 25}
           }
           Fl_Button {} {
             label {invert select}
@@ -976,16 +976,21 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
     }
     surflist->checked(i, !surflist->checked(i));
 }}
-            xywh {235 445 85 20} color 0 labelcolor 49
+            xywh {235 445 85 25} color 0 labelfont 1 labelsize 12 labelcolor 49
           }
-          Fl_Button {} {
-            label delete
-            callback {vector<int> lst;
+          Fl_Menu_Button {} {
+            label delete open
+            xywh {235 395 85 30} box GTK_UP_BOX color 88
+          } {
+            MenuItem {} {
+              label really
+              callback {vector<int> lst;
 surfselected(lst);
 for( int i=lst.size()-1; i>=0; i-- )
   mwtb->model->surfKill( lst[i] );
 refresh_surflist();}
-            xywh {155 400 50 20} color 88
+              xywh {0 0 30 20}
+            }
           }
         }
       }

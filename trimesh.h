@@ -460,8 +460,9 @@ private:
   static void cb_select1(Fl_Button*, void*);
   void cb_invert1_i(Fl_Button*, void*);
   static void cb_invert1(Fl_Button*, void*);
-  void cb_delete_i(Fl_Button*, void*);
-  static void cb_delete(Fl_Button*, void*);
+  static Fl_Menu_Item menu_delete[];
+  void cb_really_i(Fl_Menu_*, void*);
+  static void cb_really(Fl_Menu_*, void*);
 public:
   Fl_Group *colorscalegrp;
 private:

@@ -1958,16 +1958,21 @@ void Controls::cb_invert1(Fl_Button* o, void* v) {
   ((Controls*)(o->parent()->parent()->parent()->user_data()))->cb_invert1_i(o,v);
 }
 
-void Controls::cb_delete_i(Fl_Button*, void*) {
+void Controls::cb_really_i(Fl_Menu_*, void*) {
   vector<int> lst;
 surfselected(lst);
 for( int i=lst.size()-1; i>=0; i-- )
   mwtb->model->surfKill( lst[i] );
 refresh_surflist();
 }
-void Controls::cb_delete(Fl_Button* o, void* v) {
-  ((Controls*)(o->parent()->parent()->parent()->user_data()))->cb_delete_i(o,v);
+void Controls::cb_really(Fl_Menu_* o, void* v) {
+  ((Controls*)(o->parent()->parent()->parent()->user_data()))->cb_really_i(o,v);
 }
+
+Fl_Menu_Item Controls::menu_delete[] = {
+ {"really", 0,  (Fl_Callback*)Controls::cb_really, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0}
+};
 
 void Controls::cb_optimal1_i(Fl_Button*, void*) {
   mwtb->optimize_cs();
@@ -2581,7 +2586,7 @@ Controls::Controls() {
       { Fl_Group* o = new Fl_Group(15, 310, 315, 175, "Surface");
         o->labelsize(12);
         o->labelcolor((Fl_Color)90);
-        { surfvisbut = new Fl_Light_Button(235, 395, 85, 30, "visible");
+        { surfvisbut = new Fl_Light_Button(140, 395, 85, 30, "visible");
           surfvisbut->value(1);
           surfvisbut->selection_color((Fl_Color)2);
           surfvisbut->callback((Fl_Callback*)cb_surfvisbut);
@@ -2606,18 +2611,21 @@ Controls::Controls() {
           surflist->type(3);
           surflist->align(FL_ALIGN_TOP_LEFT);
         } // Fl_Check_Browser* surflist
-        { Fl_Button* o = new Fl_Button(140, 445, 85, 20, "select all");
+        { Fl_Button* o = new Fl_Button(140, 445, 85, 25, "select all");
           o->callback((Fl_Callback*)cb_select1);
         } // Fl_Button* o
-        { Fl_Button* o = new Fl_Button(235, 445, 85, 20, "invert select");
+        { Fl_Button* o = new Fl_Button(235, 445, 85, 25, "invert select");
           o->color(FL_FOREGROUND_COLOR);
+          o->labelfont(1);
+          o->labelsize(12);
           o->labelcolor(FL_BACKGROUND_COLOR);
           o->callback((Fl_Callback*)cb_invert1);
         } // Fl_Button* o
-        { Fl_Button* o = new Fl_Button(155, 400, 50, 20, "delete");
+        { Fl_Menu_Button* o = new Fl_Menu_Button(235, 395, 85, 30, "delete");
+          o->box(FL_GTK_UP_BOX);
           o->color(FL_RED);
-          o->callback((Fl_Callback*)cb_delete);
-        } // Fl_Button* o
+          o->menu(menu_delete);
+        } // Fl_Menu_Button* o
         o->end();
       } // Fl_Group* o
       tabwidget->end();
