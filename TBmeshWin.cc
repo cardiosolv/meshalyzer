@@ -452,7 +452,7 @@ void TBmeshWin::draw_cnnx(Region* sf)
                         dataopac->dop+Cnnx );
     glPopAttrib();
   } else
-    model->_cnnx->register_vertices( 0, model->_cnnx->num(), ptDrawn );
+    model->_cnnx->register_vertices( 0, model->_cnnx->num()-1, ptDrawn );
 }
 
 
