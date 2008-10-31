@@ -20,7 +20,7 @@ class Model
   public:
     Model(Colourscale *cs, DataOpacity *dopac );
     ~Model();
-    bool         read(const char *fn, bool base1=false);
+    bool         read(const char *fn, bool base1, bool no_elems);
     int          add_surface_from_tri( const char * );
     inline int   reg_first( int s, Object_t t ){return _region[s]->first(t); }
     Surfaces* surface(int s){ return _surface[s]; }

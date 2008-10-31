@@ -36,7 +36,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     Model*         model;
     virtual void draw();
     virtual int handle( int );
-    void read_model( Fl_Window*, const char *fn=0, bool base1=false);
+    void read_model(Fl_Window*,const char *fn,bool no_elems,bool base1=false);
     void highlight(Object_t obj, int a);
     inline void set_hilight( bool a ){ hilighton=a; redraw(); }
     inline void dispmode( Display_t d ){ disp = d; redraw(); }

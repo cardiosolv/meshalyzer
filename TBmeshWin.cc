@@ -605,13 +605,15 @@ int TBmeshWin::handle( int event )
  * \param flwindow
  * \param fnt      base file to open
  * \param base1    points begin numbering at 0
+ * \param no_elems do not read element file
  */
-void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt, bool base1 )
+void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt, 
+		bool no_elems, bool base1 )
 {
   while ( fnt == NULL )
     fnt = fl_file_chooser( "Pick one", "*.pts*", NULL );
 
-  if ( !model->read( fnt, base1 ) ) return;
+  if ( !model->read( fnt, base1, no_elems ) ) return;
 
   ptDrawn.resize(model->pt.num());
 

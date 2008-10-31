@@ -2,6 +2,21 @@
 #include <string>
 #include <sstream>
 #include <libgen.h>
+#include <getopt.h>
+
+/** output usage 
+ */
+void
+print_usage(void) 
+{
+  cout << "meshalyzer [options] model_base[.] [file.dat] [file.xfrm] [file.mshz] [file.vpts]"<<endl;
+  cout << "with options: " << endl;
+  cout << "--iconifycontrols|-i  iconify controls on startup" << endl;
+  cout << "--no_elem|-n          do not read eleemnt info" << endl;
+  cout << "--help|-h             print this message" << endl;
+  exit(0);
+}
+
 
 /* read in a CG (CoolGraphics) input file
  *
@@ -9,14 +24,14 @@
  * \param w       display widget
  * \param control control widget
  */
-void process_cg_format( char *fin, Meshwin *w, Controls* control )
+void process_cg_format(char *fin, Meshwin *w, Controls* control, bool no_elems)
 {
   static int  bufsize=1024;
   char        buff[bufsize];
 
   string ptfile = fin;
   ptfile.erase( ptfile.size()-5, 5 );
-  w->trackballwin->read_model(w->winny, ptfile.c_str(), true );
+  w->trackballwin->read_model(w->winny, ptfile.c_str(), no_elems, true );
 
   // figure out the directory with the ".cg_in" file
   // all others are assumed to be in the same directory
@@ -50,31 +65,61 @@ void process_cg_format( char *fin, Meshwin *w, Controls* control )
 }
 
 
+static struct option longopts[] = {
+  { "iconifycontrols", no_argument, NULL, 'i' },
+  { "no_elem"        , no_argument, NULL, 'n' },
+  { "help"           , no_argument, NULL, 'h' },
+  { NULL             , 0          , NULL, 0   }
+};
+
+
 main( int argc, char *argv[] )
 {
   Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);
 
   Meshwin win;
   Controls control;
+  bool iconcontrols = false;
+  bool no_elems  = false;
 
-  if ( argc>1 && strstr( argv[1], ".cg_in" ) != NULL )
-    process_cg_format( argv[1], &win, &control );
+  int ch;
+  while( (ch=getopt_long(argc, argv, "inh", longopts, NULL)) != -1 )
+	switch(ch) {
+		case 'i':
+			iconcontrols = true;
+			break;
+        case 'n':
+			no_elems = true;
+			break;
+		case 'h':
+			print_usage();
+			break;
+		default:
+			break;
+	}
+
+  int model_index=optind;
+  while( model_index<argc && argv[model_index][0]=='-' )
+	model_index++;
+
+  if (  model_index<argc && strstr( argv[model_index], ".cg_in" ) != NULL )
+    process_cg_format( argv[1], &win, &control, no_elems );
   else
-    win.trackballwin->read_model(win.winny, argc>=2?argv[1]:0);
+    win.trackballwin->read_model( win.winny,
+			model_index<argc?argv[model_index]:0, no_elems );
 
   win.trackballwin->controlwin( &control );
   control.outputwin(win.trackballwin);
   bool vectordata=false;
-  bool iconcontrols = false;
 
   string dir = argc>=2? dirname(argv[1]) : ".";
   dir += "/";
 
   // deal with command line files specified
-  for ( int i=2; i<argc; i++ ) {
-    if ( !strcmp( argv[i], "-iconifycontrols" ) )
-      iconcontrols = true;
-    else if ( strstr( argv[i], ".tri" ) != NULL ) {
+  for ( int i=model_index+1; i<argc; i++ ) {
+    if ( argv[i][0] = '-' ) 
+      continue;
+    if ( strstr( argv[i], ".tri" ) != NULL ) {
       if ( win.trackballwin->add_surface(argv[i])< 0 ) {
         string altdir = dir;
         altdir += argv[i];

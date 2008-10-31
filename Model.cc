@@ -21,9 +21,10 @@ Model::Model(Colourscale *cs, DataOpacity *dopac ):
  * \param flwindow
  * \param fnt      base file to open
  * \param base1    points begin numbering at 0
+ * \param no_elems do not read element file
  */
 const int bufsize=1024;
-bool Model::read( const char* fnt, bool base1 )
+bool Model::read( const char* fnt, bool base1, bool no_elems )
 {
   char fn[bufsize];
   strcpy( fn, fnt );
@@ -56,7 +57,7 @@ bool Model::read( const char* fnt, bool base1 )
   _cable  = new ContCable( &pt );
   _cable->read( fn );
 
-  read_elem_file( fn );
+  if( !no_elems ) read_elem_file( fn );
   read_region_file( in, fn );
   determine_regions();
 
