@@ -97,6 +97,29 @@ void Colourscale :: scale( CScale_t cs )
         cmap[i][1] =  cmap[i][2] = (float)(n-1-i)/intrvl ;
       }
       break;
+    case CS_CG:
+      intrvl = ispan/4.;
+      for ( ; i<intrvl; i++ ) {
+        cmap[i][0] = 0;
+        cmap[i][1] = (float)(i)/intrvl;
+        cmap[i][2] = 1;
+      }
+      for ( ; i<2*intrvl; i++ ) {
+        cmap[i][0] = 0;
+        cmap[i][1] = 1;
+        cmap[i][2] = (float)(2*intrvl-i)/intrvl;
+      }
+      for ( ; i<3*intrvl; i++ ) {
+        cmap[i][0] = (float)(i-2*intrvl)/intrvl;
+        cmap[i][1] = 1;
+        cmap[i][2] = 0;
+      }
+      for ( ; i<n; i++ ) {
+        cmap[i][0] = 1;
+        cmap[i][1] = (float)(4*intrvl-i)/intrvl;
+        cmap[i][2] = 0;
+      }
+      break;
     case CS_BL_RAINBOW:
     default:
       intrvl = ispan/6.;

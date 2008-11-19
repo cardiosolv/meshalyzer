@@ -9,7 +9,7 @@
 #include <math.h>
 
 typedef enum {
-  CS_HOT, CS_GREY, CS_RAINBOW, CS_BL_RAINBOW, CS_COLD_HOT
+  CS_HOT, CS_GREY, CS_RAINBOW, CS_BL_RAINBOW, CS_COLD_HOT, CS_CG
 } CScale_t;
 
 class Colourscale
