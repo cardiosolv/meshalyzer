@@ -6,11 +6,11 @@
 #include <vector>
 #include "DrawingObjects.h"
 
-class Region
+class RRegion
 {
   public:
-    Region(int n, int l=0, bool b=true );
-    Region(VolElement **, int, int n, int l );
+    RRegion(int n, int l=0, bool b=true );
+    RRegion(VolElement **, int, int n, int l );
     GLfloat* get_color( Object_t obj ){ return color[obj]; }
     void set_color(Object_t, float r, float g, float b, float a=1);
     inline bool visible(){return is_visible;}
@@ -35,6 +35,6 @@ class Region
     void    initialize( int, int );
 };
 
-int Region_sort( const void *a, const void *b );
+int RRegion_sort( const void *a, const void *b );
 
 #endif

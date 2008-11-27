@@ -16,7 +16,7 @@ using namespace std;
 
 void output_header( IGBheader* );
 int  jive(IGBheader *header, gzFile in);
-void write_slice(IGBheader *header, gzFile in, string ofnb, char *buf, int bufsize, int, bool memfem);
+void write_slice(IGBheader *header, gzFile in, string ofnb, void *buf, int bufsize, int, bool memfem);
 bool iscompressed (string fn);
 
 class FILE_PTR {
@@ -34,6 +34,13 @@ class FILE_PTR {
 		gzFile  gp;
 };
 		
+template<class T>
+void write_buffer(FILE_PTR *fp, T* buf, int n, IGBheader* h )
+{
+  for(int i=0;i<n;i++)
+    fp->printfl( buf[i]/h->facteur()+h->zero() );
+}
+
 
 main( int argc, char* argv[] )
 {
@@ -319,7 +326,7 @@ int jive(IGBheader *header, gzFile in)
 
 /** write slices when exploding or memfeminizing
  */
-void write_slice(IGBheader *header, gzFile in, string ofnb, char *buf, int bufsize, int slnum, bool memfem)
+void write_slice(IGBheader *header, gzFile in, string ofnb, void *buf, int bufsize, int slnum, bool memfem)
 {
   long   nr;
 
@@ -354,21 +361,34 @@ void write_slice(IGBheader *header, gzFile in, string ofnb, char *buf, int bufsi
 	  switch(header->type())  {
 
 		  case IGB_FLOAT:
-			  for(int i=0;i<ntokens;i++)
-				fp->printfl( ((float *)buf)[i] );
-			  fp->close( );
+			  write_buffer( fp, (float *)buf, ntokens, header );
 			  break;
 
 		  case IGB_DOUBLE:
-			  for(int i=0;i<ntokens;i++)
-				fp->printfl( ((double *)buf)[i] );
-			  fp->close();
+			  write_buffer( fp, (double *)buf, ntokens, header );
+			  break;
+
+		  case IGB_SHORT:
+			  write_buffer( fp, (short *)buf, ntokens, header );
+			  break;
+
+		  case IGB_INT:
+			  write_buffer( fp, (int *)buf, ntokens, header );
+			  break;
+
+		  case IGB_VEC3_f:
+			  write_buffer( fp, (float *)buf, 3*ntokens, header );
+			  break;
+
+		  case IGB_VEC4_f:
+			  write_buffer( fp, (float *)buf, 4*ntokens, header );
 			  break;
 
 		  default:
-			  fprintf(stderr, "Datatype %s not supported by --explode || --memfemize yet", header->type());
+			  fprintf(stderr, "Datatype %s not supported by --explode || --memfemize yet", Header_Type[header->type()]);
 		exit(-1);
 	  }
+	  fp->close( );
 	}
     delete fp;
   } else {

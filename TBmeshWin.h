@@ -131,12 +131,12 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      illuminate(GLfloat);			// light the model
     void      draw_surfaces(Surfaces *);
     void      draw_elements(Surfaces *);
-    void      draw_cables(Region *);
-    void      draw_cnnx(Region *);
-    void      draw_vertices(Region *);
+    void      draw_cables(RRegion *);
+    void      draw_cnnx(RRegion *);
+    void      draw_vertices(RRegion *);
     void      draw_axes();
     void      draw_clip_plane( int cp );
-    void      draw_cut_planes( Region * );
+    void      draw_cut_planes( RRegion * );
     int       max_time();
     GLenum    renderMode;			// mode for drawing
     vector<bool> ptDrawn;			// was a point drawn

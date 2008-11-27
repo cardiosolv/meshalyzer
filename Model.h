@@ -25,7 +25,7 @@ class Model
     inline int   reg_first( int s, Object_t t ){return _region[s]->first(t); }
     Surfaces* surface(int s){ return _surface[s]; }
 	void      surfKill( int s );
-    Region*   region(int s){ return _region[s]; }
+    RRegion*   region(int s){ return _region[s]; }
     const GLfloat*  pts(int t=0)const {return pt.pt(0);} // in future, pts move
     int    number( Object_t );
     const int*   volEle(int a=0)   const { return _vol[a]->obj(0); }
@@ -63,7 +63,7 @@ class Model
     int              _numReg;
     int               localElemnum(int, int& );
   private:
-    Region**        _region;
+    RRegion**        _region;
     vector<Surfaces*> _surface;
     const GLfloat*  _pts;
     float           _maxdim;		      // maximum physical dimension

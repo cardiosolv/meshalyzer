@@ -258,7 +258,7 @@ void TBmeshWin :: draw()
     // display regions
     for ( int s=0; s<model->_numReg; s++ ) {
 
-      Region *reg;
+      RRegion *reg;
       if ( revDrawOrder )
         reg = model->region(model->_numReg-s-1);
       else
@@ -424,7 +424,7 @@ void TBmeshWin::draw_elements(Surfaces* sf)
 
 
 // draw cables
-void TBmeshWin::draw_cables(Region* sf)
+void TBmeshWin::draw_cables(RRegion* sf)
 {
   if ( renderMode == GL_RENDER ) {
     glPushAttrib(GL_POLYGON_BIT);
@@ -441,7 +441,7 @@ void TBmeshWin::draw_cables(Region* sf)
 
 
 // draw connections
-void TBmeshWin::draw_cnnx(Region* sf)
+void TBmeshWin::draw_cnnx(RRegion* sf)
 {
   if ( renderMode == GL_RENDER ) {
     glPushAttrib(GL_POLYGON_BIT);
@@ -457,7 +457,7 @@ void TBmeshWin::draw_cnnx(Region* sf)
 
 
 //draw vertices
-void TBmeshWin::draw_vertices(Region* reg)
+void TBmeshWin::draw_vertices(RRegion* reg)
 {
 
   if ( renderMode==GL_RENDER ) {
@@ -1416,7 +1416,7 @@ TBmeshWin::surfFillColor( vector<int>&l, GLfloat *c )
  * \param reg the region under consideration
  */
 void
-TBmeshWin::draw_cut_planes( Region *reg )
+TBmeshWin::draw_cut_planes( RRegion *reg )
 {
   GLfloat elecol[]  = {1,0,0,1};
   GLfloat linecol[] = {0,0,0,1};

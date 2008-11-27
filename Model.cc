@@ -84,15 +84,15 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
 void Model::determine_regions()
 {
   if (!_numVol && !_numReg  ) {
-    _region = (Region **)calloc( 1, sizeof(Region *) );
-    _region[0] = new Region( pt.num() ); //0 ==default region label
+    _region = (RRegion **)calloc( 1, sizeof(RRegion *) );
+    _region[0] = new RRegion( pt.num() ); //0 ==default region label
     _numReg = 1;
     return;
   }
 
   if ( _numVol ) {
-    _region = (Region **)realloc( _region, (_numReg+1)*sizeof(Region *) );
-    _region[_numReg] = new Region(_vol, _numVol, pt.num(), _vol[0]->region(0));
+    _region = (RRegion **)realloc( _region, (_numReg+1)*sizeof(RRegion *) );
+    _region[_numReg] = new RRegion(_vol, _numVol, pt.num(), _vol[0]->region(0));
     _numReg++;
     for ( int i=1; i<_numVol; i++ ) {
       int r;
@@ -101,8 +101,8 @@ void Model::determine_regions()
           break;
       if ( r==_numReg ) {
         _numReg++;
-        _region = (Region**)realloc( _region, sizeof(Region)*_numReg );
-        _region[_numReg-1]=new Region(_vol,_numVol,pt.num(),_vol[i]->region(0));
+        _region = (RRegion**)realloc( _region, sizeof(RRegion)*_numReg );
+        _region[_numReg-1]=new RRegion(_vol,_numVol,pt.num(),_vol[i]->region(0));
       }
     }
   }
@@ -125,8 +125,8 @@ void Model::determine_regions()
         newlabel++;
       }
       _numReg++;
-      _region = (Region**)realloc( _region, sizeof(Region)*_numReg );
-      _region[_numReg-1] = new Region( pt.num(), newlabel, false );
+      _region = (RRegion**)realloc( _region, sizeof(RRegion)*_numReg );
+      _region[_numReg-1] = new RRegion( pt.num(), newlabel, false );
       for ( int i=0; i<pt.num(); i++ )
         if ( !hasregion[i] ) _region[_numReg-1]->member( i, true );
       break;
@@ -134,9 +134,9 @@ void Model::determine_regions()
 
 
 #ifdef _ARCH_PPC
-  heapsort( _region, _numReg, sizeof(Region *), Region_sort );
+  heapsort( _region, _numReg, sizeof(RRegion *), RRegion_sort );
 #else
-  qsort( _region, _numReg, sizeof(Region *), Region_sort );
+  qsort( _region, _numReg, sizeof(RRegion *), RRegion_sort );
 #endif
 
   // find first cable in layer
@@ -668,12 +668,12 @@ void Model::read_region_file( gzFile in, const char *fnb )
     gzgets(in, buff, bufsize);
     sscanf( buff, "%d", &numNewReg );
     _numReg += numNewReg;
-    _region = (Region **)realloc( _region, _numReg*sizeof(Region*) );
+    _region = (RRegion **)realloc( _region, _numReg*sizeof(RRegion*) );
     for ( int i=_numReg-numNewReg; i<_numReg; i++ ) {
       int firstpt, lastpt, label;
       gzgets(in, buff, bufsize);
       sscanf( buff, "%d %d %d", &firstpt, &lastpt, &label );
-      _region[i] = new Region( pt.num(), label, false );
+      _region[i] = new RRegion( pt.num(), label, false );
       for ( int e=firstpt; e<=lastpt; e++ )
         _region[i]->member(e,true);
     }

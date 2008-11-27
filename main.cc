@@ -117,7 +117,7 @@ main( int argc, char *argv[] )
 
   // deal with command line files specified
   for ( int i=model_index+1; i<argc; i++ ) {
-    if ( argv[i][0] = '-' ) 
+    if ( argv[i][0] == '-' ) 
       continue;
     if ( strstr( argv[i], ".tri" ) != NULL ) {
       if ( win.trackballwin->add_surface(argv[i])< 0 ) {

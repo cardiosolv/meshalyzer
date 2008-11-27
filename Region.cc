@@ -2,12 +2,12 @@
 #include "Region.h"
 #include <string.h>
 
-int Region_sort( const void *a, const void *b )
+int RRegion_sort( const void *a, const void *b )
 {
-  return (*(Region **)a)->label() - (*(Region **)b)->label();
+  return (*(RRegion **)a)->label() - (*(RRegion **)b)->label();
 }
 
-void Region:: initialize( int n, int l )
+void RRegion:: initialize( int n, int l )
 {
   is_visible = true;
   _label = l;
@@ -30,7 +30,7 @@ void Region:: initialize( int n, int l )
  * \param n   number of points
  * \param l   label for region
  */
-Region::Region( VolElement **v, int nv, int n, int l )
+RRegion::RRegion( VolElement **v, int nv, int n, int l )
 {
   startind[Tetrahedron] = -1;
 
@@ -62,14 +62,14 @@ Region::Region( VolElement **v, int nv, int n, int l )
  * \param l label for region
  * \param b initialial value
  */
-Region::Region( int n, int l, bool b )
+RRegion::RRegion( int n, int l, bool b )
 {
   initialize( n, l );
   _member.assign(n, b);
 }
 
 
-void Region :: set_color( Object_t obj, float r, float g, float b, float a )
+void RRegion :: set_color( Object_t obj, float r, float g, float b, float a )
 {
   color[obj][0] = r;
   color[obj][1] = g;
