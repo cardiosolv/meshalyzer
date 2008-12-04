@@ -142,7 +142,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     vector<bool> ptDrawn;			// was a point drawn
     vector<bool> ptVisible;         // is a point is a visible region?
     void      register_vertex( int i ); // for picking
-    GLuint*   hitbuffer;
+    vector<GLuint> hitbuffer;
     void      process_hits();		// determine picked node
     DATA_TYPE* timevec;
     unsigned long framenum;			// keep track if a frame is drawn

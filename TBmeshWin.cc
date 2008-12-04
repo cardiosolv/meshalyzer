@@ -128,7 +128,7 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     frame_skip(0), frame_delay(0.01), lightson(false),
     cs( new Colourscale( 64 ) ), renderMode(GL_RENDER),
     hinfo(new HiLiteInfoWin(this)), dataopac(new DataOpacity( this )),
-    cplane(new ClipPlane( this )), hitbuffer(new GLuint[HITBUFSIZE]),
+    cplane(new ClipPlane( this )), hitbuffer(HITBUFSIZE),
     dataBuffer(NULL), timeplotter(new PlotWin("Time series")),
     timevec(NULL), recording(false), dump_vert_list(false),
     disp(asSurface),data(NULL),facetshading(false),numframes(0),
@@ -1067,7 +1067,7 @@ void
 TBmeshWin:: select_vertex()
 {
   ptDrawn.assign(model->pt.num(),false); 	// clear list of drawn vertices
-  glSelectBuffer( HITBUFSIZE, hitbuffer );
+  glSelectBuffer( HITBUFSIZE, &hitbuffer[0] );
   renderMode = GL_SELECT;
 }
 
@@ -1089,7 +1089,7 @@ TBmeshWin::process_hits()
   // process the hits and select the one with the smallest z-value
   if ( hits>0 ) {
 
-    GLuint* ptr = hitbuffer;
+    GLuint* ptr = &hitbuffer[0];
     int minvert = -1, vertname;
     float minz;
 
@@ -1137,22 +1137,24 @@ TBmeshWin::process_hits()
  */
 void TBmeshWin::dump_vertices()
 {
-  glSelectBuffer( HITBUFSIZE, hitbuffer );
-  glRenderMode( renderMode=GL_SELECT );
+  GLint hits;
+  do {
+    glSelectBuffer( hitbuffer.size(), &hitbuffer[0] );
+    glRenderMode( renderMode=GL_SELECT );
 
-  ptDrawn.assign(model->pt.num(),false); 	// clear list of drawn vertices
-  dump_vert_list=true;
-  valid(0);
-  redraw();
-  Fl::flush();
-  glFlush();
-  dump_vert_list=false;
-  GLint hits = glRenderMode(renderMode=GL_RENDER);
-
-  if ( hits == -1 ) {
-    cerr << "Selection Buffer too small";
-    return;
-  }
+    ptDrawn.assign(model->pt.num(),false); 	// clear list of drawn vertices
+    dump_vert_list=true;
+    valid(0);
+    redraw();
+    Fl::flush();
+    glFlush();
+    dump_vert_list=false;
+    hits = glRenderMode(renderMode=GL_RENDER);
+    
+    if ( hits == -1 ) {
+      hitbuffer.resize(hitbuffer.size()*2);
+    }
+  } while (hits == -1);
 
   char *fname=fl_file_chooser( "Choose vertex file", "*", "vertices.dat" );
   if ( fname == NULL ) return;
@@ -1161,7 +1163,7 @@ void TBmeshWin::dump_vertices()
   ptDrawn.assign(model->pt.num(),false); 	// clear list of drawn vertices
 
   // process the hits and extract the names
-  GLuint* ptr = hitbuffer;
+  GLuint* ptr = &hitbuffer[0];
   for ( int i=0; i<hits; i++ ) {
     GLuint numnames = *ptr;
     ptr += 3;							//skip z1 and z2
