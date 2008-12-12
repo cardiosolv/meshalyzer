@@ -815,7 +815,7 @@ TBmeshWin :: select_hi( int n )
     if ( strstr(  hinfo->text(i), "node" ) ) {
       objtype=Vertex;
       break;
-    } else if ( strstr(  hinfo->text(i), "triangle" ) ) {
+    } else if ( strstr(  hinfo->text(i), "element" ) ) {
       objtype=SurfEle;
       break;
     } else if ( strstr(  hinfo->text(i), "volume" ) ) {

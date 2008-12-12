@@ -89,7 +89,7 @@ void Quadrilateral :: draw( int e, GLfloat *colour, float size )
       return;
 
     glLineWidth( size );
-    glBegin(GL_TRIANGLES );
+    glBegin(GL_QUADS );
     glColor4fv( colour );
     glVertex3fv( _pt->pt(_node[eind++]) );
     glVertex3fv( _pt->pt(_node[eind++]) );

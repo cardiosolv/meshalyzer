@@ -463,12 +463,12 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
   // SurfEles
   int elesurf, lele;
   if ( numSurf() ) {
-    sprintf(txt, "@b@C%6dTriangle: %d of %d", FL_BLUE, hilight[SurfEle],
+    sprintf(txt, "@b@C%6dSurface Element: %d of %d", FL_BLUE, hilight[SurfEle],
             number(SurfEle) );
     hinfo->add( txt );
     hinfo->add( "nodes:\t" );
     lele = localElemnum( hilight[SurfEle], elesurf );
-    for ( int i=0; i<3; i++ ) {
+    for ( int i=0; i<surface(elesurf)->ele(lele)->ptsPerObj(); i++ ) {
       int node=surface(elesurf)->ele(lele)->obj()[i];
       if ( data != NULL )
         sprintf( txt,"\t%6d -> %f", node, data[node] );
@@ -483,7 +483,7 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
       ts=NULL;
     }
     //normal
-    const GLfloat* n=surface(elesurf)->ele(lele)->nrml(hilight[SurfEle]);
+    const GLfloat* n=surface(elesurf)->ele(lele)->nrml();
     if ( n != NULL ) {
       hinfo->add( "normal:\t" );
       sprintf( txt, "(%f, %f, %f)", n[0], n[1], n[2] );
