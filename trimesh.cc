@@ -21,7 +21,7 @@ Meshwin::Meshwin() {
       trackballwin->labelfont(0);
       trackballwin->labelsize(14);
       trackballwin->labelcolor(FL_FOREGROUND_COLOR);
-      trackballwin->align(Fl_Align(FL_ALIGN_CENTER));
+      trackballwin->align(FL_ALIGN_CENTER);
       trackballwin->when(FL_WHEN_RELEASE);
     } // TBmeshWin* trackballwin
     winny->end();
@@ -2426,7 +2426,7 @@ Controls::Controls() {
     } // Fl_Group* o
     { regiondisp = new Fl_Group(10, 120, 330, 145, "Region");
       regiondisp->box(FL_ENGRAVED_BOX);
-      regiondisp->align(Fl_Align(FL_ALIGN_TOP|FL_ALIGN_INSIDE));
+      regiondisp->align(FL_ALIGN_TOP|FL_ALIGN_INSIDE);
       { vertbut = new Fl_Light_Button(160, 141, 100, 25, "Vertices");
         vertbut->callback((Fl_Callback*)cb_vertbut);
         vertbut->when(FL_WHEN_CHANGED);
@@ -2463,7 +2463,7 @@ Controls::Controls() {
         vertstride->step(1);
         vertstride->value(1);
         vertstride->callback((Fl_Callback*)cb_vertstride);
-        vertstride->align(Fl_Align(FL_ALIGN_LEFT));
+        vertstride->align(FL_ALIGN_LEFT);
         vertstride->when(FL_WHEN_CHANGED);
       } // MyValueInput* vertstride
       { cabstridein = new MyValueInput(305, 164, 25, 25, "Tetrahedron:");
@@ -2480,7 +2480,7 @@ Controls::Controls() {
         cabstridein->step(1);
         cabstridein->value(1);
         cabstridein->callback((Fl_Callback*)cb_cabstridein);
-        cabstridein->align(Fl_Align(FL_ALIGN_LEFT));
+        cabstridein->align(FL_ALIGN_LEFT);
         cabstridein->when(FL_WHEN_CHANGED);
       } // MyValueInput* cabstridein
       { cnnxstridein = new MyValueInput(305, 187, 25, 25, "Tetrahedron:");
@@ -2497,7 +2497,7 @@ Controls::Controls() {
         cnnxstridein->step(1);
         cnnxstridein->value(1);
         cnnxstridein->callback((Fl_Callback*)cb_cnnxstridein);
-        cnnxstridein->align(Fl_Align(FL_ALIGN_LEFT));
+        cnnxstridein->align(FL_ALIGN_LEFT);
         cnnxstridein->when(FL_WHEN_CHANGED);
       } // MyValueInput* cnnxstridein
       { visbut = new Fl_Light_Button(160, 215, 100, 20, "visible");
@@ -2517,13 +2517,12 @@ Controls::Controls() {
       regiondisp->end();
     } // Fl_Group* regiondisp
     { tabwidget = new Fl_Tabs(10, 270, 330, 215);
-      tabwidget->align(Fl_Align(FL_ALIGN_CENTER));
+      tabwidget->align(FL_ALIGN_CENTER);
       { hilightgrp = new Fl_Group(10, 305, 330, 170, "Highlight");
         hilightgrp->labelfont(1);
         hilightgrp->labelsize(12);
         hilightgrp->labelcolor((Fl_Color)121);
-        hilightgrp->align(Fl_Align(FL_ALIGN_LEFT));
-        hilightgrp->hide();
+        hilightgrp->align(FL_ALIGN_LEFT);
         { tethi = new MyValueInput(100, 345, 85, 25, "Tetrahedron:");
           tethi->box(FL_DOWN_BOX);
           tethi->color(FL_BACKGROUND2_COLOR);
@@ -2534,7 +2533,7 @@ Controls::Controls() {
           tethi->labelcolor(FL_FOREGROUND_COLOR);
           tethi->step(1);
           tethi->callback((Fl_Callback*)cb_tethi);
-          tethi->align(Fl_Align(FL_ALIGN_LEFT));
+          tethi->align(FL_ALIGN_LEFT);
           tethi->when(FL_WHEN_CHANGED);
         } // MyValueInput* tethi
         { elehi = new MyValueInput(190, 345, 85, 25, ":Triangle");
@@ -2547,7 +2546,7 @@ Controls::Controls() {
           elehi->labelcolor(FL_FOREGROUND_COLOR);
           elehi->step(1);
           elehi->callback((Fl_Callback*)cb_elehi);
-          elehi->align(Fl_Align(FL_ALIGN_RIGHT));
+          elehi->align(FL_ALIGN_RIGHT);
           elehi->when(FL_WHEN_CHANGED);
         } // MyValueInput* elehi
         { cabhi = new MyValueInput(190, 375, 85, 25, ":Cable");
@@ -2560,7 +2559,7 @@ Controls::Controls() {
           cabhi->labelcolor(FL_FOREGROUND_COLOR);
           cabhi->step(1);
           cabhi->callback((Fl_Callback*)cb_cabhi);
-          cabhi->align(Fl_Align(FL_ALIGN_RIGHT));
+          cabhi->align(FL_ALIGN_RIGHT);
           cabhi->when(FL_WHEN_CHANGED);
         } // MyValueInput* cabhi
         { verthi = new MyValueInput(100, 405, 85, 25, "Vertex:");
@@ -2573,7 +2572,7 @@ Controls::Controls() {
           verthi->labelcolor(FL_FOREGROUND_COLOR);
           verthi->step(1);
           verthi->callback((Fl_Callback*)cb_verthi);
-          verthi->align(Fl_Align(FL_ALIGN_LEFT));
+          verthi->align(FL_ALIGN_LEFT);
           verthi->when(FL_WHEN_CHANGED);
         } // MyValueInput* verthi
         { cnnxhi = new MyValueInput(100, 375, 85, 25, "Connection:");
@@ -2586,7 +2585,7 @@ Controls::Controls() {
           cnnxhi->labelcolor(FL_FOREGROUND_COLOR);
           cnnxhi->step(1);
           cnnxhi->callback((Fl_Callback*)cb_cnnxhi);
-          cnnxhi->align(Fl_Align(FL_ALIGN_LEFT));
+          cnnxhi->align(FL_ALIGN_LEFT);
           cnnxhi->when(FL_WHEN_CHANGED);
         } // MyValueInput* cnnxhi
         { hilighton = new Fl_Light_Button(100, 315, 85, 25, "on");
@@ -2595,7 +2594,7 @@ Controls::Controls() {
         { attachtype = new Fl_Choice(90, 435, 100, 20, "attached");
           attachtype->tooltip("draw which objects associated with vertex");
           attachtype->down_box(FL_BORDER_BOX);
-          attachtype->align(Fl_Align(FL_ALIGN_BOTTOM));
+          attachtype->align(FL_ALIGN_BOTTOM);
           attachtype->when(FL_WHEN_CHANGED);
           attachtype->menu(menu_attachtype);
         } // Fl_Choice* attachtype
@@ -2613,7 +2612,7 @@ Controls::Controls() {
         { vertvalout = new Fl_Value_Output(190, 405, 85, 25, ":value");
           vertvalout->tooltip("vertex value");
           vertvalout->color((Fl_Color)174);
-          vertvalout->align(Fl_Align(FL_ALIGN_RIGHT));
+          vertvalout->align(FL_ALIGN_RIGHT);
         } // Fl_Value_Output* vertvalout
         { hitettype = new Fl_Choice(15, 345, 85, 25);
           hitettype->tooltip("display style");
@@ -2651,7 +2650,7 @@ Controls::Controls() {
           veclength->step(0.1);
           veclength->value(1);
           veclength->callback((Fl_Callback*)cb_veclength);
-          veclength->align(Fl_Align(FL_ALIGN_RIGHT));
+          veclength->align(FL_ALIGN_RIGHT);
         } // Fl_Roller* veclength
         { veccolor = new Fl_Button(255, 375, 75, 25, "colour");
           veccolor->tooltip("fixed colour");
@@ -2664,7 +2663,7 @@ Controls::Controls() {
         { Fl_Choice* o = veccstype = new Fl_Choice(220, 410, 110, 30, "colour scale");
           veccstype->down_box(FL_BORDER_BOX);
           veccstype->labelsize(10);
-          veccstype->align(Fl_Align(FL_ALIGN_BOTTOM));
+          veccstype->align(FL_ALIGN_BOTTOM);
           { Fl_Menu_Item* o = &menu_veccstype[0];
           o->image(image_rainbow);
           }
@@ -2758,6 +2757,7 @@ Controls::Controls() {
         } // Fl_Button* o
         { illBut = new Fl_Light_Button(15, 450, 100, 25, "Illuminate");
           illBut->tooltip("turn on light");
+          illBut->value(1);
           illBut->labelsize(12);
           illBut->callback((Fl_Callback*)cb_illBut);
         } // Fl_Light_Button* illBut
@@ -2778,7 +2778,7 @@ Controls::Controls() {
           o->value(1);
           o->labelsize(12);
           o->callback((Fl_Callback*)cb_fixed);
-          o->align(Fl_Align(132|FL_ALIGN_INSIDE));
+          o->align(132|FL_ALIGN_INSIDE);
         } // Fl_Light_Button* o
         { specularslide = new Fl_Value_Slider(200, 330, 25, 95, "Specular");
           specularslide->tooltip("specular lighting component level");
@@ -2806,11 +2806,12 @@ Controls::Controls() {
       { Fl_Group* o = new Fl_Group(15, 310, 315, 175, "Surface");
         o->labelsize(12);
         o->labelcolor((Fl_Color)90);
+        o->hide();
         { surfvisbut = new Fl_Light_Button(140, 395, 85, 30, "visible");
           surfvisbut->value(1);
           surfvisbut->selection_color((Fl_Color)2);
           surfvisbut->callback((Fl_Callback*)cb_surfvisbut);
-          surfvisbut->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
+          surfvisbut->align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE);
         } // Fl_Light_Button* surfvisbut
         { surfoutlinebut = new Fl_Light_Button(140, 315, 85, 30, "Outline");
           surfoutlinebut->callback((Fl_Callback*)cb_surfoutlinebut);
@@ -2829,7 +2830,7 @@ Controls::Controls() {
         } // Fl_Button* o
         { surflist = new Fl_Check_Browser(20, 320, 110, 150, "apply to");
           surflist->type(3);
-          surflist->align(Fl_Align(FL_ALIGN_TOP_LEFT));
+          surflist->align(FL_ALIGN_TOP_LEFT);
         } // Fl_Check_Browser* surflist
         { Fl_Button* o = new Fl_Button(140, 445, 85, 25, "select all");
           o->callback((Fl_Callback*)cb_select1);
@@ -2861,7 +2862,7 @@ Controls::Controls() {
       { Fl_Choice* o = cstype = new Fl_Choice(230, 500, 105, 25, "colour scale");
         cstype->down_box(FL_BORDER_BOX);
         cstype->labelsize(10);
-        cstype->align(Fl_Align(FL_ALIGN_BOTTOM));
+        cstype->align(FL_ALIGN_BOTTOM);
         { Fl_Menu_Item* o = &menu_cstype[0];
         o->image(image_rainbow);
         }
@@ -2887,13 +2888,13 @@ Controls::Controls() {
         mincolval->labelsize(10);
         mincolval->textsize(12);
         mincolval->callback((Fl_Callback*)cb_mincolval);
-        mincolval->align(Fl_Align(FL_ALIGN_BOTTOM));
+        mincolval->align(FL_ALIGN_BOTTOM);
       } // Fl_Value_Input* mincolval
       { maxcolval = new Fl_Value_Input(130, 500, 65, 25, "max");
         maxcolval->labelsize(10);
         maxcolval->textsize(12);
         maxcolval->callback((Fl_Callback*)cb_maxcolval);
-        maxcolval->align(Fl_Align(FL_ALIGN_BOTTOM));
+        maxcolval->align(FL_ALIGN_BOTTOM);
       } // Fl_Value_Input* maxcolval
       { numcolev = new Fl_Value_Input(195, 500, 30, 25, "levels");
         numcolev->tooltip("colourmap size");
@@ -2904,13 +2905,13 @@ Controls::Controls() {
         numcolev->value(64);
         numcolev->textsize(12);
         numcolev->callback((Fl_Callback*)cb_numcolev);
-        numcolev->align(Fl_Align(FL_ALIGN_BOTTOM));
+        numcolev->align(FL_ALIGN_BOTTOM);
       } // Fl_Value_Input* numcolev
       { autocalibratebut = new Fl_Light_Button(15, 520, 45, 15, "auto");
         autocalibratebut->tooltip("autoscale every timestep");
         autocalibratebut->labelsize(10);
         autocalibratebut->callback((Fl_Callback*)cb_autocalibratebut);
-        autocalibratebut->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
+        autocalibratebut->align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE);
       } // Fl_Light_Button* autocalibratebut
       colorscalegrp->end();
     } // Fl_Group* colorscalegrp
@@ -2926,7 +2927,7 @@ Controls::Controls() {
         tmslider->labelsize(14);
         tmslider->labelcolor(FL_FOREGROUND_COLOR);
         tmslider->callback((Fl_Callback*)cb_tmslider);
-        tmslider->align(Fl_Align(FL_ALIGN_TOP));
+        tmslider->align(FL_ALIGN_TOP);
         tmslider->when(FL_WHEN_RELEASE);
       } // Myslider* tmslider
       { Fl_Button* o = new Fl_Button(245, 570, 40, 25, "@>>");
@@ -2944,7 +2945,7 @@ Controls::Controls() {
         frameskip->step(1);
         frameskip->value(1);
         frameskip->callback((Fl_Callback*)cb_frameskip);
-        frameskip->align(Fl_Align(FL_ALIGN_LEFT));
+        frameskip->align(FL_ALIGN_LEFT);
       } // Fl_Counter* frameskip
       { animdelay = new Fl_Value_Input(260, 605, 70, 20, "delay:");
         animdelay->tooltip("delay between frames (ms )");

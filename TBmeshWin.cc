@@ -125,7 +125,7 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     : Fl_Gl_Tb_Window(x, y, w, h, l), vecdata( NULL ), hilighton(false),
     autocol(false), have_data(NoData), datadst(Surface), vert_asc_obj(SurfEle),
     fill_assc_obj(false), fill_hitet(false), revDrawOrder(false), tm(0),
-    frame_skip(0), frame_delay(0.01), lightson(false),
+    frame_skip(0), frame_delay(0.01), lightson(true),
     cs( new Colourscale( 64 ) ), renderMode(GL_RENDER),
     hinfo(new HiLiteInfoWin(this)), dataopac(new DataOpacity( this )),
     cplane(new ClipPlane( this )), hitbuffer(HITBUFSIZE),

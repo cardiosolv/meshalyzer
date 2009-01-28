@@ -611,8 +611,8 @@ delete[] selreg;}
         xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
-          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          label Highlight selected
+          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {Tetrahedron:}
@@ -840,7 +840,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group lightgrp {
-          label Lights
+          label Lights open
           xywh {10 295 330 185} labelsize 12 labelcolor 188 hide
         } {
           Fl_Value_Slider lightx {
@@ -892,7 +892,7 @@ mwtb->redraw();}
           Fl_Light_Button illBut {
             label Illuminate
             callback {mwtb->lights((bool)o->value());}
-            tooltip {turn on light} xywh {15 450 100 25} labelsize 12
+            tooltip {turn on light} xywh {15 450 100 25} value 1 labelsize 12
           }
           Fl_Value_Slider ambientslide {
             label Ambient
@@ -926,8 +926,8 @@ mwtb->redraw();}
           }
         }
         Fl_Group {} {
-          label Surface open selected
-          xywh {15 310 315 175} labelsize 12 labelcolor 90
+          label Surface open
+          xywh {15 310 315 175} labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label visible
