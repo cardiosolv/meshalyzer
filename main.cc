@@ -3,6 +3,25 @@
 #include <sstream>
 #include <libgen.h>
 #include <getopt.h>
+#include <Fl/Fl_Text_Display.h>
+
+/** read in the version and license information
+ *
+ * \param text text widget
+ */
+void
+read_version_info( Fl_Text_Display *txt )
+{
+  txt->buffer( new Fl_Text_Buffer() );
+  ifstream ifs( "version.txt" );
+  string line;
+  txt->insert_position(0);
+  while( getline( ifs, line ) ){
+    txt->insert( line.c_str() );
+    txt->insert( "\n" );
+  }
+}
+
 
 /** output usage 
  */
@@ -107,6 +126,12 @@ main( int argc, char *argv[] )
   else
     win.trackballwin->read_model( win.winny,
 			model_index<argc?argv[model_index]:0, no_elems );
+
+  ProgInfo info;
+  read_version_info( info.infotxt );
+  control.proginfo = info.proginfo;
+
+
 
   win.trackballwin->controlwin( &control );
   control.outputwin(win.trackballwin);

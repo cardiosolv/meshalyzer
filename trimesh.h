@@ -172,6 +172,8 @@ public:
 private:
   void cb_redrawbut_i(Fl_Menu_*, void*);
   static void cb_redrawbut(Fl_Menu_*, void*);
+  void cb_About_i(Fl_Menu_*, void*);
+  static void cb_About(Fl_Menu_*, void*);
 public:
   Fl_Choice *datachc;
   static Fl_Menu_Item menu_datachc[];
@@ -531,6 +533,7 @@ public:
 private:
   TBmeshWin *mwtb; 
 public:
+  Fl_Window* proginfo; 
   void pickcolor(Object_t obj, const char* wintitle );
   void update_surfGUI( int s );
   void update_regionGUI( int r );
@@ -544,5 +547,14 @@ public:
   void restore_state(const char* fname=NULL);
   void surfselected(vector<int>& lst);
   void refresh_surflist();
+};
+#include <FL/Fl_Window.H>
+#include <FL/Fl_Text_Display.H>
+
+class ProgInfo {
+public:
+  ProgInfo();
+  Fl_Window *proginfo;
+  Fl_Text_Display *infotxt;
 };
 #endif

@@ -56,7 +56,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {582 50 350 650} type Double box UP_BOX
+      xywh {226 25 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -452,6 +452,19 @@ mainbar->redraw();}
           callback {mwtb->redraw();}
           xywh {0 0 100 20} labelcolor 180 hide
         }
+        MenuItem {} {
+          label item
+          xywh {0 0 30 20} labeltype NO_LABEL
+        }
+        MenuItem {} {
+          label item
+          xywh {0 0 30 20} labeltype NO_LABEL
+        }
+        MenuItem {} {
+          label About
+          callback {proginfo->show();}
+          xywh {0 0 30 20}
+        }
       }
       Fl_Choice datachc {
         label {Data on}
@@ -611,7 +624,7 @@ delete[] selreg;}
         xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight selected
+          label Highlight
           xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1108,6 +1121,8 @@ mwtb->redraw();}
     code {mwtb = w;} {}
   }
   decl {TBmeshWin *mwtb;} {}
+  decl {Fl_Window* proginfo;} {selected public
+  }
   Function {pickcolor(Object_t obj, const char* wintitle )} {} {
     code {bool* sel=regselected();
 for( int i=0; i<reglist->nitems(); i++ )
@@ -1435,8 +1450,7 @@ for( int i=1; i<=surflist->nitems(); i++ )
   if( surflist->checked(i) )
     lst.push_back(i-1);} {}
   }
-  Function {refresh_surflist()} {open
-  } {
+  Function {refresh_surflist()} {} {
     code {surflist->clear(); 
 for( int s=0; s<mwtb->model->numSurf(); s++ ) {
     char surfno[100];
@@ -1446,5 +1460,20 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   elehi->maximum(mwtb->model->number(SurfEle)-1);
   mwtb->redraw();
   surflist->redraw();} {}
+  }
+} 
+
+class ProgInfo {open
+} {
+  Function {ProgInfo()} {open
+  } {
+    Fl_Window proginfo {
+      label {Progam Version} open
+      xywh {112 116 560 570} type Single color 7 visible
+    } {
+      Fl_Text_Display infotxt {
+        image {meshlogo.jpg} xywh {5 140 550 430} box NO_BOX
+      }
+    }
   }
 } 
