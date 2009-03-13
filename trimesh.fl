@@ -55,12 +55,12 @@ class Controls {open
   Function {Controls()} {open
   } {
     Fl_Window window {
-      label {Meshalyzer Controls} open
+      label {Meshalyzer Controls}
       xywh {1180 25 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {selected
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -538,7 +538,7 @@ mainbar->redraw();}
         }
       }
       Fl_Group regiondisp {
-        label Region open
+        label Region
         xywh {10 120 330 145} box ENGRAVED_BOX align 17
       } {
         Fl_Light_Button vertbut {
@@ -579,7 +579,7 @@ string lab = objnames[Cnnx];
 lab += " Properties";
 op->win->label( lab.c_str() );
 op->win->show();}
-          xywh {260 190 50 25} labelsize 12
+          xywh {260 190 70 25} labelsize 12
         }
         Fl_Value_Input vertstride {
           label {Tetrahedron:}
@@ -1199,14 +1199,15 @@ mwtb->redraw();} {}
   reglist->checked(i+1,1);
 }} {}
   }
-  Function {regselected()} {return_type {bool *}
+  Function {regselected()} {open return_type {bool *}
   } {
     code {bool *sel = new bool[reglist->nitems()];
 for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {} {
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1280,6 +1281,29 @@ for( int i=0; i<mwtb->model->numSurf(); i++ ) {
   mshzf << " " << mwtb->model->surface(i)->filled();
   mshzf << " " << mwtb->model->surface(i)->outline();
   mshzf << endl;
+}
+
+mshzf << "REGION_SIZE = " << mwtb->model->_numReg << endl;
+for( int i=0; i<mwtb->model->_numReg; i++ ) {
+  RRegion *r =  mwtb->model->region(i);
+  mshzf << r->size(Vertex) << " ";
+  mshzf << r->size(Cable) << " ";
+  mshzf << r->size(Cnnx) << endl;
+}
+
+mshzf << "stride = ";
+for( int i=0; i<mwtb->model->_numReg; i++ ) {
+  mshzf << mwtb->stride(Vertex) << " ";
+  mshzf << mwtb->stride(Cable) << " ";
+  mshzf << mwtb->stride(Cnnx) << endl;
+}
+
+mshzf << "REGION_3D = " << mwtb->model->_numReg << endl;
+for( int i=0; i<mwtb->model->_numReg; i++ ) {
+  RRegion *r =  mwtb->model->region(i);
+  mshzf << r->threeD(Vertex) << " ";
+  mshzf << r->threeD(Cable) << " ";
+  mshzf << r->threeD(Cnnx) << endl;
 }
 
 mshzf << "REGION_COLOURS = " << mwtb->model->_numReg << endl;
@@ -1386,6 +1410,46 @@ while( mshzf.getline( buf, BUFLEN ) ) {
       mwtb->model->region(i)->visible(v);
     }
 	continue;
+  }
+  if( !strcmp( var, "REGION_3D" ) ) {
+    bool  v;
+    for( int i=0; i<val; i++ ) {
+      if( i >= mwtb->model->_numReg ) {
+         mshzf.getline( var, 1024 );
+         continue;
+      }     
+      mshzf >> v;
+      mwtb->model->region(i)->threeD( Vertex, v );
+      mshzf >> v;
+      mwtb->model->region(i)->threeD( Cable, v );
+      mshzf >> v;
+      mwtb->model->region(i)->threeD( Cnnx, v );
+    }
+	continue;
+  } 
+  if( !strcmp( var, "REGION_SIZE" ) ) {
+    float s;
+    for( int i=0; i<val; i++ ) {
+      if( i >= mwtb->model->_numReg ) {
+         mshzf.getline( var, 1024 );
+         continue;
+      }     
+      mshzf >> s;
+      mwtb->model->region(i)->size( Vertex, s );
+      mshzf >> s;
+      mwtb->model->region(i)->size( Cable, s );
+      mshzf >> s;
+      mwtb->model->region(i)->size( Cnnx, s );
+    }
+	continue;
+  } 
+  if( !strcmp( var, "stride" ) ) {
+    int vs, cbs, cxs;
+    sscanf( buf, "%*s = %d %d %d", &vs, &cbs, &cxs );
+    mwtb->stride( Vertex, vs );
+    mwtb->stride( Cable, cbs );
+    mwtb->stride( Cnnx, cxs );
+    continue;
   } 
   TEST_MENUVAR( read_recalibrate, var, val )  
   TEST_MENUVAR( revdraworder, var, val )  
@@ -1480,7 +1544,7 @@ class ObjProps {open
   Function {ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o),numreg(nr),sel(s)} {open
   } {
     Fl_Window win {open
-      xywh {860 610 310 65} type Single visible
+      xywh {860 580 310 65} type Single visible
     } {
       Fl_Button color {
         label colour
@@ -1512,7 +1576,7 @@ class ObjProps {open
         label {size:}
         callback {for( int i=0; i<numreg; i++ )
   if( sel[i] )
-     mwtb->size(obj, i, float(o->value()) );} selected
+     mwtb->size(obj, i, float(o->value()) );}
         xywh {230 21 70 28} maximum 10000 step 0.1 value 1
       }
     }
@@ -1520,6 +1584,7 @@ class ObjProps {open
   if( sel[i] ) {
     thrD->value( mwtb->threeD( obj, i ) );
     stride->value( mwtb->stride( obj ) );
+    sizeinp->value( mwtb->size( obj, i ) );
   }} {}
   }
   decl {TBmeshWin *mwtb;} {}

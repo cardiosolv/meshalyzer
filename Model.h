@@ -56,7 +56,7 @@ class Model
     void  threeD( Object_t o, int r, bool b ){ _region[r<0?0:r]->threeD(o,b); }
     bool  threeD( Object_t o, int r ){ return _region[r<0?0:r]->threeD(o); }
     void  size( Object_t o, int r, float s ){ _region[r<0?0:r]->size(o, s); }
-    bool  size( Object_t o, int r ){ return _region[r<0?0:r]->size(o); }
+    float size( Object_t o, int r ){ return _region[r<0?0:r]->size(o); }
 
     Point             pt;
     Connection*      _cnnx;

@@ -131,14 +131,19 @@ main( int argc, char *argv[] )
   read_version_info( info.infotxt );
   control.proginfo = info.proginfo;
 
-
-
   win.trackballwin->controlwin( &control );
   control.outputwin(win.trackballwin);
   bool vectordata=false;
 
   string dir = argc>=2? dirname(argv[1]) : ".";
   dir += "/";
+
+  // look for default state
+  string defstate = getenv("HOME");
+  defstate += "/.default.mshz";
+  struct stat buf;
+  if( !stat( defstate.c_str(), &buf) )
+    control.restore_state( defstate.c_str() );
 
   // deal with command line files specified
   for ( int i=model_index+1; i<argc; i++ ) {

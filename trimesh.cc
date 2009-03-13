@@ -2452,7 +2452,7 @@ Controls::Controls() {
         o->labelsize(12);
         o->callback((Fl_Callback*)cb_colour1);
       } // Fl_Button* o
-      { Fl_Button* o = new Fl_Button(260, 190, 50, 25, "props");
+      { Fl_Button* o = new Fl_Button(260, 190, 70, 25, "props");
         o->labelsize(12);
         o->callback((Fl_Callback*)cb_props);
       } // Fl_Button* o
@@ -3118,6 +3118,29 @@ for( int i=0; i<mwtb->model->numSurf(); i++ ) {
   mshzf << endl;
 }
 
+mshzf << "REGION_SIZE = " << mwtb->model->_numReg << endl;
+for( int i=0; i<mwtb->model->_numReg; i++ ) {
+  RRegion *r =  mwtb->model->region(i);
+  mshzf << r->size(Vertex) << " ";
+  mshzf << r->size(Cable) << " ";
+  mshzf << r->size(Cnnx) << endl;
+}
+
+mshzf << "stride = ";
+for( int i=0; i<mwtb->model->_numReg; i++ ) {
+  mshzf << mwtb->stride(Vertex) << " ";
+  mshzf << mwtb->stride(Cable) << " ";
+  mshzf << mwtb->stride(Cnnx) << endl;
+}
+
+mshzf << "REGION_3D = " << mwtb->model->_numReg << endl;
+for( int i=0; i<mwtb->model->_numReg; i++ ) {
+  RRegion *r =  mwtb->model->region(i);
+  mshzf << r->threeD(Vertex) << " ";
+  mshzf << r->threeD(Cable) << " ";
+  mshzf << r->threeD(Cnnx) << endl;
+}
+
 mshzf << "REGION_COLOURS = " << mwtb->model->_numReg << endl;
 for( int i=0; i<mwtb->model->_numReg; i++ ) {
   save_colour( mshzf, mwtb->model->region(i)->get_color(Vertex) );
@@ -3224,6 +3247,46 @@ while( mshzf.getline( buf, BUFLEN ) ) {
       mwtb->model->region(i)->visible(v);
     }
 	continue;
+  }
+  if( !strcmp( var, "REGION_3D" ) ) {
+    bool  v;
+    for( int i=0; i<val; i++ ) {
+      if( i >= mwtb->model->_numReg ) {
+         mshzf.getline( var, 1024 );
+         continue;
+      }     
+      mshzf >> v;
+      mwtb->model->region(i)->threeD( Vertex, v );
+      mshzf >> v;
+      mwtb->model->region(i)->threeD( Cable, v );
+      mshzf >> v;
+      mwtb->model->region(i)->threeD( Cnnx, v );
+    }
+	continue;
+  } 
+  if( !strcmp( var, "REGION_SIZE" ) ) {
+    float s;
+    for( int i=0; i<val; i++ ) {
+      if( i >= mwtb->model->_numReg ) {
+         mshzf.getline( var, 1024 );
+         continue;
+      }     
+      mshzf >> s;
+      mwtb->model->region(i)->size( Vertex, s );
+      mshzf >> s;
+      mwtb->model->region(i)->size( Cable, s );
+      mshzf >> s;
+      mwtb->model->region(i)->size( Cnnx, s );
+    }
+	continue;
+  } 
+  if( !strcmp( var, "stride" ) ) {
+    int vs, cbs, cxs;
+    sscanf( buf, "%*s = %d %d %d", &vs, &cbs, &cxs );
+    mwtb->stride( Vertex, vs );
+    mwtb->stride( Cable, cbs );
+    mwtb->stride( Cnnx, cxs );
+    continue;
   } 
   TEST_MENUVAR( read_recalibrate, var, val )  
   TEST_MENUVAR( revdraworder, var, val )  
@@ -14112,5 +14175,6 @@ ObjProps::ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o
   if( sel[i] ) {
     thrD->value( mwtb->threeD( obj, i ) );
     stride->value( mwtb->stride( obj ) );
+    sizeinp->value( mwtb->size( obj, i ) );
   }
 }
