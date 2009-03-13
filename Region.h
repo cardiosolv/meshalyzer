@@ -23,7 +23,11 @@ class RRegion
     inline bool member(int a){ return _member[a]; }
     inline void member(int a, bool b ){ _member[a]=b;}
     int  first(Object_t t){ return startind[t]; }
-    int  first(Object_t t, int a){ startind[t]=a; }
+    void first(Object_t t, int a){ startind[t]=a; }
+    int  size(Object_t t){ return _size[t]; }
+    void size(Object_t t, int a){ _size[t]=a; }
+    bool threeD(Object_t t){ return _3D[t]; }
+    void threeD(Object_t t, int a){ _3D[t]=a; }
   private:
     GLfloat color[maxobject+2][4];
     int     startind[maxobject+2];
@@ -33,6 +37,8 @@ class RRegion
     int    _label;           //!< identifier in file for region
     vector<bool> _member;    //!< whether a node is part of region
     void    initialize( int, int );
+    float   _size[maxobject+2];
+    bool    _3D[maxobject+2];
 };
 
 int RRegion_sort( const void *a, const void *b );

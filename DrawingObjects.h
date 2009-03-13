@@ -21,10 +21,16 @@ class DrawingObj
                          int stride=1, dataOpac* dopac=NULL )=0;
     virtual bool   read( const char * ) = 0;
     int    num() const { return _n; }		//!< get \#objects
-    DrawingObj( void ): _n(0){}
+    DrawingObj( void ): _n(0),_size(1),_3D(false){}
     void   translucency( bool );            //!< set tranlucency
+    void   size( float s ){ _size = s; }
+    float  size( void ){ return _size; }
+    void   threeD( bool b ){ _3D = b; }
+    bool   threeD( void ){ return _3D; }
   protected:
-    int _n;			                    //!< \# objects
+    int   _n;			                    //!< \# objects
+    float _size;                            //!< size to draw objects
+    bool  _3D;
 };
 
 

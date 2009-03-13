@@ -18,8 +18,10 @@ void RRegion:: initialize( int n, int l )
   memset( startind, 0, maxobject*sizeof(int)  );
   memset( endind,   0, maxobject*sizeof(int)  );
   memset( showobj,  0, maxobject*sizeof(bool) );
+  memset( _3D,      0, maxobject*sizeof(bool) );
   _member.resize(n);
   _member.assign(n,false);
+  for( int i=0; i<maxobject; i++ ) _size[i] = 1.;
 }
 
 

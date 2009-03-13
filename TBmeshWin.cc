@@ -445,11 +445,12 @@ void TBmeshWin::draw_cnnx(RRegion* sf)
 {
   if ( renderMode == GL_RENDER ) {
     glPushAttrib(GL_POLYGON_BIT);
-    glLineWidth(4.);
+    model->_cnnx->size( sf->size(Cnnx) );
+    model->_cnnx->threeD( sf->threeD(Cnnx) );
     glColor4fv( sf->get_color( Cnnx ) );
     model->_cnnx->draw( 0, model->_cnnx->num()-1, sf->get_color(Cnnx),
-                        cs, (datadst==All|datadst==Cnnx)?data:NULL, model->stride(Cnnx),
-                        dataopac->dop+Cnnx );
+                        cs, (datadst==All|datadst==Cnnx)?data:NULL, 
+                        model->stride(Cnnx), dataopac->dop+Cnnx       );
     glPopAttrib();
   } else
     model->_cnnx->register_vertices( 0, model->_cnnx->num()-1, ptDrawn );

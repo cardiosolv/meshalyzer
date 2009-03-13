@@ -56,7 +56,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {226 25 350 650} type Double box UP_BOX
+      xywh {1180 25 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -538,7 +538,7 @@ mainbar->redraw();}
         }
       }
       Fl_Group regiondisp {
-        label Region
+        label Region open
         xywh {10 120 330 145} box ENGRAVED_BOX align 17
       } {
         Fl_Light_Button vertbut {
@@ -573,9 +573,13 @@ delete[] selreg;}
           xywh {260 165 45 25} labelsize 12
         }
         Fl_Button {} {
-          label colour
-          callback {pickcolor(Cnnx,"Connection colour");}
-          xywh {260 190 45 25} labelsize 12
+          label props
+          callback {ObjProps *op = new ObjProps( mwtb, Cnnx, reglist->nitems(), regselected() );
+string lab = objnames[Cnnx];
+lab += " Properties";
+op->win->label( lab.c_str() );
+op->win->show();}
+          xywh {260 190 50 25} labelsize 12
         }
         Fl_Value_Input vertstride {
           label {Tetrahedron:}
@@ -588,13 +592,6 @@ delete[] selreg;}
           label {Tetrahedron:}
           callback {mwtb->stride(Cable,int(o->value()));}
           tooltip stride xywh {305 164 25 25} labeltype NO_LABEL minimum 1 maximum 100 step 1 value 1
-          code0 {\#include "MyValueInput.h"}
-          class MyValueInput
-        }
-        Fl_Value_Input cnnxstridein {
-          label {Tetrahedron:}
-          callback {mwtb->stride(Cnnx,int(o->value()));}
-          tooltip stride xywh {305 187 25 25} labeltype NO_LABEL minimum 1 maximum 100 step 1 value 1
           code0 {\#include "MyValueInput.h"}
           class MyValueInput
         }
@@ -620,7 +617,7 @@ delete[] selreg;}
           xywh {250 240 80 20} color 0 labelcolor 49
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
@@ -1121,9 +1118,10 @@ mwtb->redraw();}
     code {mwtb = w;} {}
   }
   decl {TBmeshWin *mwtb;} {}
-  decl {Fl_Window* proginfo;} {selected public
+  decl {Fl_Window* proginfo;} {public
   }
-  Function {pickcolor(Object_t obj, const char* wintitle )} {} {
+  Function {pickcolor(Object_t obj, const char* wintitle )} {open
+  } {
     code {bool* sel=regselected();
 for( int i=0; i<reglist->nitems(); i++ )
   if( sel[i] ) { 
@@ -1132,7 +1130,8 @@ for( int i=0; i<reglist->nitems(); i++ )
    cc->window->label(wintitle);
    cc->window->show();
    break;
-   }} {}
+   }
+delete[] sel;} {}
   }
   Function {update_surfGUI( int s )} {return_type void
   } {
@@ -1231,7 +1230,6 @@ SAVE_WIDGET(mshzf,cabbut);
 SAVE_WIDGET(mshzf,cnnxbut);
 SAVE_WIDGET(mshzf,vertstride);
 SAVE_WIDGET(mshzf,cabstridein);
-SAVE_WIDGET(mshzf,cnnxstridein);
 //hilighttab
 SAVE_WIDGET(mshzf,hilighton);
 SAVE_WIDGET(mshzf,hitettype);
@@ -1319,7 +1317,8 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -1396,8 +1395,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( cabbut, var, int(val) )  
   TEST_VAR( cnnxbut, var, int(val) )  
   TEST_VAR( vertstride, var, int(val) ) 
-  TEST_VAR( cabstridein, var, int(val) ) 
-  TEST_VAR( cnnxstridein, var, int(val) ) 
+  TEST_VAR( cabstridein, var, int(val) )  
   TEST_VAR( hilighton, var, int(val) ) 
   TEST_CHOICE( hitettype, var, int(val) ) 
   TEST_VAR( tethi, var, int(val) ) 
@@ -1463,17 +1461,69 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   }
 } 
 
-class ProgInfo {open
-} {
+class ProgInfo {} {
   Function {ProgInfo()} {open
   } {
     Fl_Window proginfo {
       label {Progam Version} open
-      xywh {112 116 560 570} type Single color 7 visible
+      xywh {1082 25 560 570} type Single color 7 hide
     } {
       Fl_Text_Display infotxt {
         image {meshlogo.jpg} xywh {5 140 550 430} box NO_BOX
       }
     }
   }
+} 
+
+class ObjProps {open
+} {
+  Function {ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o),numreg(nr),sel(s)} {open
+  } {
+    Fl_Window win {open
+      xywh {860 610 310 65} type Single visible
+    } {
+      Fl_Button color {
+        label colour
+        callback {for( int i=0; i<numreg; i++ )
+  if( sel[i] ) { 
+   GLfloat *c = mwtb->get_color(obj, i);
+   colourChoice *cc = new colourChoice( c, sel, numreg, obj, mwtb );
+   string lab( objnames[obj] );
+   lab += " colour";
+   cc->window->label(lab.c_str());
+   cc->window->show();
+   break;
+   }}
+        xywh {10 10 100 45}
+      }
+      Fl_Check_Button thrD {
+        label 3D
+        callback {for( int i=0; i<numreg; i++ )
+  if( sel[i] )
+    mwtb->threeD( obj, i, static_cast<bool>(thrD->value()) );}
+        xywh {160 0 30 30} down_box DOWN_BOX align 4
+      }
+      Fl_Value_Input stride {
+        label Stride
+        callback {mwtb->stride( obj, int(stride->value()) );}
+        xywh {155 31 30 24} value 1
+      }
+      Fl_Value_Input sizeinp {
+        label {size:}
+        callback {for( int i=0; i<numreg; i++ )
+  if( sel[i] )
+     mwtb->size(obj, i, float(o->value()) );} selected
+        xywh {230 21 70 28} maximum 10000 step 0.1 value 1
+      }
+    }
+    code {for( int i=0; i<numreg; i++ )
+  if( sel[i] ) {
+    thrD->value( mwtb->threeD( obj, i ) );
+    stride->value( mwtb->stride( obj ) );
+  }} {}
+  }
+  decl {TBmeshWin *mwtb;} {}
+  decl {Object_t obj;} {}
+  decl {int numreg;} {}
+  decl {bool *sel;} {}
 } 

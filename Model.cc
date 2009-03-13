@@ -12,7 +12,9 @@ Model::Model(Colourscale *cs, DataOpacity *dopac ):
     _surface(NULL), _vertnrml(NULL),
     _numReg(0), _region(NULL), _numVol(0), _vol(NULL)
 {
-  for ( int i=0; i<maxobject; i++ ) _outstride[i] = 1;
+  for ( int i=0; i<maxobject; i++ ) {
+    _outstride[i] = 1;
+  }
 }
 
 

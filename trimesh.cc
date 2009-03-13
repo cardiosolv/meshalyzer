@@ -986,11 +986,15 @@ void Controls::cb_colour1(Fl_Button* o, void* v) {
   ((Controls*)(o->parent()->parent()->user_data()))->cb_colour1_i(o,v);
 }
 
-void Controls::cb_colour2_i(Fl_Button*, void*) {
-  pickcolor(Cnnx,"Connection colour");
+void Controls::cb_props_i(Fl_Button*, void*) {
+  ObjProps *op = new ObjProps( mwtb, Cnnx, reglist->nitems(), regselected() );
+string lab = objnames[Cnnx];
+lab += " Properties";
+op->win->label( lab.c_str() );
+op->win->show();
 }
-void Controls::cb_colour2(Fl_Button* o, void* v) {
-  ((Controls*)(o->parent()->parent()->user_data()))->cb_colour2_i(o,v);
+void Controls::cb_props(Fl_Button* o, void* v) {
+  ((Controls*)(o->parent()->parent()->user_data()))->cb_props_i(o,v);
 }
 
 void Controls::cb_vertstride_i(MyValueInput* o, void*) {
@@ -1005,13 +1009,6 @@ void Controls::cb_cabstridein_i(MyValueInput* o, void*) {
 }
 void Controls::cb_cabstridein(MyValueInput* o, void* v) {
   ((Controls*)(o->parent()->parent()->user_data()))->cb_cabstridein_i(o,v);
-}
-
-void Controls::cb_cnnxstridein_i(MyValueInput* o, void*) {
-  mwtb->stride(Cnnx,int(o->value()));
-}
-void Controls::cb_cnnxstridein(MyValueInput* o, void* v) {
-  ((Controls*)(o->parent()->parent()->user_data()))->cb_cnnxstridein_i(o,v);
 }
 
 void Controls::cb_visbut_i(Fl_Light_Button* o, void*) {
@@ -2455,9 +2452,9 @@ Controls::Controls() {
         o->labelsize(12);
         o->callback((Fl_Callback*)cb_colour1);
       } // Fl_Button* o
-      { Fl_Button* o = new Fl_Button(260, 190, 45, 25, "colour");
+      { Fl_Button* o = new Fl_Button(260, 190, 50, 25, "props");
         o->labelsize(12);
-        o->callback((Fl_Callback*)cb_colour2);
+        o->callback((Fl_Callback*)cb_props);
       } // Fl_Button* o
       { vertstride = new MyValueInput(305, 140, 25, 25, "Tetrahedron:");
         vertstride->tooltip("stride when rendering vertices");
@@ -2493,23 +2490,6 @@ Controls::Controls() {
         cabstridein->align(FL_ALIGN_LEFT);
         cabstridein->when(FL_WHEN_CHANGED);
       } // MyValueInput* cabstridein
-      { cnnxstridein = new MyValueInput(305, 187, 25, 25, "Tetrahedron:");
-        cnnxstridein->tooltip("stride");
-        cnnxstridein->box(FL_DOWN_BOX);
-        cnnxstridein->color(FL_BACKGROUND2_COLOR);
-        cnnxstridein->selection_color(FL_SELECTION_COLOR);
-        cnnxstridein->labeltype(FL_NO_LABEL);
-        cnnxstridein->labelfont(0);
-        cnnxstridein->labelsize(14);
-        cnnxstridein->labelcolor(FL_FOREGROUND_COLOR);
-        cnnxstridein->minimum(1);
-        cnnxstridein->maximum(100);
-        cnnxstridein->step(1);
-        cnnxstridein->value(1);
-        cnnxstridein->callback((Fl_Callback*)cb_cnnxstridein);
-        cnnxstridein->align(FL_ALIGN_LEFT);
-        cnnxstridein->when(FL_WHEN_CHANGED);
-      } // MyValueInput* cnnxstridein
       { visbut = new Fl_Light_Button(160, 215, 100, 20, "visible");
         visbut->value(1);
         visbut->callback((Fl_Callback*)cb_visbut);
@@ -2984,6 +2964,7 @@ for( int i=0; i<reglist->nitems(); i++ )
    cc->window->show();
    break;
    }
+delete[] sel;
 }
 
 void Controls::update_surfGUI( int s ) {
@@ -3085,7 +3066,6 @@ SAVE_WIDGET(mshzf,cabbut);
 SAVE_WIDGET(mshzf,cnnxbut);
 SAVE_WIDGET(mshzf,vertstride);
 SAVE_WIDGET(mshzf,cabstridein);
-SAVE_WIDGET(mshzf,cnnxstridein);
 //hilighttab
 SAVE_WIDGET(mshzf,hilighton);
 SAVE_WIDGET(mshzf,hitettype);
@@ -3253,8 +3233,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( cabbut, var, int(val) )  
   TEST_VAR( cnnxbut, var, int(val) )  
   TEST_VAR( vertstride, var, int(val) ) 
-  TEST_VAR( cabstridein, var, int(val) ) 
-  TEST_VAR( cnnxstridein, var, int(val) ) 
+  TEST_VAR( cabstridein, var, int(val) )  
   TEST_VAR( hilighton, var, int(val) ) 
   TEST_CHOICE( hitettype, var, int(val) ) 
   TEST_VAR( tethi, var, int(val) ) 
@@ -14063,4 +14042,75 @@ ProgInfo::ProgInfo() {
     } // Fl_Text_Display* infotxt
     proginfo->end();
   } // Fl_Window* proginfo
+}
+
+void ObjProps::cb_color_i(Fl_Button*, void*) {
+  for( int i=0; i<numreg; i++ )
+  if( sel[i] ) { 
+   GLfloat *c = mwtb->get_color(obj, i);
+   colourChoice *cc = new colourChoice( c, sel, numreg, obj, mwtb );
+   string lab( objnames[obj] );
+   lab += " colour";
+   cc->window->label(lab.c_str());
+   cc->window->show();
+   break;
+   };
+}
+void ObjProps::cb_color(Fl_Button* o, void* v) {
+  ((ObjProps*)(o->parent()->user_data()))->cb_color_i(o,v);
+}
+
+void ObjProps::cb_thrD_i(Fl_Check_Button*, void*) {
+  for( int i=0; i<numreg; i++ )
+  if( sel[i] )
+    mwtb->threeD( obj, i, static_cast<bool>(thrD->value()) );
+}
+void ObjProps::cb_thrD(Fl_Check_Button* o, void* v) {
+  ((ObjProps*)(o->parent()->user_data()))->cb_thrD_i(o,v);
+}
+
+void ObjProps::cb_stride_i(Fl_Value_Input*, void*) {
+  mwtb->stride( obj, int(stride->value()) );
+}
+void ObjProps::cb_stride(Fl_Value_Input* o, void* v) {
+  ((ObjProps*)(o->parent()->user_data()))->cb_stride_i(o,v);
+}
+
+void ObjProps::cb_sizeinp_i(Fl_Value_Input* o, void*) {
+  for( int i=0; i<numreg; i++ )
+  if( sel[i] )
+     mwtb->size(obj, i, float(o->value()) );
+}
+void ObjProps::cb_sizeinp(Fl_Value_Input* o, void* v) {
+  ((ObjProps*)(o->parent()->user_data()))->cb_sizeinp_i(o,v);
+}
+
+ObjProps::ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o),numreg(nr),sel(s) {
+  { win = new Fl_Window(310, 65);
+    win->user_data((void*)(this));
+    { color = new Fl_Button(10, 10, 100, 45, "colour");
+      color->callback((Fl_Callback*)cb_color);
+    } // Fl_Button* color
+    { thrD = new Fl_Check_Button(160, 0, 30, 30, "3D");
+      thrD->down_box(FL_DOWN_BOX);
+      thrD->callback((Fl_Callback*)cb_thrD);
+      thrD->align(FL_ALIGN_LEFT);
+    } // Fl_Check_Button* thrD
+    { stride = new Fl_Value_Input(155, 31, 30, 24, "Stride");
+      stride->value(1);
+      stride->callback((Fl_Callback*)cb_stride);
+    } // Fl_Value_Input* stride
+    { sizeinp = new Fl_Value_Input(230, 21, 70, 28, "size:");
+      sizeinp->maximum(10000);
+      sizeinp->step(0.1);
+      sizeinp->value(1);
+      sizeinp->callback((Fl_Callback*)cb_sizeinp);
+    } // Fl_Value_Input* sizeinp
+    win->end();
+  } // Fl_Window* win
+  for( int i=0; i<numreg; i++ )
+  if( sel[i] ) {
+    thrD->value( mwtb->threeD( obj, i ) );
+    stride->value( mwtb->stride( obj ) );
+  }
 }

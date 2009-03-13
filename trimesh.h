@@ -225,8 +225,8 @@ private:
   static void cb_colour(Fl_Button*, void*);
   void cb_colour1_i(Fl_Button*, void*);
   static void cb_colour1(Fl_Button*, void*);
-  void cb_colour2_i(Fl_Button*, void*);
-  static void cb_colour2(Fl_Button*, void*);
+  void cb_props_i(Fl_Button*, void*);
+  static void cb_props(Fl_Button*, void*);
 public:
   MyValueInput *vertstride;
 private:
@@ -237,11 +237,6 @@ public:
 private:
   void cb_cabstridein_i(MyValueInput*, void*);
   static void cb_cabstridein(MyValueInput*, void*);
-public:
-  MyValueInput *cnnxstridein;
-private:
-  void cb_cnnxstridein_i(MyValueInput*, void*);
-  static void cb_cnnxstridein(MyValueInput*, void*);
 public:
   Fl_Light_Button *visbut;
 private:
@@ -556,5 +551,34 @@ public:
   ProgInfo();
   Fl_Window *proginfo;
   Fl_Text_Display *infotxt;
+};
+
+class ObjProps {
+public:
+  ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s);
+  Fl_Window *win;
+  Fl_Button *color;
+private:
+  void cb_color_i(Fl_Button*, void*);
+  static void cb_color(Fl_Button*, void*);
+public:
+  Fl_Check_Button *thrD;
+private:
+  void cb_thrD_i(Fl_Check_Button*, void*);
+  static void cb_thrD(Fl_Check_Button*, void*);
+public:
+  Fl_Value_Input *stride;
+private:
+  void cb_stride_i(Fl_Value_Input*, void*);
+  static void cb_stride(Fl_Value_Input*, void*);
+public:
+  Fl_Value_Input *sizeinp;
+private:
+  void cb_sizeinp_i(Fl_Value_Input*, void*);
+  static void cb_sizeinp(Fl_Value_Input*, void*);
+  TBmeshWin *mwtb; 
+  Object_t obj; 
+  int numreg; 
+  bool *sel; 
 };
 #endif
