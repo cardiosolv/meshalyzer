@@ -6,6 +6,8 @@
  */
 #include "DrawingObjects.h"
 
+void draw_cylinder( const GLfloat *, const GLfloat *, int );
+
 /** draw many ContCables
  *
  *  \param p0       first index of cable to draw
@@ -20,29 +22,44 @@ void ContCable::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
   if ( p0>=_n || p1>=_n ) return;
 
   for ( int i=p0; i<=p1; i+=stride ) {
-    glBegin(GL_LINE_STRIP);
+    if( !_3D )
+      glBegin(GL_LINE_STRIP);
+
     if ( data!=NULL ) {
       if ( dataopac->on() ) {		// data opacity
         for ( int j=_node[i]; j<_node[i+1]; j++ ) {
           if ( !_pt->vis(j) ) continue;
           cs->colourize( data[j], dataopac->alpha( data[j]) );
-          glVertex3fv( _pt->pt(j) );
+          if( _3D ) {
+            if( j<_node[i+1]-1 )
+              draw_cylinder( _pt->pt(j), _pt->pt(j+1), _size );
+          } else
+            glVertex3fv( _pt->pt(j) );
         }
       } else {		// no data opacity
         for ( int j=_node[i]; j<_node[i+1]; j++ ) {
           if ( !_pt->vis(j) ) continue;
           cs->colourize( data[j], colour[3] );
-          glVertex3fv( _pt->pt(j) );
+          if( _3D ) {
+            if( j<_node[i+1]-1 )
+              draw_cylinder( _pt->pt(j), _pt->pt(j+1), _size );
+          } else
+            glVertex3fv( _pt->pt(j) );
         }
       }
     } else {							// no data on cables
       glColor4fv( colour );
       for ( int j=_node[i]; j<_node[i+1]; j++ ) {
         if ( !_pt->vis(j) ) continue;
-        glVertex3fv( _pt->pt(j) );
+        if( _3D ) {
+          if( j<_node[i+1]-1 )
+            draw_cylinder( _pt->pt(j), _pt->pt(j+1), _size );
+        } else
+          glVertex3fv( _pt->pt(j) );
       }
     }
-    glEnd();
+    if( !_3D )
+      glEnd();
   }
 }
 
@@ -58,12 +75,18 @@ void ContCable :: draw( int p, GLfloat *colour, float size )
   if ( p<_n ) {
     glColor3fv( colour );
     glLineWidth(size);
-    glBegin( GL_LINE_STRIP );
+    if( !_3D )
+      glBegin( GL_LINE_STRIP );
     for ( int j=_node[p]; j<_node[p+1]; j++ ) {
       if ( !_pt->vis(j) ) continue;
-      glVertex3fv( _pt->pt(j) );
+      if( _3D ) {
+        if( j<_node[p+1]-1 )
+          draw_cylinder( _pt->pt(j), _pt->pt(j+1), size );
+      } else
+        glVertex3fv( _pt->pt(j) );
     }
-    glEnd();
+    if( !_3D )
+      glEnd();
     glLineWidth(1);
   }
 }

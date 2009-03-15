@@ -6,8 +6,6 @@
 
 #include "VecData.h"
 
-#define CNNX_CYL_RAD 100
-
 void draw_cylinder( const GLfloat *start, const GLfloat* end, int radius )
 {
   GLUquadric* quado = gluNewQuadric();
@@ -89,7 +87,7 @@ void Connection :: draw( int p, GLfloat *colour, float size )
     glColor3fv( colour );
     glLineWidth(size);
     if( _3D )
-      draw_cylinder( _pt->pt(_node[p*2]), _pt->pt(_node[p*2+1]), CNNX_CYL_RAD );
+      draw_cylinder( _pt->pt(_node[p*2]), _pt->pt(_node[p*2+1]), size );
     else{
       glBegin( GL_LINES );
       glVertex3fv( _pt->pt(_node[p*2]   ) );

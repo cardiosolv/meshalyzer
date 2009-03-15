@@ -972,23 +972,9 @@ void Controls::cb_cnnxbut(Fl_Light_Button* o, void* v) {
   ((Controls*)(o->parent()->parent()->user_data()))->cb_cnnxbut_i(o,v);
 }
 
-void Controls::cb_colour_i(Fl_Button*, void*) {
-  pickcolor(Vertex,"Vertex colour");
-}
-void Controls::cb_colour(Fl_Button* o, void* v) {
-  ((Controls*)(o->parent()->parent()->user_data()))->cb_colour_i(o,v);
-}
-
-void Controls::cb_colour1_i(Fl_Button*, void*) {
-  pickcolor(Cable,"Cable colour");
-}
-void Controls::cb_colour1(Fl_Button* o, void* v) {
-  ((Controls*)(o->parent()->parent()->user_data()))->cb_colour1_i(o,v);
-}
-
 void Controls::cb_props_i(Fl_Button*, void*) {
-  ObjProps *op = new ObjProps( mwtb, Cnnx, reglist->nitems(), regselected() );
-string lab = objnames[Cnnx];
+  ObjProps *op = new ObjProps( mwtb, Vertex, reglist->nitems(), regselected() );
+string lab = objnames[Vertex];
 lab += " Properties";
 op->win->label( lab.c_str() );
 op->win->show();
@@ -997,18 +983,15 @@ void Controls::cb_props(Fl_Button* o, void* v) {
   ((Controls*)(o->parent()->parent()->user_data()))->cb_props_i(o,v);
 }
 
-void Controls::cb_vertstride_i(MyValueInput* o, void*) {
-  mwtb->stride(Vertex,int(o->value()));
+void Controls::cb_props1_i(Fl_Button*, void*) {
+  ObjProps *op = new ObjProps( mwtb, Cnnx, reglist->nitems(), regselected() );
+string lab = objnames[Cnnx];
+lab += " Properties";
+op->win->label( lab.c_str() );
+op->win->show();
 }
-void Controls::cb_vertstride(MyValueInput* o, void* v) {
-  ((Controls*)(o->parent()->parent()->user_data()))->cb_vertstride_i(o,v);
-}
-
-void Controls::cb_cabstridein_i(MyValueInput* o, void*) {
-  mwtb->stride(Cable,int(o->value()));
-}
-void Controls::cb_cabstridein(MyValueInput* o, void* v) {
-  ((Controls*)(o->parent()->parent()->user_data()))->cb_cabstridein_i(o,v);
+void Controls::cb_props1(Fl_Button* o, void* v) {
+  ((Controls*)(o->parent()->parent()->user_data()))->cb_props1_i(o,v);
 }
 
 void Controls::cb_visbut_i(Fl_Light_Button* o, void*) {
@@ -1033,6 +1016,17 @@ void Controls::cb_invert_i(Fl_Button*, void*) {
 }
 void Controls::cb_invert(Fl_Button* o, void* v) {
   ((Controls*)(o->parent()->parent()->user_data()))->cb_invert_i(o,v);
+}
+
+void Controls::cb_props2_i(Fl_Button*, void*) {
+  ObjProps *op = new ObjProps( mwtb, Cable, reglist->nitems(), regselected() );
+string lab = objnames[Cable];
+lab += " Properties";
+op->win->label( lab.c_str() );
+op->win->show();
+}
+void Controls::cb_props2(Fl_Button* o, void* v) {
+  ((Controls*)(o->parent()->parent()->user_data()))->cb_props2_i(o,v);
 }
 
 void Controls::cb_tethi_i(MyValueInput* o, void*) {
@@ -2444,52 +2438,14 @@ Controls::Controls() {
       { cnnxbut = new Fl_Light_Button(160, 190, 100, 25, "Connections");
         cnnxbut->callback((Fl_Callback*)cb_cnnxbut);
       } // Fl_Light_Button* cnnxbut
-      { Fl_Button* o = new Fl_Button(260, 140, 45, 25, "colour");
-        o->labelsize(12);
-        o->callback((Fl_Callback*)cb_colour);
-      } // Fl_Button* o
-      { Fl_Button* o = new Fl_Button(260, 165, 45, 25, "colour");
-        o->labelsize(12);
-        o->callback((Fl_Callback*)cb_colour1);
-      } // Fl_Button* o
-      { Fl_Button* o = new Fl_Button(260, 190, 70, 25, "props");
+      { Fl_Button* o = new Fl_Button(260, 140, 70, 25, "props");
         o->labelsize(12);
         o->callback((Fl_Callback*)cb_props);
       } // Fl_Button* o
-      { vertstride = new MyValueInput(305, 140, 25, 25, "Tetrahedron:");
-        vertstride->tooltip("stride when rendering vertices");
-        vertstride->box(FL_DOWN_BOX);
-        vertstride->color(FL_BACKGROUND2_COLOR);
-        vertstride->selection_color(FL_SELECTION_COLOR);
-        vertstride->labeltype(FL_NO_LABEL);
-        vertstride->labelfont(0);
-        vertstride->labelsize(14);
-        vertstride->labelcolor(FL_FOREGROUND_COLOR);
-        vertstride->minimum(1);
-        vertstride->maximum(1000);
-        vertstride->step(1);
-        vertstride->value(1);
-        vertstride->callback((Fl_Callback*)cb_vertstride);
-        vertstride->align(FL_ALIGN_LEFT);
-        vertstride->when(FL_WHEN_CHANGED);
-      } // MyValueInput* vertstride
-      { cabstridein = new MyValueInput(305, 164, 25, 25, "Tetrahedron:");
-        cabstridein->tooltip("stride");
-        cabstridein->box(FL_DOWN_BOX);
-        cabstridein->color(FL_BACKGROUND2_COLOR);
-        cabstridein->selection_color(FL_SELECTION_COLOR);
-        cabstridein->labeltype(FL_NO_LABEL);
-        cabstridein->labelfont(0);
-        cabstridein->labelsize(14);
-        cabstridein->labelcolor(FL_FOREGROUND_COLOR);
-        cabstridein->minimum(1);
-        cabstridein->maximum(100);
-        cabstridein->step(1);
-        cabstridein->value(1);
-        cabstridein->callback((Fl_Callback*)cb_cabstridein);
-        cabstridein->align(FL_ALIGN_LEFT);
-        cabstridein->when(FL_WHEN_CHANGED);
-      } // MyValueInput* cabstridein
+      { Fl_Button* o = new Fl_Button(260, 190, 70, 25, "props");
+        o->labelsize(12);
+        o->callback((Fl_Callback*)cb_props1);
+      } // Fl_Button* o
       { visbut = new Fl_Light_Button(160, 215, 100, 20, "visible");
         visbut->value(1);
         visbut->callback((Fl_Callback*)cb_visbut);
@@ -2503,6 +2459,10 @@ Controls::Controls() {
         o->color(FL_FOREGROUND_COLOR);
         o->labelcolor(FL_BACKGROUND_COLOR);
         o->callback((Fl_Callback*)cb_invert);
+      } // Fl_Button* o
+      { Fl_Button* o = new Fl_Button(260, 165, 70, 25, "props");
+        o->labelsize(12);
+        o->callback((Fl_Callback*)cb_props2);
       } // Fl_Button* o
       regiondisp->end();
     } // Fl_Group* regiondisp
@@ -2793,10 +2753,10 @@ Controls::Controls() {
         } // Fl_Value_Slider* backintensityslide
         lightgrp->end();
       } // Fl_Group* lightgrp
-      { Fl_Group* o = new Fl_Group(15, 310, 315, 175, "Surface");
-        o->labelsize(12);
-        o->labelcolor((Fl_Color)90);
-        o->hide();
+      { surfgrp = new Fl_Group(15, 310, 315, 175, "Surface");
+        surfgrp->labelsize(12);
+        surfgrp->labelcolor((Fl_Color)90);
+        surfgrp->hide();
         { surfvisbut = new Fl_Light_Button(140, 395, 85, 30, "visible");
           surfvisbut->value(1);
           surfvisbut->selection_color((Fl_Color)2);
@@ -2837,8 +2797,8 @@ Controls::Controls() {
           o->color(FL_RED);
           o->menu(menu_delete);
         } // Fl_Menu_Button* o
-        o->end();
-      } // Fl_Group* o
+        surfgrp->end();
+      } // Fl_Group* surfgrp
       tabwidget->end();
     } // Fl_Tabs* tabwidget
     { colorscalegrp = new Fl_Group(10, 490, 330, 60);
@@ -3064,8 +3024,6 @@ SAVE_WIDGET(mshzf,draw_axes);
 SAVE_WIDGET(mshzf,vertbut);
 SAVE_WIDGET(mshzf,cabbut);
 SAVE_WIDGET(mshzf,cnnxbut);
-SAVE_WIDGET(mshzf,vertstride);
-SAVE_WIDGET(mshzf,cabstridein);
 //hilighttab
 SAVE_WIDGET(mshzf,hilighton);
 SAVE_WIDGET(mshzf,hitettype);
@@ -3106,6 +3064,7 @@ SAVE_WIDGET(mshzf,cstype);
 SAVE_WIDGET(mshzf,tmslider);
 SAVE_WIDGET(mshzf,frameskip);
 SAVE_WIDGET(mshzf,animdelay);
+
 
 mshzf << "SURFACE_COLOURS = " << mwtb->model->numSurf() << endl;
 for( int i=0; i<mwtb->model->numSurf(); i++ ) {
@@ -3294,9 +3253,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( draw_axes, var, int(val) )  
   TEST_VAR( vertbut, var, int(val) )  
   TEST_VAR( cabbut, var, int(val) )  
-  TEST_VAR( cnnxbut, var, int(val) )  
-  TEST_VAR( vertstride, var, int(val) ) 
-  TEST_VAR( cabstridein, var, int(val) )  
+  TEST_VAR( cnnxbut, var, int(val) )    
   TEST_VAR( hilighton, var, int(val) ) 
   TEST_CHOICE( hitettype, var, int(val) ) 
   TEST_VAR( tethi, var, int(val) ) 
@@ -3337,6 +3294,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( tmslider, var, int(val) ) 
   TEST_VAR( frameskip, var, int(val) ) 
   TEST_VAR( animdelay, var, int(val) ) 
+  
   if( !strcmp( "BGD_COLOUR", var )) { mwtb->bgd(val); continue; }
 
   cerr << "Unknown variable specified: " << var << endl;

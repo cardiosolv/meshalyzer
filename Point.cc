@@ -1,5 +1,27 @@
 #include "DrawingObjects.h"
 
+#include "VecData.h"
+
+/** draw a nice 3D sphere 
+ *
+ * \param ctr    position
+ * \param radius radius
+ */
+void draw_sphere( const GLfloat *ctr, float radius )
+{
+  GLUquadric* quado = gluNewQuadric();
+  gluQuadricDrawStyle( quado, GLU_FILL );
+  gluQuadricOrientation(quado, GLU_INSIDE);
+
+  glPolygonMode( GL_FRONT, GL_FILL );
+  glPushMatrix();
+  glTranslatef( ctr[0], ctr[1], ctr[2] );
+  gluSphere( quado, radius, 10, 5 );
+  glPopMatrix();
+  gluDeleteQuadric(quado);
+}
+
+
 /** draw many Points
  *
  *  \param p0       first index of point to draw
@@ -14,7 +36,11 @@ void Point::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
   if ( p0>=_n || p1>=_n ) return;
 
   glPushAttrib(GL_POLYGON_BIT);
-  glBegin( GL_POINTS );
+
+  if( !_3D ) {
+    glPointSize( _size );
+    glBegin( GL_POINTS );
+  }
 
   if ( data != NULL ) {					// data determines colour
     if ( dataopac!=NULL && dataopac->on() ) {       // data opacity
@@ -22,21 +48,30 @@ void Point::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
       for ( int i=p0; i<=p1; i+=stride ) {
         if ( !(*_visible)[i] ) continue;
         cs->colourize( data[i], dataopac->alpha(data[i]) );
-        glVertex3fv( _pts+3*i );
+        if( _3D )
+          draw_sphere( _pts+3*i, _size );
+        else
+          glVertex3fv( _pts+3*i );
       }
       translucency(false);
     } else {                             // no data opacity
       for (int i=p0; i<=p1; i+=stride ) {
         if ( !(*_visible)[i] ) continue;
         cs->colourize( data[i], colour[3] );
-        glVertex3fv( _pts+3*i );
+        if( _3D )
+          draw_sphere( _pts+3*i, _size );
+        else
+          glVertex3fv( _pts+3*i );
       }
     }
   } else {								 // all same colour
     glColor4fv( colour );
     for (int i=p0; i<=p1; i+=stride )
       if ( (*_visible)[i] )
-        glVertex3fv( _pts+3*i );
+        if( _3D )
+          draw_sphere( _pts+3*i, _size );
+        else
+          glVertex3fv( _pts+3*i );
   }
 
   glEnd();
@@ -54,11 +89,14 @@ void Point :: draw( int p, GLfloat *colour, float size )
 {
   if ( p<_n ) {
     glColor3fv( colour );
-    glPointSize(size);
-    glBegin( GL_POINTS );
-    glVertex3fv( _pts+3*p );
-    glEnd();
-    glPointSize(1);
+    if( _3D ) {
+      draw_sphere( _pts+3*p, size );
+    } else {
+      glPointSize(size);
+      glBegin( GL_POINTS );
+      glVertex3fv( _pts+3*p );
+      glEnd();
+    }
   }
 }
 

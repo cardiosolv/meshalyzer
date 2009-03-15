@@ -29,9 +29,9 @@ class UserInterface {
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Group.H>
 #include <FL/Fl_Check_Button.H>
-#include "MyValueInput.h"
 #include <FL/Fl_Check_Browser.H>
 #include <FL/Fl_Tabs.H>
+#include "MyValueInput.h"
 #include <FL/Fl_Value_Output.H>
 #include <FL/Fl_Roller.H>
 #include "Colourscale.h"
@@ -221,22 +221,10 @@ public:
 private:
   void cb_cnnxbut_i(Fl_Light_Button*, void*);
   static void cb_cnnxbut(Fl_Light_Button*, void*);
-  void cb_colour_i(Fl_Button*, void*);
-  static void cb_colour(Fl_Button*, void*);
-  void cb_colour1_i(Fl_Button*, void*);
-  static void cb_colour1(Fl_Button*, void*);
   void cb_props_i(Fl_Button*, void*);
   static void cb_props(Fl_Button*, void*);
-public:
-  MyValueInput *vertstride;
-private:
-  void cb_vertstride_i(MyValueInput*, void*);
-  static void cb_vertstride(MyValueInput*, void*);
-public:
-  MyValueInput *cabstridein;
-private:
-  void cb_cabstridein_i(MyValueInput*, void*);
-  static void cb_cabstridein(MyValueInput*, void*);
+  void cb_props1_i(Fl_Button*, void*);
+  static void cb_props1(Fl_Button*, void*);
 public:
   Fl_Light_Button *visbut;
 private:
@@ -249,6 +237,8 @@ public:
 private:
   void cb_invert_i(Fl_Button*, void*);
   static void cb_invert(Fl_Button*, void*);
+  void cb_props2_i(Fl_Button*, void*);
+  static void cb_props2(Fl_Button*, void*);
 public:
   Fl_Tabs *tabwidget;
   Fl_Group *hilightgrp;
@@ -434,6 +424,7 @@ private:
   void cb_backintensityslide_i(Fl_Value_Slider*, void*);
   static void cb_backintensityslide(Fl_Value_Slider*, void*);
 public:
+  Fl_Group *surfgrp;
   Fl_Light_Button *surfvisbut;
 private:
   void cb_surfvisbut_i(Fl_Light_Button*, void*);

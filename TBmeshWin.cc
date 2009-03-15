@@ -428,7 +428,8 @@ void TBmeshWin::draw_cables(RRegion* sf)
 {
   if ( renderMode == GL_RENDER ) {
     glPushAttrib(GL_POLYGON_BIT);
-    glLineWidth(3.);
+    model->_cable->size( sf->size(Cable) );
+    model->_cable->threeD( sf->threeD(Cable) );
     if ( dataopac->dop[Cable].on() ) translucency(true);
     model->_cable->draw( 0, model->_cable->num()-1, sf->get_color(Cable),
                          cs, (datadst==Cable||datadst==All)?data:NULL,
@@ -465,7 +466,8 @@ void TBmeshWin::draw_vertices(RRegion* reg)
     glPushAttrib(GL_POLYGON_BIT);
     glColor4fv( reg->get_color(Vertex) );
     GLfloat opac = reg->get_color(Vertex)[3];
-    glPointSize(5.);
+    model->pt.size( reg->size(Vertex) );
+    model->pt.threeD( reg->threeD(Vertex) );
     if ( dataopac->dop[Vertex].on() ) translucency(true);
     model->pt.draw( 0, model->pt.num()-1, reg->get_color(Vertex),
                     cs, (datadst==All||datadst==Vertex)?data:NULL,
