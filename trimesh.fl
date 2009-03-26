@@ -1284,12 +1284,10 @@ for( int i=0; i<mwtb->model->_numReg; i++ ) {
   mshzf << r->size(Cnnx) << endl;
 }
 
-mshzf << "stride = ";
-for( int i=0; i<mwtb->model->_numReg; i++ ) {
-  mshzf << mwtb->stride(Vertex) << " ";
-  mshzf << mwtb->stride(Cable) << " ";
-  mshzf << mwtb->stride(Cnnx) << endl;
-}
+mshzf << "stride =";
+mshzf << " " << mwtb->stride(Vertex);
+mshzf << " " << mwtb->stride(Cable);
+mshzf << " " << mwtb->stride(Cnnx) << endl;
 
 mshzf << "REGION_3D = " << mwtb->model->_numReg << endl;
 for( int i=0; i<mwtb->model->_numReg; i++ ) {

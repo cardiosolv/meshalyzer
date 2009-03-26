@@ -1,7 +1,6 @@
-/* $Id: gl2ps.h,v 1.6 2007/01/30 21:32:00 vigmond Exp $ */
 /*
  * GL2PS, an OpenGL to PostScript Printing Library
- * Copyright (C) 1999-2006 Christophe Geuzaine <geuz@geuz.org>
+ * Copyright (C) 1999-2009 C. Geuzaine
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of either:
@@ -78,14 +77,14 @@
 
 #define GL2PS_MAJOR_VERSION 1
 #define GL2PS_MINOR_VERSION 3
-#define GL2PS_PATCH_VERSION 2
+#define GL2PS_PATCH_VERSION 3
 #define GL2PS_EXTRA_VERSION ""
 
 #define GL2PS_VERSION (GL2PS_MAJOR_VERSION + \
                        0.01 * GL2PS_MINOR_VERSION + \
                        0.0001 * GL2PS_PATCH_VERSION)
 
-#define GL2PS_COPYRIGHT "(C) 1999-2006 Christophe Geuzaine (geuz@geuz.org)"
+#define GL2PS_COPYRIGHT "(C) 1999-2009 C. Geuzaine"
 
 /* Output file formats (the values and the ordering are important!) */
 
@@ -137,9 +136,9 @@
 #define GL2PS_BLEND               4
 
 /* Text alignment (o=raster position; default mode is BL):
-   +---+ +---+ +---+ +---+ +---+ +---+ +-o-+ o---+ +---o
-   | o | o   | |   o |   | |   | |   | |   | |   | |   |
-   +---+ +---+ +---+ +-o-+ o---+ +---o +---+ +---+ +---+
+   +---+ +---+ +---+ +---+ +---+ +---+ +-o-+ o---+ +---o 
+   | o | o   | |   o |   | |   | |   | |   | |   | |   | 
+   +---+ +---+ +---+ +-o-+ o---+ +---o +---+ +---+ +---+ 
     C     CL    CR    B     BL    BR    T     TL    TR */
 
 #define GL2PS_TEXT_C  1
@@ -155,40 +154,40 @@
 typedef GLfloat GL2PSrgba[4];
 
 #if defined(__cplusplus)
-extern "C"
-{
+extern "C" {
 #endif
 
-  GL2PSDLL_API GLint gl2psBeginPage(const char *title, const char *producer,
-                                    GLint viewport[4], GLint format, GLint sort,
-                                    GLint options, GLint colormode,
-                                    GLint colorsize, GL2PSrgba *colormap,
-                                    GLint nr, GLint ng, GLint nb, GLint buffersize,
-                                    FILE *stream, const char *filename);
-  GL2PSDLL_API GLint gl2psEndPage(void);
-  GL2PSDLL_API GLint gl2psSetOptions(GLint options);
-  GL2PSDLL_API GLint gl2psBeginViewport(GLint viewport[4]);
-  GL2PSDLL_API GLint gl2psEndViewport(void);
-  GL2PSDLL_API GLint gl2psText(const char *str, const char *fontname,
-                               GLshort fontsize);
-  GL2PSDLL_API GLint gl2psTextOpt(const char *str, const char *fontname,
-                                  GLshort fontsize, GLint align, GLfloat angle);
-  GL2PSDLL_API GLint gl2psSpecial(GLint format, const char *str);
-  GL2PSDLL_API GLint gl2psDrawPixels(GLsizei width, GLsizei height,
-                                     GLint xorig, GLint yorig,
-                                     GLenum format, GLenum type, const void *pixels);
-  GL2PSDLL_API GLint gl2psEnable(GLint mode);
-  GL2PSDLL_API GLint gl2psDisable(GLint mode);
-  GL2PSDLL_API GLint gl2psPointSize(GLfloat value);
-  GL2PSDLL_API GLint gl2psLineWidth(GLfloat value);
-  GL2PSDLL_API GLint gl2psBlendFunc(GLenum sfactor, GLenum dfactor);
+GL2PSDLL_API GLint gl2psBeginPage(const char *title, const char *producer, 
+                                  GLint viewport[4], GLint format, GLint sort,
+                                  GLint options, GLint colormode,
+                                  GLint colorsize, GL2PSrgba *colormap, 
+                                  GLint nr, GLint ng, GLint nb, GLint buffersize,
+                                  FILE *stream, const char *filename);
+GL2PSDLL_API GLint gl2psEndPage(void);
+GL2PSDLL_API GLint gl2psSetOptions(GLint options);
+GL2PSDLL_API GLint gl2psGetOptions(GLint *options);
+GL2PSDLL_API GLint gl2psBeginViewport(GLint viewport[4]);
+GL2PSDLL_API GLint gl2psEndViewport(void);
+GL2PSDLL_API GLint gl2psText(const char *str, const char *fontname, 
+                             GLshort fontsize);
+GL2PSDLL_API GLint gl2psTextOpt(const char *str, const char *fontname, 
+                                GLshort fontsize, GLint align, GLfloat angle);
+GL2PSDLL_API GLint gl2psSpecial(GLint format, const char *str);
+GL2PSDLL_API GLint gl2psDrawPixels(GLsizei width, GLsizei height,
+                                   GLint xorig, GLint yorig,
+                                   GLenum format, GLenum type, const void *pixels);
+GL2PSDLL_API GLint gl2psEnable(GLint mode);
+GL2PSDLL_API GLint gl2psDisable(GLint mode);
+GL2PSDLL_API GLint gl2psPointSize(GLfloat value);
+GL2PSDLL_API GLint gl2psLineWidth(GLfloat value);
+GL2PSDLL_API GLint gl2psBlendFunc(GLenum sfactor, GLenum dfactor);
 
-  /* undocumented */
-  GL2PSDLL_API GLint gl2psDrawImageMap(GLsizei width, GLsizei height,
-                                       const GLfloat position[3],
-                                       const unsigned char *imagemap);
-  GL2PSDLL_API const char *gl2psGetFileExtension(GLint format);
-  GL2PSDLL_API const char *gl2psGetFormatDescription(GLint format);
+/* undocumented */
+GL2PSDLL_API GLint gl2psDrawImageMap(GLsizei width, GLsizei height,
+                                     const GLfloat position[3],
+                                     const unsigned char *imagemap);
+GL2PSDLL_API const char *gl2psGetFileExtension(GLint format);
+GL2PSDLL_API const char *gl2psGetFormatDescription(GLint format);
 
 #if defined(__cplusplus)
 }

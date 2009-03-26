@@ -6,7 +6,11 @@
  */
 #include "DrawingObjects.h"
 
+void fillCylTexture( GLfloat *, GLfloat *, GLfloat, GLfloat, GLubyte * );
 void draw_cylinder( const GLfloat *, const GLfloat *, int );
+void initializeCyltexture( GLubyte *, GLuint * );
+#define NUM_S 2
+#define NUM_T 2
 
 /** draw many ContCables
  *
@@ -21,34 +25,54 @@ void ContCable::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 {
   if ( p0>=_n || p1>=_n ) return;
 
+  if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )     // data opacity
+	  translucency(true);
+
+  GLuint texName;
+  GLubyte cgrad[4*NUM_S*NUM_T]; 
+  bool facetshade;
+  if( _3D ) {
+    facetshade =  !glIsEnabled(GL_LINE_SMOOTH );
+    if( data !=NULL && !facetshade) initializeCyltexture( cgrad, &texName );
+  } else {
+	glLineWidth( _size );
+  }
+
+  if( data==NULL ) glColor4fv( colour );
+
+  GLfloat a0 = colour[3], a1 = colour[3];
+
   for ( int i=p0; i<=p1; i+=stride ) {
+
     if( !_3D )
       glBegin(GL_LINE_STRIP);
 
     if ( data!=NULL ) {
-      if ( dataopac->on() ) {		// data opacity
-        for ( int j=_node[i]; j<_node[i+1]; j++ ) {
-          if ( !_pt->vis(j) ) continue;
-          cs->colourize( data[j], dataopac->alpha( data[j]) );
-          if( _3D ) {
-            if( j<_node[i+1]-1 )
-              draw_cylinder( _pt->pt(j), _pt->pt(j+1), _size );
-          } else
-            glVertex3fv( _pt->pt(j) );
+
+      for ( int j=_node[i]; j<_node[i+1]; j++ ) {
+
+        if ( !_pt->vis(j) ) continue;
+
+        if ( dataopac!=NULL && dataopac->on() ) {       // data opacity
+          a0 =  dataopac->alpha(data[j]); 
+          a1 =  dataopac->alpha(data[j+1]); 
         }
-      } else {		// no data opacity
-        for ( int j=_node[i]; j<_node[i+1]; j++ ) {
-          if ( !_pt->vis(j) ) continue;
-          cs->colourize( data[j], colour[3] );
-          if( _3D ) {
-            if( j<_node[i+1]-1 )
-              draw_cylinder( _pt->pt(j), _pt->pt(j+1), _size );
-          } else
-            glVertex3fv( _pt->pt(j) );
+
+        if( _3D ) {
+          if( j<_node[i+1]-1 ) {
+            if( facetshade )
+              cs->colourize( data[j], a0 );
+            else 
+              fillCylTexture(  cs->colorvec( data[j]   ),
+                      cs->colorvec( data[j+1] ), a0, a1, cgrad ); 
+            draw_cylinder( _pt->pt(j), _pt->pt(j+1), _size );
+          }
+        } else {
+          cs->colourize( data[j], a0 );
+          glVertex3fv( _pt->pt(j) );
         }
       }
     } else {							// no data on cables
-      glColor4fv( colour );
       for ( int j=_node[i]; j<_node[i+1]; j++ ) {
         if ( !_pt->vis(j) ) continue;
         if( _3D ) {
@@ -58,9 +82,14 @@ void ContCable::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
           glVertex3fv( _pt->pt(j) );
       }
     }
+
     if( !_3D )
       glEnd();
   }
+
+  if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )     // data opacity
+	  translucency(false);
+
 }
 
 
