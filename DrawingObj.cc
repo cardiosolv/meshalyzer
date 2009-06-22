@@ -18,7 +18,7 @@ static const int simple_index[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13};
  *  \return where along a,b the intersection occurs
  */
 float find_line_plane_intersect( const GLfloat* a, const GLfloat* b,
-                                 const GLfloat* pc, const GLfloat* pp, GLfloat* ip )
+                             const GLfloat* pc, const GLfloat* pp, GLfloat* ip )
 {
   Vector3D<GLfloat>  ppv(pp), p0(a), p1(b);
   GLfloat tmp1[3];
@@ -238,7 +238,7 @@ VolElement::planecut( char *pd, GLfloat* cp,
       inode[2*num_int+1] = _node[edges[i][1]];
       try {
         d[num_int] = find_line_plane_intersect(_pt->pt(_node[edges[i][0]]),
-                                               _pt->pt(_node[edges[i][1]]), cp, ptOnPlane, intersect+3*num_int );
+             _pt->pt(_node[edges[i][1]]), cp, ptOnPlane, intersect+3*num_int );
       } catch ( lpint_enum raison ) {
         if ( raison==BOTH_ON_PLANE ) {		// add both points
           d[num_int] = d[num_int+1] = 1;

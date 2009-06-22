@@ -89,6 +89,13 @@ T* normalize( T* a )
 }
 
 template<class T>
+T mag2( const T* a )
+{
+  return a[0]*a[0] + a[1]*a[1] + a[2]*a[2];
+}
+
+
+template<class T>
 T* add( const T* a, const T* b, T* c )
 {
   for ( int i=0; i<3; i++ )

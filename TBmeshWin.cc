@@ -1555,12 +1555,13 @@ TBmeshWin::draw_iso_lines()
   if( have_data==NoData || !isc->isolineOn->value() )
     return;
 
-  if( isc->isDirty() || tm!=isoline->tm() ){
+  if( isc->islDirty() || tm!=isoline->tm() ){
     delete isoline;
     isoline=new IsoLine( isc->isolineVal0->value(), isc->isolineVal1->value(),
              isc->isoNumLines->value(), tm );
     for ( int s=0; s<model->numSurf(); s++ ) 
       isoline->process( model->surface(s), data );
   }
-  isoline->draw(NULL,isc->thickness());
+  isoline->color( isc->islColor() );
+  isoline->draw(NULL,isc->islThickness());
 }

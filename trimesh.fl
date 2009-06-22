@@ -16,8 +16,7 @@ decl {class TBmeshWin;} {public
 decl {class IsoSurface;} {public
 } 
 
-decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {selected
-} 
+decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {} 
 
 decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {} 
 
@@ -56,7 +55,7 @@ winny->size_range(50,50,1200,1200,5,5,1);} {}
 
 class Controls {open
 } {
-  Function {Controls()} {open
+  Function {Controls()} {selected
   } {
     Fl_Window window {
       label {Meshalyzer Controls}
@@ -1314,9 +1313,19 @@ for( int i=0; i<mwtb->model->_numReg; i++ ) {
   mshzf << " " << mwtb->model->region(i)->show(Cnnx) << " " 
         << mwtb->model->region(i)->visible() << endl; 
 }
-mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;} {}
+mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;
+
+mshzf << "ISOLINE_COLOUR = ";
+save_colour( mshzf, mwtb->isosurfwin ->islColor() );
+mshzf << endl;
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineVal0 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineVal1 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoNumLines );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineThick );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->islDatify );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineOn );} {}
   }
-  Function {save_colour( ofstream&ofs, GLfloat *col )} {} {
+  Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
@@ -1339,7 +1348,8 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -1422,7 +1432,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
       mshzf >> v;
       mwtb->model->region(i)->threeD( Cnnx, v );
     }
-	continue;
+    continue;
   } 
   if( !strcmp( var, "REGION_SIZE" ) ) {
     float s;
@@ -1438,7 +1448,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
       mshzf >> s;
       mwtb->model->region(i)->size( Cnnx, s );
     }
-	continue;
+   continue;
   } 
   if( !strcmp( var, "stride" ) ) {
     int vs, cbs, cxs;
@@ -1495,6 +1505,19 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( tmslider, var, int(val) ) 
   TEST_VAR( frameskip, var, int(val) ) 
   TEST_VAR( animdelay, var, int(val) ) 
+  
+  TEST_VAR( mwtb->isosurfwin->isolineVal0, var, val )
+  TEST_VAR( mwtb->isosurfwin->isolineVal1, var, val )
+  TEST_VAR( mwtb->isosurfwin->isoNumLines, var, int(val) )
+  TEST_VAR( mwtb->isosurfwin->isolineThick, var, int(val) )
+  TEST_VAR( mwtb->isosurfwin->islDatify, var, int(val) )
+  TEST_VAR( mwtb->isosurfwin->isolineOn, var, int(val) )
+  if( !strcmp( var, "ISOLINE_COLOUR" ) ){
+    float r, g, b, a;
+    sscanf( buf, "%*s = %f %f %f %f", &r, &g, &b, &a );
+    mwtb->isosurfwin->islColor(r,g,b,a);
+    continue;
+  }
   
   if( !strcmp( "BGD_COLOUR", var )) { mwtb->bgd(val); continue; }
 
