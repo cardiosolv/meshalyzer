@@ -86,6 +86,7 @@ template <class T> class Vector3D
     inline Vector3D<T> operator - () const { return Vector3D<T>(-X(), -Y(), -Z()); }
 
     inline Vector3D<T>   operator +  (const Vector3D<T> & v) const { return Vector3D<T>(X()+v.X(), Y()+v.Y(), Z()+v.Z()); }
+    inline Vector3D<T>   operator +  (const T* v) const { return Vector3D<T>(X()+v[0], Y()+v[1], Z()+v[2]); }
     inline Vector3D<T>   operator -  (const Vector3D<T> & v) const { return Vector3D<T>(X()-v.X(), Y()-v.Y(), Z()-v.Z()); }
     inline Vector3D<T>   operator -  (const T* v) const { return Vector3D<T>(X()-v[0], Y()-v[1], Z()-v[2]); }
     inline Vector3D<T> & operator += (const Vector3D<T> & v) { X()+=v.X(); Y()+=v.Y(); Z()+=v.Z(); return *this;  }

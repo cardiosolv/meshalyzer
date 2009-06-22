@@ -13,7 +13,11 @@ decl {\#include <vector>} {}
 decl {class TBmeshWin;} {public
 } 
 
-decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {} 
+decl {class IsoSurface;} {public
+} 
+
+decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {selected
+} 
 
 decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {} 
 
@@ -55,16 +59,16 @@ class Controls {open
   Function {Controls()} {open
   } {
     Fl_Window window {
-      label {Meshalyzer Controls} open
-      xywh {791 25 350 650} type Double box UP_BOX
+      label {Meshalyzer Controls}
+      xywh {359 50 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {open
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -364,7 +368,7 @@ mwtb->trackball.size = md;mwtb->redraw();}
           }
         }
         Submenu {} {
-          label Data
+          label Data open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -376,6 +380,11 @@ mwtb->trackball.size = md;mwtb->redraw();}
             label Clipping
             callback {mwtb->cplane->window->show();}
             xywh {10 10 100 20}
+          }
+          MenuItem {} {
+            label Isosurf
+            callback {mwtb->isosurfwin->isowin->show();}
+            xywh {0 0 31 20}
           }
         }
         Submenu outmenu {
@@ -611,7 +620,7 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
@@ -1114,8 +1123,7 @@ mwtb->redraw();}
   decl {TBmeshWin *mwtb;} {}
   decl {Fl_Window* proginfo;} {public
   }
-  Function {pickcolor(Object_t obj, const char* wintitle )} {open
-  } {
+  Function {pickcolor(Object_t obj, const char* wintitle )} {} {
     code {bool* sel=regselected();
 for( int i=0; i<reglist->nitems(); i++ )
   if( sel[i] ) { 
@@ -1200,8 +1208,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1307,8 +1314,7 @@ for( int i=0; i<mwtb->model->_numReg; i++ ) {
   mshzf << " " << mwtb->model->region(i)->show(Cnnx) << " " 
         << mwtb->model->region(i)->visible() << endl; 
 }
-mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;} {selected
-    }
+mshzf << "BGD_COLOUR = " << (mwtb->bgd())[1] << endl;} {}
   }
   Function {save_colour( ofstream&ofs, GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
@@ -1333,8 +1339,7 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
+  Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -1530,10 +1535,8 @@ class ProgInfo {} {
   }
 } 
 
-class ObjProps {open
-} {
-  Function {ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o),numreg(nr),sel(s)} {open
-  } {
+class ObjProps {} {
+  Function {ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o),numreg(nr),sel(s)} {} {
     Fl_Window win {open
       xywh {860 580 310 65} type Single hide
     } {

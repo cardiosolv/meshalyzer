@@ -36,6 +36,9 @@ OBJS = Fl_Gl_Tb_Window.o\
 	Hexahedron.o\
 	HiLiteWinInfo.o\
 	IGBheader.o\
+	isosurf.o\
+	IsoLines.o\
+	IsoSurface.o\
 	main.o\
 	Matrix4x4.o\
 	Model.o\

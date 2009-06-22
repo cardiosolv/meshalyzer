@@ -1,4 +1,5 @@
 #include "trimesh.h"
+#include "isosurf.h"
 #include <string>
 #include <sstream>
 #include <libgen.h>

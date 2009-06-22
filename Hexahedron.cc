@@ -3,9 +3,9 @@
 const int hex_num_edge=12;
 const int hex_edges[hex_num_edge][2] =
   {
-    {0,1}
-    ,{1,2},{2,3},{3,0},{0,4},{1,7},{2,6},{3,5},{4,5},{5,6},{6,7},{7,4}
+    {0,1} ,{1,2},{2,3},{3,0},{0,4},{1,7},{2,6},{3,5},{4,5},{5,6},{6,7},{7,4}
   };
+const int hex_iso_table[][3] = { {1,2,3} };
 
 /** draw many Hexahedrons
  *
@@ -245,3 +245,14 @@ Hexahedron::cut( char*pd, GLfloat* cp,
   return planecut( pd, cp, interp, hex_num_edge, hex_edges, e );
 }
 
+
+/* return the list of intersection polygons for isosurfaces
+ *
+ *  \param index for each node, the bit is true if the isoval is exceeded
+ *  
+ * \return the row in the table
+ */
+const int* Hexahedron::iso_polys(unsigned int index)
+{
+  return hex_iso_table[index];
+}

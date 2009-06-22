@@ -5,6 +5,8 @@
 
 enum lpint_enum{ BOTH_ON_PLANE, NO_INTERSECTION };
 
+static const int simple_index[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13};
+
 /** find the intersection of a plane with a line
  *
  *  \param a  first point of line
@@ -144,7 +146,7 @@ void SurfaceElement::read_normals( int e0, int e1, const char *fnb )
  * \pre  \p nl must be at least _ptsPerObj*\p n long
  * \post \p _n is allocated if need be
  */
-void  MultiPoint::define( int *nl, int n )
+void  MultiPoint::define( const int *nl, int n )
 {
   delete[] _node;
   _node = new int[n*_ptsPerObj];
@@ -308,3 +310,95 @@ VolElement::planecut( char *pd, GLfloat* cp,
 
   return se;
 }
+
+
+/** linearly interpolate the position of a value along an element edge 
+ *
+ *  \param p0    vertex 0
+ *  \param dat0  data on p0
+ *  \param p1    vertex 1
+ *  \param dat1  data on p1
+ *  \param val   data between dat0 and dat1
+ *  \param pint  location of val (computed)
+ */
+void
+edge_interp( const GLfloat *p0, DATA_TYPE dat0, const GLfloat *p1,
+             DATA_TYPE dat1, DATA_TYPE val, GLfloat* pint )
+{
+  Vector3D<GLfloat> b   = p1; 
+  Vector3D<GLfloat> e   = b - p0;
+  
+  e       *= 1.- (val-dat0)/(dat1-dat0);
+  b       -= e;
+  pint[0]  = b.X();
+  pint[1]  = b.Y();
+  pint[2]  = b.Z();
+}
+
+
+/** determine the isosurface for a multipoint object
+ *
+ *  A row in a table is determined from the nodes above the threshold value
+ *  Each row is of the form \n
+ *      \#polygon \#sides_poly0 edge0_node0 edge0_node1 edge1_node0
+ *      edge1_ node1 ... edgeN_node1 \#sides_poly1  edge0_node0 ...
+ *      edgeN_node2
+ *
+ * \param dat   data for all the nodes
+ * \param val   value for the isosurface
+ * \param npoly number of polygons
+ *
+ *  \return a list of element pointers
+ *  \post   npoly is the number of elements in the list
+ */
+MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly )
+{
+  // determine row index into table 
+  unsigned int index=0;
+  for( int i=_ptsPerObj-1; i>=0; i-- ) {
+    index <<= 1;
+    if( dat[_node[i]]>val )
+      index += 1;
+  }
+
+  const int* poly        = iso_polys(index);
+  npoly                  = poly[0];// number of polygons to create
+  int       poly_start   = 1;      // first polygon defined after \#polygons
+  MultiPoint **isoele = new MultiPoint *[poly[0]]; //element pointer list
+
+  for( int n=0; n<npoly; n++ ) {
+    int      npts = poly[poly_start];         // \#nodes defining polygon
+    GLfloat *pt   = new GLfloat[npts*3];      // local point list
+    for( int i=0; i<npts; i++ ) {
+      int pindex  = poly_start+1+i*2;
+      edge_interp( (*_pt)[_node[poly[pindex]]], dat[_node[poly[pindex]]],
+                   (*_pt)[_node[poly[pindex+1]]], dat[_node[poly[pindex+1]]],
+                   val, pt+3*i );
+    }
+    Point   *pts = new Point;
+    pts->add( pt, npts );
+
+    switch(poly[poly_start]) {
+        case 1:
+            assert(0);
+            break;
+        case 2:
+            isoele[n] = new Connection( pts );
+            break;
+        case 3: 
+            isoele[n] = new Triangle( pts );
+            break;
+        case  4:
+            isoele[n] = new Quadrilateral( pts );
+            break;
+        default:
+            isoele[n] = new PolyGon( pts, npts );
+            break;
+    }
+    isoele[n]->define( simple_index );
+    poly_start += npts*2+1;
+  }
+  return isoele;
+}
+
+

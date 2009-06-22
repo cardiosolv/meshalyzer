@@ -186,7 +186,7 @@ int Model::add_surface_from_elem( const char *fn )
   gzFile in;
   string fname(fn);
   if ( (in=gzopen( (fname+="elem").c_str(), "r" )) == NULL )
-    if ( (in=gzopen( (fname+=".gz").c_str(), "r" )) == NULL ) {
+    if ((in=gzopen( (fname+=".gz").c_str(), "r" )) == NULL ) {
       return -1;
     }
 

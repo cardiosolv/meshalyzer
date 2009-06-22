@@ -16,12 +16,16 @@
 #include "CutSurfaces.h"
 #include "Interpolator.h"
 #include "plottingwin.h"
+#include "isosurf.h"
+#include "IsoSurface.h"
+#include "IsoLines.h"
 
 class Sequence;
 class HiLiteInfoWin;
 class Controls;
 class DataOpacity;
 class ClipPlane;
+class IsosurfControl;
 
 class TBmeshWin:public Fl_Gl_Tb_Window
 {
@@ -108,6 +112,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     bool      threeD( Object_t o, int r ){ return model->threeD(o,r); }
     void      size( Object_t o, int r, float b ){model->size(o,r,b); redraw();}
     float     size( Object_t o, int r ){ return model->size(o,r); }
+    IsosurfControl *isosurfwin;
   private:
     int        hilight[maxobject];	// which object to highlight
     bool	   hilighton;			// whether to highlight
@@ -140,6 +145,8 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      draw_axes();
     void      draw_clip_plane( int cp );
     void      draw_cut_planes( RRegion * );
+    void      draw_iso_surfaces( RRegion * );
+    void      draw_iso_lines();
     int       max_time();
     GLenum    renderMode;			// mode for drawing
     vector<bool> ptDrawn;			// was a point drawn
@@ -154,6 +161,8 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     bool      facetshading;			// do not blend over surface elements
     bool      headlamp_mode;		// headlamp lighting mode
     CutSurfaces **_cutsurface;      // clipped surfaces
+    IsoSurface *iso0, *iso1;
+    IsoLine    *isoline;
 };
 
 #include "DataOpacity.h"

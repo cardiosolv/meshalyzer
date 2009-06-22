@@ -1,0 +1,120 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cc}
+decl {\#include "TBmeshWin.h"} {public global
+} 
+
+decl {\#include <GL/gl.h>} {public global
+} 
+
+decl {\#include <FL/Fl_Color_chooser.H>} {global
+} 
+
+class IsosurfControl {open
+} {
+  Function {IsosurfControl(TBmeshWin *tb)} {open
+  } {
+    Fl_Window isowin {open
+      xywh {508 78 305 272} type Double hide
+    } {
+      Fl_Group {} {
+        label {Isosurface 0} open
+        xywh {7 12 290 115} box UP_BOX labeltype EMBOSSED_LABEL align 17
+      } {
+        Fl_Button isocol0 {
+          label colour
+          callback {double r=_color0[0], g=_color0[1], b=_color0[2];
+if(fl_color_chooser( "Isosurface 0",r,g,b ) ){
+  _color0[0] = r;
+  _color0[1] = g;
+  _color0[2] = b;
+  mwtb->redraw();
+}}
+          xywh {232 86 55 29}
+        }
+        Fl_Light_Button isoon0 {
+          label on
+          callback {mwtb->redraw();}
+          xywh {25 44 45 28}
+        }
+        Fl_Value_Input isoval0 {
+          label {value:}
+          callback {mwtb->redraw();}
+          xywh {177 44 70 28}
+        }
+        Fl_Value_Slider opacity0 {
+          label {Opacity::}
+          callback {mwtb->redraw();}
+          xywh {77 87 145 25} type Horizontal align 4 textsize 14
+        }
+      }
+      Fl_Group {} {
+        label Isolines open
+        xywh {5 135 290 125} box UP_BOX labeltype EMBOSSED_LABEL labelsize 16 align 17
+      } {
+        Fl_Light_Button isolineOn {
+          label on
+          callback {dirty = true;
+mwtb->redraw();}
+          xywh {20 165 45 30}
+        }
+        Fl_Value_Input isolineVal0 {
+          label {start value:}
+          callback {dirty = true;
+if( isolineOn->value() ) mwtb->redraw();}
+          xywh {220 161 60 29}
+        }
+        Fl_Value_Input isolineVal1 {
+          label {end value:}
+          callback {dirty = true;
+if( isolineOn->value() ) mwtb->redraw();} selected
+          xywh {220 191 60 29}
+        }
+        Fl_Spinner isoNumLines {
+          label {\#lines:}
+          callback {dirty = true;
+if( isolineOn->value() ) mwtb->redraw();}
+          xywh {220 221 60 24} maximum 1000 value 1
+        }
+        Fl_Spinner isolineThick {
+          label thickness
+          callback {dirty = true;
+if( isolineOn->value() ) mwtb->redraw();}
+          xywh {25 221 60 24} align 5 minimum 0 value 1
+        }
+        Fl_Light_Button islDatify {
+          label datified
+          callback {if( isolineOn->value() ) mwtb->redraw();}
+          xywh {75 165 68 30}
+        }
+      }
+    }
+    code {mwtb = tb;
+_color0[0] = _color0[3] = 1.;
+_color0[1] = _color0[2] = 0;
+dirty = 1;} {}
+  }
+  decl {TBmeshWin* mwtb;} {}
+  decl {GLfloat _color0[4];} {}
+  Function {color(int s)} {return_type {const GLfloat*}
+  } {
+    code {if( s==0 ) {
+  _color0[3] = opacity0->value();
+  return _color0;
+}} {}
+  }
+  decl {int isolineT;} {}
+  decl {int isosurfT;} {}
+  decl {bool dirty;} {}
+  Function {isDirty()} {open return_type bool
+  } {
+    code {bool od = dirty;
+dirty = false;
+return od;} {}
+  }
+  Function {thickness()} {open return_type GLfloat
+  } {
+    code {return isolineThick->value();} {}
+  }
+} 

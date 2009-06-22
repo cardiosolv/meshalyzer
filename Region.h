@@ -20,6 +20,7 @@ class RRegion
     void label(int l){ _label=l; }
     int  label(void)const {return _label;}
     vector<bool>* membership(){ return &_member; }
+    vector<bool>& ele_membership(){ return _elemember; }
     inline bool member(int a){ return _member[a]; }
     inline void member(int a, bool b ){ _member[a]=b;}
     int  first(Object_t t){ return startind[t]; }
@@ -36,7 +37,8 @@ class RRegion
     bool    is_visible;
     int    _label;           //!< identifier in file for region
     vector<bool> _member;    //!< whether a node is part of region
-    void    initialize( int, int );
+    vector<bool> _elemember; //!< whether a element is part of region
+    void    initialize( int, int, int );
     float   _size[maxobject+2];
     bool    _3D[maxobject+2];
 };

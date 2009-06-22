@@ -7,7 +7,7 @@ int RRegion_sort( const void *a, const void *b )
   return (*(RRegion **)a)->label() - (*(RRegion **)b)->label();
 }
 
-void RRegion:: initialize( int n, int l )
+void RRegion:: initialize( int n, int nvol, int l )
 {
   is_visible = true;
   _label = l;
@@ -21,6 +21,8 @@ void RRegion:: initialize( int n, int l )
   memset( _3D,      0, maxobject*sizeof(bool) );
   _member.resize(n);
   _member.assign(n,false);
+  _elemember.resize(nvol);
+  _elemember.assign(nvol,false);
   for( int i=0; i<maxobject; i++ ) _size[i] = 1.;
 }
 
@@ -36,11 +38,12 @@ RRegion::RRegion( VolElement **v, int nv, int n, int l )
 {
   startind[Tetrahedron] = -1;
 
-  initialize( n, l );
+  initialize( n, nv, l );
   for ( int j=0; j<nv; j++ ) {
     const int* ele = v[j]->obj();
     for ( int e=0; e<v[j]->num(); e++ )
       if ( v[j]->region(e) == l ) {
+        _elemember[j] = true;
         for ( int i=0; i<v[j]->ptsPerObj(); i++ ) {
           _member[ele[e*v[j]->ptsPerObj()+i]] = true;
         }
@@ -62,11 +65,11 @@ RRegion::RRegion( VolElement **v, int nv, int n, int l )
  *
  * \param n number of points
  * \param l label for region
- * \param b initialial value
+ * \param b initial value
  */
 RRegion::RRegion( int n, int l, bool b )
 {
-  initialize( n, l );
+  initialize( n, 0, l );
   _member.assign(n, b);
 }
 

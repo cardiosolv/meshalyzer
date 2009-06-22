@@ -3,9 +3,9 @@
 const int pyr_num_edge=8;
 static int pyr_edges[pyr_num_edge][2] =
   {
-    {0,1}
-    ,{1,2},{2,3},{3,0},{0,4},{1,4},{2,4},{3,4}
+    {0,1},{1,2},{2,3},{3,0},{0,4},{1,4},{2,4},{3,4}
   };
+static const int pyramid_iso_table[][2] = { {2,3},{3,4} };
 
 /** draw many Pyramids
  *
@@ -189,5 +189,17 @@ Pyramid::cut( char *pd, GLfloat* cp,
               Interpolator<DATA_TYPE>* &interp, int e )
 {
   return planecut( pd, cp, interp, pyr_num_edge, pyr_edges, e );
+}
+
+
+/* return the list of intersection polygons for isosurfaces
+ *
+ *  \param index for each node, the bit is true if the isoval is exceeded
+ *  
+ * \return the row in the table
+ */
+const int* Pyramid::iso_polys(unsigned int index)
+{
+  return pyramid_iso_table[index];
 }
 

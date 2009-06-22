@@ -54,6 +54,7 @@ class Point: public DrawingObj
     const   GLfloat* offset() const { return _offset; }
     void    base1(bool b){ _base1 = b; }
     void     add( GLfloat *, int n=1 );
+    const GLfloat* operator[] (int i){ return _pts+3*i; }
   private:
     GLfloat*     _pts;		  //!< point list
     vector<bool>*_visible;    //!< points which get drawn
@@ -66,30 +67,36 @@ class Point: public DrawingObj
 class MultiPoint : public DrawingObj
 {
   public:
-    MultiPoint( Point *p, int n ):_pt(p),_ptsPerObj(n),_node(NULL){}
+    MultiPoint( Point *p, int n, int e ):_pt(p),_ptsPerObj(n),_node(NULL),
+                                 _nedge(e){}
     ~MultiPoint(){ if ( _n ) delete[] _node; }
-  const int* obj( int n=0 ) { return _node+n*_ptsPerObj; }
-    int   ptsPerObj(){ return _ptsPerObj; }
-    void  register_vertices(int, int, vector<bool>& );
-    void  add( int *n );
-  const Point* pt(){ return _pt; }
-    void  define( int *nl, int n=1 );
+    const int* obj( int n=0 ) { return _node+n*_ptsPerObj; }
+    int     ptsPerObj(){ return _ptsPerObj; }
+    void    register_vertices(int, int, vector<bool>& );
+    void    add( int *n );
+    const   Point* pt(){ return _pt; }
+    void    define( const int *nl, int n=1 );
+    MultiPoint **isosurf( DATA_TYPE *d, DATA_TYPE val, int & );
+    virtual const int*iso_polys(unsigned int)=0; 
   protected:
     int *  _node;			//!< list of nodes defining objects
     Point* _pt;             //!< pointer to point list
     int    _ptsPerObj;		//!< \#nodes to define one object
+    int    _nedge;          //!< \#edges
 };
 
 
 class Connection : public MultiPoint
 {
   public:
-    Connection(Point *p):MultiPoint(p,2) {}
+    Connection(Point *p):MultiPoint(p,2,1) {}
     void add( int, int );	//!< add a connection
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
+    virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){}
     virtual bool     read( const char * );
+    const int *iso_polys(unsigned int index){return NULL;}
 };
 
 
@@ -97,7 +104,7 @@ class Connection : public MultiPoint
 class ContCable : public MultiPoint
 {
   public:
-    ContCable(Point *p):MultiPoint(p,1) {}
+    ContCable(Point *p):MultiPoint(p,1,1) {}
     const int* obj( int n=0 ) { return _node+n; }
     void add( int, int );
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -105,13 +112,15 @@ class ContCable : public MultiPoint
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
     void             register_vertices( int, int, vector<bool>& );
+    const int *iso_polys(unsigned int index){return NULL;}
 };
 
 
+// closed convex polygons
 class SurfaceElement : public MultiPoint
 {
   public:
-    SurfaceElement(Point *p, int n):MultiPoint(p,n),_nrml(NULL) {}
+    SurfaceElement(Point *p, int n):MultiPoint(p,n,n),_nrml(NULL) {}
     virtual void     compute_normals( int, int )=0;
     const   void     nrml( GLfloat *n ){ _nrml=n; };
   inline  const   GLfloat* nrml( int a=0 ) {return _nrml==NULL?NULL:_nrml+3*a; }
@@ -131,12 +140,14 @@ class PolyGon : public SurfaceElement
   public:
     PolyGon( Point *p, int n ):SurfaceElement(p,n) {}
     virtual void compute_normals( int a, int b );
-    virtual void     draw( int, GLfloat*, float size=1 );
-    virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
+    virtual void draw( int, GLfloat*, float size=1 );
+    virtual void draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride, dataOpac* dopac, const GLfloat * );
-    virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
+    virtual void draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
-    virtual bool     read( const char * ){}};
+    virtual bool read( const char * ){}
+    const int* iso_polys(unsigned int index){return NULL;}
+};
 
 
 class Triangle : public SurfaceElement
@@ -150,7 +161,9 @@ class Triangle : public SurfaceElement
                            int stride, dataOpac* dopac, const GLfloat *);
     virtual bool     read( const char * );
     virtual void     compute_normals( int, int );
+    virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){}
     bool     add( const char * );
+    const int*       iso_polys(unsigned int);
   protected:
     int         countInFile( const char * );
 };
@@ -168,6 +181,7 @@ class Quadrilateral : public SurfaceElement
     virtual bool     read( const char * );
     virtual void     compute_normals( int, int );
     bool     add( const char * );
+    const int*       iso_polys(unsigned int);
   protected:
     int         countTrisInFile( const char * );
 };
@@ -177,7 +191,7 @@ class Quadrilateral : public SurfaceElement
 class VolElement : public MultiPoint
 {
   public:
-    VolElement( Point *p, int n ):MultiPoint( p, n ) {}
+    VolElement( Point *p, int n, int e ):MultiPoint( p, n, e ) {}
     const   int* region() const { return _region; }
     int  region(int a) const { return _region[a]; }
     void region(int a, int b) { _region[a] = b; }
@@ -194,50 +208,53 @@ class VolElement : public MultiPoint
 class Tetrahedral : public VolElement
 {
   public:
-    Tetrahedral(Point *p ): VolElement(p,4) {}
+    Tetrahedral(Point *p ): VolElement(p,4,6) {}
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
     virtual void     draw_out_face( int );
-    virtual SurfaceElement* cut( char*, GLfloat* cp, Interpolator<DATA_TYPE>*&,int=0);
+    virtual SurfaceElement* cut(char*,GLfloat*,Interpolator<DATA_TYPE>*&,int=0);
+    const int* iso_polys( unsigned int );
 };
 
 class Prism : public VolElement
 {
   public:
-    Prism(Point *p ): VolElement(p,6) {}
+    Prism(Point *p ): VolElement(p,6,9) {}
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
     virtual void draw_out_face( int );
-    virtual SurfaceElement* cut( char *pd, GLfloat* cp, Interpolator<DATA_TYPE>*&,int );
+    virtual SurfaceElement* cut(char *,GLfloat*,Interpolator<DATA_TYPE>*&,int);
+    const   int*     iso_polys(unsigned int);
 };
 
 
 class Hexahedron : public VolElement
 {
   public:
-    Hexahedron(Point *p ): VolElement(p,8) {}
+    Hexahedron(Point *p ): VolElement(p,8,12) {}
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
     virtual void draw_out_face( int );
-    virtual SurfaceElement* cut( char * pd, GLfloat* cp, Interpolator<DATA_TYPE>*&,int );
+    virtual SurfaceElement* cut(char *,GLfloat*,Interpolator<DATA_TYPE>*&,int);
+    const int* iso_polys( unsigned int );
 };
 
 class Pyramid : public VolElement
 {
   public:
-    Pyramid(Point *p ): VolElement(p,5) {}
+    Pyramid(Point *p ): VolElement(p,5,8) {}
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
     virtual void     draw_out_face( int );
-    virtual SurfaceElement* cut( char* pd, GLfloat* cp, Interpolator<DATA_TYPE>*&,int );
+    virtual SurfaceElement* cut(char*, GLfloat*, Interpolator<DATA_TYPE>*&,int);
+    const int* iso_polys( unsigned int );
 };
-
 #endif

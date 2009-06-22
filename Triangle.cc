@@ -1,5 +1,9 @@
 #include "DrawingObjects.h"
 
+static const int tri_iso_table[][6] = { 
+  {0,0,0,0,0,0},{1,2,0,1,0,2},{1,2,1,0,1,2},{1,2,1,2,0,2},
+  {1,2,2,0,2,1},{1,2,0,1,2,1},{1,2,0,1,0,2},{0,0,0,0,0,0} };
+
 /** draw many Triangles
  *
  *  \param p0       first index of point to draw
@@ -249,3 +253,9 @@ void Triangle::compute_normals(int e0, int e1)
   }
 }
 
+
+
+const int* Triangle::iso_polys(unsigned int index)
+{
+  return tri_iso_table[index];
+}

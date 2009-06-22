@@ -3,9 +3,9 @@
 const int prism_num_edge=9;
 const int prism_edges[prism_num_edge][2] =
   {
-    {0,1}
-    ,{1,2},{2,0},{0,3},{1,5},{2,4},{3,4},{4,5},{5,3}
+    {0,1},{1,2},{2,0},{0,3},{1,5},{2,4},{3,4},{4,5},{5,3}
   };
+const int prism_iso_table[][3] = { {1,2,3},{2,3,4} };
 
 /** draw many Prisms
  *
@@ -217,3 +217,9 @@ Prism::cut( char* pd, GLfloat* cp,
   return planecut( pd, cp, interp, prism_num_edge, prism_edges, e );
 }
 
+
+const int* 
+Prism::iso_polys(unsigned int index)
+{
+  return prism_iso_table[index];
+}

@@ -1,5 +1,7 @@
 #include "DrawingObjects.h"
 
+static int quad_iso_table[][3] = {{1,2,3}};
+
 /** draw many Quadrilaterals
  *
  *  \param p0       first index of point to draw
@@ -172,3 +174,10 @@ void Quadrilateral::compute_normals(int e0, int e1)
   }
 }
 
+
+
+const int* 
+Quadrilateral::iso_polys(unsigned int index)
+{
+  return quad_iso_table[index];
+}

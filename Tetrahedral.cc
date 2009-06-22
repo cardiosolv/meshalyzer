@@ -3,9 +3,9 @@
 const int tet_num_edge=6;
 static int tet_edges[tet_num_edge][2] =
   {
-    {0,1}
-    ,{1,2},{2,0},{0,3},{1,3},{2,3}
+    {0,1},{1,2},{2,0},{0,3},{1,3},{2,3}
   };
+static int tetra_iso_table[][4] = { {0,1,2,3} };
 
 
 /** draw many Tetrahedrals
@@ -158,3 +158,9 @@ Tetrahedral::cut( char *pd, GLfloat* cp,
   return planecut( pd, cp, interp, tet_num_edge, tet_edges, e );
 }
 
+
+const int*
+Tetrahedral::iso_polys(unsigned int index)
+{
+  return tetra_iso_table[index];
+}

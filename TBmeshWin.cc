@@ -132,7 +132,8 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     dataBuffer(NULL), timeplotter(new PlotWin("Time series")),
     timevec(NULL), recording(false), dump_vert_list(false),
     disp(asSurface),data(NULL),facetshading(false),numframes(0),
-    headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] )
+    headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] ),
+    iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL)
 {
   model = new Model(cs,dataopac);
   memset( hilight, 0, sizeof(int)*maxobject );
@@ -275,6 +276,7 @@ void TBmeshWin :: draw()
       if ( reg->show(Vertex) )
         draw_vertices(reg);
 
+      draw_iso_surfaces( reg );
       draw_cut_planes( reg );
     }
   }
@@ -298,6 +300,7 @@ void TBmeshWin :: draw()
       draw_elements(sf);
     }
   }
+  draw_iso_lines();
 
   if ( hilighton ) {
     // draw highlighted tetrahedron
@@ -371,6 +374,25 @@ void TBmeshWin :: draw()
   if ( vecdata != NULL ) vecdata->draw(tm,model->maxdim());
 
   glPopMatrix();
+}
+
+
+// draw_iso_surfaces()
+void TBmeshWin::draw_iso_surfaces( RRegion *reg )
+{
+  if( have_data == NoData ) return;
+
+  if( isosurfwin->isoon0->value() ) {
+    if( iso0!=NULL && isosurfwin->isoval0->value()!=iso0->isoval() ) {
+      delete iso0;
+      iso0 = NULL;
+    }
+    if( iso0==NULL ) 
+      iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
+                                                      reg->ele_membership() );
+    iso0->color( isosurfwin->color(0) );
+    iso0->draw();
+  } 
 }
 
 
@@ -1458,9 +1480,8 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
         }
 
         _cutsurface[i]->ele(e)->draw( 0, 0, elecol, cs, showData?idata:NULL,
-                                      1, dataopac->dop+Surface, facetshading?NULL:n );
+                              1, dataopac->dop+Surface, facetshading?NULL:n );
       }
-
       glEnable( CLIP_PLANE[i] );
     }
   }
@@ -1520,3 +1541,26 @@ TBmeshWin :: determine_cutplane( int cp )
   }
 }
 
+
+/** draw isovalue lines
+ *
+ *  we check if the values in the widget have changed so that we do not
+ *  recompute lines needlessly
+ */
+void
+TBmeshWin::draw_iso_lines()
+{
+  IsosurfControl *isc = isosurfwin;
+
+  if( have_data==NoData || !isc->isolineOn->value() )
+    return;
+
+  if( isc->isDirty() || tm!=isoline->tm() ){
+    delete isoline;
+    isoline=new IsoLine( isc->isolineVal0->value(), isc->isolineVal1->value(),
+             isc->isoNumLines->value(), tm );
+    for ( int s=0; s<model->numSurf(); s++ ) 
+      isoline->process( model->surface(s), data );
+  }
+  isoline->draw(NULL,isc->thickness());
+}
