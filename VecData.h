@@ -80,18 +80,19 @@ T magnitude( const T* a )
 
 
 template<class T>
+T mag2( const T* a )
+{
+  return a[0]*a[0] + a[1]*a[1] + a[2]*a[2];
+}
+
+
+template<class T>
 T* normalize( T* a )
 {
   T mag = magnitude(a);
   for ( int i=0; i<3; i++ )
     a[i] /= mag;
   return a;
-}
-
-template<class T>
-T mag2( const T* a )
-{
-  return a[0]*a[0] + a[1]*a[1] + a[2]*a[2];
 }
 
 

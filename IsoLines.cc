@@ -18,6 +18,28 @@ IsoLine :: process( Surfaces *s, DATA_TYPE *dat )
   return num_lines;
 }
 
+int 
+IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
+{
+  int num_lines=0;
+  for( int i=0; i<_nl; i++ ){
+    double val = _nl==1? _v0: _v0 + i*(_v1-_v0)/(float)(_nl-1.);
+
+    for( int j=0; j<s->num(); j++ ) {
+
+      DATA_TYPE idata[s->ele(j)->ptsPerObj()];
+        for ( int v=0; v<s->ele(j)->ptsPerObj(); v++ )
+          idata[v] = s->interpolate( j, dat, v );
+      int npoly;
+      MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly );
+      for( int j=0; j<npoly; j++ ) {
+        _polygon.push_back(lpoly[j]);
+        num_lines++;
+      }
+    }
+  }
+  return num_lines;
+}
 
 IsoLine::~IsoLine()
 {

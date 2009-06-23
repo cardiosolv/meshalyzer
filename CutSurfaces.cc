@@ -20,7 +20,7 @@ CutSurfaces::CutSurfaces() : _norm(NULL),_ptarr(NULL), _interp(NULL)
  *
  *  \pre each element pointer points to a single element and not a list
  *
- *  \note points are not shred between elements
+ *  \note points are not shared between elements
  */
 void
 CutSurfaces :: addEle( SurfaceElement *se, GLfloat *n, Interpolator<DATA_TYPE> *ni )

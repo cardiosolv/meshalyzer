@@ -3,7 +3,7 @@
 
 #include "Model.h"
 #include "DrawingObjects.h"
-#include "Surfaces.h"
+#include "CutSurfaces.h"
 #include <vector>
 
 class IsoLine {
@@ -12,6 +12,7 @@ class IsoLine {
                _t(t) {_color[0]=_color[1]=_color[2]=0;_color[3]=1.;}
         ~IsoLine();
         int process( Surfaces *, DATA_TYPE * );
+        int process( CutSurfaces *, DATA_TYPE * );
         int nl(){ return _nl; }
         int v0(){ return _v0; }
         int v1(){ return _v1; }

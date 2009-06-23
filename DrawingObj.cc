@@ -220,11 +220,11 @@ VolElement::planecut( char *pd, GLfloat* cp,
   //find an arbitrary point on the plane
   GLfloat ptOnPlane[3] = {1,1,1};
   if ( cp[0] )
-    ptOnPlane[0] = -(cp[3]+cp[1]*cp[2])/cp[0];
+    ptOnPlane[0] = -(cp[3]+cp[1]+cp[2])/cp[0];
   else if ( cp[1] )
-    ptOnPlane[1] = -(cp[3]+cp[2]*cp[0])/cp[1];
+    ptOnPlane[1] = -(cp[3]+cp[2]+cp[0])/cp[1];
   else
-    ptOnPlane[2] = -(cp[3]+cp[0]*cp[1])/cp[2];
+    ptOnPlane[2] = -(cp[3]+cp[0]+cp[1])/cp[2];
 
   // get intersections and centroid of intersections of plane with edges
   GLfloat intersect[6*numedge];

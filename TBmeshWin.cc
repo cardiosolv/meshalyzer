@@ -1562,6 +1562,10 @@ TBmeshWin::draw_iso_lines()
     for ( int s=0; s<model->numSurf(); s++ ) 
       isoline->process( model->surface(s), data );
   }
+  for( int i=0; i<NUM_CP; i++ )
+    if( _cutsurface[i] != NULL )
+      isoline->process( _cutsurface[i], data );
+
   isoline->color( isc->islColor() );
   isoline->draw(NULL,isc->islThickness());
 }
