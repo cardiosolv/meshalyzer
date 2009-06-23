@@ -299,6 +299,8 @@ VolElement::planecut( char *pd, GLfloat* cp,
   SurfaceElement *se;
   if ( num_int==3 )
     se = new Triangle( pt );
+  else if( num_int==4 )
+    se = new Quadrilateral( pt );
   else
     se = new PolyGon( pt, num_int );
   int nl[num_int];

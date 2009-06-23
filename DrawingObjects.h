@@ -146,7 +146,8 @@ class PolyGon : public SurfaceElement
     virtual void draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool read( const char * ){}
-    const int* iso_polys(unsigned int index){return NULL;}
+    const int* iso_polys(unsigned int index){return &_zero;}
+	static const int  _zero=0;
 };
 
 

@@ -21,6 +21,7 @@ class IsoLine {
 		void color( const GLfloat* c ){memcpy(_color,c,4*sizeof(GLfloat));}
     private:
         vector<MultiPoint *> _polygon;
+        vector<float>        _val;
         GLfloat               _color[4];
         double                _v0, _v1;
         int                   _nl;

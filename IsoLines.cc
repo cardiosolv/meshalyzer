@@ -10,6 +10,7 @@ IsoLine :: process( Surfaces *s, DATA_TYPE *dat )
       int npoly;
       MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly );
       for( int j=0; j<npoly; j++ ) {
+		_val.push_back(val);
         _polygon.push_back(lpoly[j]);
         num_lines++;
       }
@@ -34,6 +35,7 @@ IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
       MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly );
       for( int j=0; j<npoly; j++ ) {
         _polygon.push_back(lpoly[j]);
+		_val.push_back(val);
         num_lines++;
       }
     }
@@ -51,8 +53,13 @@ IsoLine::~IsoLine()
 
 void IsoLine::draw( Colourscale *cs, GLfloat size )
 {
-  for( int i=0; i<_polygon.size(); i++ ) {
-    _polygon[i]->draw(0, _color, size );
+  if( cs==NULL )
+    for( int i=0; i<_polygon.size(); i++ ) {
+      _polygon[i]->draw(0, _color, size );
+  } else {
+    for( int i=0; i<_polygon.size(); i++ ) {
+      _polygon[i]->draw( 0, cs->colorvec(_val[i]), size );
+	}
   }
 }
 

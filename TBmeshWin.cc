@@ -1452,6 +1452,8 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   glPushAttrib( GL_POLYGON_BIT );
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   glDisable(GL_BLEND);
+  glShadeModel(GL_SMOOTH);
+  glEnable( GL_POLYGON_SMOOTH );
 
   bool showData=true;
   if ( (datadst!=Surface && datadst!=All) || have_data==NoData )
@@ -1560,12 +1562,14 @@ TBmeshWin::draw_iso_lines()
     isoline=new IsoLine( isc->isolineVal0->value(), isc->isolineVal1->value(),
              isc->isoNumLines->value(), tm );
     for ( int s=0; s<model->numSurf(); s++ ) 
-      isoline->process( model->surface(s), data );
+	  isoline->process( model->surface(s), data );
   }
   for( int i=0; i<NUM_CP; i++ )
-    if( _cutsurface[i] != NULL )
-      isoline->process( _cutsurface[i], data );
+	if( _cutsurface[i] != NULL ){
+	  isoline->process( _cutsurface[i], data );
+	}
 
   isoline->color( isc->islColor() );
-  isoline->draw(NULL,isc->islThickness());
+  isoline->draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
+
 }
