@@ -321,14 +321,10 @@ void
 edge_interp( const GLfloat *p0, DATA_TYPE dat0, const GLfloat *p1,
              DATA_TYPE dat1, DATA_TYPE val, GLfloat* pint )
 {
-  Vector3D<GLfloat> b   = p1; 
-  Vector3D<GLfloat> e   = b - p0;
-  
-  e       *= 1.- (val-dat0)/(dat1-dat0);
-  b       -= e;
-  pint[0]  = b.X();
-  pint[1]  = b.Y();
-  pint[2]  = b.Z();
+  GLfloat edge[3];
+  sub( p1, p0, edge );
+  float d = (val-dat0)/(dat1-dat0);
+  add( p0, scale( edge, d ), pint );
 }
 
 
@@ -374,6 +370,7 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly )
     Point   *pts = new Point;
     pts->add( pt, npts );
     pts->setVis(true);
+    pts->offset(_pt->offset());
 
     switch(poly[poly_start]) {
         case 1:

@@ -1,7 +1,7 @@
 #include "IsoSurface.h"
 
-IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v, vector<bool>&member)
-:_val(v)
+IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v, vector<bool>&member,
+		int t):_val(v),_tm(t)
 {
   for( int i=0; i<m->numVol(); i++ ) {
     if( member[i] ) {

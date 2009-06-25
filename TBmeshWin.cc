@@ -382,14 +382,14 @@ void TBmeshWin::draw_iso_surfaces( RRegion *reg )
 {
   if( have_data == NoData ) return;
 
-  if( isosurfwin->isoon0->value() ) {
-    if( reg->_iso0 && isosurfwin->isoval0->value()!=reg->_iso0->isoval() ){
+  if( isosurfwin->isoOn0->value() ) {
+    if( !iso0 || isosurfwin->issDirty() || iso0->tm() != tm ){
       delete iso0;
       reg->_iso0 = NULL;
     }
     if( reg->_iso0==NULL ) 
       reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
-                                                  reg->ele_membership() );
+                                                  reg->ele_membership(), tm );
     reg->_iso0->color( isosurfwin->color(0) );
     reg->_iso0->draw();
   } 
@@ -1571,5 +1571,4 @@ TBmeshWin::draw_iso_lines()
 
   isoline->color( isc->islColor() );
   isoline->draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
-
 }
