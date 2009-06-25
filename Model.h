@@ -84,6 +84,7 @@ class Model
     int              add_surface_from_elem( const char *fn );
     vector<bool>     allvis;
     int             _numtm;
+    int              new_region_label();
 };
 
 #endif

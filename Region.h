@@ -2,14 +2,16 @@
 #define REGION_H
 
 #include <stdio.h>
-#include<FL/gl.h>
+#include <FL/gl.h>
 #include <vector>
 #include "DrawingObjects.h"
+
+class IsoSurface;
 
 class RRegion
 {
   public:
-    RRegion(int n, int l=0, bool b=true );
+    RRegion(int n, int nv=0, int l=0, bool b=true );
     RRegion(VolElement **, int, int n, int l );
     GLfloat* get_color( Object_t obj ){ return color[obj]; }
     void set_color(Object_t, float r, float g, float b, float a=1);
@@ -19,16 +21,19 @@ class RRegion
     void show( Object_t obj, bool a ){ showobj[obj] = a; }
     void label(int l){ _label=l; }
     int  label(void)const {return _label;}
-    vector<bool>* membership(){ return &_member; }
+    vector<bool>& pt_membership(){ return _member; }
     vector<bool>& ele_membership(){ return _elemember; }
-    inline bool member(int a){ return _member[a]; }
-    inline void member(int a, bool b ){ _member[a]=b;}
+    inline bool pt_member(int a){ return _member[a]; }
+    inline void pt_member(int a, bool b ){ _member[a]=b;}
+    inline bool ele_member(int a){ return _elemember[a]; }
+    void ele_member(VolElement **, int, bool );
     int  first(Object_t t){ return startind[t]; }
     void first(Object_t t, int a){ startind[t]=a; }
     int  size(Object_t t){ return _size[t]; }
     void size(Object_t t, int a){ _size[t]=a; }
     bool threeD(Object_t t){ return _3D[t]; }
     void threeD(Object_t t, int a){ _3D[t]=a; }
+    IsoSurface* _iso0;
   private:
     GLfloat color[maxobject+2][4];
     int     startind[maxobject+2];

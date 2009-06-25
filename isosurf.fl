@@ -2,7 +2,7 @@
 version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "TBmeshWin.h"} {public global
+decl {\#include "TBmeshWin.h"} {selected public global
 } 
 
 decl {\#include <GL/gl.h>} {public global
@@ -17,7 +17,7 @@ class IsosurfControl {open
   Function {IsosurfControl(TBmeshWin *tb)} {open
   } {
     Fl_Window isowin {open
-      xywh {746 82 305 270} type Double visible
+      xywh {746 82 305 270} type Double hide
     } {
       Fl_Group {} {
         label {Isosurface 0} open
@@ -47,7 +47,7 @@ if(fl_color_chooser( "Isosurface 0",r,g,b ) ){
         Fl_Value_Slider opacity0 {
           label {Opacity::}
           callback {mwtb->redraw();}
-          xywh {77 87 145 25} type Horizontal align 4 textsize 14
+          xywh {77 87 145 25} type Horizontal align 4 value 1 textsize 14
         }
       }
       Fl_Group {} {
@@ -75,12 +75,12 @@ if( isolineOn->value() ) mwtb->redraw();}
           label {\#lines:}
           callback {_islDirty = true;
 if( isolineOn->value() ) mwtb->redraw();}
-          xywh {220 221 60 24}
+          xywh {220 221 60 24} value 1
         }
         Fl_Spinner isolineThick {
           label thickness
           callback {if( isolineOn->value() ) mwtb->redraw();}
-          xywh {25 221 60 24} align 5 minimum 0
+          xywh {25 221 60 24} align 5 minimum 0 value 1
         }
         Fl_Light_Button islDatify {
           label datified
@@ -139,7 +139,6 @@ return od;} {}
     code {_islColor[0] = r;
 _islColor[1] = g;
 _islColor[2] = b;
-_islColor[3] = a;} {selected
-    }
+_islColor[3] = a;} {}
   }
 } 

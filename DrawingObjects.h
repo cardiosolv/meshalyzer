@@ -52,6 +52,7 @@ class Point: public DrawingObj
     bool     vis( int n, bool b ) const { (*_visible)[n]=b; }
     const vector<bool>* vis() const { return _visible; }
     const   GLfloat* offset() const { return _offset; }
+    void    offset( const GLfloat*o )  { memcpy(_offset,o,sizeof(GLfloat)*3); }
     void    base1(bool b){ _base1 = b; }
     void     add( GLfloat *, int n=1 );
     const GLfloat* operator[] (int i){ return _pts+3*i; }
@@ -146,8 +147,8 @@ class PolyGon : public SurfaceElement
     virtual void draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool read( const char * ){}
+	static const int  _zero;
     const int* iso_polys(unsigned int index){return &_zero;}
-	static const int  _zero=0;
 };
 
 

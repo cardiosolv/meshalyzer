@@ -1,5 +1,7 @@
 #include "DrawingObjects.h"
 
+const int PolyGon::_zero=0;
+
 /** draw many Triangles
  *
  *  \param p0       first index of point to draw

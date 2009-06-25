@@ -7,6 +7,23 @@
 #include "VecData.h"
 
 
+/** return a new unique region label
+ */
+int Model::new_region_label()
+{
+  int  r, newlabel=0; 
+  while ( true ) {
+    for ( r=0; r<_numReg; r++ )
+      if ( _region[r]->label() == newlabel )
+        break;
+    if ( r==_numReg )
+      break;
+    newlabel++;
+  }
+  return newlabel;
+}
+
+
 Model::Model(Colourscale *cs, DataOpacity *dopac ):
     _cs(cs),_dataopac(dopac),_base1(false),
     _surface(NULL), _vertnrml(NULL),
@@ -109,28 +126,36 @@ void Model::determine_regions()
     }
   }
 
+  // make sure all elements are included
+  vector<bool> hasEleRegion(_numVol,false);
+  for ( int r=0; r<_numReg; r++ )
+    for ( int i=0; i<_numVol; i++ )
+      hasEleRegion[i] = hasEleRegion[i] || _region[r]->ele_member(i);
+  for ( int i=0; i<_numVol; i++ )
+    if ( !hasEleRegion[i] ) { // point without a region detected
+      _region = (RRegion**)realloc( _region, sizeof(RRegion)*(_numReg+1) );
+      _region[_numReg] = new RRegion( 
+                             _vol, _numVol, pt.num(), new_region_label() );
+      _numReg++;
+      for ( int i=0; i<_numVol; i++ )
+        if ( !hasEleRegion[i] ) _region[_numReg-1]->ele_member( _vol, i, true );
+     break;
+    }
+
   // make sure that all points are included
-  vector<bool> hasregion(pt.num(),false);
+  vector<bool> hasPtRegion(pt.num(),false);
   for ( int r=0; r<_numReg; r++ )
     for ( int i=0; i<pt.num(); i++ )
-      hasregion[i] = hasregion[i] | _region[r]->member(i);
+      hasPtRegion[i] = hasPtRegion[i] || _region[r]->pt_member(i);
 
   for ( int i=0; i<pt.num(); i++ )
-    if ( !hasregion[i] ) { // point without a region detected
-      int  r, newlabel=0;  // must create a unique region number
-      while ( true ) {
-        for ( r=0; r<_numReg; r++ )
-          if ( _region[r]->label() == newlabel )
-            break;;
-        if ( r==_numReg )
-          break;
-        newlabel++;
-      }
+    if ( !hasPtRegion[i] ) { // point without a region detected
+      _region = (RRegion**)realloc( _region, sizeof(RRegion)*(_numReg+1) );
+      _region[_numReg] = new RRegion( pt.num(), _numVol, 
+                                            new_region_label(), false );
       _numReg++;
-      _region = (RRegion**)realloc( _region, sizeof(RRegion)*_numReg );
-      _region[_numReg-1] = new RRegion( pt.num(), newlabel, false );
       for ( int i=0; i<pt.num(); i++ )
-        if ( !hasregion[i] ) _region[_numReg-1]->member( i, true );
+        if ( !hasPtRegion[i] ) _region[_numReg-1]->pt_member( i, true );
       break;
     }
 
@@ -148,7 +173,7 @@ void Model::determine_regions()
         const int *o = _cable->obj(i);
         int  c;
         for ( c=o[0]; c<o[1]; c++ )
-          if ( _region[i]->member(c) == true ) {
+          if ( _region[i]->pt_member(c) == true ) {
             _region[r]->first(Cable,i);
             break;
           }
@@ -163,7 +188,7 @@ void Model::determine_regions()
     for ( int r=0; r<_numReg; r++ ) {
       for ( int i=0; i<_cnnx->num(); i++ ) {
         const int *o = _cnnx->obj(i);
-        if ( _region[r]->member(o[0])==true||_region[r]->member(o[1])==true ) {
+        if ( _region[r]->pt_member(o[0])==true||_region[r]->pt_member(o[1])==true ) {
           _region[r]->first(Cnnx,i);
           break;
         }
@@ -677,7 +702,7 @@ void Model::read_region_file( gzFile in, const char *fnb )
       sscanf( buff, "%d %d %d", &firstpt, &lastpt, &label );
       _region[i] = new RRegion( pt.num(), label, false );
       for ( int e=firstpt; e<=lastpt; e++ )
-        _region[i]->member(e,true);
+        _region[i]->pt_member(e,true);
     }
     gzclose(in);
   }

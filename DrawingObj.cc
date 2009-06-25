@@ -12,18 +12,20 @@ static const int simple_index[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13};
  *  \param a  first point of line
  *  \param b  second point of line
  *  \param pc coefficients describing plane: ax+by+cz+d=0
- *  \param pp point on plane
  *  \param ip intersection point
  *
- *  \return where along a,b the intersection occurs
+ *  \return fraction along a,b the intersection occurs
  */
 float find_line_plane_intersect( const GLfloat* a, const GLfloat* b,
-                             const GLfloat* pc, const GLfloat* pp, GLfloat* ip )
+                             const GLfloat* pc, GLfloat* ip )
 {
-  Vector3D<GLfloat>  ppv(pp), p0(a), p1(b);
-  GLfloat tmp1[3];
-  float t = (ppv-p0).Dot(pc)/(p1-p0).Dot(pc);
-  add( p0.e,((p1-p0)*t).e, ip );
+  float d1 = fabs(dot( a, pc )+pc[3]);
+  float d2 = fabs(dot( b, pc )+pc[3]);
+  float t  = d1/(d1+d2);
+
+  GLfloat v[3];
+  add( a, scale( sub(b,a,v), t ), ip );
+
   if ( t<0 || t>1 ) {
     if ( isinf(t) )
       throw BOTH_ON_PLANE;
@@ -217,15 +219,6 @@ VolElement::planecut( char *pd, GLfloat* cp,
       break;
   if ( p==_ptsPerObj ) return NULL;
 
-  //find an arbitrary point on the plane
-  GLfloat ptOnPlane[3] = {1,1,1};
-  if ( cp[0] )
-    ptOnPlane[0] = -(cp[3]+cp[1]+cp[2])/cp[0];
-  else if ( cp[1] )
-    ptOnPlane[1] = -(cp[3]+cp[2]+cp[0])/cp[1];
-  else
-    ptOnPlane[2] = -(cp[3]+cp[0]+cp[1])/cp[2];
-
   // get intersections and centroid of intersections of plane with edges
   GLfloat intersect[6*numedge];
   float   d[2*_ptsPerObj];
@@ -238,7 +231,7 @@ VolElement::planecut( char *pd, GLfloat* cp,
       inode[2*num_int+1] = _node[edges[i][1]];
       try {
         d[num_int] = find_line_plane_intersect(_pt->pt(_node[edges[i][0]]),
-             _pt->pt(_node[edges[i][1]]), cp, ptOnPlane, intersect+3*num_int );
+             _pt->pt(_node[edges[i][1]]), cp, intersect+3*num_int );
       } catch ( lpint_enum raison ) {
         if ( raison==BOTH_ON_PLANE ) {		// add both points
           d[num_int] = d[num_int+1] = 1;
@@ -296,6 +289,7 @@ VolElement::planecut( char *pd, GLfloat* cp,
   Point *pt = new Point;
   pt->add( intersect, num_int );
   pt->setVis( true );
+  pt->offset( _pt->offset() );
   SurfaceElement *se;
   if ( num_int==3 )
     se = new Triangle( pt );
@@ -379,6 +373,7 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly )
     }
     Point   *pts = new Point;
     pts->add( pt, npts );
+    pts->setVis(true);
 
     switch(poly[poly_start]) {
         case 1:

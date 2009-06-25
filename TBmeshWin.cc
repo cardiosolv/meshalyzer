@@ -240,7 +240,7 @@ void TBmeshWin :: draw()
 
       if ( !model->region(r)->visible() ) continue;
 
-      model->pt.setVis(model->region(r)->membership());
+      model->pt.setVis(&model->region(r)->pt_membership());
 
       for ( int i=0; i<model->numVol(); i++ )
         model->_vol[i]->draw( 0, model->_vol[i]->num()-1,
@@ -267,7 +267,7 @@ void TBmeshWin :: draw()
 
       if ( !reg->visible() ) continue;
 
-      model->pt.setVis(reg->membership());
+      model->pt.setVis(&reg->pt_membership());
 
       if ( reg->show(Cable) && model->_cable->num() )
         draw_cables(reg);
@@ -383,15 +383,15 @@ void TBmeshWin::draw_iso_surfaces( RRegion *reg )
   if( have_data == NoData ) return;
 
   if( isosurfwin->isoon0->value() ) {
-    if( iso0!=NULL && isosurfwin->isoval0->value()!=iso0->isoval() ) {
+    if( reg->_iso0 && isosurfwin->isoval0->value()!=reg->_iso0->isoval() ){
       delete iso0;
-      iso0 = NULL;
+      reg->_iso0 = NULL;
     }
-    if( iso0==NULL ) 
-      iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
-                                                      reg->ele_membership() );
-    iso0->color( isosurfwin->color(0) );
-    iso0->draw();
+    if( reg->_iso0==NULL ) 
+      reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
+                                                  reg->ele_membership() );
+    reg->_iso0->color( isosurfwin->color(0) );
+    reg->_iso0->draw();
   } 
 }
 
@@ -1522,9 +1522,9 @@ TBmeshWin :: determine_cutplane( int cp )
   // first determine which points belong to visible regions
   for ( int r=0; r<model->_numReg; r++ ) {
     if ( !model->region(r)->visible() ) continue;
-    vector<bool>* memb = model->region(r)->membership();
+    vector<bool>& memb = model->region(r)->pt_membership();
     for ( int i=0; i<model->pt.num(); i++ )
-      if ( (*memb)[i] ) cpvis[i]=true;
+      if ( memb[i] ) cpvis[i]=true;
   }
 
   // determine the points clipped by the plane

@@ -11,6 +11,7 @@ void RRegion:: initialize( int n, int nvol, int l )
 {
   is_visible = true;
   _label = l;
+  _iso0 = NULL;
   set_color( Vertex, 0., 1., 0. );
   set_color( Cable, 0., 0., 1. );
   set_color( Cnnx, 1., 0., 1. );
@@ -45,7 +46,8 @@ RRegion::RRegion( VolElement **v, int nv, int n, int l )
       if ( v[j]->region(e) == l ) {
         _elemember[j] = true;
         for ( int i=0; i<v[j]->ptsPerObj(); i++ ) {
-          _member[ele[e*v[j]->ptsPerObj()+i]] = true;
+          int node = ele[e*v[j]->ptsPerObj()+i];
+          _member[node] = true;
         }
         endind[Tetrahedron] = j;
         if ( startind[Tetrahedron]<0 ) startind[Tetrahedron] = j;
@@ -64,13 +66,15 @@ RRegion::RRegion( VolElement **v, int nv, int n, int l )
 /** constructor
  *
  * \param n number of points
+ * \param nv number volume elements
  * \param l label for region
  * \param b initial value
  */
-RRegion::RRegion( int n, int l, bool b )
+RRegion::RRegion( int n, int nv, int l, bool b )
 {
-  initialize( n, 0, l );
+  initialize( n, nv, l );
   _member.assign(n, b);
+  _elemember.assign(nv, b);
 }
 
 
@@ -82,3 +86,17 @@ void RRegion :: set_color( Object_t obj, float r, float g, float b, float a )
   color[obj][3] = a;
 }
 
+
+
+/** assign/unassign an element to a region
+ *
+ *  \param a element number
+ *  \param b membership
+ */
+void RRegion :: ele_member(VolElement **v, int e, bool b )
+{
+  _elemember[e] = b;
+  for ( int i=0; i<v[e]->ptsPerObj(); i++ ) {
+    _member[v[e]->obj()[i]] = b;
+  }
+}
