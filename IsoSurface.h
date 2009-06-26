@@ -12,7 +12,7 @@ class IsoSurface {
         void draw();
         GLfloat *color(){ return colour; }
         double isoval(){ return _val; } 
-        void color(const GLfloat *c){memmove(colour,c, sizeof(colour));}
+        void color(const GLfloat *c){memmove(colour,c, 4*sizeof(GLfloat));}
 		int tm() const { return _tm; }
     private:
         vector<MultiPoint *> polygon;

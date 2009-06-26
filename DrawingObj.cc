@@ -324,6 +324,8 @@ edge_interp( const GLfloat *p0, DATA_TYPE dat0, const GLfloat *p1,
   GLfloat edge[3];
   sub( p1, p0, edge );
   float d = (val-dat0)/(dat1-dat0);
+  if( d<0 || d>1 )
+    throw NO_INTERSECTION;
   add( p0, scale( edge, d ), pint );
 }
 
