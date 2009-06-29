@@ -9,6 +9,7 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v, vector<bool>&member,
       MultiPoint **lpoly = m->_vol[i]->isosurf( dat, _val, npoly );
       for( int j=0; j<npoly; j++ )
         polygon.push_back(lpoly[j]);
+      delete[] lpoly;
     }
   }
 }

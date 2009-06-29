@@ -77,7 +77,8 @@ class MultiPoint : public DrawingObj
     void    add( int *n );
     const   Point* pt(){ return _pt; }
     void    define( const int *nl, int n=1 );
-    MultiPoint **isosurf( DATA_TYPE *d, DATA_TYPE val, int & );
+    MultiPoint **isosurf( DATA_TYPE *d, DATA_TYPE val, int &, 
+                                    vector<Interpolator<DATA_TYPE>*> *a=NULL );
     virtual const int*iso_polys(unsigned int)=0; 
   protected:
     int *  _node;			//!< list of nodes defining objects

@@ -5,7 +5,7 @@
 
 enum lpint_enum{ BOTH_ON_PLANE, NO_INTERSECTION };
 
-static const int simple_index[] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13};
+static const int simple_index[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13};
 
 /** find the intersection of a plane with a line
  *
@@ -316,8 +316,10 @@ VolElement::planecut( char *pd, GLfloat* cp,
  *  \param dat1  data on p1
  *  \param val   data between dat0 and dat1
  *  \param pint  location of val (computed)
+ *
+ *  \return relative weight of node 0
  */
-void
+float
 edge_interp( const GLfloat *p0, DATA_TYPE dat0, const GLfloat *p1,
              DATA_TYPE dat1, DATA_TYPE val, GLfloat* pint )
 {
@@ -327,6 +329,7 @@ edge_interp( const GLfloat *p0, DATA_TYPE dat0, const GLfloat *p1,
   if( d<0 || d>1 )
     throw NO_INTERSECTION;
   add( p0, scale( edge, d ), pint );
+  return 1.-d;
 }
 
 
@@ -338,14 +341,16 @@ edge_interp( const GLfloat *p0, DATA_TYPE dat0, const GLfloat *p1,
  *      edge1_ node1 ... edgeN_node1 \#sides_poly1  edge0_node0 ...
  *      edgeN_node2
  *
- * \param dat   data for all the nodes
- * \param val   value for the isosurface
- * \param npoly number of polygons
+ * \param dat    data for all the nodes
+ * \param val    value for the isosurface
+ * \param npoly  number of polygons
+ * \param interp interpolation values
  *
  *  \return a list of element pointers
  *  \post   npoly is the number of elements in the list
  */
-MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly )
+MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
+        vector<Interpolator<DATA_TYPE>*> *interp )
 {
   // determine row index into table 
   unsigned int index=0;
@@ -365,9 +370,12 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly )
     GLfloat *pt   = new GLfloat[npts*3];      // local point list
     for( int i=0; i<npts; i++ ) {
       int pindex  = poly_start+1+i*2;
-      edge_interp( (*_pt)[_node[poly[pindex]]], dat[_node[poly[pindex]]],
-                   (*_pt)[_node[poly[pindex+1]]], dat[_node[poly[pindex+1]]],
-                   val, pt+3*i );
+      int n0 = _node[poly[pindex]];
+      int n1 = _node[poly[pindex+1]];
+      float d = edge_interp( (*_pt)[n0], dat[n0], (*_pt)[n1], 
+                                             dat[n1], val, pt+3*i );
+      if( interp )
+        interp->push_back(new Interpolator<DATA_TYPE>( n0, n1, d )); 
     }
     Point   *pts = new Point;
     pts->add( pt, npts );
@@ -392,6 +400,8 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly )
             break;
     }
     isoele[n]->define( simple_index );
+    if( poly[poly_start]>2 )                  // it is a surface element
+      dynamic_cast<SurfaceElement*>(isoele[n])->compute_normals( 0, 0 );
     poly_start += npts*2+1;
   }
   return isoele;
