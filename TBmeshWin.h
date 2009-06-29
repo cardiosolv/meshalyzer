@@ -145,7 +145,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      draw_axes();
     void      draw_clip_plane( int cp );
     void      draw_cut_planes( RRegion * );
-    void      draw_iso_surfaces( RRegion * );
+    void      draw_iso_surfaces( );
     void      draw_iso_lines();
     int       max_time();
     GLenum    renderMode;			// mode for drawing
