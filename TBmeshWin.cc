@@ -309,9 +309,9 @@ void TBmeshWin :: draw()
       if ( fill_hitet ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
         model->_vol[hilight[Tetrahedron]]->draw(0,  hiptobj_color, 2 );
-        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         model->_vol[hilight[Tetrahedron]]->draw(0, bc );
       } else
+        glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
         model->_vol[hilight[Tetrahedron]]->draw( 0, hitet_color, 2 );
     }
     if (model->numVol() && vert_asc_obj==Tetrahedron ) {
@@ -384,7 +384,9 @@ void TBmeshWin::draw_iso_surfaces()
   if( have_data == NoData || !isosurfwin->isoOn0->value() ) return;
 
   bool dirty =  isosurfwin->issDirty();
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glEnable(GL_BLEND);
+  glDepthMask(GL_FALSE);
 
   for ( int s=0; s<model->_numReg; s++ ) {
     RRegion *reg = model->region(s);
@@ -399,7 +401,8 @@ void TBmeshWin::draw_iso_surfaces()
 	reg->_iso0->draw();
   } 
 
-  glEnable(GL_BLEND);
+  glDepthMask(GL_TRUE);
+  glPopAttrib();
 }
 
 
@@ -428,8 +431,8 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
 		facetshading?NULL:model->vertex_normals(sf) );
 
   if ( dataopac->dop[Surface].on() ) translucency(false);
-  glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
   glPopAttrib();
+  glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 }
 
 
@@ -1564,6 +1567,8 @@ TBmeshWin::draw_iso_lines()
   if( have_data==NoData || !isc->isolineOn->value() )
     return;
 
+  glPushAttrib( GL_POLYGON_BIT );
+
   if( isc->islDirty() || tm!=isoline->tm() ){
     delete isoline;
     isoline=new IsoLine( isc->isolineVal0->value(), isc->isolineVal1->value(),
@@ -1578,4 +1583,6 @@ TBmeshWin::draw_iso_lines()
 
   isoline->color( isc->islColor() );
   isoline->draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
+
+  glPopAttrib( );
 }
