@@ -55,8 +55,7 @@ winny->size_range(50,50,1200,1200,5,5,1);} {}
 
 class Controls {open
 } {
-  Function {Controls()} {selected
-  } {
+  Function {Controls()} {} {
     Fl_Window window {
       label {Meshalyzer Controls}
       xywh {359 50 350 650} type Double box UP_BOX
@@ -1207,7 +1206,8 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {} {
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1323,7 +1323,15 @@ SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineVal1 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoNumLines );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineThick );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->islDatify );
-SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineOn );} {}
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineOn );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoOn0 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoval0 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->opacity0 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isocol0 );
+mshzf << "ISOSURF0 COLOUR = ";
+save_colour( mshzf, mwtb->isosurfwin->color(0) );
+mshzf << endl;} {selected
+    }
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
@@ -1348,8 +1356,7 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
+  Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
