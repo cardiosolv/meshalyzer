@@ -55,9 +55,10 @@ winny->size_range(50,50,1200,1200,5,5,1);} {}
 
 class Controls {open
 } {
-  Function {Controls()} {} {
+  Function {Controls()} {open
+  } {
     Fl_Window window {
-      label {Meshalyzer Controls}
+      label {Meshalyzer Controls} open
       xywh {359 50 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
@@ -622,7 +623,7 @@ op->win->show();}
         xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
+          label Highlight selected
           xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1010,7 +1011,7 @@ refresh_surflist();}
           }
         }
       }
-      Fl_Group colorscalegrp {
+      Fl_Group colorscalegrp {open
         xywh {10 490 330 60} box ENGRAVED_BOX
       } {
         Fl_Button {} {
@@ -1061,19 +1062,19 @@ mwtb->redraw();}
           label min
           callback {mwtb->cs->calibrate(o->value(),mwtb->cs->max());
 mwtb->redraw();}
-          xywh {65 500 65 25} labelsize 10 align 2 textsize 12
+          xywh {65 500 65 25} labelsize 10 align 2 when 4 textsize 12
         }
         Fl_Value_Input maxcolval {
           label max
           callback {mwtb->cs->calibrate(mwtb->cs->min(),o->value());
 mwtb->redraw();}
-          xywh {130 500 65 25} labelsize 10 align 2 textsize 12
+          xywh {130 500 65 25} labelsize 10 align 2 when 4 textsize 12
         }
         Fl_Value_Input numcolev {
           label levels
           callback {mwtb->cs->size((int)(o->value()));
 mwtb->redraw();}
-          tooltip {colourmap size} xywh {195 500 30 25} labelsize 10 align 2 minimum 4 maximum 252 step 1 value 64 textsize 12
+          tooltip {colourmap size} xywh {195 500 30 25} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
         }
         Fl_Light_Button autocalibratebut {
           label auto
@@ -1327,11 +1328,9 @@ SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineOn );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoOn0 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoval0 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->opacity0 );
-SAVE_WIDGET( mshzf, mwtb->isosurfwin->isocol0 );
-mshzf << "ISOSURF0 COLOUR = ";
-save_colour( mshzf, mwtb->isosurfwin->color(0) );
-mshzf << endl;} {selected
-    }
+mshzf << "ISOSURF_COLOUR 0 = ";
+save_colour( mshzf, mwtb->isosurfwin->issColor(0) );
+mshzf << endl;} {}
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
@@ -1367,6 +1366,8 @@ if( fname==NULL ) {
 
 int BUFLEN=1024;
 char buf[BUFLEN];
+float r, g, b, a;
+
 while( mshzf.getline( buf, BUFLEN ) ) {
   
   float val;
@@ -1391,7 +1392,6 @@ while( mshzf.getline( buf, BUFLEN ) ) {
         mshzf.getline(var, 1024);
         continue;
       }
-      float r,g,b,a;
       mshzf >> r >> g >> b >> a;
       mwtb->model->surface(i)->fillcolor(r,g,b,a);
       mshzf >> r >> g >> b >> a;
@@ -1404,7 +1404,6 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 	continue;
   } 
   if( !strcmp( var, "REGION_COLOURS" ) ) {
-    float r, g, b, a;
     bool  v;
     for( int i=0; i<val; i++ ) {
       if( i >= mwtb->model->_numReg ) {
@@ -1519,10 +1518,17 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( mwtb->isosurfwin->isolineThick, var, int(val) )
   TEST_VAR( mwtb->isosurfwin->islDatify, var, int(val) )
   TEST_VAR( mwtb->isosurfwin->isolineOn, var, int(val) )
+  TEST_VAR( mwtb->isosurfwin->isoval0, var, val )
+  TEST_VAR( mwtb->isosurfwin->opacity0, var, val )
+  TEST_VAR( mwtb->isosurfwin->isoOn0, var, val )
   if( !strcmp( var, "ISOLINE_COLOUR" ) ){
-    float r, g, b, a;
-    sscanf( buf, "%*s = %f %f %f %f", &r, &g, &b, &a );
+    sscanf( buf, "%*s = %d %f %f %f %f", &r, &g, &b, &a );
     mwtb->isosurfwin->islColor(r,g,b,a);
+    continue;
+  }
+  if( !strcmp( var, "ISOSURF_COLOUR" ) ){
+    sscanf( buf, "%*s %*d = %f %f %f %f", &r, &g, &b, &a );
+    mwtb->isosurfwin->issColor(int(val),r,g,b,a);
     continue;
   }
   

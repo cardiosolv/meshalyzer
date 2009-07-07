@@ -29,7 +29,7 @@ OBJS = Fl_Gl_Tb_Window.o\
 	Connection.o\
 	CutSurfaces.o\
 	DataOpacity.o\
-	DrawingObj.o\
+	DrawingObjects.o\
 	FileType.o\
 	gl2ps.o\
 	Graph.o PlotWin.o plottingwin.o\

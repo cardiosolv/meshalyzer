@@ -19,9 +19,9 @@ static const int simple_index[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13};
 float find_line_plane_intersect( const GLfloat* a, const GLfloat* b,
                              const GLfloat* pc, GLfloat* ip )
 {
-  float d1 = fabs(dot( a, pc )+pc[3]);
-  float d2 = fabs(dot( b, pc )+pc[3]);
-  float t  = d1/(d1+d2);
+  float d1 = dot( a, pc )+pc[3];
+  float d2 = dot( b, pc )+pc[3];
+  float t  = d1/(d1-d2);
 
   GLfloat v[3];
   add( a, scale( sub(b,a,v), t ), ip );

@@ -30,7 +30,7 @@ class Myslider : public Fl_Group
     Fl_Slider       slider;
     Fl_Value_Output valout;
   public:
-    Myslider( int, int, int, int, char *L=0 );
+    Myslider( int, int, int, int, const char *L=0 );
     int handle( int );
     float value( void );
     void  value( int );

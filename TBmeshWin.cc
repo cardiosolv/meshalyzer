@@ -397,7 +397,7 @@ void TBmeshWin::draw_iso_surfaces()
 	if( reg->_iso0==NULL ) 
 	  reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
 			  reg->ele_membership(), tm );
-	reg->_iso0->color( isosurfwin->color(0) );
+	reg->_iso0->color( isosurfwin->issColor(0) );
 	reg->_iso0->draw();
   } 
 

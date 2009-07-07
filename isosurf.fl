@@ -17,7 +17,7 @@ class IsosurfControl {open
   Function {IsosurfControl(TBmeshWin *tb)} {open
   } {
     Fl_Window isowin {open
-      xywh {746 82 305 270} type Double visible
+      xywh {799 25 305 270} type Double visible
     } {
       Fl_Group {} {
         label {Isosurface 0} open
@@ -45,7 +45,7 @@ if(fl_color_chooser( "Isosurface 0",r,g,b ) ){
           callback {_issDirty = true;
 if( isoOn0->value() )
   mwtb->redraw();}
-          xywh {177 44 70 28}
+          xywh {177 44 70 28} when 8
         }
         Fl_Value_Slider opacity0 {
           label {Opacity:}
@@ -67,18 +67,18 @@ if( isoOn0->value() )
           label {start value:}
           callback {_islDirty = true;
 if( isolineOn->value() ) mwtb->redraw();}
-          xywh {220 161 60 29}
+          xywh {220 161 60 29} when 4
         }
         Fl_Value_Input isolineVal1 {
           label {end value:}
           callback {_islDirty = true;
 if( isolineOn->value() ) mwtb->redraw();}
-          xywh {220 191 60 29}
+          xywh {220 191 60 29} when 4
         }
         Fl_Spinner isoNumLines {
           label {\#lines:}
           callback {_islDirty = true;
-if( isolineOn->value() ) mwtb->redraw();}
+if( isolineOn->value() ) mwtb->redraw();} selected
           xywh {220 221 60 24} value 1
         }
         Fl_Spinner isolineThick {
@@ -113,18 +113,26 @@ _islColor[3] = 1.;
 _issDirty = true;} {}
   }
   decl {TBmeshWin* mwtb;} {}
-  decl {GLfloat _color0[4];} {selected
-  }
+  decl {GLfloat _color0[4];} {}
   decl {GLfloat _islColor[4];} {}
   decl {int isosurfT;} {}
   decl {int isolineT;} {}
   decl {bool _islDirty;} {}
   decl {bool _issDirty;} {}
-  Function {color(int s)} {return_type {const GLfloat*}
+  Function {issColor(int s)} {return_type {const GLfloat*}
   } {
     code {if( s==0 ) {
   _color0[3] = opacity0->value();
   return _color0;
+}} {}
+  }
+  Function {issColor(int s,float r, float g, float b, float a)} {return_type void
+  } {
+    code {if( s==0 ) {
+  _color0[0] = r;
+  _color0[1] = g;
+  _color0[2] = b;
+  _color0[3] = a;
 }} {}
   }
   Function {islDirty()} {return_type bool

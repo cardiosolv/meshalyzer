@@ -27,7 +27,7 @@ void IsoSurface::draw()
 {
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   for( int i=0; i<polygon.size(); i++ ) {
-    polygon[i]->draw(0, colour, 1 );
+    polygon[i]->draw(0, 0, colour, NULL, NULL );
   }
 }
 

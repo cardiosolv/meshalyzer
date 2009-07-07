@@ -48,7 +48,7 @@ grid, as well as examining the structure of the grid.
 It is an ever changing and ongoing project that has been in development since 2001.
 Certain file schemes and names may bear a vague resemblance to those used by
 \emph{Cool Graphics}, a program developed by Jamey Eason, but it's only because he
-thought too loudly when he was in the beside me in the office.
+thought too loudly when he was beside me in the office.
 
 \section{Input Files}
 
@@ -88,7 +88,7 @@ Surfaces are independent of regions, and the relationship between the points
 and model structures is described in the Fig.~\ref{fig:UML}.
 \begin{figure}
 \centerline{\includegraphics[width=13cm]{UML}}
-\caption{Relationshop between vertces (Points) and other structures.}
+\caption{Relationshop between vertices (Points) and other structures.}
 \label{fig:UML}
 \end{figure}
 
@@ -389,7 +389,7 @@ Currently, the first 2 are ignored but must be present.
 \section{Invocation}
 The program is run by typing\\[1ex]
 \centerline{
-{\texttt{meshalyzer cg\_in|[pts [vpts] [dat|tdat|out] [tri tri ...]] 
+{\texttt{meshalyzer cg\_in|[pts [vpts] [dat|tdat|out] [mshz] [tri ...]] 
 \raisebox{-2Ex}{\rule{0em}{3Ex}}
 }}}\\
 where the extensions of the required file types are given.
@@ -407,18 +407,20 @@ This only applies to the vertices file.
 \caption{The control widget.}
 \end{figure}
 
-\subsection{Tetrahedral Mesh}
-To display the tetrahedral mesh, click on the  \emph{Tetrahedral Mesh} 
+\subsection{Volume Mesh}
+To display the volume element mesh, click on the  \emph{Voxele Mesh} 
 radio button in the
 \emph{Display as:} box.
-The colour of the tetrahedra can be changed with the \emph{Tet colour} button.
+The colour of the volume elements can be changed with the \emph{Voxele colour}
+button.
 No other structure types will be displayed.
 
 \subsection{Regions}
-To not display the mesh as a set of tetrahedra, click on the  \emph{Surfaces} 
+To not display the mesh as a set of volume elements,
+click on the  \emph{Surfaces} 
 radio button in the
 \emph{Display as:} box.
-This will display all structures except tetrahedra.
+This will display all structures except volume elements.
 
 Display of each structure type can be toggled on and off on a
 region-by-region basis or all-at-once.
@@ -434,9 +436,13 @@ order.
 The order can be reversed by checking ``Reverse Draw order'' under the ``Image''
 menu.
 
-For each structure, there is a button toggling its display, a button to select its
-colour when it is not displaying data, and a 
-input widget for selecting the output stride.
+For each structure, there is a button toggling its display, 
+and a button to select its dispaly properties.
+pressing the ``props'' button will open a widget to specify 
+colour when it is not displaying data, to specify the output stride, size 
+and if a 3D effect is to be used. 
+Note that the 3D effect is graphics intensive and may be very slow for a 
+large number of structures.
 
 Different structures in different layers can be coloured differently.
 Under ``Image/Randomly colour'', one can select which structure types gets randomly
@@ -650,6 +656,23 @@ For each clipping plane, several different modes are available:
 \caption{Clipping plane dialogue.}
 \end{figure}
 
+\subsubsection{IsoSurfaces/IsoLines}
+
+By selecting ``Isosurf'' from the ``Data'' menu item,
+the isosurface/isolines widget is popped open.
+This widget controls display of isovalue surfaces and lines.
+Isosurfaces are only available if elements are defined. 
+They are drawn with a specified colour and opacity.
+Changes to the ``value'' are reflected when enter is pressed or the focus
+changes.
+
+For isolines, surfaces must be defined. An initial isovalue, ending
+isovalue and the number of isovalue lines are specified.
+If ``datified'' is selected, the lines are coloured according to 
+the data colour scale, otherwise all lines are drawn with the same
+specified ``colour''.
+The thickness of the lines can also be controlled.
+
 \subsection{Output Menu}
 
 \subsubsection{Single Images}
@@ -720,6 +743,19 @@ Once saved, it can be restored later by choosing ``Read transform'' and selectin
 Standard views are available under the ``Image'' menu under ``View''.
 The normal which points directly out of (+) or into (-) the screen is
 first selected and then the positive direction of the other axes.
+
+\subsection{Saving/Restoring the State}
+
+The state is everything including the view transform. 
+You can save the state under ``Save state'' in the ``File'' menu.
+You will be prompted for a file which will have the extension \emph{.mshz}.
+This file is text and can be edited by hand afterwards. 
+You may delete any entries which you do not wish restored.
+Upon invoking  \meshal from the command line, your home directory will be
+searched for a default state file called \texttt{.default.mshz} 
+which will be read in automatically.
+A state file can also be specified on the command line and will supercede
+any default settings.
 
 \section{Grid window}
 

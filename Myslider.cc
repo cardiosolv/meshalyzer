@@ -21,7 +21,7 @@
 
 const int w_valout = 40;
 
-Myslider :: Myslider( int X, int Y, int W, int H, char *L):
+Myslider :: Myslider( int X, int Y, int W, int H, const char *L):
     Fl_Group(X,Y,W,H,L),
     valout(X,Y,w_valout,H),
     slider( X+w_valout, Y, W-w_valout, H )
