@@ -146,6 +146,7 @@ main( int argc, char *argv[] )
   if( !stat( defstate.c_str(), &buf) )
     control.restore_state( defstate.c_str() );
 
+  win.winny->show();
   // deal with command line files specified
   for ( int i=model_index+1; i<argc; i++ ) {
     if ( argv[i][0] == '-' ) 
@@ -168,7 +169,6 @@ main( int argc, char *argv[] )
       win.trackballwin->get_data(argv[i], control.tmslider );
   }
 
-  win.winny->show();
   win.trackballwin->show();
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
     char s[256];
