@@ -58,13 +58,15 @@ Connection.cc
 ContCable.cc
 CutSurfaces.cc
 DataOpacity.cc
-DrawingObj.cc
+DrawingObjects.cc
 FileType.cc
 Fl_Gl_Tb_Window.C
 gl2ps.c
 Graph.cc
 Hexahedron.cc
 HiLiteWinInfo.cc
+IsoLines.cc
+IsoSurface.cc
 IGBheader.cc
 main.cc
 Matrix4x4.C
@@ -92,4 +94,5 @@ trimesh.cc
 VecData.cc
 Vector3D.C
 Vector4D.C
+isosurf.cc
 )
