@@ -66,6 +66,9 @@ OBJS = Fl_Gl_Tb_Window.o\
 READER_OBJS = DataReader.h asciireader.h FileSeqCGreader.h \
 			  IGBreader.h ThreadedData.h DataAllInMem.h
 	
+FLTK_SRC = ClipPlane.cc DataOpacity.cc  isosurf.cc Sequence.cc \
+           colourchoice.cc  HiLiteWinInfo.cc  plottingwin.cc  trimesh.cc
+
 all: $(OBJS)
 	c++ $(CFLAGS) -o meshalyzer $(OBJS) $(LIBS)
 	fltk-config --post meshalyzer
@@ -78,7 +81,10 @@ format:
 
 TBmeshWin.o: TBmeshWin.cc $(READER_OBJS)
 	c++ -c $(CFLAGS) $(INCLUDES) $<
-	
+
+%.cc: %.fl
+	fluid -c $<
+
 %.o : %.cc
 	c++ -c $(CFLAGS) $(INCLUDES) $<
 

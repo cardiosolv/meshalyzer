@@ -295,7 +295,7 @@ int Model::add_surface_from_tri( const char *fn )
           fname = fn;
           fname += "tri.gz";
           if ( (in=gzopen( fname.c_str(), "r" )) == NULL ) {
-            fprintf( stderr, "Could not open surface file\n" );
+            //fprintf( stderr, "Could not open surface file\n" );
             return -1;
           }
         }
