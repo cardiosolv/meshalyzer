@@ -697,7 +697,7 @@ ClipPlane::ClipPlane( TBmeshWin *tb ) {
     } // Fl_Group* Clip2
     { Clip3 = new Fl_Group(5, 250, 185, 220, "Clipping Plane 4");
       Clip3->box(FL_UP_BOX);
-      Clip3->align(FL_ALIGN_BOTTOM);
+      Clip3->align(Fl_Align(FL_ALIGN_BOTTOM));
       { Fl_Group* o = new Fl_Group(15, 305, 115, 145, "Plane Normal4");
         o->box(FL_UP_BOX);
         { xdir3 = new Fl_Value_Input(35, 315, 80, 25, "X:");
@@ -739,7 +739,7 @@ ClipPlane::ClipPlane( TBmeshWin *tb ) {
     } // Fl_Group* Clip3
     { Clip4 = new Fl_Group(195, 250, 185, 220, "Clipping Plane 5");
       Clip4->box(FL_UP_BOX);
-      Clip4->align(FL_ALIGN_BOTTOM);
+      Clip4->align(Fl_Align(FL_ALIGN_BOTTOM));
       { Fl_Group* o = new Fl_Group(205, 305, 115, 145, "Plane Normal5");
         o->box(FL_UP_BOX);
         { xdir4 = new Fl_Value_Input(225, 315, 80, 25, "X:");
@@ -781,7 +781,7 @@ ClipPlane::ClipPlane( TBmeshWin *tb ) {
     } // Fl_Group* Clip4
     { Clip5 = new Fl_Group(385, 250, 185, 220, "Clipping Plane 6");
       Clip5->box(FL_UP_BOX);
-      Clip5->align(FL_ALIGN_BOTTOM);
+      Clip5->align(Fl_Align(FL_ALIGN_BOTTOM));
       { Fl_Group* o = new Fl_Group(395, 305, 115, 145, "Plane Normal6");
         o->box(FL_UP_BOX);
         { xdir5 = new Fl_Value_Input(415, 315, 80, 25, "X:");

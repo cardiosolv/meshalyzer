@@ -1208,18 +1208,29 @@ void TBmeshWin::dump_vertices()
   }
 
   //output the clipping planes
-  of << NUM_CP << endl;
+  int cp_on = 0;
+  for ( int i=0; i<NUM_CP; i++ ) 
+	if( cplane->on(i) )
+	  cp_on++;
+  of << cp_on << endl;
   for ( int i=0; i<NUM_CP; i++ ) {
-    GLdouble cp_coeff[4];
+    GLdouble *cp_coeff;
+	GLfloat   ctr[4];
     if ( cplane->on(i) ) {
-      glGetClipPlane( CLIP_PLANE[i], cp_coeff );
-      for ( int j=0; j<4; j++ ) of << cp_coeff[j] << " ";
-      of << endl;
-    } else
-      of << "0 0 0 0" << endl;
+      cp_coeff = cplane->plane(i);
+	  model->pt.offset(ctr);
+      for ( int j=0; j<3; j++ ) of << cp_coeff[j] << " ";
+	  // adjust interecept for centering
+	  of << cp_coeff[3]+V3d(cp_coeff).Dot(V3f(ctr)) << endl;
+    } 
   }
 
   // output the vertices
+  int vtx_on=0;
+  for ( int i=0; i<model->pt.num(); i++ )
+    if ( ptDrawn[i] ) 
+      vtx_on++;
+  of << vtx_on << endl;
   for ( int i=0; i<model->pt.num(); i++ ) if ( ptDrawn[i] ) of<< i << endl;
 
   of.close();

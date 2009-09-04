@@ -208,7 +208,6 @@ Each line may be any of the element types.
 \begin{figure}
 \centerline{\includegraphics[width=10cm]{volelemdef}}
 \caption{Volume elements\label{fg:voleledef}}
-\label{fg:voleledef}
 \end{figure}
 
 \subsubsection{Tetrahedra}
@@ -715,13 +714,14 @@ selecting
 You will be proompted for a filename and a file with the following format
 will be produced:
 \begin{verbatim}
-number_clip_planes
+number_clip_planes_on
 a1 b1 c1 d1
 a2 b2 c2 d2
 .
 .
 .
 an bn cn dn
+number_visible_vertices
 visible_node1
 visible_node2
 .
@@ -730,7 +730,7 @@ visible_node2
 visible_nodeN
 \end{verbatim}
 The coefficients (a,b,c,d) 
-for the clipping plane are those as defined by the OpenGL standard.
+for the clipping plane are defined in the specified model coordinate system.
 
 \subsection{Saving The Current View}
 

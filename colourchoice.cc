@@ -42,7 +42,7 @@ colourChoice::colourChoice( GLfloat *c, bool *b, int nb, Object_t o, TBmeshWin *
       rgb_choice->labelfont(0);
       rgb_choice->labelsize(14);
       rgb_choice->labelcolor(FL_FOREGROUND_COLOR);
-      rgb_choice->align(FL_ALIGN_CENTER);
+      rgb_choice->align(Fl_Align(FL_ALIGN_CENTER));
       rgb_choice->when(FL_WHEN_RELEASE);
     } // Fl_Color_Chooser* rgb_choice
     { opacity = new Fl_Slider(10, 190, 205, 25, "Opacity");
@@ -50,7 +50,7 @@ colourChoice::colourChoice( GLfloat *c, bool *b, int nb, Object_t o, TBmeshWin *
       opacity->selection_color(FL_FOREGROUND_COLOR);
       opacity->step(0.01);
       opacity->value(1);
-      opacity->align(FL_ALIGN_TOP);
+      opacity->align(Fl_Align(FL_ALIGN_TOP));
     } // Fl_Slider* opacity
     { Fl_Return_Button* o = new Fl_Return_Button(125, 225, 90, 30, "Done");
       o->callback((Fl_Callback*)cb_Done);
