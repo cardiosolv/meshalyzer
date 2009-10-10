@@ -82,6 +82,7 @@ class Model
     void             determine_regions();
     bool             read_elem_file(const char *);
     int              add_surface_from_elem( const char *fn );
+    int              add_region_surfaces( void );
     vector<bool>     allvis;
     int             _numtm;
     int              new_region_label();

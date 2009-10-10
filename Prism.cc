@@ -71,6 +71,11 @@ const int prism_iso_table[][17] = {
     { 1, 3, 0, 1, 0, 2, 0, 3 },
     { 0 }
 };
+const int prism_num_surf = 5;
+const int prism_surface_table[][4] = {
+   {0,2,1,-1}, {0,3,4,2}, {2,4,5,1}, {1,0,3,5}, {3,5,4,-1}
+};
+
 
 /** draw many Prisms
  *
@@ -287,4 +292,19 @@ const int*
 Prism::iso_polys(unsigned int index)
 {
   return prism_iso_table[index];
+}
+
+
+/* 
+ * return list of lists of nodes defining the bounding surfaces
+ *
+ * \param v element number
+ *
+ * \param pointer to a vector of vectors
+ */
+vector<vector<int> > * 
+Prism::surfaces( int v )
+{
+  return make_surf_nodelist( prism_num_surf, int(prism_surface_table[1]-prism_surface_table[0]), 
+                             (const int **)prism_surface_table, v );
 }

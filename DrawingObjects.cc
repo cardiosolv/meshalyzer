@@ -407,4 +407,28 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
   return isoele;
 }
 
+/** 
+ * return alist of lists of nodes defining the surface of a volume element
+ *
+ * \param ns   number of surfaces
+ * \param nn   number of nodes per surface
+ * \param nl   table of local nodes for each surface
+ * \param ve   volume element
+ */
+vector<vector<int> > * 
+VolElement:: make_surf_nodelist( const int ns, int nn, const int **nl, int ve )
+{
+  vector<vector<int> >* vv = new  vector<vector<int> >;
+  for( int s=0; s<ns; s++ ) {
+    vector<int> nlv;
+    for( int i=0; i<nn; i++ ) {
+      int lnode = *(reinterpret_cast<int*>(nl)+s*nn+i);
+      if( lnode !=-1 )
+        nlv.push_back(_node[ve*_ptsPerObj+lnode]);
+    }
+    vv->push_back(nlv);
+  }
+  return vv;
+}
+
 

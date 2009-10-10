@@ -1,10 +1,24 @@
 #include "Model.h"
 #include <set>
 #include <map>
+#include <vector>
+#include<algorithm>
 #include <string>
 #include "DataOpacity.h"
 #include "gl2ps.h"
 #include "VecData.h"
+
+struct eleFaceCmp
+{
+  bool operator()(const vector<int>&a, const vector<int>&b)
+  {
+    if( a.size()<b.size() ) return true;
+    if( a.size()>b.size() ) return false;
+    for( int i=0; i<a.size()-2; i++ )     // -2 since element \# and face are tacked on
+      if( a[i] < b[i] ) return true;
+    return false;
+  }
+};
 
 
 /** return a new unique region label
@@ -48,7 +62,6 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   char fn[bufsize];
   strcpy( fn, fnt );
   gzFile in;
-
   _base1 = base1;
   pt.base1( base1 );
 
@@ -79,6 +92,7 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   if( !no_elems ) read_elem_file( fn );
   read_region_file( in, fn );
   determine_regions();
+  add_region_surfaces();
 
   //_triele  = new Triangle( &pt );
   add_surface_from_tri( fn );
@@ -274,8 +288,73 @@ int Model::add_surface_from_elem( const char *fn )
 }
 
 
-/** add a surface by reading in a .tri file, also try reading a normal file
+/** find bounding surfaces for all the regions
  *
+ *  We do this by adding the faces of all elements into a set and removing a face if
+ *  it appears twice
+ */
+int Model::add_region_surfaces()
+{
+  // copy all faces from elements in the reions into a set
+  // eliminating any face which appears twice
+  for( int r=0; r<_numReg; r++ ) {
+    RRegion *reg = _region[r];
+    set<vector<int>,eleFaceCmp> faces;
+    for( int e=0; e<_numVol; e++ ){
+      if( reg->ele_member(e) ) {
+        vector<vector<int> >*fnl = _vol[e]->surfaces();
+        for( int i=0; i<fnl->size(); i++ ) {
+          // sort the nodes but add the info so we can get the face back later
+          sort( fnl->at(i).begin(), fnl->at(i).end() );
+          fnl->at(i).push_back(e);  // element
+          fnl->at(i).push_back(i);  // face within element
+          set<vector<int>,eleFaceCmp>::iterator it;
+          it = faces.find( (*fnl)[i] );
+          if( it != faces.end() )
+            faces.erase(it);
+          else
+            faces.insert( (*fnl)[i] );
+        }
+        delete fnl;
+      }
+    }
+    // convert the left over faces into a surface
+    if( faces.size() ) {
+
+      _surface.push_back( new Surfaces( &pt ) );
+      _surface.back()->num( faces.size() );
+      set<vector<int>,eleFaceCmp>::iterator fit = faces.begin();
+
+      for( int e=0; e<faces.size(); e++, fit++ ){  
+        
+        int findex = fit->back();
+        int ele    = fit->at(fit->size()-2);
+        vector<vector<int> >*fnl = _vol[ele]->surfaces();
+        int numnodes = fnl->at(findex).size();
+        int nl[numnodes];
+
+        for( int i=0; i<numnodes; i++ ) nl[i] = fnl->at(findex)[i];
+
+        if( numnodes==3 ) {
+          _surface.back()->ele(e) = new Triangle( &pt );
+        } else if( numnodes==4 ) {
+          _surface.back()->ele(e) = new Quadrilateral( &pt );
+        } else 
+          assert(0);
+
+        _surface.back()->ele(e)->define( nl );
+        _surface.back()->ele(e)->compute_normals(0,0);
+
+        delete fnl;
+      }
+      _surface.back()->determine_vert_norms( pt );
+    }
+  }
+}
+
+
+  /** add a surface by reading in a .tri file, also try reading a normal file
+   *
  * \param fn   file containing tri's
  *
  * \return     the \#surfaces, -1 if not successful

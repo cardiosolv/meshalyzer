@@ -39,6 +39,11 @@ static const int pyramid_iso_table[][15] = {
     { 1, 3, 0, 1, 0, 3, 0, 4 },
     { 0 }
 };
+const int pyr_num_surf = 5;
+const int pyr_surface_table[][4] = {
+   {0,3,2,1}, {4,1,2,-1}, {4,2,3,-1}, {4,3,0,-1}, {4,0,1,-1}
+};
+
 
 /** draw many Pyramids
  *
@@ -236,3 +241,17 @@ const int* Pyramid::iso_polys(unsigned int index)
   return pyramid_iso_table[index];
 }
 
+
+/* 
+ * return list of lists of nodes defining the bounding surfaces
+ *
+ * \param v element number
+ *
+ * \param pointer to a vector of vectors
+ */
+vector<vector<int> > * 
+Pyramid::surfaces( int v )
+{
+  return make_surf_nodelist( pyr_num_surf, int(pyr_surface_table[1]-pyr_surface_table[0]), 
+                             (const int **)pyr_surface_table, v );
+}

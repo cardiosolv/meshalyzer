@@ -201,10 +201,12 @@ class VolElement : public MultiPoint
     void add( int *n, int r=-1 );
     virtual void draw_out_face( int )=0;
     virtual SurfaceElement *cut( char*, GLfloat*, Interpolator<DATA_TYPE>*&, int e=0 )=0;
+    virtual vector<vector<int> >* surfaces(int v=0) = 0;
   protected:
     int*        _region;		//!< region for each element
     Connection* _edges;         //!< egdes for drawing elements
     SurfaceElement* planecut( char*, GLfloat*, Interpolator<DATA_TYPE>*&, int, const int [][2], int e  );
+    vector<vector<int> >* make_surf_nodelist(const int,int, const int **, int);
 };
 
 
@@ -219,6 +221,7 @@ class Tetrahedral : public VolElement
     virtual void     draw_out_face( int );
     virtual SurfaceElement* cut(char*,GLfloat*,Interpolator<DATA_TYPE>*&,int=0);
     const int* iso_polys( unsigned int );
+    virtual vector<vector<int> >* surfaces(int v=0);
 };
 
 class Prism : public VolElement
@@ -232,6 +235,7 @@ class Prism : public VolElement
     virtual void draw_out_face( int );
     virtual SurfaceElement* cut(char *,GLfloat*,Interpolator<DATA_TYPE>*&,int);
     const   int*     iso_polys(unsigned int);
+    virtual vector<vector<int> >* surfaces(int v=0);
 };
 
 
@@ -246,6 +250,7 @@ class Hexahedron : public VolElement
     virtual void draw_out_face( int );
     virtual SurfaceElement* cut(char *,GLfloat*,Interpolator<DATA_TYPE>*&,int);
     const int* iso_polys( unsigned int );
+    virtual vector<vector<int> >* surfaces(int v=0);
 };
 
 class Pyramid : public VolElement
@@ -259,5 +264,6 @@ class Pyramid : public VolElement
     virtual void     draw_out_face( int );
     virtual SurfaceElement* cut(char*, GLfloat*, Interpolator<DATA_TYPE>*&,int);
     const int* iso_polys( unsigned int );
+    virtual vector<vector<int> >* surfaces(int v=0);
 };
 #endif
