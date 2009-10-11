@@ -2,23 +2,48 @@
 #include <set>
 #include <map>
 #include <vector>
-#include<algorithm>
 #include <string>
 #include "DataOpacity.h"
 #include "gl2ps.h"
+#include <redblack.h>
 #include "VecData.h"
 
-struct eleFaceCmp
-{
-  bool operator()(const vector<int>&a, const vector<int>&b)
-  {
-    if( a.size()<b.size() ) return true;
-    if( a.size()>b.size() ) return false;
-    for( int i=0; i<a.size()-2; i++ )     // -2 since element \# and face are tacked on
-      if( a[i] < b[i] ) return true;
-    return false;
-  }
+
+struct Face {
+  int nsort[MAX_NUM_SURF_NODES];  //!< sorted nodes
+  int norig[MAX_NUM_SURF_NODES];  //!< nodes in original order
+  int nnode;                      //!< number of nodes
 };
+
+int intcmp( const void *a, const void *b ){ return *(int *)a-*(int *)b; }
+
+/** compare 2 faces for sorting */
+int cmpface( const void *a, const void *b, const void *c )
+{
+  const Face *A = (const Face *)a;
+  const Face *B = (const Face *)b;
+
+  if( A->nnode != B->nnode ) return  A->nnode - B->nnode;
+  for(  int i=0; i< A->nnode; i++ )
+    if( A->nsort[i] != B->nsort[i] ) return  A->nsort[i] - B->nsort[i];
+  return 0;
+};
+
+
+/** make a face from a node list
+ *
+ * \param f new face
+ * \param n number of nodes in surface face
+ * \param orig nodes in original order
+ */
+void
+make_face( Face *f, int n, int* orig )
+{
+  f->nnode = n;
+  memcpy( f->norig, orig, n*sizeof(int) );
+  memcpy( f->nsort, orig, n*sizeof(int) );
+  qsort( f->nsort, n, sizeof(int), intcmp ); 
+}
 
 
 /** return a new unique region label
@@ -290,71 +315,76 @@ int Model::add_surface_from_elem( const char *fn )
 
 /** find bounding surfaces for all the regions
  *
- *  We do this by adding the faces of all elements into a set and removing a face if
+ *  We do this by adding the faces of all elements into a tree and removing a face if
  *  it appears twice
  */
 int Model::add_region_surfaces()
 {
-  // copy all faces from elements in the reions into a set
-  // eliminating any face which appears twice
-  for( int r=0; r<_numReg; r++ ) {
-    RRegion *reg = _region[r];
-    set<vector<int>,eleFaceCmp> faces;
-    for( int e=0; e<_numVol; e++ ){
-      if( reg->ele_member(e) ) {
-        vector<vector<int> >*fnl = _vol[e]->surfaces();
-        for( int i=0; i<fnl->size(); i++ ) {
-          // sort the nodes but add the info so we can get the face back later
-          sort( fnl->at(i).begin(), fnl->at(i).end() );
-          fnl->at(i).push_back(e);  // element
-          fnl->at(i).push_back(i);  // face within element
-          set<vector<int>,eleFaceCmp>::iterator it;
-          it = faces.find( (*fnl)[i] );
-          if( it != faces.end() )
-            faces.erase(it);
-          else
-            faces.insert( (*fnl)[i] );
+  // set up matrix to hold element faces
+  int **faces = new int *[MAX_NUM_SURF];
+  for( int i=0; i<MAX_NUM_SURF; i++ ) faces[i] = new int[MAX_NUM_SURF_NODES+1];
+
+  for( int r=0; r<_numReg; r++ )  {
+    
+    struct rbtree *facetree = rbinit( cmpface, NULL );  // tree to hold faces
+    Face *newface = new Face;
+    
+    for( int e=0; e<_numVol; e++ )
+      if( _region[r]->ele_member(e) ) {
+        int ns = _vol[e]->surfaces( faces );
+        for( int i=0; i<ns; i++ ) {
+          Face *f1;
+          make_face( newface, faces[i][0], faces[i]+1 );
+          if ( (f1=(Face *)rbsearch( newface, facetree )) != newface ) { //in list
+            rbdelete( f1, facetree );
+            free( f1 );
+          } else 
+            newface = new Face;  // added to list, get memory for a new face
         }
-        delete fnl;
       }
-    }
-    // convert the left over faces into a surface
-    if( faces.size() ) {
+
+    // count the number of faces left in the list
+    delete newface;
+    RBLIST* rbl = rbopenlist( facetree );
+    int numface=0;
+    while( rbreadlist( rbl ) != NULL ) numface ++;
+    rbcloselist( rbl );
+
+    if( numface ) {             // convert the left over faces into a surface
+
+      rbl = rbopenlist( facetree );
 
       _surface.push_back( new Surfaces( &pt ) );
-      _surface.back()->num( faces.size() );
-      set<vector<int>,eleFaceCmp>::iterator fit = faces.begin();
+      _surface.back()->num( numface );
 
-      for( int e=0; e<faces.size(); e++, fit++ ){  
-        
-        int findex = fit->back();
-        int ele    = fit->at(fit->size()-2);
-        vector<vector<int> >*fnl = _vol[ele]->surfaces();
-        int numnodes = fnl->at(findex).size();
-        int nl[numnodes];
+      for( int e=0; e<numface; e++ ){  
 
-        for( int i=0; i<numnodes; i++ ) nl[i] = fnl->at(findex)[i];
+        newface = (Face *)rbreadlist( rbl );
 
-        if( numnodes==3 ) {
+        if( newface->nnode == 3 ) {
           _surface.back()->ele(e) = new Triangle( &pt );
-        } else if( numnodes==4 ) {
+        } else if( newface->nnode==4 ) {
           _surface.back()->ele(e) = new Quadrilateral( &pt );
-        } else 
+        } else
           assert(0);
 
-        _surface.back()->ele(e)->define( nl );
+        _surface.back()->ele(e)->define( newface->norig );
         _surface.back()->ele(e)->compute_normals(0,0);
 
-        delete fnl;
+        delete newface; // mo longer needed
       }
       _surface.back()->determine_vert_norms( pt );
+      rbcloselist( rbl );
+      rbdestroy( facetree );
     }
   }
+  for( int i=0; i<MAX_NUM_SURF; i++ ) delete[] faces[i];
+  delete[] faces;
 }
 
 
-  /** add a surface by reading in a .tri file, also try reading a normal file
-   *
+/** add a surface by reading in a .tri file, also try reading a normal file
+ *
  * \param fn   file containing tri's
  *
  * \return     the \#surfaces, -1 if not successful

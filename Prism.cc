@@ -298,13 +298,15 @@ Prism::iso_polys(unsigned int index)
 /* 
  * return list of lists of nodes defining the bounding surfaces
  *
+ * \param ft face table to be filled in
  * \param v element number
  *
  * \param pointer to a vector of vectors
  */
-vector<vector<int> > * 
-Prism::surfaces( int v )
+int
+Prism::surfaces( int **ft, int v )
 {
-  return make_surf_nodelist( prism_num_surf, int(prism_surface_table[1]-prism_surface_table[0]), 
-                             (const int **)prism_surface_table, v );
+  return make_surf_nodelist( v, ft, prism_num_surf,
+          int(prism_surface_table[1]-prism_surface_table[0]), 
+                             (const int **)prism_surface_table );
 }

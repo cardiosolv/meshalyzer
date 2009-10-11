@@ -11,6 +11,9 @@
 
 gzFile openFile( const char*, const char* );
 
+#define MAX_NUM_SURF 6
+#define MAX_NUM_SURF_NODES 4
+
 class DrawingObj
 {
   public:
@@ -201,12 +204,12 @@ class VolElement : public MultiPoint
     void add( int *n, int r=-1 );
     virtual void draw_out_face( int )=0;
     virtual SurfaceElement *cut( char*, GLfloat*, Interpolator<DATA_TYPE>*&, int e=0 )=0;
-    virtual vector<vector<int> >* surfaces(int v=0) = 0;
+    virtual int surfaces(int **, int v=0) = 0;
   protected:
     int*        _region;		//!< region for each element
     Connection* _edges;         //!< egdes for drawing elements
     SurfaceElement* planecut( char*, GLfloat*, Interpolator<DATA_TYPE>*&, int, const int [][2], int e  );
-    vector<vector<int> >* make_surf_nodelist(const int,int, const int **, int);
+    int make_surf_nodelist(int, int**, const int, int, const int **);
 };
 
 
@@ -221,7 +224,7 @@ class Tetrahedral : public VolElement
     virtual void     draw_out_face( int );
     virtual SurfaceElement* cut(char*,GLfloat*,Interpolator<DATA_TYPE>*&,int=0);
     const int* iso_polys( unsigned int );
-    virtual vector<vector<int> >* surfaces(int v=0);
+    virtual int surfaces(int **, int v=0);
 };
 
 class Prism : public VolElement
@@ -235,7 +238,7 @@ class Prism : public VolElement
     virtual void draw_out_face( int );
     virtual SurfaceElement* cut(char *,GLfloat*,Interpolator<DATA_TYPE>*&,int);
     const   int*     iso_polys(unsigned int);
-    virtual vector<vector<int> >* surfaces(int v=0);
+    virtual int surfaces(int **, int v=0);
 };
 
 
@@ -250,7 +253,7 @@ class Hexahedron : public VolElement
     virtual void draw_out_face( int );
     virtual SurfaceElement* cut(char *,GLfloat*,Interpolator<DATA_TYPE>*&,int);
     const int* iso_polys( unsigned int );
-    virtual vector<vector<int> >* surfaces(int v=0);
+    virtual int surfaces(int **, int v=0);
 };
 
 class Pyramid : public VolElement
@@ -264,6 +267,6 @@ class Pyramid : public VolElement
     virtual void     draw_out_face( int );
     virtual SurfaceElement* cut(char*, GLfloat*, Interpolator<DATA_TYPE>*&,int);
     const int* iso_polys( unsigned int );
-    virtual vector<vector<int> >* surfaces(int v=0);
+    virtual int surfaces(int **, int v=0);
 };
 #endif

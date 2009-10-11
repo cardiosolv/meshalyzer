@@ -245,13 +245,16 @@ const int* Pyramid::iso_polys(unsigned int index)
 /* 
  * return list of lists of nodes defining the bounding surfaces
  *
- * \param v element number
+ * \param ft face table
+ * \param v  element number
  *
  * \param pointer to a vector of vectors
+ *
+ * \pre the size of ft is big enough
  */
-vector<vector<int> > * 
-Pyramid::surfaces( int v )
+int 
+Pyramid::surfaces( int **ft, int v )
 {
-  return make_surf_nodelist( pyr_num_surf, int(pyr_surface_table[1]-pyr_surface_table[0]), 
-                             (const int **)pyr_surface_table, v );
+  return make_surf_nodelist( v, ft, pyr_num_surf, 
+        int(pyr_surface_table[1]-pyr_surface_table[0]), (const int **)pyr_surface_table );
 }

@@ -522,13 +522,15 @@ const int* Hexahedron::iso_polys(unsigned int index)
 /* 
  * return list of lists of nodes defining the bounding surfaces
  *
+ * \param ft face table to be filled in
  * \param v element number
  *
  * \param pointer to a vector of vectors
  */
-vector<vector<int> > * 
-Hexahedron::surfaces( int v )
+int
+Hexahedron::surfaces( int **ft, int v )
 {
-  return make_surf_nodelist( hex_num_surf, int(hex_surface_table[1]-hex_surface_table[0]), 
-                             (const int**)hex_surface_table, v );
+  return make_surf_nodelist( v, ft, hex_num_surf, 
+          int(hex_surface_table[1]-hex_surface_table[0]), 
+                             (const int**)hex_surface_table );
 }

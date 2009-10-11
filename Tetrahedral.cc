@@ -25,7 +25,7 @@ const int tetra_iso_table[][10] = {
 };
 const int tet_num_surf =4;
 const int tetra_surface_table[][3] = {
-   {0, 2, 1}, {0, 1, 3}, {0, 3, 2}, {2, 3, 1}
+   {0, 1, 2}, {0, 3, 1}, {0, 2, 3}, {2, 1, 3}
 };
 
 
@@ -194,11 +194,12 @@ Tetrahedral::iso_polys(unsigned int index)
  *
  * \param pointer to a vector of vectors
  */
-vector<vector<int> > * 
-Tetrahedral::surfaces( int v )
+int 
+Tetrahedral::surfaces( int **nl, int v )
 {
-  return make_surf_nodelist( tet_num_surf, int(tetra_surface_table[1]-tetra_surface_table[0]), 
-                             (const int **)tetra_surface_table, v );
+  return make_surf_nodelist( v, nl, tet_num_surf, 
+                             int(tetra_surface_table[1]-tetra_surface_table[0]), 
+                                            (const int **)tetra_surface_table );
 }
 
   
