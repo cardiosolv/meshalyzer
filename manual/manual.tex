@@ -79,7 +79,7 @@ volume elements are tagged, elements with no direction will be region~0,
 and other elements will be region~1.
 
 Surfaces may be formed from collections of two-dimensional elements.
-Surfaces are defined by Triangle files (see \S\ref{sec:tris}).
+Surfaces are defined by surface element files (see \S\ref{sec:surffile}).
 Also, surfaces are defined if there are any 2D elements in an \texttt{elem}
 file (see \S\ref{sec:elem}). 
 In the latter case, 
@@ -148,26 +148,58 @@ vertex#1 vertex#2
 vertex#1 vertex#2
 \end{verbatim}
 
-\subsection{Triangles}
+\subsection{Surface Elements}
+
+\label{sec:surffile}
+These files are a subset of the more general volume elements
+with the suffix ``.surf''.
+They may define several surfaces in one file.
+Any 2-dimensional element can be specified.
+labels are any sequence of characters not including white space.
+The file has the following format:
+\begin{verbatim}
+number_elements_in_surface0 label_for_surface0
+Tr vertex0 vertex1 vertex2 float
+Qd vertex0 vertex1 vertex2 vertex3 float
+.
+.
+.
+Qd vertex0 vertex1 vertex2 vertex3 float
+number_eleemnts_in_surface1 label_for_surface1
+Tr vertex0 vertex1 vertex2 float
+Tr vertex0 vertex1 vertex2 float
+.
+.
+.
+number_elements_in_surfaceN label_for_surfaceN
+Qd vertex0 vertex1 vertex2 vertex3 float
+Tr vertex0 vertex1 vertex2 float
+.
+.
+.
+Tr vertex0 vertex1 vertex2 float
+\end{verbatim}
+
+\subsubsection{Triangles}
 \label{sec:tris}
-Triangles are defined on a shell by shell basis
-in a file with the extension ``.tris'' or ``.tri''
+Triangle files are deprecated. 
+They are defined in a file with the extension ``.tris'' or ``.tri''
 which has the following format:
 \begin{verbatim}
-number_triangles_in_shell0
+number_triangles_in_surface0 label_for_surface0
 vertex0 vertex1 vertex2 float
 vertex0 vertex1 vertex2 float
 .
 .
 .
 vertex0 vertex1 vertex2 float
-number_triangles_in_shell1
+number_triangles_in_surface1 label_for_surface1
 vertex0 vertex1 vertex2 float
 vertex0 vertex1 vertex2 float
 .
 .
 .
-number_triangles_in_shellN
+number_triangles_in_surfaceN label_for_surfaceN
 vertex0 vertex1 vertex2 float
 vertex0 vertex1 vertex2 float
 .

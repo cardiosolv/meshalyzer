@@ -7,7 +7,8 @@
 #include "gl2ps.h"
 #include <redblack.h>
 #include "VecData.h"
-
+#include <sstream>
+#include <FL/filename.H>
 
 struct Face {
   int nsort[MAX_NUM_SURF_NODES];  //!< sorted nodes
@@ -84,6 +85,7 @@ Model::Model(Colourscale *cs, DataOpacity *dopac ):
 const int bufsize=1024;
 bool Model::read( const char* fnt, bool base1, bool no_elems )
 {
+  _file = fnt;
   char fn[bufsize];
   strcpy( fn, fnt );
   gzFile in;
@@ -117,10 +119,9 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   if( !no_elems ) read_elem_file( fn );
   read_region_file( in, fn );
   determine_regions();
-  add_region_surfaces();
 
-  //_triele  = new Triangle( &pt );
   add_surface_from_tri( fn );
+  add_surface_from_surf( fn );
   add_surface_from_elem( fn );
 
   // find maximum dimension and bounding box
@@ -306,8 +307,12 @@ int Model::add_surface_from_elem( const char *fn )
   }
   gzclose( in );
 
-  for ( int s=oldnumSurf; s<_surface.size(); s++ )
+  for ( int s=oldnumSurf; s<_surface.size(); s++ ) {
     _surface[s]->determine_vert_norms( pt );
+    ostringstream slabel(fname);
+    slabel << s-oldnumSurf;
+    _surface[s]->label( slabel.str() );
+  }
 
   return _surface.size();
 }
@@ -323,6 +328,7 @@ int Model::add_region_surfaces()
   // set up matrix to hold element faces
   int **faces = new int *[MAX_NUM_SURF];
   for( int i=0; i<MAX_NUM_SURF; i++ ) faces[i] = new int[MAX_NUM_SURF_NODES+1];
+  int numNewSurf=0;
 
   for( int r=0; r<_numReg; r++ )  {
     
@@ -352,6 +358,7 @@ int Model::add_region_surfaces()
 
     if( numface ) {             // convert the left over faces into a surface
 
+      numNewSurf++;
       rbl = rbopenlist( facetree );
 
       _surface.push_back( new Surfaces( &pt ) );
@@ -371,15 +378,82 @@ int Model::add_region_surfaces()
         _surface.back()->ele(e)->define( newface->norig );
         _surface.back()->ele(e)->compute_normals(0,0);
 
-        delete newface; // mo longer needed
+        delete newface; // no longer needed
       }
       _surface.back()->determine_vert_norms( pt );
+      ostringstream regnum;
+      regnum << "Reg " << r;
+      _surface.back()->label( regnum.str() );
       rbcloselist( rbl );
       rbdestroy( facetree );
     }
   }
   for( int i=0; i<MAX_NUM_SURF; i++ ) delete[] faces[i];
   delete[] faces;
+  return numNewSurf;
+}
+
+
+/** add a surface by reading in a .surf file
+ *
+ * \param fn   file containing surface elements
+ *
+ * \return     the \#surfaces added, -1 if not successful
+ */
+int Model::add_surface_from_surf( const char *fn )
+{
+  /* determine file name */
+  gzFile in;
+  string fname(fn);
+  if ( (in=gzopen( fname.c_str(), "r" )) == NULL ) {
+    fname += "surf";
+    if ( (in=gzopen( fname.c_str(), "r" )) == NULL ) {
+        fname += ".gz";
+        if ( (in=gzopen( fname.c_str(), "r" )) == NULL ) {
+            return -1;
+        }
+    }
+  }
+
+  int  nd[5], nele;
+  char buff[bufsize];
+  int  surfnum = 0;
+  char surflabel[bufsize];
+
+  while ( gzgets(in,buff,bufsize)!=Z_NULL && sscanf(buff, "%d", &nele )==1 ) {
+
+    _surface.push_back( new Surfaces( &pt ) );
+
+    // use specified surface label if available
+    if( sscanf( buff, "%d %s", &nele, surflabel ) != 2 ) 
+      sprintf( surflabel, "%s:%d", fl_filename_name(fname.c_str()), surfnum );
+    _surface.back()->label( surflabel );
+
+    _surface.back()->num(nele);
+    for ( int i=0; i<nele; i++ ) {
+      int nl[5];
+      char etype[12];
+      if ( gzgets(in,buff,bufsize) == Z_NULL ||
+              sscanf(buff, "%s %d %d %d", etype, nl, nl+1, nl+2, nl+3, nl+4 ) < 4 ) {
+        _surface.pop_back();
+        return surfnum;
+      }
+      if( !strcmp(etype, "Tr" ) )
+        _surface.back()->ele(i) = new Triangle( &pt );
+      else if( !strcmp(etype, "Qd") )
+        _surface.back()->ele(i) = new Quadrilateral( &pt );
+      else {
+        _surface.pop_back();
+        return surfnum;
+      }
+      _surface.back()->ele(i)->define(nl);
+      _surface.back()->ele(i)->compute_normals(0,0);
+    }
+    _surface.back()->determine_vert_norms( pt );
+    surfnum++;
+  } 
+
+  return surfnum;
 }
 
 
@@ -416,10 +490,19 @@ int Model::add_surface_from_tri( const char *fn )
   char buff[bufsize];
   gzgets(in,buff,bufsize);
   bool multi_surface = sscanf( buff, "%d %d %d", &ntri, nd+1, nd+2 ) < 3;
+  int surfnum = 0;
 
   if ( multi_surface ) {
+
     do {
       _surface.push_back( new Surfaces( &pt ) );
+
+      // use specified surface label if available
+      char surflabel[1024];
+      if( sscanf( buff, "%d %s", &ntri, surflabel ) != 2 ) 
+        sprintf( surflabel, "%s:%d", fl_filename_name(fname.c_str()), surfnum );
+      _surface.back()->label( surflabel );
+
       _surface.back()->num(ntri);
       for ( int i=0; i<ntri; i++ ) {
         _surface.back()->ele(i) = new Triangle( &pt );
@@ -427,30 +510,42 @@ int Model::add_surface_from_tri( const char *fn )
         if ( gzgets(in,buff,bufsize) == Z_NULL ||
              sscanf(buff, "%d %d %d", nl, nl+1, nl+2 ) < 3 ) {
           _surface.pop_back();
-          return numSurf();
+          return surfnum;
         }
         _surface.back()->ele(i)->define(nl);
         _surface.back()->ele(i)->compute_normals(0,0);
       }
       _surface.back()->determine_vert_norms( pt );
+      surfnum++;
     } while ( gzgets(in,buff,bufsize)!=Z_NULL && sscanf(buff, "%d",&ntri)==1 );
-  } else {
+
+  } else {  // 1 surface
+    
     int nl[3];
     nl[0]=ntri;nl[1]=nd[1];nl[2]=nd[2];
     _surface.push_back( new Surfaces( &pt ) );
     int curele = 0;
     do {
+      if(  sscanf(buff, "%d %d %d",nl, nl+1, nl+2) < 3 ) {
+        if( !curele ) {
+        _surface.pop_back();
+        return -1;
+      } else
+        break;
+      }
 #define ELEINC 10000
 	  if( !(curele%ELEINC) ) _surface.back()->num(curele+ELEINC);
 	  _surface.back()->ele(curele) = new Triangle( &pt );
   	  _surface.back()->ele(curele)->define(nl);
 	  _surface.back()->ele(curele++)->compute_normals(0,0);
-	}while( gzgets(in,buff,bufsize)!=Z_NULL && 
-			                   sscanf(buff, "%d %d %d",nl, nl+1, nl+2)>=3 );
+	}while( gzgets(in,buff,bufsize)!=Z_NULL );
     _surface.back()->num(curele);
     _surface.back()->determine_vert_norms( pt );
+    ostringstream slabel(fname);
+    _surface.back()->label( slabel.str() );
+    surfnum++;
   }
-  return _surface.size();
+  return surfnum;
 }
 
 

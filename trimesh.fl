@@ -59,7 +59,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {359 50 350 650} type Double box UP_BOX
+      xywh {5 77 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -67,24 +67,55 @@ class Controls {open
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File
+          label File open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
             label {Add surface}
-            callback {char *fn=fl_file_chooser("Surface", "*.tri",NULL);
+            callback {char *fn=fl_file_chooser("Surface", "*.{tris,surf,tri}",NULL);
 int sn;
-if( fn != NULL ) if( (sn=mwtb->add_surface( fn ))>=0 ){
-  for( int s=surflist->nitems(); s<sn; s++ ) {
-    char surfno[100];
-    sprintf( surfno, "%d", s );
-    surflist->add(surfno,1);
+if( fn != NULL ) {
+  if( (sn=mwtb->add_surface(fn))>0 ) {
+    for( int s=0; s<sn; s++ ) {
+      surflist->add(mwtb->model->surface(surflist->nitems())->label().c_str(),1);
+    }
+    elehi->maximum(mwtb->model->number(SurfEle)-1);
+    mwtb->redraw();
+    surflist->redraw();
   }
-  elehi->maximum(mwtb->model->number(SurfEle)-1);
-  mwtb->redraw();
-  surflist->redraw();
 }}
-            xywh {0 0 100 20} divider
+            xywh {0 0 100 20}
+          }
+          MenuItem {} {
+            label {Compute surfaces}
+            callback {int nsa=mwtb->model->add_region_surfaces();
+int ns = mwtb->model->numSurf();
+for( int i=ns-nsa; i<ns; i++ )  
+  surflist->add( mwtb->model->surface(i)->label().c_str(),1);
+surflist->redraw();
+char *fn;
+if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", "region.surf" )){
+  fl_cursor(FL_CURSOR_WAIT );
+  ofstream outf(fn);
+  for( int i=ns-nsa; i<ns; i++ ) {
+    SurfaceElement *e;
+    outf << mwtb->model->surface(i)->num() << endl;
+    for( int j=0; j<mwtb->model->surface(i)->num();j++ ) {
+      e = mwtb->model->element(i,j);
+      const int* n=e->obj();
+      if( e->ptsPerObj()==3 ) 
+        outf << "Tr";
+      else
+        outf << "Qd";
+      for( int k=0; k< e->ptsPerObj(); k++ )
+        outf << " " << n[k];
+      outf << endl;
+    }
+  }
+  fl_cursor(FL_CURSOR_DEFAULT);
+  mwtb->redraw();
+}}
+            xywh {0 0 30 20} divider
           }
           MenuItem {} {
             label {Read data}
@@ -367,7 +398,7 @@ mwtb->trackball.size = md;mwtb->redraw();}
           }
         }
         Submenu {} {
-          label Data open
+          label Data
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -619,12 +650,12 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight selected
-          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4
+          label Highlight
+          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
             label {Tetrahedron:}
@@ -938,8 +969,8 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface
-          xywh {15 310 315 175} labelsize 12 labelcolor 90 hide
+          label Surface open
+          xywh {15 310 315 175} labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
             label visible
@@ -1207,8 +1238,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1544,16 +1574,16 @@ for( int i=1; i<=surflist->nitems(); i++ )
   if( surflist->checked(i) )
     lst.push_back(i-1);} {}
   }
-  Function {refresh_surflist()} {} {
+  Function {refresh_surflist()} {open
+  } {
     code {surflist->clear(); 
 for( int s=0; s<mwtb->model->numSurf(); s++ ) {
-    char surfno[100];
-    sprintf( surfno, "%d", s );
-    surflist->add(surfno,1);
+    surflist->add(mwtb->model->surface(s)->label().c_str(),1);
   }
   elehi->maximum(mwtb->model->number(SurfEle)-1);
   mwtb->redraw();
-  surflist->redraw();} {}
+  surflist->redraw();} {selected
+    }
   }
 } 
 

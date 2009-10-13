@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "DrawingObjects.h"
-
+#include <string>
 
 class Surfaces
 {
@@ -29,7 +29,9 @@ class Surfaces
     vector<SurfaceElement*>& ele(){return _ele;}
     void draw(GLfloat*,Colourscale*,DATA_TYPE*,int,
               dataOpac*,const GLfloat*);
-    void register_vertices( vector<bool>& );
+    void   register_vertices( vector<bool>& );
+    void   label( string s ){ _label=s; }
+    string label( void ) { return _label; }
   protected:
     Point   *_p;
     GLfloat  _fillcolor[4];
@@ -40,7 +42,7 @@ class Surfaces
     GLfloat* _vertnorm;   //!< vertex normals
     int*     _vert;       //!< vertices for which normals are computed
     vector<SurfaceElement*> _ele; //!< list of elelments to draw
-    int       label;
+    string   _label;
 };
 
 #endif

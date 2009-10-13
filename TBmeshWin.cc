@@ -672,11 +672,15 @@ void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt,
 /** add a surface by reading in a .tri file, also try reading a normal file
  *
  * \param file     file containing tri's
+ *
+ * \return \#surfaces added
  */
 int TBmeshWin :: add_surface( const char *fn )
 {
-  model->add_surface_from_tri( fn );
-  return model->numSurf();
+  int nsa; 
+  if ( (nsa=model->add_surface_from_tri( fn ))<=0 )
+    nsa = model->add_surface_from_surf( fn );
+  return nsa;
 }
 
 

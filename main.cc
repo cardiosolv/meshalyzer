@@ -171,9 +171,7 @@ main( int argc, char *argv[] )
 
   win.trackballwin->show();
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
-    char s[256];
-    sprintf( s, "%d", i );
-    control.surflist->add( s, 1 );
+    control.surflist->add( win.trackballwin->model->surface(i)->label().c_str(), 1 );
   }
   if ( vectordata ) control.vectorgrp->activate();
   control.tethi->maximum( win.trackballwin->model->numVol()-1 );

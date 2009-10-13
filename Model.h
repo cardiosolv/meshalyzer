@@ -22,6 +22,8 @@ class Model
     ~Model();
     bool         read(const char *fn, bool base1, bool no_elems);
     int          add_surface_from_tri( const char * );
+    int          add_surface_from_surf( const char * );
+    int          add_region_surfaces( void );
     inline int   reg_first( int s, Object_t t ){return _region[s]->first(t); }
     Surfaces* surface(int s){ return _surface[s]; }
 	void      surfKill( int s );
@@ -82,10 +84,10 @@ class Model
     void             determine_regions();
     bool             read_elem_file(const char *);
     int              add_surface_from_elem( const char *fn );
-    int              add_region_surfaces( void );
     vector<bool>     allvis;
     int             _numtm;
     int              new_region_label();
+    string          _file;               //!< base file name
 };
 
 #endif
