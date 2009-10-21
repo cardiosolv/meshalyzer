@@ -828,6 +828,11 @@ mwtb->redraw();}
 mwtb->redraw();}
               image {cg.xpm} xywh {15 15 100 20}
             }
+            MenuItem {} {
+              callback {mwtb->vecdata->cs->scale(CS_MATLAB);
+mwtb->redraw();}
+              image {matlab.xpm} xywh {15 15 100 20}
+            }
           }
           Fl_Menu_Button veclengthdeterm {
             label Length
@@ -1087,6 +1092,11 @@ mwtb->redraw();}
             callback {mwtb->cs->scale(CS_CG);
 mwtb->redraw();}
             image {cg.xpm} xywh {0 0 100 20}
+          }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_MATLAB);
+mwtb->redraw();} selected
+            image {matlab.xpm} xywh {0 0 100 20}
           }
         }
         Fl_Value_Input mincolval {
