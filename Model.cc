@@ -5,7 +5,6 @@
 #include <string>
 #include "DataOpacity.h"
 #include "gl2ps.h"
-#include <redblack.h>
 #include "VecData.h"
 #include <sstream>
 #include <FL/filename.H>
@@ -19,15 +18,12 @@ struct Face {
 int intcmp( const void *a, const void *b ){ return *(int *)a-*(int *)b; }
 
 /** compare 2 faces for sorting */
-int cmpface( const void *a, const void *b, const void *c )
+bool cmpface( const Face *A, const Face *B)
 {
-  const Face *A = (const Face *)a;
-  const Face *B = (const Face *)b;
-
-  if( A->nnode != B->nnode ) return  A->nnode - B->nnode;
+  if( A->nnode != B->nnode ) return  A->nnode < B->nnode;
   for(  int i=0; i< A->nnode; i++ )
-    if( A->nsort[i] != B->nsort[i] ) return  A->nsort[i] - B->nsort[i];
-  return 0;
+    if( A->nsort[i] != B->nsort[i] ) return  A->nsort[i] < B->nsort[i];
+  return false;
 };
 
 
@@ -332,41 +328,40 @@ int Model::add_region_surfaces()
 
   for( int r=0; r<_numReg; r++ )  {
     
-    struct rbtree *facetree = rbinit( cmpface, NULL );  // tree to hold faces
+    set<Face*, bool (*)(const Face*, const Face*)> facetree(cmpface);
     Face *newface = new Face;
     
     for( int e=0; e<_numVol; e++ )
       if( _region[r]->ele_member(e) ) {
         int ns = _vol[e]->surfaces( faces );
         for( int i=0; i<ns; i++ ) {
-          Face *f1;
           make_face( newface, faces[i][0], faces[i]+1 );
-          if ( (f1=(Face *)rbsearch( newface, facetree )) != newface ) { //in list
-            rbdelete( f1, facetree );
-            free( f1 );
-          } else 
+          set<Face*>::iterator iter = facetree.find(newface);
+          if (iter != facetree.end()) {
+            delete *iter;
+            facetree.erase(iter);
+          } else {
+            facetree.insert(newface);
             newface = new Face;  // added to list, get memory for a new face
+          }
         }
       }
 
     // count the number of faces left in the list
     delete newface;
-    RBLIST* rbl = rbopenlist( facetree );
-    int numface=0;
-    while( rbreadlist( rbl ) != NULL ) numface ++;
-    rbcloselist( rbl );
 
-    if( numface ) {             // convert the left over faces into a surface
-
+    if( facetree.size() ) {             // convert the left over faces into a surface
       numNewSurf++;
-      rbl = rbopenlist( facetree );
-
+      
       _surface.push_back( new Surfaces( &pt ) );
-      _surface.back()->num( numface );
+      _surface.back()->num( facetree.size() );
 
-      for( int e=0; e<numface; e++ ){  
+      int e=0;
+      for(set<Face*>::iterator iter=facetree.begin();
+          iter!=facetree.end();
+          ++iter) {
 
-        newface = (Face *)rbreadlist( rbl );
+        newface = *iter;
 
         if( newface->nnode == 3 ) {
           _surface.back()->ele(e) = new Triangle( &pt );
@@ -379,13 +374,12 @@ int Model::add_region_surfaces()
         _surface.back()->ele(e)->compute_normals(0,0);
 
         delete newface; // no longer needed
+        e++;
       }
       _surface.back()->determine_vert_norms( pt );
       ostringstream regnum;
       regnum << "Reg " << r;
       _surface.back()->label( regnum.str() );
-      rbcloselist( rbl );
-      rbdestroy( facetree );
     }
   }
   for( int i=0; i<MAX_NUM_SURF; i++ ) delete[] faces[i];
