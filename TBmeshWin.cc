@@ -645,8 +645,13 @@ int TBmeshWin::handle( int event )
 void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt, 
 		bool no_elems, bool base1 )
 {
-  while ( fnt == NULL )
+  if ( fnt == NULL ) {
     fnt = fl_file_chooser( "Pick one", "*.pts*", NULL );
+    if (fnt == NULL) {
+      fprintf(stderr, "No file selected.  Exiting.\n");
+      exit(0);
+    }
+  }
 
   if ( !model->read( fnt, base1, no_elems ) ) return;
 
