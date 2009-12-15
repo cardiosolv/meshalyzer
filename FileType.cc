@@ -62,7 +62,7 @@ FileType FileTypeFinder ( const char *fn )
 
   } else {			// might be a CG file sequence
 
-    char* tpos = strrchr( fn, 't' ); // look for last "t" in the file name
+    const char* tpos = strrchr( fn, 't' ); // look for last "t" in the file name
 
     if ( tpos ==  NULL ) // no "t" found, therefore not CG file sequence
       return FTascii;

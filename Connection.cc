@@ -8,6 +8,7 @@
 
 void draw_cylinder( const GLfloat *start, const GLfloat* end, int radius )
 {
+  // cylinder
   GLUquadric* quado = gluNewQuadric();
   gluQuadricDrawStyle( quado, GLU_FILL );
   gluQuadricOrientation(quado, GLU_INSIDE);
@@ -36,7 +37,8 @@ void draw_cylinder( const GLfloat *start, const GLfloat* end, int radius )
 
 #define NUM_S 2
 #define NUM_T 2
-/** fill the      texture buffer 
+/** fill the texture buffer so that data is linearly interpolated over the cylinder
+ *
  * \param co      initial colour
  * \param c1      final colour
  * \param a0      intial alpha
@@ -90,10 +92,13 @@ initializeCyltexture( GLubyte *cgrad, GLuint *tn )
 void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
         DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
+  void draw_sphere( const GLfloat *, float );
+
   if ( p0>=_n || p1>=_n ) return;
 
   if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )     // data opacity
 	  translucency(true);
+
 
   GLuint texName;
   GLubyte cgrad[4*NUM_S*NUM_T];
@@ -108,38 +113,51 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 
   if( data==NULL ) glColor4fv( colour );
 
+
   for ( int i=p0; i<=p1; i+=stride ) {
 
-	if ( !_pt->vis(_node[i*2]) || !_pt->vis(_node[i*2+1]) )
+    int n0 = _node[i*2], n1=_node[i*2+1];
+
+	if ( !_pt->vis( n0 ) || !_pt->vis( n1 ) )
 	  continue;
 	
 	if ( data != NULL ) {
 
 	  GLfloat a0 = colour[3], a1 = colour[3];
 	  if ( dataopac!=NULL && dataopac->on() ) {       // data opacity
-		a0 =  dataopac->alpha(data[_node[i*2]]); 
-		a1 =  dataopac->alpha(data[_node[i*2+1]]); 
+		a0 =  dataopac->alpha(data[n0]); 
+		a1 =  dataopac->alpha(data[n1]); 
 	  }
 
 	  if( _3D ) {
+		
+        cs->colourize( data[n0], a0 );
+        draw_sphere(  _pt->pt(n0), 0.98*_size );
+        if( !facetshade) 
+		  cs->colourize( data[n1], a1 );
+        draw_sphere(  _pt->pt(n1), 0.98*_size );
+
 		if( facetshade )
-          cs->colourize( data[_node[i*2]] );
+          cs->colourize( data[n0] );
         else
-          fillCylTexture(  cs->colorvec( data[_node[i*2]]   ),
-			             cs->colorvec( data[_node[i*2+1]] ), a0, a1, cgrad ); 
-		draw_cylinder( _pt->pt(_node[i*2]), _pt->pt(_node[i*2+1]), _size );
+          fillCylTexture( cs->colorvec( data[n0] ),
+			              cs->colorvec( data[n1] ), a0, a1, cgrad ); 
+		draw_cylinder( _pt->pt(n0), _pt->pt(n1), _size );
+
 	  }else{
-		cs->colourize( data[_node[i*2]], a0 );
-		glVertex3fv(_pt->pt(_node[i*2]));
-		cs->colourize( data[_node[i*2+1]], a1 );
-		glVertex3fv(_pt->pt(_node[i*2+1]));
+		cs->colourize( data[n0], a0 );
+		glVertex3fv(_pt->pt(n0));
+		cs->colourize( data[n1], a1 );
+		glVertex3fv(_pt->pt(n1));
 	  }
 	} else {
 	  if( _3D ){
-		draw_cylinder( _pt->pt(_node[i*2]), _pt->pt(_node[i*2+1]), _size );
+        draw_sphere(  _pt->pt(n0), _size );
+        draw_sphere(  _pt->pt(n1), _size );
+		draw_cylinder( _pt->pt(n0), _pt->pt(n1), _size );
 	  }else{
-		glVertex3fv(_pt->pt(_node[i*2]));
-		glVertex3fv(_pt->pt(_node[i*2+1]));
+		glVertex3fv(_pt->pt(n0));
+		glVertex3fv(_pt->pt(n1));
 	  }
 	}
   }

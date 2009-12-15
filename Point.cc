@@ -10,13 +10,15 @@
 void draw_sphere( const GLfloat *ctr, float radius )
 {
   GLUquadric* quado = gluNewQuadric();
-  gluQuadricDrawStyle( quado, GLU_FILL );
   gluQuadricOrientation(quado, GLU_INSIDE);
+  gluQuadricDrawStyle( quado, GLU_FILL );
+  gluQuadricNormals( quado, GLU_SMOOTH );
+  gluQuadricTexture( quado, GL_FALSE );
 
-  glPolygonMode( GL_FRONT, GL_FILL );
+  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   glPushMatrix();
   glTranslatef( ctr[0], ctr[1], ctr[2] );
-  gluSphere( quado, radius, 10, 5 );
+  gluSphere( quado, radius, 16, 16 );
   glPopMatrix();
   gluDeleteQuadric(quado);
 }

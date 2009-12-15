@@ -59,7 +59,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {5 77 350 650} type Double box UP_BOX
+      xywh {952 47 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -654,8 +654,8 @@ op->win->show();}
         xywh {10 270 330 215} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
-          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          label Highlight selected
+          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {Tetrahedron:}
@@ -766,8 +766,8 @@ mwtb->select_vertex();}
           }
         }
         Fl_Group vectorgrp {
-          label Vectors
-          xywh {15 325 315 140} labelsize 12 labelcolor 7 hide deactivate
+          label Vectors open
+          xywh {15 325 315 155} labelsize 12 labelcolor 7 hide deactivate
         } {
           Fl_Light_Button veconbut {
             label Vectors
@@ -886,6 +886,12 @@ mwtb->redraw();}
 mwtb->redraw();}
             tooltip {calibrate for current time} xywh {120 410 75 30} box ROUND_UP_BOX labelsize 10
           }
+          Fl_Value_Input vecstride {
+            label {stride:}
+            callback {mwtb->vecdata->stride(o->value());
+mwtb->redraw();}
+            xywh {65 451 35 24} when 8 minimum 1 maximum 100000 step 1 value 1
+          }
         }
         Fl_Group lightgrp {
           label Lights
@@ -974,8 +980,8 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface open
-          xywh {15 310 315 175} labelsize 12 labelcolor 90
+          label Surface
+          xywh {15 310 315 175} labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label visible
@@ -1592,8 +1598,7 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   }
   elehi->maximum(mwtb->model->number(SurfEle)-1);
   mwtb->redraw();
-  surflist->redraw();} {selected
-    }
+  surflist->redraw();} {}
   }
 } 
 

@@ -236,7 +236,7 @@ VecData::draw(int tm, float maxdim)
   // We must move translate and rotate the world to get the proper orientation
   GLfloat rotvect[3], zaxis[]={0,0,1};
 
-  for ( int i=0; i<3*numpt; i+=3 ) {
+  for ( int i=0; i<3*numpt; i+=3*_stride ) {
 
     // determine size to draw vectors
     float size = base_size;

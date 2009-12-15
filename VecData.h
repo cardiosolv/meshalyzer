@@ -33,6 +33,7 @@ class VecData
 	                                          {_colour_det=dt; optimize_cs();} }
     void         auto_cs(bool a){ autocal=a; }
     void         optimize_cs();
+    void         stride( int a ){ _stride=a; }
     Colourscale *cs;			// colour scale for display
   private:
     int      numpt;			// number of spatial points
@@ -51,6 +52,7 @@ class VecData
     scalar_max;
     GLUquadricObj* quado;
     int      _last_tm;      // last time drawn
+    int      _stride;
 };
 
 
