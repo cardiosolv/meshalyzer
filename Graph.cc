@@ -10,6 +10,8 @@
 #include <FL/fl_ask.H>
 #include <sstream>
 
+#define MIN_STATIC_CURVE 2
+
 const int setcolour[]=
   {
     FL_RED, FL_GREEN, FL_BLUE, FL_DARK_MAGENTA,
@@ -146,7 +148,7 @@ void Graph::copy_curve( int c )
 // clear curves
 void Graph :: clear_curves()
 {
-  for ( int c=2; c<numset; c++ ) {
+  for ( int c=MIN_STATIC_CURVE; c<numset; c++ ) {
     delete[] xv[c];
     delete[] yv[c];
     np[c] = 0;
@@ -259,6 +261,18 @@ Graph :: set_2d_data( const double *x, const double *y, int n, int setno )
 
   redraw();
   return 0;
+}
+
+
+void
+Graph :: rotate()
+{
+  for( int i=MIN_STATIC_CURVE; i<numset; i++ ) {
+    const double *t = xv[i];
+    xv[i] = yv[i];
+    yv[i] = t;
+  }
+  scale();
 }
 
 

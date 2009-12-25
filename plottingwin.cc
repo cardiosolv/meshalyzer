@@ -58,7 +58,7 @@ PlotWin::PlotWin(  string title ) {
       graph->labelfont(0);
       graph->labelsize(14);
       graph->labelcolor(FL_FOREGROUND_COLOR);
-      graph->align(Fl_Align(FL_ALIGN_CENTER));
+      graph->align(FL_ALIGN_CENTER);
       graph->when(FL_WHEN_RELEASE);
       Fl_Group::current()->resizable(graph);
     } // Graph* graph

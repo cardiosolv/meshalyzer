@@ -15,7 +15,7 @@ void RRegion:: initialize( int n, int nvol, int l )
   set_color( Vertex, 0., 1., 0. );
   set_color( Cable, 0., 0., 1. );
   set_color( Cnnx, 1., 0., 1. );
-  set_color( Tetrahedron, 0., 0., 1. );
+  set_color( VolEle, 0., 0., 1. );
   memset( startind, 0, maxobject*sizeof(int)  );
   memset( endind,   0, maxobject*sizeof(int)  );
   memset( showobj,  0, maxobject*sizeof(bool) );
@@ -37,7 +37,7 @@ void RRegion:: initialize( int n, int nvol, int l )
  */
 RRegion::RRegion( VolElement **v, int nv, int n, int l )
 {
-  startind[Tetrahedron] = -1;
+  startind[VolEle] = -1;
 
   initialize( n, nv, l );
   for ( int j=0; j<nv; j++ ) {
@@ -49,8 +49,8 @@ RRegion::RRegion( VolElement **v, int nv, int n, int l )
           int node = ele[e*v[j]->ptsPerObj()+i];
           _member[node] = true;
         }
-        endind[Tetrahedron] = j;
-        if ( startind[Tetrahedron]<0 ) startind[Tetrahedron] = j;
+        endind[VolEle] = j;
+        if ( startind[VolEle]<0 ) startind[VolEle] = j;
       }
   }
 

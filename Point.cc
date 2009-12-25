@@ -175,4 +175,5 @@ Point :: add( GLfloat *p, int n )
   memcpy( _pts+3*(_n-n), p, n*3*sizeof(GLfloat) );
   _allvis.resize( _n );
   _allvis.assign( _n, true );
+  setVis( true );
 }

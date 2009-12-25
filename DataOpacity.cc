@@ -100,13 +100,13 @@ DataOpacity::DataOpacity( TBmeshWin *tbmw ) {
       minopacval->type(3);
       minopacval->value(0.5);
       minopacval->callback((Fl_Callback*)cb_minopacval);
-      minopacval->align(Fl_Align(FL_ALIGN_LEFT));
+      minopacval->align(FL_ALIGN_LEFT);
     } // Fl_Value_Slider* minopacval
     { maxopacval = new Fl_Value_Slider(125, 100, 120, 30, "Maximum Opacity");
       maxopacval->type(3);
       maxopacval->value(1);
       maxopacval->callback((Fl_Callback*)cb_maxopacval);
-      maxopacval->align(Fl_Align(FL_ALIGN_LEFT));
+      maxopacval->align(FL_ALIGN_LEFT);
     } // Fl_Value_Slider* maxopacval
     { onbut = new Fl_Light_Button(225, 10, 120, 30, "Data Opacity ");
       onbut->labelsize(16);

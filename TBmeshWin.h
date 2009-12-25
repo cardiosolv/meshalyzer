@@ -11,6 +11,7 @@
 #include "DataAllInMem.h"
 #include "ThreadedData.h"
 #include "VecData.h"
+#include "AuxGrid.h"
 #include "Model.h"
 #include "Sequence.h"
 #include "CutSurfaces.h"
@@ -113,6 +114,8 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      size( Object_t o, int r, float b ){model->size(o,r,b); redraw();}
     float     size( Object_t o, int r ){ return model->size(o,r); }
     IsosurfControl *isosurfwin;
+    int       readAuxGrid( char* agfile );
+    AuxGrid  *auxGrid;
   private:
     int        hilight[maxobject];	// which object to highlight
     bool	   hilighton;			// whether to highlight

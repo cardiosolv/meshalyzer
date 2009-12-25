@@ -48,16 +48,16 @@ class Point: public DrawingObj
     const   GLfloat* pt( int p=0 ){ return _pts+p*3; }
     Point(): _pts(NULL), _base1(false) {}
     ~Point() { if ( _n ) free(_pts); }
-  const   GLfloat* pt( int p ) const { return _pts+p*3; }
+    const   GLfloat* pt( int p ) const { return _pts+p*3; }
     void     setVis( bool v ){ if (v) _visible=&_allvis; }
-  void     setVis( vector<bool>* v ){ _visible=v; }
+    void     setVis( vector<bool>* v ){ _visible=v; }
     bool     vis( int n ) const { return (*_visible)[n]; }
     bool     vis( int n, bool b ) const { (*_visible)[n]=b; }
     const vector<bool>* vis() const { return _visible; }
     const   GLfloat* offset() const { return _offset; }
     void    offset( const GLfloat*o )  { memcpy(_offset,o,sizeof(GLfloat)*3); }
     void    base1(bool b){ _base1 = b; }
-    void     add( GLfloat *, int n=1 );
+    void    add( GLfloat *, int n=1 );
     const GLfloat* operator[] (int i){ return _pts+3*i; }
   private:
     GLfloat*     _pts;		  //!< point list

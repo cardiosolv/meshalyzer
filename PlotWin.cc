@@ -84,15 +84,13 @@ void PlotWin :: highlight( int tindx=-1 )
     graph->set_2d_data(xv,data,datasize,0);
   else
     graph->set_2d_data(data,xv,datasize,0);
-  if ( !rotated ) {
-    tmx[0] = tmx[1] = xv[tindx];
-    tmy[0] = datamin;
-    tmy[1] = data[tindx];
-    if ( !rotated )
-      graph->set_2d_data(tmx,tmy,2,1);
-    else
-      graph->set_2d_data(tmy,tmx,2,1);
-  }
+  tmx[0] = tmx[1] = xv[tindx];
+  tmy[0] = datamin;
+  tmy[1] = data[tindx];
+  if ( !rotated )
+    graph->set_2d_data(tmx,tmy,2,1);
+  else
+    graph->set_2d_data(tmy,tmx,2,1);
 #ifdef USE_GNUPLOT
   window->redraw();
 #else
@@ -104,6 +102,7 @@ void PlotWin :: rotate( bool a )
 {
   if ( a!=rotated ) {
     rotated = a;
+    graph->rotate();
     rotbut->value(a);
     window->size( window->h(), window->w() );
     highlight();

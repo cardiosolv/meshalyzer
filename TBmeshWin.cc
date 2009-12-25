@@ -125,7 +125,7 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     : Fl_Gl_Tb_Window(x, y, w, h, l), vecdata( NULL ), hilighton(false),
     autocol(false), have_data(NoData), datadst(Surface), vert_asc_obj(SurfEle),
     fill_assc_obj(false), fill_hitet(false), revDrawOrder(false), tm(0),
-    frame_skip(0), frame_delay(0.01), lightson(true),
+    frame_skip(0), frame_delay(0.01), lightson(true), auxGrid(NULL),
     cs( new Colourscale( 64 ) ), renderMode(GL_RENDER),
     hinfo(new HiLiteInfoWin(this)), dataopac(new DataOpacity( this )),
     cplane(new ClipPlane( this )), hitbuffer(HITBUFSIZE),
@@ -135,7 +135,7 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] ),
     iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL)
 {
-  model = new Model(cs,dataopac);
+  model = new Model();
   memset( hilight, 0, sizeof(int)*maxobject );
   tet_color[0]     = 1.; tet_color[1]     = 1.;  tet_color[2]     = 1.;
   hitet_color[0]   = 1.; hitet_color[1]   = 0.;  hitet_color[2]   = 0.;
@@ -234,7 +234,7 @@ void TBmeshWin :: draw()
 
     glLineWidth(0.5);
     glColor3fv( tet_color );
-    const bool datcolor = (datadst == Tetrahedron) && have_data!=NoData;
+    const bool datcolor = (datadst == VolEle) && have_data!=NoData;
 
     for ( int r=0; r<model->_numReg; r++ ) {
 
@@ -244,7 +244,7 @@ void TBmeshWin :: draw()
 
       for ( int i=0; i<model->numVol(); i++ )
         model->_vol[i]->draw( 0, model->_vol[i]->num()-1,
-                              model->region(r)->get_color(Tetrahedron),
+                              model->region(r)->get_color(VolEle),
                               cs, datcolor?data:NULL );
     }
 
@@ -303,18 +303,19 @@ void TBmeshWin :: draw()
   }
   draw_iso_lines();
 
+
   if ( hilighton ) {
     // draw highlighted tetrahedron
     if ( model->numVol() ) {
       if ( fill_hitet ) {
         glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        model->_vol[hilight[Tetrahedron]]->draw(0,  hiptobj_color, 2 );
-        model->_vol[hilight[Tetrahedron]]->draw(0, bc );
+        model->_vol[hilight[VolEle]]->draw(0,  hiptobj_color, 2 );
+        model->_vol[hilight[VolEle]]->draw(0, bc );
       } else
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-        model->_vol[hilight[Tetrahedron]]->draw( 0, hitet_color, 2 );
+        model->_vol[hilight[VolEle]]->draw( 0, hitet_color, 2 );
     }
-    if (model->numVol() && vert_asc_obj==Tetrahedron ) {
+    if (model->numVol() && vert_asc_obj==VolEle ) {
       //draw volume elements associated with highlighted node
 
       if ( fill_assc_obj ) {
@@ -372,7 +373,8 @@ void TBmeshWin :: draw()
   gl2psEnable(GL2PS_BLEND);
   glEnable(GL_BLEND);
 
-  if ( vecdata != NULL ) vecdata->draw(tm,model->maxdim());
+  if( vecdata != NULL ) vecdata->draw(tm,model->maxdim());
+  if( auxGrid) auxGrid->draw( tm );
 
   glPopMatrix();
 }
@@ -696,7 +698,7 @@ GLfloat* TBmeshWin:: get_color( Object_t obj, int s )
 {
   if ( s<0 ) s=0;
 
-  if ( obj == Tetrahedron )
+  if ( obj == VolEle )
     return tet_color;
   else if ( obj == SurfEle && model->numSurf() )
     return model->surface(s)->outlinecolor();
@@ -708,7 +710,7 @@ GLfloat* TBmeshWin:: get_color( Object_t obj, int s )
 
 void TBmeshWin:: set_color( Object_t obj, int s, float r, float g, float b, float a )
 {
-  if ( obj==Tetrahedron ) {
+  if ( obj==VolEle ) {
     tet_color[0] = r;
     tet_color[1] = g;
     tet_color[2] = b;
@@ -863,7 +865,7 @@ TBmeshWin :: select_hi( int n )
       objtype=SurfEle;
       break;
     } else if ( strstr(  hinfo->text(i), "volume" ) ) {
-      objtype=Tetrahedron;
+      objtype=VolEle;
       break;
     } else if ( strstr(  hinfo->text(i), "cable" ) ) {
       objtype=Cable;
@@ -886,7 +888,7 @@ TBmeshWin :: select_hi( int n )
     hiliteinfo();
     hinfo->topline( lineno );
     contwin->verthi->value(hilight[Vertex]);
-    contwin->tethi->value(hilight[Tetrahedron]);
+    contwin->tethi->value(hilight[VolEle]);
     contwin->elehi->value(hilight[SurfEle]);
     contwin->cnnxhi->value(hilight[Cnnx]);
     contwin->cabhi->value(hilight[Cable]);
@@ -1085,6 +1087,30 @@ TBmeshWin::getVecData( void *vp, char* vptfile )
   vecdata = newvd;
   ((Myslider *)vp)->maximum( max_time() );
   contwin->window->redraw();
+  redraw();
+  return 0;
+}
+
+
+// read in Auxiliary grid
+// return nonzero if an error
+int
+TBmeshWin::readAuxGrid( char* agfile )
+{
+  AuxGrid* newAuxGrid;
+
+  try {
+    newAuxGrid = new AuxGrid( agfile, model->pt_offset() );
+  } catch (...) {
+    return 1;
+  }
+  if( max_time() && max_time() != newAuxGrid->num_tm()-1 ) {
+    delete newAuxGrid;
+    fl_message( "Number of times in Aux Grid does not match" );
+    return 1;
+  }
+  if ( auxGrid != NULL ) delete auxGrid;
+  auxGrid = newAuxGrid;
   redraw();
   return 0;
 }

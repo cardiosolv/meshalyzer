@@ -96,7 +96,7 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 
   if ( p0>=_n || p1>=_n ) return;
 
-  if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )     // data opacity
+  if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )   // data opacity
 	  translucency(true);
 
 

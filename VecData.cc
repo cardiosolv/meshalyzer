@@ -98,7 +98,7 @@ VecData::VecData(const GLfloat *pt_offset, char* vptfile):_length(1),maxmag(0.),
   for ( int i=0; i<3*numpt; i+=3 ) {
     if ( gzgets(in, buff, bufsize) == Z_NULL ) return;
     if ( sscanf( buff, "%f %f %f", pts+i, pts+i+1, pts+i+2 ) != 3 ) return;
-    for ( int j=0; j<3; j++ ) pts[i+j] -= pt_offset[j];		// centre wrt scalar data
+    for ( int j=0; j<3; j++ ) pts[i+j] -= pt_offset[j];//centre wrt scalar data
   }
   gzclose( in );
 

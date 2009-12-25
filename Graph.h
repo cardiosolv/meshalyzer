@@ -83,6 +83,7 @@ class Graph : public Fl_Widget
     void write(ostream&, int);
     int  n(){ return numset; }
     void to_world( int x, int y, double &wx, double &wy );
+    void rotate();
   private:
     const double *xv[max_num_sets], *yv[max_num_sets];
     double x0, x1, y0, y1;					// data range being plotted

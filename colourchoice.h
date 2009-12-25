@@ -35,4 +35,23 @@ private:
   TBmeshWin *tbmw; 
   bool *sc; 
 };
+
+class AuxColourChoice {
+public:
+  AuxColourChoice( GLfloat *c, Object_t o, TBmeshWin *tb);
+  Fl_Double_Window *window;
+  Fl_Color_Chooser *rgb_choice;
+  Fl_Slider *opacity;
+private:
+  void cb_Done1_i(Fl_Return_Button*, void*);
+  static void cb_Done1(Fl_Return_Button*, void*);
+public:
+  Fl_Button *apbut;
+private:
+  void cb_apbut1_i(Fl_Button*, void*);
+  static void cb_apbut1(Fl_Button*, void*);
+  GLfloat *col; 
+  Object_t obj; 
+  TBmeshWin *tbmw; 
+};
 #endif

@@ -165,6 +165,8 @@ main( int argc, char *argv[] )
       control.restore_state( argv[i] );
     else if ( strstr( argv[i], ".vpts" ) != NULL )
       vectordata = !win.trackballwin->getVecData(control.tmslider, argv[i]);
+    else if ( strstr( argv[i], ".pts_t" ) != NULL )
+      win.trackballwin->readAuxGrid( argv[i]);
     else
       win.trackballwin->get_data(argv[i], control.tmslider );
   }
@@ -184,6 +186,7 @@ main( int argc, char *argv[] )
   control.set_tet_region( win.trackballwin->model );
   control.window->show();
   if ( vectordata ) control.vectorgrp->activate();
+  if ( win.trackballwin->auxGrid ) control.auxgridgrp->activate();
   if ( iconcontrols )
     control.window->iconize();
   win.winny->position(1,1);

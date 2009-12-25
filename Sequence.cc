@@ -27,7 +27,7 @@ Sequence::Sequence( TBmeshWin *tb ) {
       o->callback((Fl_Callback*)cb_Start);
     } // Fl_Return_Button* o
     { fname = new Fl_File_Input(15, 65, 215, 35, "output file base name:");
-      fname->align(Fl_Align(FL_ALIGN_TOP));
+      fname->align(FL_ALIGN_TOP);
     } // Fl_File_Input* fname
     { Fl_Button* o = new Fl_Button(240, 65, 40, 35, "browse");
       o->labelsize(10);

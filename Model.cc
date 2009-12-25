@@ -43,6 +43,25 @@ make_face( Face *f, int n, int* orig )
 }
 
 
+/** read in a line from a file, ignoring lines beginning with "#"
+ *
+ * \warn not threadsafe
+ * \return pointer to a static buffer
+ */
+char *
+get_line( gzFile in )
+{
+  const int bufsize=1024;
+  static char buf[bufsize];
+  char *retval;
+  do {
+	retval = gzgets( in, buf, bufsize );
+  } while( retval != Z_NULL && buf[0]=='#' );
+  
+  return retval==Z_NULL?NULL:buf;
+}
+
+
 /** return a new unique region label
  */
 int Model::new_region_label()
@@ -60,9 +79,8 @@ int Model::new_region_label()
 }
 
 
-Model::Model(Colourscale *cs, DataOpacity *dopac ):
-    _cs(cs),_dataopac(dopac),_base1(false),
-    _surface(NULL), _vertnrml(NULL),
+Model::Model():
+    _base1(false), _surface(NULL), _vertnrml(NULL),
     _numReg(0), _region(NULL), _numVol(0), _vol(NULL)
 {
   for ( int i=0; i<maxobject; i++ ) {
@@ -94,7 +112,6 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
     fprintf(stderr, "Unable to read proper points file\n" );
     exit(1);
   }
-  _pts = pt.pt();
   allvis.resize(pt.num());
   allvis.assign(pt.num(), true );
 
@@ -638,7 +655,7 @@ void Model :: randomize_color( Object_t obj )
 
 Model::~Model()
 {
-  delete[] _pts;
+  delete    pt.pt();
   delete[] _cnnx;
   //delete[] _ptnrml;
   for ( int i=0; i<_numVol; i++ )
@@ -664,7 +681,7 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
 
   // Volume ELements
   if ( _numVol ) {
-    int hivol=hilight[Tetrahedron];
+    int hivol=hilight[VolEle];
     sprintf( txt, "@b@C%6dVolume Element: %d of %d", FL_RED, hivol, _numVol );
     hinfo->add( txt );
     hinfo->add( "nodes:\t" );
@@ -728,9 +745,9 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
     hinfo->add( txt );
   }
   const GLfloat*offset = pt.offset();
-  sprintf( txt, "( %.6g, %.6g, %.6g )", _pts[hilight[Vertex]*3]+offset[0],
-           _pts[hilight[Vertex]*3+1]+offset[1],
-           _pts[hilight[Vertex]*3+2]+offset[2]);
+  sprintf( txt, "( %.6g, %.6g, %.6g )", pt.pt()[hilight[Vertex]*3]+offset[0],
+           pt.pt()[hilight[Vertex]*3+1]+offset[1],
+           pt.pt()[hilight[Vertex]*3+2]+offset[2]);
   hinfo->add( txt );
   /*
   string reginfo( "in surface: " );
@@ -813,7 +830,7 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
       for ( int j=0; j<_vol[i]->ptsPerObj(); j++ )
         if ( tet[j]==hilight[Vertex] ) {
           sprintf( txt, "\t%d", i );
-          if ( tet[j]==hilight[Tetrahedron] )
+          if ( tet[j]==hilight[VolEle] )
             sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
           hinfo->add( txt );
           for ( int k=0; k<_vol[i]->ptsPerObj(); k++ ) {
@@ -924,7 +941,7 @@ int Model::number(Object_t a )
       for ( int s=0; s<_surface.size(); s++ )
         nele += surface(s)->num();
       return nele;
-    case Tetrahedron:
+    case VolEle:
       return _numVol;
     case RegionDef:
       return _numReg;
@@ -1041,6 +1058,10 @@ int Model::localElemnum( int gele, int& surf )
 
 
 
+/** delete a surface
+ *
+ *  \param s the number of the surface to delete
+ */
 void
 Model::surfKill( int s )
 {
@@ -1049,3 +1070,85 @@ Model::surfKill( int s )
 	it++;
   _surface.erase(it);
 }
+
+
+#define BUFSIZE 1024
+/** read in one instant in time which is part of a element  time file
+ *
+ *  \param pt_in   already open point file
+ *  \param elem_in already opened element file
+ *
+ *  \return 
+ */
+bool Model :: read_instance( gzFile pt_in, gzFile elem_in, 
+                                       const GLfloat* offset )
+{
+  // read in points
+  if( pt_in != NULL ) {
+    int num_pt;
+    sscanf( get_line(pt_in), "%d", &num_pt );
+    GLfloat *p = new GLfloat[num_pt*3];
+    for( int i=0; i< num_pt; i++ ) {
+      sscanf( get_line(pt_in), "%f %f %f", p+i*3, p+i*3+1, p+i*3+2 );
+      sub( p+i*3, offset, p+i*3 ); // center wrt fixed model
+    }
+    pt.add( p, num_pt );
+    pt.offset( offset );
+	pt.setVis( true );
+    delete[] p;
+  }
+
+  // read in elements
+  if( elem_in != NULL ) {
+    int num_elem;
+	sscanf( get_line(elem_in), "%d", &num_elem );
+	int *Cxpt = (int *)malloc(num_elem*2*sizeof(int) ), numCx=0;
+	_vol = new VolElement*[num_elem];
+	_surface.push_back( new Surfaces( &pt ) );
+
+	int n[10];
+	for( int i=0; i<num_elem; i++ ) {
+      char type[10];
+      sscanf( get_line(elem_in),"%s %d %d %d %d %d %d %d %d %d %d",type,
+			  n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8, n+9 );
+      if( !strcmp( type, "Ln") ) {
+        Cxpt = (int *)realloc( Cxpt, numCx*sizeof(int)*2+2 );
+        Cxpt[numCx*2] = n[0];
+        Cxpt[numCx*2+1] = n[1];
+        numCx++;
+      } else if( !strcmp( type, "Tr" ) ) {
+        _surface.back()->ele().push_back( new Triangle( &pt ) );
+        _surface.back()->ele().back()->define( n );
+      } else if( !strcmp( type, "Qd" ) ) {
+        _surface.back()->ele().push_back( new Quadrilateral( &pt ) );
+        _surface.back()->ele().back()->define( n );
+        _surface.back()->ele().back()->compute_normals(0,0);
+      } else if( !strcmp( type, "Tt" ) ) {
+        _vol[_numVol] = new Tetrahedral( &pt );
+        _vol[_numVol]->add( n, n[4] );
+        _numVol++;
+      } else if( !strcmp( type, "Hx" ) ) {
+        _vol[_numVol] = new Hexahedron( &pt );
+        _vol[_numVol]->add( n, n[8] );
+        _numVol++;
+      } else if( !strcmp( type, "Py" ) ) {
+        _vol[_numVol] = new Pyramid( &pt );
+        _vol[_numVol]->add( n, n[5] );
+        _numVol++;
+      } else if( !strcmp( type, "Pr" ) ) {
+        _vol[_numVol] = new Prism( &pt );
+        _vol[_numVol]->add( n, n[6] );
+        _numVol++;
+      }
+    }
+    // define connections
+    _cnnx = new Connection( &pt );
+    _cnnx->define( Cxpt, numCx );
+    free( Cxpt );
+  }
+  determine_regions();
+  return true;
+}
+
+
+

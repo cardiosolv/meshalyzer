@@ -59,15 +59,15 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {952 47 350 650} type Double box UP_BOX
+      xywh {916 50 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -140,6 +140,15 @@ maxcolval->value(mwtb->cs->max());}
             callback {if( !mwtb->getVecData(tmslider) ) {
   vectorgrp->activate();
   tabwidget->value(vectorgrp);
+}}
+            xywh {0 0 100 20}
+          }
+          MenuItem {} {
+            label {Read Aux Grid}
+            callback {char *fn = fl_file_chooser( "Auxiliary Grid", "*.pts_t", NULL );
+if( fn && !mwtb->readAuxGrid(fn) ) {
+  auxgridgrp->activate();
+  tabwidget->value(auxgridgrp);
 }}
             xywh {0 0 100 20}
           }
@@ -367,7 +376,7 @@ mwtb->trackball.size = md;mwtb->redraw();}
             }
             MenuItem {} {
               label voxele
-              callback {mwtb->randomize_color(Tetrahedron);}
+              callback {mwtb->randomize_color(VolEle);}
               xywh {0 0 30 20}
             }
           }
@@ -537,7 +546,7 @@ mainbar->redraw();}
         }
         MenuItem {} {
           label Tetrahedra
-          callback {mwtb->datify(Tetrahedron);}
+          callback {mwtb->datify(VolEle);}
           xywh {0 0 100 20}
         }
         MenuItem {} {
@@ -558,7 +567,7 @@ mainbar->redraw();}
       }
       Fl_Button {} {
         label {Voxele  colour}
-        callback {pickcolor(Tetrahedron, "Voxele colour");}
+        callback {pickcolor(VolEle, "Voxele colour");}
         xywh {95 85 85 25} labelsize 13
       }
       Fl_Group {} {
@@ -651,15 +660,15 @@ op->win->show();}
         }
       }
       Fl_Tabs tabwidget {open
-        xywh {10 270 330 215} align 0
+        xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight selected
-          xywh {10 305 330 170} labelfont 1 labelsize 12 labelcolor 121 align 4
+          label Highlight
+          xywh {10 305 330 170} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
-            label {Tetrahedron:}
-            callback {mwtb->highlight(Tetrahedron,int((o->value())));}
+            label {VolEle:}
+            callback {mwtb->highlight(VolEle,int((o->value())));}
             xywh {100 345 85 25} labeltype NO_LABEL step 1
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
@@ -709,12 +718,12 @@ vertvalout->value(mwtb->vertex_val(int(o->value())));}
             }
             MenuItem {} {
               label Vols
-              callback {mwtb->assc_obj(Tetrahedron);}
+              callback {mwtb->assc_obj(VolEle);}
               xywh {5 5 100 20}
             }
             MenuItem {} {
               label {filled Vols}
-              callback {mwtb->assc_obj(Tetrahedron, 1 );}
+              callback {mwtb->assc_obj(VolEle, 1 );}
               xywh {5 5 100 20}
             }
             MenuItem {} {
@@ -765,9 +774,168 @@ mwtb->select_vertex();}
             xywh {195 435 105 30} color 124
           }
         }
+        Fl_Group lightgrp {
+          label Lights
+          xywh {10 295 330 185} color 188 labelfont 1 labelsize 12 labelcolor 188 hide
+        } {
+          Fl_Value_Slider lightx {
+            label {X direction}
+            callback {mwtb->redraw();}
+            tooltip {X component of light direction} xywh {15 330 120 20} type Horizontal selection_color 71 labelsize 12 minimum -1
+          }
+          Fl_Value_Slider lighty {
+            label {Y direction}
+            callback {mwtb->redraw();}
+            tooltip {Y component of light direction} xywh {15 370 120 20} type Horizontal selection_color 190 labelsize 12 minimum -1
+          }
+          Fl_Value_Slider lightz {
+            label {Z directtion}
+            callback {mwtb->redraw();}
+            tooltip {z component of light direction} xywh {15 410 120 20} type Horizontal selection_color 244 labelsize 12 minimum -1 value 1
+          }
+          Fl_Button {} {
+            label reset
+            callback {lightx->value(0);
+lighty->value(0.);
+lightz->value(1);
+mwtb->redraw();}
+            tooltip {reset light direction to default} xywh {165 305 60 20} labelsize 12
+          }
+          Fl_Light_Button showLightDir {
+            label {show direction}
+            callback {mwtb->redraw();}
+            tooltip {draw an arrow indicating the light direction} xywh {125 450 100 25} labelsize 12
+          }
+          Fl_Button {} {
+            label {zero X}
+            callback {lightx->value(0);
+mwtb->redraw();}
+            tooltip {set x component to 0} xywh {15 305 35 20} labelsize 10
+          }
+          Fl_Button {} {
+            label {zero Y}
+            callback {lighty->value(0);
+mwtb->redraw();}
+            tooltip {set y component to 0} xywh {60 305 35 20} labelsize 10
+          }
+          Fl_Button {} {
+            label {zero Z}
+            callback {lightz->value(0);
+mwtb->redraw();}
+            tooltip {set z component to 0} xywh {105 305 35 20} labelsize 10
+          }
+          Fl_Light_Button illBut {
+            label Illuminate
+            callback {mwtb->lights((bool)o->value());}
+            tooltip {turn on light} xywh {15 450 100 25} value 1 labelsize 12
+          }
+          Fl_Value_Slider ambientslide {
+            label Ambient
+            callback {mwtb->redraw();}
+            tooltip {ambient lighting component level} xywh {150 330 25 95} selection_color 3 labelsize 12 value 0.2
+          }
+          Fl_Light_Button facetshadBut {
+            label {facet shading}
+            callback {mwtb->facetshade( (bool)(o->value()) );}
+            tooltip {do not blend colours over surface} xywh {235 450 100 25} labelsize 12
+          }
+          Fl_Light_Button {} {
+            label fixed
+            callback {mwtb->headlamp(o->value());}
+            tooltip {Fixed light - headlamp mode} xywh {240 305 60 20} value 1 labelsize 12 align 148
+          }
+          Fl_Value_Slider specularslide {
+            label Specular
+            callback {mwtb->redraw();}
+            tooltip {specular lighting component level} xywh {200 330 25 95} selection_color 6 labelsize 12 value 0.65
+          }
+          Fl_Value_Slider diffuseslide {
+            label Diffuse
+            callback {mwtb->redraw();}
+            tooltip {specular lighting component level} xywh {245 330 25 95} selection_color 6 labelsize 12 value 0.65
+          }
+          Fl_Value_Slider backintensityslide {
+            label Backside
+            callback {mwtb->redraw();}
+            tooltip {intensity of back side of surface} xywh {300 330 25 95} selection_color 6 labelsize 12 value 0.5
+          }
+        }
+        Fl_Group surfgrp {
+          label Surface
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
+        } {
+          Fl_Light_Button surfvisbut {
+            label visible
+            callback {vector<int>lst;
+surfselected(lst);
+mwtb->surfVis(lst,static_cast<bool>(o->value()));}
+            xywh {140 395 85 30} value 1 selection_color 2 align 16
+          }
+          Fl_Light_Button surfoutlinebut {
+            label Outline
+            callback {vector<int>lst;
+surfselected(lst);
+mwtb->surfOutline(lst,static_cast<bool>(o->value()));}
+            xywh {140 315 85 30}
+          }
+          Fl_Light_Button surffillbut {
+            label Filled
+            callback {vector<int> lst;
+surfselected(lst);
+mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
+            xywh {235 315 85 30} value 1
+          }
+          Fl_Button {} {
+            label {Outline colour}
+            callback {pick_surf_color( SurfEle, "Outline Colour" );}
+            xywh {140 355 85 30} labelsize 12
+          }
+          Fl_Button {} {
+            label {Fill colour}
+            callback {pick_surf_color( Surface, "Surface colour" );}
+            xywh {235 355 85 30} labelsize 12
+          }
+          Fl_Check_Browser surflist {
+            label {apply to}
+            xywh {20 320 110 150} type Multi align 5
+          }
+          Fl_Button {} {
+            label {select all}
+            callback {surflist->check_all();
+update_surfGUI(0);}
+            xywh {140 445 85 25}
+          }
+          Fl_Button {} {
+            label {invert select}
+            callback {bool done=false;
+
+for( int i=1; i<=surflist->nitems(); i++ ) {
+    if( !done && !surflist->checked(i) ) {
+      done = true;
+      update_surfGUI(i-1);
+    }
+    surflist->checked(i, !surflist->checked(i));
+}}
+            xywh {235 445 85 25} color 0 labelfont 1 labelsize 12 labelcolor 49
+          }
+          Fl_Menu_Button {} {
+            label delete open
+            xywh {235 395 85 30} box GTK_UP_BOX color 88
+          } {
+            MenuItem {} {
+              label really
+              callback {vector<int> lst;
+surfselected(lst);
+for( int i=lst.size()-1; i>=0; i-- )
+  mwtb->model->surfKill( lst[i] );
+refresh_surflist();}
+              xywh {0 0 30 20}
+            }
+          }
+        }
         Fl_Group vectorgrp {
-          label Vectors open
-          xywh {15 325 315 155} labelsize 12 labelcolor 7 hide deactivate
+          label Vectors
+          xywh {15 325 315 155} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
             label Vectors
@@ -893,167 +1061,292 @@ mwtb->redraw();}
             xywh {65 451 35 24} when 8 minimum 1 maximum 100000 step 1 value 1
           }
         }
-        Fl_Group lightgrp {
-          label Lights
-          xywh {10 295 330 185} labelsize 12 labelcolor 188 hide
+        Fl_Group auxgridgrp {
+          label {Aux Grid} open
+          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
         } {
-          Fl_Value_Slider lightx {
-            label {X direction}
-            callback {mwtb->redraw();}
-            tooltip {X component of light direction} xywh {15 330 120 20} type Horizontal selection_color 71 labelsize 12 minimum -1
-          }
-          Fl_Value_Slider lighty {
-            label {Y direction}
-            callback {mwtb->redraw();}
-            tooltip {Y component of light direction} xywh {15 370 120 20} type Horizontal selection_color 190 labelsize 12 minimum -1
-          }
-          Fl_Value_Slider lightz {
-            label {Z directtion}
-            callback {mwtb->redraw();}
-            tooltip {z component of light direction} xywh {15 410 120 20} type Horizontal selection_color 244 labelsize 12 minimum -1 value 1
-          }
-          Fl_Button {} {
-            label reset
-            callback {lightx->value(0);
-lighty->value(0.);
-lightz->value(1);
+          Fl_Light_Button auxgriddispbut {
+            label display
+            callback {mwtb->auxGrid->display( o->value() );
 mwtb->redraw();}
-            tooltip {reset light direction to default} xywh {165 305 60 20} labelsize 12
-          }
-          Fl_Light_Button showLightDir {
-            label {show direction}
-            callback {mwtb->redraw();}
-            tooltip {draw an arrow indicating the light direction} xywh {125 450 100 25} labelsize 12
+            xywh {60 310 70 20} value 1
           }
           Fl_Button {} {
-            label {zero X}
-            callback {lightx->value(0);
+            label optimal
+            callback {mwtb->auxGrid->optimize_cs(tmslider->value());
+auxmincolval->value(mwtb->auxGrid->cs.min());
+auxmaxcolval->value(mwtb->auxGrid->cs.max());
 mwtb->redraw();}
-            tooltip {set x component to 0} xywh {15 305 35 20} labelsize 10
+            tooltip {calibrate for current time} xywh {140 310 45 20} box ROUND_UP_BOX labelsize 10
           }
-          Fl_Button {} {
-            label {zero Y}
-            callback {lighty->value(0);
-mwtb->redraw();}
-            tooltip {set y component to 0} xywh {60 305 35 20} labelsize 10
-          }
-          Fl_Button {} {
-            label {zero Z}
-            callback {lightz->value(0);
-mwtb->redraw();}
-            tooltip {set z component to 0} xywh {105 305 35 20} labelsize 10
-          }
-          Fl_Light_Button illBut {
-            label Illuminate
-            callback {mwtb->lights((bool)o->value());}
-            tooltip {turn on light} xywh {15 450 100 25} value 1 labelsize 12
-          }
-          Fl_Value_Slider ambientslide {
-            label Ambient
-            callback {mwtb->redraw();}
-            tooltip {ambient lighting component level} xywh {150 330 25 95} selection_color 3 labelsize 12 value 0.2
-          }
-          Fl_Light_Button facetshadBut {
-            label {facet shading}
-            callback {mwtb->facetshade( (bool)(o->value()) );}
-            tooltip {do not blend colours over surface} xywh {235 450 100 25} labelsize 12
-          }
-          Fl_Light_Button {} {
-            label fixed
-            callback {mwtb->headlamp(o->value());}
-            tooltip {Fixed light - headlamp mode} xywh {240 305 60 20} value 1 labelsize 12 align 148
-          }
-          Fl_Value_Slider specularslide {
-            label Specular
-            callback {mwtb->redraw();}
-            tooltip {specular lighting component level} xywh {200 330 25 95} selection_color 6 labelsize 12 value 0.65
-          }
-          Fl_Value_Slider diffuseslide {
-            label Diffuse
-            callback {mwtb->redraw();}
-            tooltip {specular lighting component level} xywh {245 330 25 95} selection_color 6 labelsize 12 value 0.65
-          }
-          Fl_Value_Slider backintensityslide {
-            label Backside
-            callback {mwtb->redraw();}
-            tooltip {intensity of back side of surface} xywh {300 330 25 95} selection_color 6 labelsize 12 value 0.5
-          }
-        }
-        Fl_Group surfgrp {
-          label Surface
-          xywh {15 310 315 175} labelsize 12 labelcolor 90 hide
-        } {
-          Fl_Light_Button surfvisbut {
-            label visible
-            callback {vector<int>lst;
-surfselected(lst);
-mwtb->surfVis(lst,static_cast<bool>(o->value()));}
-            xywh {140 395 85 30} value 1 selection_color 2 align 16
-          }
-          Fl_Light_Button surfoutlinebut {
-            label Outline
-            callback {vector<int>lst;
-surfselected(lst);
-mwtb->surfOutline(lst,static_cast<bool>(o->value()));}
-            xywh {140 315 85 30}
-          }
-          Fl_Light_Button surffillbut {
-            label Filled
-            callback {vector<int> lst;
-surfselected(lst);
-mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
-            xywh {235 315 85 30} value 1
-          }
-          Fl_Button {} {
-            label {Outline colour}
-            callback {pick_surf_color( SurfEle, "Outline Colour" );}
-            xywh {140 355 85 30} labelsize 12
-          }
-          Fl_Button {} {
-            label {Fill colour}
-            callback {pick_surf_color( Surface, "Surface colour" );}
-            xywh {235 355 85 30} labelsize 12
-          }
-          Fl_Check_Browser surflist {
-            label {apply to}
-            xywh {20 320 110 150} type Multi align 5
-          }
-          Fl_Button {} {
-            label {select all}
-            callback {surflist->check_all();
-update_surfGUI(0);}
-            xywh {140 445 85 25}
-          }
-          Fl_Button {} {
-            label {invert select}
-            callback {bool done=false;
-
-for( int i=1; i<=surflist->nitems(); i++ ) {
-    if( !done && !surflist->checked(i) ) {
-      done = true;
-      update_surfGUI(i-1);
-    }
-    surflist->checked(i, !surflist->checked(i));
-}}
-            xywh {235 445 85 25} color 0 labelfont 1 labelsize 12 labelcolor 49
-          }
-          Fl_Menu_Button {} {
-            label delete open
-            xywh {235 395 85 30} box GTK_UP_BOX color 88
+          Fl_Choice auxcstype {
+            label {colour scale}
+            xywh {220 340 90 25} down_box BORDER_BOX labelsize 10 align 2
+            code0 {\#include "Colourscale.h"}
+            code1 {o->value(1);}
           } {
             MenuItem {} {
-              label really
-              callback {vector<int> lst;
-surfselected(lst);
-for( int i=lst.size()-1; i>=0; i-- )
-  mwtb->model->surfKill( lst[i] );
-refresh_surflist();}
-              xywh {0 0 30 20}
+              callback {mwtb->auxGrid->cs.scale(CS_RAINBOW);
+mwtb->redraw();}
+              image {rainbow.xpm} xywh {10 10 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_BL_RAINBOW);
+mwtb->redraw();}
+              image {blrainbow.xpm} xywh {10 10 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_HOT);
+mwtb->redraw();}
+              image {hot.xpm} xywh {10 10 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_COLD_HOT);
+mwtb->redraw();}
+              image {coldhot.xpm} xywh {10 10 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_GREY);
+mwtb->redraw();}
+              image {blwhite.xpm} xywh {10 10 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_CG);
+mwtb->redraw();}
+              image {cg.xpm} xywh {10 10 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_MATLAB);
+mwtb->redraw();}
+              image {matlab.xpm} xywh {10 10 100 20}
+            }
+          }
+          Fl_Value_Input auxmincolval {
+            label min
+            callback {mwtb->auxGrid->cs.calibrate(o->value(),mwtb->auxGrid->cs.max());
+mwtb->redraw();}
+            xywh {40 340 65 25} labelsize 10 align 2 when 4 textsize 12
+          }
+          Fl_Value_Input auxmaxcolval {
+            label max
+            callback {mwtb->auxGrid->cs.calibrate(mwtb->auxGrid->cs.min(),o->value());
+mwtb->redraw();}
+            xywh {115 340 65 25} labelsize 10 align 2 when 4 textsize 12
+          }
+          Fl_Value_Input auxnumcolev {
+            label levels
+            callback {mwtb->auxGrid->cs.size((int)(o->value()));
+mwtb->redraw();}
+            tooltip {colourmap size} xywh {185 340 30 25} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
+          }
+          Fl_Light_Button auxautocalibratebut {
+            label auto
+            callback {mwtb->auxGrid->autocolor(o->value());}
+            tooltip {autoscale every timestep} xywh {200 310 50 20} labelsize 10 align 16
+          }
+          Fl_Group {} {
+            label Vertex open
+            xywh {65 375 255 30} labelsize 12 align 4
+          } {
+            Fl_Button auxptcolor {
+              label color
+              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(Vertex),Vertex,mwtb);}
+              xywh {65 380 55 20}
+            }
+            Fl_Light_Button auxptdat {
+              label data
+              callback {mwtb->auxGrid->datify(Vertex,o->value());
+mwtb->redraw();}
+              xywh {125 380 50 20}
+            }
+            Fl_Value_Input auxptsize {
+              label {size:}
+              callback {mwtb->auxGrid->size(Vertex,o->value());}
+              xywh {205 380 55 20} labelsize 12 maximum 1e+06 step 5 value 50
+            }
+            Fl_Choice auxptstyle {
+              xywh {260 380 50 20} down_box BORDER_BOX labelsize 10 align 8
+              code0 {o->value(1);}
+            } {
+              MenuItem {} {
+                label Off
+                callback {mwtb->auxGrid->showobj(Vertex,false);
+mwtb->redraw();}
+                xywh {10 10 31 20}
+              }
+              MenuItem {} {
+                label Point
+                callback {mwtb->auxGrid->showobj(Vertex,true);
+mwtb->auxGrid->threeD(Vertex,false);
+mwtb->redraw();}
+                xywh {10 10 31 20}
+              }
+              MenuItem {} {
+                label 3D
+                callback {mwtb->auxGrid->showobj(Vertex,true);
+mwtb->auxGrid->threeD(Vertex,true);
+mwtb->redraw();}
+                xywh {10 10 31 20}
+              }
+            }
+          }
+          Fl_Group {} {
+            label Lines open
+            xywh {65 405 255 25} labelsize 12 align 4
+          } {
+            Fl_Button auxlinecolor {
+              label color
+              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(Cnnx),Cnnx,mwtb);}
+              xywh {65 405 55 20}
+            }
+            Fl_Light_Button auxlinedat {
+              label data
+              callback {mwtb->auxGrid->datify(Cnnx,o->value());
+mwtb->redraw();}
+              xywh {125 405 50 20}
+            }
+            Fl_Value_Input auxlinewidth {
+              label {size:}
+              callback {mwtb->auxGrid->size(Cnnx,o->value());
+mwtb->redraw();}
+              xywh {205 405 55 20} labelsize 12 maximum 10000 step 5 value 100
+            }
+            Fl_Choice auxlinestyle {
+              callback {mwtb->auxGrid->showobj(Cnnx,o->value());
+if( o->value()==1 )
+  mwtb->auxGrid->threeD(Cnnx,false);
+else if( o->value()==2 )
+  mwtb->auxGrid->threeD(Cnnx,true);
+mwtb->redraw();}
+              xywh {260 405 50 20} down_box BORDER_BOX labelsize 12 align 8
+              code0 {o->value(2);}
+            } {
+              MenuItem {} {
+                label Off
+                callback {mwtb->auxGrid->showobj(Cnnx,false);
+mwtb->redraw();}
+                xywh {15 15 31 20}
+              }
+              MenuItem {} {
+                label Line
+                callback {mwtb->auxGrid->showobj(Cnnx,true);
+mwtb->auxGrid->threeD(Cnnx,false);
+mwtb->redraw();}
+                xywh {15 15 31 20}
+              }
+              MenuItem {} {
+                label 3D
+                callback {mwtb->auxGrid->showobj(Cnnx,true);
+mwtb->auxGrid->threeD(Cnnx,true);
+mwtb->redraw();}
+                xywh {15 15 31 20}
+              }
+            }
+          }
+          Fl_Group {} {
+            label Surface open
+            xywh {65 430 265 20} labelsize 12 align 4
+          } {
+            Fl_Button auxsurfcolor {
+              label color
+              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(SurfEle),SurfEle,mwtb);}
+              xywh {65 430 55 20}
+            }
+            Fl_Light_Button auxsurfdat {
+              label data
+              callback {mwtb->auxGrid->datify(Surface,o->value());
+mwtb->redraw();}
+              xywh {125 430 50 20}
+            }
+            Fl_Value_Input auxsurfline {
+              label {size:}
+              callback {mwtb->auxGrid->size(SurfEle,o->value());}
+              xywh {205 430 55 20} labelsize 12 maximum 100000 step 5 value 10
+            }
+            Fl_Choice auxsurfstyle {
+              callback {mwtb->auxGrid->showobj(SurfEle,false);
+mwtb->auxGrid->surfill(true);
+mwtb->redraw();}
+              xywh {260 430 50 20} down_box BORDER_BOX align 8
+              code0 {o->value(2);}
+            } {
+              MenuItem {} {
+                label Off
+                callback {mwtb->auxGrid->showobj(SurfEle,false);
+mwtb->redraw();}
+                xywh {10 10 31 20}
+              }
+              MenuItem {} {
+                label Outline
+                callback {mwtb->auxGrid->showobj(SurfEle,true);
+mwtb->auxGrid->surfill(false);
+mwtb->redraw();}
+                xywh {10 10 31 20}
+              }
+              MenuItem {} {
+                label Filled
+                callback {mwtb->auxGrid->showobj(SurfEle,true);
+mwtb->auxGrid->surfill(true);
+mwtb->redraw();}
+                xywh {10 10 31 20}
+              }
+            }
+          }
+          Fl_Group {} {
+            label VoxEle open
+            xywh {65 454 245 22} labelsize 12 align 4
+          } {
+            Fl_Button auxvolcolor {
+              label color
+              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(VolEle),VolEle,mwtb);}
+              xywh {65 455 55 20}
+            }
+            Fl_Light_Button auxvoldat {
+              label data
+              callback {mwtb->auxGrid->datify(VolEle,o->value());
+mwtb->redraw();}
+              xywh {125 455 50 20}
+            }
+            Fl_Value_Input auxvolline {
+              label {size:}
+              callback {mwtb->auxGrid->size(VolEle,o->value());}
+              xywh {205 455 55 20} labelsize 12 maximum 10000 step 5 value 10
+            }
+            Fl_Choice auxvolstyle {
+              callback {mwtb->auxGrid->showobj(VolEle,o->value());
+if( o->value()==1 )
+  mwtb->auxGrid->volfill(false);
+else if( o->value()==2 )
+  mwtb->auxGrid->volfill(true);
+mwtb->redraw();}
+              xywh {260 455 50 20} down_box BORDER_BOX align 8
+              code0 {o->value(2);}
+            } {
+              MenuItem {} {
+                label Off
+                callback {mwtb->auxGrid->showobj(VolEle,false);
+mwtb->redraw();}
+                xywh {15 15 31 20}
+              }
+              MenuItem {} {
+                label Outline
+                callback {mwtb->auxGrid->showobj(VolEle,true);
+mwtb->auxGrid->volfill(false);
+mwtb->redraw();}
+                xywh {15 15 31 20}
+              }
+              MenuItem {} {
+                label Filled
+                callback {mwtb->auxGrid->showobj(VolEle,true);
+mwtb->auxGrid->volfill(true);
+mwtb->redraw();}
+                xywh {15 15 31 20}
+              }
             }
           }
         }
       }
-      Fl_Group colorscalegrp {open
+      Fl_Group colorscalegrp {
         xywh {10 490 330 60} box ENGRAVED_BOX
       } {
         Fl_Button {} {
@@ -1064,7 +1357,7 @@ maxcolval->value(mwtb->cs->max());}
           tooltip {calibrate for current time} xywh {15 495 45 20} box ROUND_UP_BOX labelsize 10
         }
         Fl_Choice cstype {
-          label {colour scale} open
+          label {colour scale}
           xywh {230 500 105 25} down_box BORDER_BOX labelsize 10 align 2
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
@@ -1101,7 +1394,7 @@ mwtb->redraw();}
           }
           MenuItem {} {
             callback {mwtb->cs->scale(CS_MATLAB);
-mwtb->redraw();} selected
+mwtb->redraw();}
             image {matlab.xpm} xywh {0 0 100 20}
           }
         }
@@ -1202,8 +1495,8 @@ for( regnum=0; regnum<reglist->nitems(); regnum++ )
     break;
 regnum--;
 
-int objnum = mwtb->reg_first( regnum, Tetrahedron );
-mwtb->highlight( Tetrahedron, objnum );
+int objnum = mwtb->reg_first( regnum, VolEle );
+mwtb->highlight( VolEle, objnum );
 tethi->value( objnum );
 objnum = mwtb->reg_first(regnum, Cnnx );
 mwtb->highlight( Cnnx, objnum );
@@ -1254,7 +1547,8 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {} {
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1306,6 +1600,36 @@ SAVE_WIDGET(mshzf,illBut);
 SAVE_WIDGET(mshzf,surfvisbut);
 SAVE_WIDGET(mshzf,surfoutlinebut);
 SAVE_WIDGET(mshzf,surffillbut);
+// Aux Grid tab
+SAVE_WIDGET(mshzf,auxgriddispbut);
+SAVE_WIDGET(mshzf,auxcstype);
+SAVE_WIDGET(mshzf,auxmincolval);
+SAVE_WIDGET(mshzf,auxmaxcolval);
+SAVE_WIDGET(mshzf,auxnumcolev);
+SAVE_WIDGET(mshzf,auxautocalibratebut);
+SAVE_WIDGET(mshzf,auxptdat);
+SAVE_WIDGET(mshzf,auxptsize);
+SAVE_WIDGET(mshzf,auxptstyle);
+SAVE_WIDGET(mshzf,auxlinedat);
+SAVE_WIDGET(mshzf,auxlinewidth);
+SAVE_WIDGET(mshzf,auxlinestyle);
+SAVE_WIDGET(mshzf,auxsurfdat);
+SAVE_WIDGET(mshzf,auxsurfline);
+SAVE_WIDGET(mshzf,auxsurfstyle);
+SAVE_WIDGET(mshzf,auxvoldat);
+SAVE_WIDGET(mshzf,auxvolline);
+SAVE_WIDGET(mshzf,auxvolstyle);
+if(mwtb->auxGrid){
+  mshzf << "AUX_GRID_COLOURS = 4" << endl;
+  save_colour(mshzf, mwtb->auxGrid->color(Vertex) );
+  mshzf << " ";
+  save_colour(mshzf, mwtb->auxGrid->color(Cnnx) );
+  mshzf << " ";
+  save_colour(mshzf, mwtb->auxGrid->color(SurfEle) );
+  mshzf << " ";
+  save_colour(mshzf, mwtb->auxGrid->color(VolEle) );
+  mshzf << endl;
+}
 // colour scale
 SAVE_WIDGET(mshzf,autocalibratebut);
 SAVE_WIDGET(mshzf,mincolval);
@@ -1401,7 +1725,8 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -1557,7 +1882,40 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( tmslider, var, int(val) ) 
   TEST_VAR( frameskip, var, int(val) ) 
   TEST_VAR( animdelay, var, int(val) ) 
-  
+  TEST_VAR( auxgriddispbut, var, int(val) );
+  TEST_CHOICE( auxcstype, var, int(val) );
+  TEST_VAR( auxmincolval, var, val );
+  TEST_VAR( auxmaxcolval, var, val );
+  TEST_VAR( auxnumcolev, var, int(val) );
+  TEST_VAR( auxautocalibratebut, var, int(val) );
+  TEST_VAR( auxptdat, var, int(val) );
+  TEST_VAR( auxptsize, var, val );
+  TEST_CHOICE( auxptstyle, var, int(val) );
+  TEST_VAR( auxlinedat, var, int(val) );
+  TEST_VAR( auxlinewidth, var, val );
+  TEST_CHOICE( auxlinestyle, var, int(val) );
+  TEST_VAR( auxsurfdat, var, int(val) );
+  TEST_VAR( auxsurfline, var, val );
+  TEST_CHOICE( auxsurfstyle, var, int(val) ); 
+  TEST_VAR( auxvoldat, var, int(val) );
+  TEST_VAR( auxvolline, var, val );
+  TEST_CHOICE( auxvolstyle, var, int(val) ); 
+  if( !strcmp( var, "AUX_GRID_COLOURS" ) ) {
+    if( mwtb->auxGrid ) {
+      mshzf.getline( var, 1024 );
+      float c[4];
+      int nread;
+      sscanf( var, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
+      mwtb->auxGrid->color( Vertex, c );
+      sscanf( var+nread, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
+      mwtb->auxGrid->color( Cnnx, c );
+      sscanf( var+nread, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
+      mwtb->auxGrid->color( SurfEle, c );
+      sscanf( var+nread, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
+      mwtb->auxGrid->color( VolEle, c );
+      continue;
+    }
+  }
   TEST_VAR( mwtb->isosurfwin->isolineVal0, var, val )
   TEST_VAR( mwtb->isosurfwin->isolineVal1, var, val )
   TEST_VAR( mwtb->isosurfwin->isoNumLines, var, int(val) )
@@ -1582,7 +1940,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {}
+mwtb->lights(illBut->value());} {selected
+    }
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
@@ -1590,8 +1949,7 @@ for( int i=1; i<=surflist->nitems(); i++ )
   if( surflist->checked(i) )
     lst.push_back(i-1);} {}
   }
-  Function {refresh_surflist()} {open
-  } {
+  Function {refresh_surflist()} {} {
     code {surflist->clear(); 
 for( int s=0; s<mwtb->model->numSurf(); s++ ) {
     surflist->add(mwtb->model->surface(s)->label().c_str(),1);
@@ -1617,7 +1975,8 @@ class ProgInfo {} {
 } 
 
 class ObjProps {} {
-  Function {ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o),numreg(nr),sel(s)} {} {
+  Function {ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o),numreg(nr),sel(s)} {open
+  } {
     Fl_Window win {open
       xywh {860 580 310 65} type Single hide
     } {

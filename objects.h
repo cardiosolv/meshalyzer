@@ -2,10 +2,10 @@
 #define OBJECTS_H
 
 typedef enum objects{
-  Vertex, Cable, Cnnx, SurfEle, Surface, Tetrahedron, RegionDef, Nothing, All } Object_t;
+  Vertex, Cable, Cnnx, SurfEle, Surface, VolEle, RegionDef, Nothing, All } Object_t;
 
 static const char *objnames[] = { "Vertex", "Cable", "Cnnx", "Surface", 
-  "Tetrahedron", "RegionDef", "Nothing", "All" };
+  "Volume", "RegionDef", "Nothing", "All" };
 
 static const int maxobject=6;
 

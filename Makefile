@@ -21,7 +21,7 @@ LIBS     = $(FLTK_LD_FLAGS) $(COMMON_LIBS)
 INCLUDES = $(FLTK_INC) $(COMMON_INC) -DNOMINMAX
 endif
 
-OBJS = Fl_Gl_Tb_Window.o\
+OBJS = AuxGrid.o\
 	ContCable.o\
 	ClipPlane.o\
 	Colourscale.o\
@@ -31,6 +31,7 @@ OBJS = Fl_Gl_Tb_Window.o\
 	DataOpacity.o\
 	DrawingObjects.o\
 	FileType.o\
+	Fl_Gl_Tb_Window.o\
 	gl2ps.o\
 	Graph.o PlotWin.o plottingwin.o\
 	Hexahedron.o\

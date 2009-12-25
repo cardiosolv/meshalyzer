@@ -9,6 +9,7 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{longtable}
+\usepackage{array}
 
 \usepackage{overcite}                                 % superscript notation of references
 
@@ -367,6 +368,49 @@ The first 3 elements define the value of the vector field,
 and the optional 4th element is the
 scalar component as above. This file has the suffix ``.vec.igb''.
 
+\subsection{Auxiliary Grid}
+An auxiliary grid may be defined, optionally on which may be displayed
+data. The grid may contain any of the elements forming the main grid
+(points,lines,surface elements,volume elements), and the
+elements may change as a function of time.
+If scalar data has already been read in, the number of time instances in
+the auxiliary grid must either be one, or the same as the scalar data.
+
+A vertex file is mandatory and has the extension ``.pts\_t''.
+An element file is optonal. If present, it has the same base name as the
+vertex file but with the extension ``.elem\_t''.
+Scalar data may also be optionally defined on the auxiliary grid. The file
+has the same basename as the vertex file but with the extension
+``.dat\_t''.
+The file formats follow:\\
+\newcolumntype{A}{>{\ttfamily}l}
+\begin{longtable}{|AAA|A|A|}\hline
+    \multicolumn{3}{|l|}{base.pts\_t}& base.elem\_t & base.dat\_t \\
+    \hline
+    \multicolumn{3}{|l|}{\#times}& \#times & \#times \\ 
+    \multicolumn{3}{|l|}{\#points\_time0} & \#elements\_time0 & \#data\_time0 \\
+pt(0,0).x & pt(0,0).y & pt(0,0).z & element(0,0) & data(0,0) \\
+pt(1,0).x & pt(1,0).y & pt(1,0).z & element(1,0) & data(1,0) \\
+. & . & . & . & . \\
+. & . & . & . & . \\
+. & . & . & . & . \\
+. & . & . & element(M,0) & . \\
+. & . & . & \#elements\_time1 & . \\
+. & . & . & element(0,1) & . \\
+. & . & . & element(1,1) & . \\
+. & . & . & . & . \\
+pt(N,0).x & pt(N,0).y & pt(N,0).z & . & data(N,0) \\
+  \multicolumn{3}{|l|}{\#points\_time1} & . & \#data\_time1 \\
+pt(0,1).x & pt(0,1).y & pt(0,1).z & . & data(0,1) \\
+pt(1,1).x & pt(1,1).y & pt(1,1).z & . & data(1,1) \\
+. & . & . & . & . \\
+. & . & . & element(M,1) & . \\
+. & . & . & \#elements\_time2 & . \\
+. & . & . & element(0,2) & . \\
+. & . & . & . & . \\ \hline
+\end{longtable}
+
+
 \subsection{CG meta format}
 Cool Graphics (CG) is a visualization program written chiefly by Jamey Eason
 and its file format was pretty much copied for this program.
@@ -420,7 +464,8 @@ Currently, the first 2 are ignored but must be present.
 \section{Invocation}
 The program is run by typing\\[1ex]
 \centerline{
-{\texttt{meshalyzer cg\_in|[pts [vpts] [dat|tdat|out] [mshz] [tri ...]] 
+{\texttt{meshalyzer cg\_in|[pts [vpts] [dat|tdat|out] [mshz] [tri ...]
+[pts_t] 
 \raisebox{-2Ex}{\rule{0em}{3Ex}}
 }}}\\
 where the extensions of the required file types are given.
@@ -550,9 +595,6 @@ highlighted node.
 For tetrahedra and triangles, the vertex scalar data values are displayed and for
 tetrahedra, the solid angle of each node is also computed.
 
-
-
-
 \subsubsection{Lighting}
 
 Lighting is turned on with the \emph{illuminate} button and
@@ -572,6 +614,7 @@ are not antialiased. This may speed up rendering on slow platforms.
 
 \subsubsection{Scalar Data}
 
+\label{sec:scalardata}
 Scalar data is read under the ``File'' menu in the top bar.
 It can be static or time-dependent.
 If time-dependent, animation can be played by clicking the green double arrow button
@@ -607,6 +650,25 @@ Colour can be based on vector magnitude, scalar data or be constant.
 The constant value is selected by the ``colour'' button.
 Magnitude and scalar data are mapped to a selectable colour map as with
 vertex scalar data.
+
+\subsubsection{Auxiliary Grid}
+
+Auxiliary grids are specified on the command line or by selecting
+``Read Aux Grid'' under the ``File'' menu.
+The Dispaly button toggles drawing of the grid.
+The colouring of the model components is controlled independently of the
+main grid.
+Widgets for selecting the colour scale and mapping of the scalar data to
+colour are available. See \S\ref{sec:scalardata} for details.
+Componets are grouped into line, surface and volume elements.
+Each group of grid components can be coloured with a fixed colour chosen
+with the ``color'' button.
+If scalar data is present, the components can be coloured according to the
+associated data value, that is, ``datafied''.
+The size of the components can also be controlled. For surface and volume
+elements, the size refers to the line width when the components are drawn
+as wireframe.
+How the components are drawn can also be specified.
 
 \subsubsection{Surfaces}
 

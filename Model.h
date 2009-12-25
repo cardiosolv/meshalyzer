@@ -18,9 +18,10 @@ class DataOpacity;
 class Model
 {
   public:
-    Model(Colourscale *cs, DataOpacity *dopac );
+    Model();
     ~Model();
     bool         read(const char *fn, bool base1, bool no_elems);
+    bool         read_instance( gzFile, gzFile, const GLfloat * );
     int          add_surface_from_tri( const char * );
     int          add_surface_from_surf( const char * );
     int          add_region_surfaces( void );
@@ -43,7 +44,7 @@ class Model
     inline bool visibility( int s ){return _region[s<0?0:s]->visible();}
     inline GLfloat opacity( int s )
                          { return (_region[s<0?0:s]->get_color(Surface))[3]; }
-    GLfloat* get_color( Object_t obj, int s );
+    GLfloat* get_color( Object_t obj, int s=0 );
     void  set_color( Object_t obj, int s, float r, float g, float b, float a );
     void  visibility( int, bool a );
     void  opacity( int s, float opac );
@@ -68,14 +69,12 @@ class Model
     int               numSurf(void){return _surface.size();}
     int              _numReg;
     int               localElemnum(int, int& );
+    MultiPoint*      _elems;
   private:
     RRegion**        _region;
     vector<Surfaces*> _surface;
-    const GLfloat*  _pts;
     float           _maxdim;		      // maximum physical dimension
     int             _outstride[maxobject];// stride to use when outputting
-    Colourscale*    _cs;
-    DataOpacity*    _dataopac;		      // data opacity
     bool            _base1;  		    //whether node numbering starts at 1
     void             read_region_file( gzFile, const char * );
     void             read_normals( gzFile, const char * );
