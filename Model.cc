@@ -81,7 +81,7 @@ int Model::new_region_label()
 
 Model::Model():
     _base1(false), _surface(NULL), _vertnrml(NULL),
-    _numReg(0), _region(NULL), _numVol(0), _vol(NULL)
+    _numReg(0), _region(NULL), _numVol(0), _vol(NULL), _cnnx(NULL) 
 {
   for ( int i=0; i<maxobject; i++ ) {
     _outstride[i] = 1;
@@ -1099,12 +1099,13 @@ bool Model :: read_instance( gzFile pt_in, gzFile elem_in,
   }
 
   // read in elements
+  _surface.push_back( new Surfaces( &pt ) );
+  _cnnx = new Connection( &pt );
   if( elem_in != NULL ) {
     int num_elem;
 	sscanf( get_line(elem_in), "%d", &num_elem );
 	int *Cxpt = (int *)malloc(num_elem*2*sizeof(int) ), numCx=0;
 	_vol = new VolElement*[num_elem];
-	_surface.push_back( new Surfaces( &pt ) );
 
 	int n[10];
 	for( int i=0; i<num_elem; i++ ) {
@@ -1142,7 +1143,6 @@ bool Model :: read_instance( gzFile pt_in, gzFile elem_in,
       }
     }
     // define connections
-    _cnnx = new Connection( &pt );
     _cnnx->define( Cxpt, numCx );
     free( Cxpt );
   }

@@ -56,6 +56,7 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset ):_num_tm_grid(1),
   _num_mod = _num_tm_grid>_num_tm_data?_num_tm_grid:_num_tm_data;
 
   _data = new DATA_TYPE*[_num_tm_data];
+  memset( _data, 0, sizeof(DATA_TYPE *)*_num_tm_data );
 
   // read in first time step
   _model.push_back(new Model());
@@ -67,14 +68,15 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset ):_num_tm_grid(1),
     if( _num_tm_grid>1 ) {
       _model.push_back(new Model());
       _model.back()->read_instance( pt_in, elem_in, pt_offset );  
-      _model.back()->_cnnx->size(100);
-      _model.back()->_cnnx->threeD(true);
     }
     if( _num_tm_data>1 )
       read_data_instance( data_in, _model.back()->number(Vertex), _data[i] ); 
   }
-  for( int i=0; i<maxobject; i++ )
-    _show[i] = true;
+  for( int i=0; i<maxobject; i++ ) {
+    _show[i]     = true;
+    _datafied[i] = false;
+  }
+  threeD( Cnnx, true );
 }
 
 
@@ -106,7 +108,7 @@ AuxGrid :: draw( int t )
 			&cs, (_data&&_datafied[Cnnx])?_data[t]:NULL, 1, NULL );
   }
 
-  if( _show[SurfEle] ) {
+  if( _show[SurfEle]  ) {
 	glPushAttrib(GL_POLYGON_BIT);
 	if( _surf_fill ) {
 	  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -122,7 +124,7 @@ AuxGrid :: draw( int t )
     glPopAttrib();
   }
 
-  if( _show[VolEle] ) {
+  if( _show[VolEle] && m->_vol ) {
     glPushAttrib(GL_POLYGON_BIT);
     if( _vol_fill ) {
       glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -134,7 +136,7 @@ AuxGrid :: draw( int t )
       m->_vol[i]->draw( 0, m->_cnnx->num()-1, m->get_color(VolEle),
               &cs, (_data&&_datafied[VolEle])?_data[t]:NULL, 1, NULL );
   }
-    glPopAttrib();
+  glPopAttrib();
 }
 
 
@@ -166,7 +168,7 @@ AuxGrid::read_data_instance( gzFile in, int npt, DATA_TYPE*& data )
 AuxGrid::~AuxGrid()
 {
   for( int i=0; i<_model.size(); i++ ) {
-	delete _model[i];
+	delete   _model[i];
 	delete[] _data[i];
   }
 
@@ -238,4 +240,31 @@ AuxGrid :: optimize_cs( int tm )
       max=_data[tm][i];
   }
   cs.calibrate( min, max );
+}
+
+
+/** assignment operator */
+AuxGrid& 
+AuxGrid::operator=( const AuxGrid &a ) 
+{
+  memcpy( _show, a._show, maxobject*sizeof(bool) );
+  memcpy( _datafied, a._datafied, maxobject*sizeof(bool) );
+  _display   = a._display;
+  _surf_fill = a._surf_fill;
+  _vol_fill  = a._vol_fill;
+  _autocol   = a._autocol;
+  color( Vertex,  a.color( Vertex )  );
+  color( Cnnx,    a.color( Cnnx )    );
+  color( SurfEle, a.color( SurfEle ) );
+  color( VolEle,  a.color( VolEle )  );
+  threeD( Vertex,  a.threeD( Vertex )  );
+  threeD( Cnnx,    a.threeD( Cnnx )    );
+  threeD( SurfEle, a.threeD( SurfEle ) );
+  threeD( VolEle,  a.threeD( VolEle )  );
+  size( Vertex,  a.size( Vertex )  );
+  size( Cnnx,    a.size( Cnnx )    );
+  size( SurfEle, a.size( SurfEle ) );
+  size( VolEle,  a.size( VolEle )  );
+
+  return *this;
 }

@@ -32,6 +32,7 @@ class Surfaces
     void   register_vertices( vector<bool>& );
     void   label( string s ){ _label=s; }
     string label( void ) { return _label; }
+    void   flip_norms();
   protected:
     Point   *_p;
     GLfloat  _fillcolor[4];

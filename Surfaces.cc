@@ -50,7 +50,7 @@ void Surfaces::get_vert_norms( GLfloat *vn )
 
 /** set the vertex normals for the surface
  *
- * \param vm vector of normals for all points
+ * \param pt all points
  *
  */
 void Surfaces::determine_vert_norms( Point& pt )
@@ -115,4 +115,15 @@ void Surfaces::register_vertices( vector<bool>& vb )
 {
   for ( int i=0; i<_ele.size(); i++ )
     _ele[i]->register_vertices( 0, 0, vb );
+}
+
+/** flip the normals
+ */
+void Surfaces :: flip_norms()
+{
+  int numvert=0;;
+  while( _vert[numvert] != -1 ) numvert++;
+
+  for( int i=0; i<3*(numvert-1); i++ )
+    _vertnorm[i] *=-1;
 }

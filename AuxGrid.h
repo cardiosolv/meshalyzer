@@ -32,13 +32,13 @@ class AuxGrid {
 		Colourscale cs;
         void     draw( int );
         void     color( Object_t obj, GLfloat *r );
-        GLfloat* color( Object_t o ){return _model[0]->get_color(o,-1);}
+        GLfloat* color( Object_t o ) const {return _model[0]->get_color(o,-1);}
         void     showobj( Object_t obj, bool b ){_show[obj]=b;}
         bool     showobj( Object_t o ){return _show[o];}
         void     threeD( Object_t o, bool b );
-        bool     threeD( Object_t o ){return _model[0]->threeD(o,-1);}
+        bool     threeD( Object_t o ) const {return _model[0]->threeD(o,-1);}
         void     size( Object_t o, float s );
-        float    size( Object_t o ){return _model[0]->size(o,-1);}
+        float    size( Object_t o ) const {return _model[0]->size(o,-1);}
         int      num_tm(){ return _num_mod; }
         void     display( bool b ){ _display=b; }
         void     datify( Object_t o, bool b ){ _datafied[o]=b; }
@@ -46,6 +46,7 @@ class AuxGrid {
         void     volfill( bool b ){ _vol_fill=b; }
         void     autocolor( bool b ){ _autocol=b; }
         void     optimize_cs(int);
+        AuxGrid& operator=( const AuxGrid &a );
 };
 
 #endif

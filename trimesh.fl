@@ -59,7 +59,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {916 50 350 650} type Double box UP_BOX
+      xywh {1045 25 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.h>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -663,8 +663,8 @@ op->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
-          xywh {10 305 330 170} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          label Highlight open
+          xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -674,7 +674,7 @@ op->win->show();}
             class MyValueInput
           }
           Fl_Value_Input elehi {
-            label {:Triangle}
+            label {:Surf Ele}
             callback {mwtb->highlight(SurfEle,static_cast<int>(o->value()));}
             xywh {190 345 85 25} align 8 step 1
             code0 {\#include "MyValueInput.h"}
@@ -709,10 +709,10 @@ vertvalout->value(mwtb->vertex_val(int(o->value())));}
           }
           Fl_Choice attachtype {
             label attached
-            tooltip {draw which objects associated with vertex} xywh {90 435 100 20} down_box BORDER_BOX align 2 when 1
+            tooltip {draw which objects associated with vertex} xywh {95 435 90 25} down_box BORDER_BOX align 2 when 1
           } {
             MenuItem {} {
-              label triangles
+              label {surf eles}
               callback {mwtb->assc_obj(SurfEle);}
               xywh {5 5 100 20}
             }
@@ -766,12 +766,12 @@ mwtb->redraw();}
             label {Pick Vertex}
             callback {o->color(128);
 mwtb->select_vertex();}
-            tooltip {select a vertex with mouse} xywh {15 435 70 30} color 131 labelsize 12
+            tooltip {select a vertex with mouse} xywh {20 435 70 30} color 131 labelsize 12
           }
           Fl_Button {} {
             label {plot time series}
             callback {mwtb->timeplot();}
-            xywh {195 435 105 30} color 124
+            xywh {190 435 105 30} color 124
           }
         }
         Fl_Group lightgrp {
@@ -1062,8 +1062,8 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid} open
-          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
+          label {Aux Grid}
+          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
             label display
@@ -1150,7 +1150,8 @@ mwtb->redraw();}
           } {
             Fl_Button auxptcolor {
               label color
-              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(Vertex),Vertex,mwtb);}
+              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(Vertex),Vertex,mwtb);
+mwtb->redraw();}
               xywh {65 380 55 20}
             }
             Fl_Light_Button auxptdat {
@@ -1161,7 +1162,8 @@ mwtb->redraw();}
             }
             Fl_Value_Input auxptsize {
               label {size:}
-              callback {mwtb->auxGrid->size(Vertex,o->value());}
+              callback {mwtb->auxGrid->size(Vertex,o->value());
+mwtb->redraw();}
               xywh {205 380 55 20} labelsize 12 maximum 1e+06 step 5 value 50
             }
             Fl_Choice auxptstyle {
@@ -1196,7 +1198,8 @@ mwtb->redraw();}
           } {
             Fl_Button auxlinecolor {
               label color
-              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(Cnnx),Cnnx,mwtb);}
+              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(Cnnx),Cnnx,mwtb);
+mwtb->redraw();}
               xywh {65 405 55 20}
             }
             Fl_Light_Button auxlinedat {
@@ -1211,13 +1214,7 @@ mwtb->redraw();}
 mwtb->redraw();}
               xywh {205 405 55 20} labelsize 12 maximum 10000 step 5 value 100
             }
-            Fl_Choice auxlinestyle {
-              callback {mwtb->auxGrid->showobj(Cnnx,o->value());
-if( o->value()==1 )
-  mwtb->auxGrid->threeD(Cnnx,false);
-else if( o->value()==2 )
-  mwtb->auxGrid->threeD(Cnnx,true);
-mwtb->redraw();}
+            Fl_Choice auxlinestyle {open
               xywh {260 405 50 20} down_box BORDER_BOX labelsize 12 align 8
               code0 {o->value(2);}
             } {
@@ -1249,7 +1246,8 @@ mwtb->redraw();}
           } {
             Fl_Button auxsurfcolor {
               label color
-              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(SurfEle),SurfEle,mwtb);}
+              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(SurfEle),SurfEle,mwtb);
+mwtb->redraw();}
               xywh {65 430 55 20}
             }
             Fl_Light_Button auxsurfdat {
@@ -1260,13 +1258,11 @@ mwtb->redraw();}
             }
             Fl_Value_Input auxsurfline {
               label {size:}
-              callback {mwtb->auxGrid->size(SurfEle,o->value());}
+              callback {mwtb->auxGrid->size(SurfEle,o->value());
+mwtb->redraw();}
               xywh {205 430 55 20} labelsize 12 maximum 100000 step 5 value 10
             }
-            Fl_Choice auxsurfstyle {
-              callback {mwtb->auxGrid->showobj(SurfEle,false);
-mwtb->auxGrid->surfill(true);
-mwtb->redraw();}
+            Fl_Choice auxsurfstyle {open
               xywh {260 430 50 20} down_box BORDER_BOX align 8
               code0 {o->value(2);}
             } {
@@ -1298,7 +1294,8 @@ mwtb->redraw();}
           } {
             Fl_Button auxvolcolor {
               label color
-              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(VolEle),VolEle,mwtb);}
+              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(VolEle),VolEle,mwtb);
+mwtb->redraw();}
               xywh {65 455 55 20}
             }
             Fl_Light_Button auxvoldat {
@@ -1309,16 +1306,11 @@ mwtb->redraw();}
             }
             Fl_Value_Input auxvolline {
               label {size:}
-              callback {mwtb->auxGrid->size(VolEle,o->value());}
+              callback {mwtb->auxGrid->size(VolEle,o->value());
+mwtb->redraw();}
               xywh {205 455 55 20} labelsize 12 maximum 10000 step 5 value 10
             }
-            Fl_Choice auxvolstyle {
-              callback {mwtb->auxGrid->showobj(VolEle,o->value());
-if( o->value()==1 )
-  mwtb->auxGrid->volfill(false);
-else if( o->value()==2 )
-  mwtb->auxGrid->volfill(true);
-mwtb->redraw();}
+            Fl_Choice auxvolstyle {open
               xywh {260 455 50 20} down_box BORDER_BOX align 8
               code0 {o->value(2);}
             } {
@@ -1422,7 +1414,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 520 45 15} labelsize 10 align 16
         }
       }
-      Fl_Group animate_group {
+      Fl_Group animate_group {selected
         xywh {10 555 330 80} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
@@ -1462,7 +1454,8 @@ mwtb->redraw();}
   decl {TBmeshWin *mwtb;} {}
   decl {Fl_Window* proginfo;} {public
   }
-  Function {pickcolor(Object_t obj, const char* wintitle )} {} {
+  Function {pickcolor(Object_t obj, const char* wintitle )} {open
+  } {
     code {bool* sel=regselected();
 for( int i=0; i<reglist->nitems(); i++ )
   if( sel[i] ) { 
@@ -1940,8 +1933,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {selected
-    }
+mwtb->lights(illBut->value());} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
@@ -1978,7 +1970,7 @@ class ObjProps {} {
   Function {ObjProps( TBmeshWin* wtb, Object_t o, int nr, bool *s):mwtb(wtb),obj(o),numreg(nr),sel(s)} {open
   } {
     Fl_Window win {open
-      xywh {860 580 310 65} type Single hide
+      xywh {688 522 310 65} type Single hide
     } {
       Fl_Button color {
         label colour
