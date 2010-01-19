@@ -4,7 +4,7 @@
 #include <sstream>
 #include <libgen.h>
 #include <getopt.h>
-#include <Fl/Fl_Text_Display.h>
+#include <FL/Fl_Text_Display.H>
 
 /** read in the version and license information
  *
