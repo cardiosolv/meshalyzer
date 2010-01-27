@@ -22,7 +22,7 @@ OBJS = $(FLTK_SOURCES:.fl=.o)\
 	$(patsubst %.C,%.o,$(wildcard *.C))
 
 meshalyzer: $(FLTK_SOURCES:.fl=.cc) $(OBJS)
-	$(CC) $(CFLAGS) -o meshalyzer $(sort $(OBJS)) $(LIBS)
+	$(CXX) $(CFLAGS) -o meshalyzer $(sort $(OBJS)) $(LIBS)
 ifeq ($(HOSTMACHINE),Darwin)
 	fltk-config --post meshalyzer
 endif
