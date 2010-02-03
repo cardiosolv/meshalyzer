@@ -1699,7 +1699,8 @@ mshzf << endl;} {}
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, const char *winlab)} {} {
+  Function {pick_surf_color(Object_t ot, const char *winlab)} {open
+  } {
     code {int msz = surflist->nitems();
 
 if( !msz ) return;
@@ -1716,7 +1717,8 @@ for( int mi=0; mi<surflist->nitems(); mi++ )
 
 colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
-cc->window->show();} {}
+cc->window->show();} {selected
+    }
   }
   Function {restore_state(const char* fname=NULL)} {open
   } {
@@ -1875,24 +1877,45 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( tmslider, var, int(val) ) 
   TEST_VAR( frameskip, var, int(val) ) 
   TEST_VAR( animdelay, var, int(val) ) 
-  TEST_VAR( auxgriddispbut, var, int(val) );
-  TEST_CHOICE( auxcstype, var, int(val) );
-  TEST_VAR( auxmincolval, var, val );
-  TEST_VAR( auxmaxcolval, var, val );
-  TEST_VAR( auxnumcolev, var, int(val) );
-  TEST_VAR( auxautocalibratebut, var, int(val) );
-  TEST_VAR( auxptdat, var, int(val) );
-  TEST_VAR( auxptsize, var, val );
-  TEST_CHOICE( auxptstyle, var, int(val) );
-  TEST_VAR( auxlinedat, var, int(val) );
-  TEST_VAR( auxlinewidth, var, val );
-  TEST_CHOICE( auxlinestyle, var, int(val) );
-  TEST_VAR( auxsurfdat, var, int(val) );
-  TEST_VAR( auxsurfline, var, val );
-  TEST_CHOICE( auxsurfstyle, var, int(val) ); 
-  TEST_VAR( auxvoldat, var, int(val) );
-  TEST_VAR( auxvolline, var, val );
-  TEST_CHOICE( auxvolstyle, var, int(val) ); 
+  if( mwtb->auxGrid ) {
+	TEST_VAR( auxgriddispbut, var, int(val) );
+	TEST_CHOICE( auxcstype, var, int(val) );
+	TEST_VAR( auxmincolval, var, val );
+	TEST_VAR( auxmaxcolval, var, val );
+	TEST_VAR( auxnumcolev, var, int(val) );
+	TEST_VAR( auxautocalibratebut, var, int(val) );
+	TEST_VAR( auxptdat, var, int(val) );
+	TEST_VAR( auxptsize, var, val );
+	TEST_CHOICE( auxptstyle, var, int(val) );
+	TEST_VAR( auxlinedat, var, int(val) );
+	TEST_VAR( auxlinewidth, var, val );
+	TEST_CHOICE( auxlinestyle, var, int(val) );
+	TEST_VAR( auxsurfdat, var, int(val) );
+	TEST_VAR( auxsurfline, var, val );
+	TEST_CHOICE( auxsurfstyle, var, int(val) ); 
+	TEST_VAR( auxvoldat, var, int(val) );
+	TEST_VAR( auxvolline, var, val );
+	TEST_CHOICE( auxvolstyle, var, int(val) ); 
+  } else {
+	IGNORE_VAR( auxgriddispbut, var );
+	IGNORE_VAR( auxcstype, var );
+	IGNORE_VAR( auxmincolval, var );
+	IGNORE_VAR( auxmaxcolval, var );
+	IGNORE_VAR( auxnumcolev, var );
+	IGNORE_VAR( auxautocalibratebut, var );
+	IGNORE_VAR( auxptdat, var );
+	IGNORE_VAR( auxptsize, var );
+	IGNORE_VAR( auxptstyle, var );
+	IGNORE_VAR( auxlinedat, var );
+	IGNORE_VAR( auxlinewidth, var );
+	IGNORE_VAR( auxlinestyle, var );
+	IGNORE_VAR( auxsurfdat, var );
+	IGNORE_VAR( auxsurfline, var );
+	IGNORE_VAR( auxsurfstyle, var );
+	IGNORE_VAR( auxvoldat, var );
+	IGNORE_VAR( auxvolline, var );
+	IGNORE_VAR( auxvolstyle, var );
+  }
   if( !strcmp( var, "AUX_GRID_COLOURS" ) ) {
     if( mwtb->auxGrid ) {
       mshzf.getline( var, 1024 );
@@ -1907,7 +1930,9 @@ while( mshzf.getline( buf, BUFLEN ) ) {
       sscanf( var+nread, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
       mwtb->auxGrid->color( VolEle, c );
       continue;
-    }
+    } else {
+	  for( int i=0; i<4; i++ ) mshzf.getline( var, 1024 );
+	}
   }
   TEST_VAR( mwtb->isosurfwin->isolineVal0, var, val )
   TEST_VAR( mwtb->isosurfwin->isolineVal1, var, val )

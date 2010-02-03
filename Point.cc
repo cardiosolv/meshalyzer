@@ -1,6 +1,6 @@
 #include "DrawingObjects.h"
-
 #include "VecData.h"
+#include "gzFileBuffer.h"
 
 /** draw a nice 3D sphere 
  *
@@ -130,6 +130,8 @@ bool Point :: read( const char *fname )
   if ( gzgets(in, buff, bufsize) == Z_NULL ) throw 1;
   if ( sscanf( buff, "%d", &_n ) != 1 ) throw 2;
 
+  gzFileBuffer file(in);
+
   if ( _base1 ) _n++;					// add initial bogus point
   _pts = (GLfloat *)malloc(_n*3*sizeof(GLfloat));
   float min[3], max[3];
@@ -140,7 +142,8 @@ bool Point :: read( const char *fname )
         _pts[i+j] = _pts[i+j-3];
       continue;
     }
-    if ( gzgets(in, buff, bufsize) == Z_NULL ) throw 2;
+    //if ( gzgets(in, buff, bufsize) == Z_NULL ) throw 2;
+    if ( file.gets(buff, bufsize) == Z_NULL ) throw 2;
     if ( sscanf( buff, "%f %f %f", _pts+i, _pts+i+1, _pts+i+2 ) < 3 )
       throw 3;
     for ( int ti=0; ti<3; ti++ ) {

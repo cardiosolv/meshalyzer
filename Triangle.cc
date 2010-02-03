@@ -1,4 +1,5 @@
 #include "DrawingObjects.h"
+#include "gzFileBuffer.h"
 
 static const int tri_iso_table[][6] = { 
   {0,0,0,0,0,0},{1,2,0,1,0,2},{1,2,1,0,1,2},{1,2,1,2,0,2},
@@ -114,13 +115,16 @@ bool Triangle :: read( const char *fname )
   char      buff[bufsize];
   int       nold=_n, nele;
 
-  while ( gzgets(in, buff, bufsize) != Z_NULL ) {
+  gzFileBuffer file(in);
+  while ( file.gets(buff, bufsize) != Z_NULL ) {
+  //while ( gzgets(in, buff, bufsize) != Z_NULL ) {
     sscanf( buff, "%d", &nele );
     _n += nele;
     _node  = (int *)realloc( _node, _n*3*sizeof(int) );
     _nrml = (GLfloat*)realloc( _nrml, _n*sizeof(GLfloat)*3 );
     for ( int i=_n-nele; i<_n; i++ ) {
-      gzgets(in, buff, bufsize);
+      file.gets(buff, bufsize);
+      //gzgets(in, buff, bufsize);
       sscanf( buff, "%d %d %d %*d", _node+3*i, _node+3*i+1, _node+3*i+2 );
     }
   }

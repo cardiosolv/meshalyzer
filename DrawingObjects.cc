@@ -186,6 +186,7 @@ void VolElement::add( int *n, int r )
   MultiPoint::add( n );
   if ( _n>1 ) {
     int *newreg = new int[_n*_ptsPerObj];
+    /** GD: indexing out of range on the _region happens alot in this file, should be _n-1 I think. **/
     memcpy( newreg, _region, _n*_ptsPerObj*sizeof(int) );
     delete[] _region;
     _region = newreg;

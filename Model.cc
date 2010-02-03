@@ -8,6 +8,7 @@
 #include "VecData.h"
 #include <sstream>
 #include <FL/filename.H>
+#include "gzFileBuffer.h"
 
 struct Face {
   int nsort[MAX_NUM_SURF_NODES];  //!< sorted nodes
@@ -80,7 +81,7 @@ int Model::new_region_label()
 
 
 Model::Model():
-    _base1(false), _surface(NULL), _vertnrml(NULL),
+    _base1(false), _surface(NULL), _vertnrml(NULL),_cable(NULL),
     _numReg(0), _region(NULL), _numVol(0), _vol(NULL), _cnnx(NULL) 
 {
   for ( int i=0; i<maxobject; i++ ) {
@@ -99,6 +100,11 @@ Model::Model():
 const int bufsize=1024;
 bool Model::read( const char* fnt, bool base1, bool no_elems )
 {
+  ofstream logger("logger.txt");
+  clock_t timer = clock();
+  logger << "starting to monitor" << std::endl;
+  logger.flush();
+
   _file = fnt;
   char fn[bufsize];
   strcpy( fn, fnt );
@@ -115,6 +121,10 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   allvis.resize(pt.num());
   allvis.assign(pt.num(), true );
 
+  logger << "time1: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
+
   if ( !strcmp( ".gz", fn+strlen(fn)-3 ) ) // temporary
     fn[strlen(fn)-3] = '\0';
   if ( !strcmp( ".pts", fn+strlen(fn)-4 ) ) // temporary
@@ -126,16 +136,44 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
 
   _cnnx   = new Connection( &pt );
   _cnnx->read( fn );
+
+  logger << "time2: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
+
   _cable  = new ContCable( &pt );
   _cable->read( fn );
 
+  logger << "time3: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
+
   if( !no_elems ) read_elem_file( fn );
+  logger << "time4: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
+
   read_region_file( in, fn );
+  logger << "time5: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
   determine_regions();
+  logger << "time6: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
 
   add_surface_from_tri( fn );
+  logger << "time7: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
   add_surface_from_surf( fn );
+  logger << "time8: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
   add_surface_from_elem( fn );
+  logger << "time9: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
 
   // find maximum dimension and bounding box
   const GLfloat *p = pt.pt();
@@ -144,6 +182,10 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
     if ( p[i]>_maxdim ) _maxdim = p[i];
 
   _vertnrml= new GLfloat[3*pt.num()];
+
+  logger << "time10: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
+  logger.flush();
+
 
   return true;
 }
@@ -250,7 +292,6 @@ void Model::determine_regions()
   }
 }
 
-
 /** add surface by selecting 2D elements from .elem file
  *
  *  A surface will be created for each different region specified.
@@ -272,18 +313,30 @@ int Model::add_surface_from_elem( const char *fn )
   char buff[bufsize];
   gzgets(in,buff,bufsize);           // throw away first line
   map<string,int> surfs;             // number of elements in each surface
-  while ( gzgets(in,buff,bufsize) !=Z_NULL ) {
+
+  gzFileBuffer file(in);
+  while ( file.gets(buff,bufsize) != Z_NULL ) 
+//while ( gzgets(in,buff,bufsize) != Z_NULL ) 
+  {
     char   surfnum[10]="";
-    if ( !strncmp(buff,"Tr",2) ) {
+    
+    if ( !strncmp(buff,"Tr",2) ) 
+    {
       if ( sscanf(buff, "%*s %*d %*d %*d %s", surfnum )<1 )
-        strcpy( surfnum, "EMPTY" );
-    } else if ( !strncmp(buff,"Qd",2) ) {
+        strcpy(surfnum, "EMPTY");
+    } 
+    else if ( !strncmp(buff,"Qd",2) ) 
+    {
       if ( sscanf(buff, "%*s %*d %*d %*d %*d %s", &surfnum )<1 )
-        strcpy( surfnum, "EMPTY" );
+        strcpy(surfnum, "EMPTY");
     }
+    else
+      continue;
+
     if ( strlen(surfnum) )
       surfs[surfnum]++;
   }
+
   if ( !surfs.size() ) return numSurf();
 
   // allocate new surfaces
@@ -299,8 +352,12 @@ int Model::add_surface_from_elem( const char *fn )
 
   surfs.clear();                // now use for current element in each surface
   gzrewind(in);
+
+  gzFileBuffer file2(in);
+
   gzgets(in,buff,bufsize);      //throw away first line
-  while( gzgets(in,buff,bufsize) !=Z_NULL ) {
+  while( file2.gets(buff,bufsize) !=Z_NULL ) {
+//while( gzgets(in,buff,bufsize) !=Z_NULL ) {
 	char etype[10],reg[10];
 	int  idat[4];
 	if( !strncmp(buff,"Tr",2) ) {
@@ -987,17 +1044,33 @@ bool Model :: read_elem_file( const char *fname )
 
   _vol = new VolElement*[_numVol];
 
+  gzFileBuffer file(in);
+
   int nele = _numVol;
   int ne    = 0;
   int surfe = 0;
   for( int i=0; i<nele; i++ ) {
-    if( gzgets(in, buf, bufsize)==Z_NULL || !strlen(buf) ) break;
+    //if( gzgets(in, buf, bufsize)==Z_NULL || !strlen(buf) ) break;
+    if( file.gets(buf, bufsize)==Z_NULL || !strlen(buf) ) break;
 	int n[9];
 	if( tets ) 
-	  sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
+	  //sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
+	{
+	  char * p = buf;
+	  for (size_t i=0; i<5; i++)
+	    n[i] = strtol(p, &p, 10);
+	}
 	else
-	  sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
-			n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
+	  //sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
+	  // 		n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
+	{
+	  eletype[0]=buf[0];
+	  eletype[1]=buf[1];
+	  char * p = buf+3;
+	  for (size_t i=0; i<9; i++)
+	    n[i] = strtol(p, &p, 10);
+	}
+
     if( !strcmp( eletype, "Tt" ) ) {
 	  _vol[ne] = new Tetrahedral( &pt );
 	  _vol[ne]->add( n, n[4] );
