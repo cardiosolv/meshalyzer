@@ -47,31 +47,20 @@ void Triangle::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
   for ( int i=3*p0; i<=3*p1; i+=3*stride ) {
     if ( !_pt->vis(_node[i]) || !_pt->vis(_node[i+1]) || !_pt->vis(_node[i+2]) )
       continue;
-
-    if ( lightson && ptnrml==NULL) glNormal3fv( nrml(i/3) );
-
-    if ( data!=NULL ) {
-      if ( dataopac->on() ) {		// data opacity
-        for ( int j=0; j<3; j++ ) {
-          cs->colourize( data[_node[i+j]], dataopac->alpha(data[_node[i+j]]));
-          if ( lightson && ptnrml ) glNormal3fv( ptnrml+_node[i+j]*3 );
-          glVertex3fv( _pt->pt(_node[i+j]) );
-        }
-      } else {		// no data opacity
-        for ( int j=0; j<3; j++ ) {
-          cs->colourize( data[_node[i+j]], colour[3] );
-          if ( lightson && ptnrml ) glNormal3fv( ptnrml+_node[i+j]*3 );
-          glVertex3fv( _pt->pt(_node[i+j]) );
-        }
-      }
-    } else {							// no data
-      glColor4fv( colour );
-      for ( int j=0; j<3; j++ ) {
-        if ( lightson && ptnrml ) glNormal3fv( ptnrml+_node[i+j]*3 );
-        glVertex3fv( _pt->pt(_node[i+j]) );
-      }
-    }
+    
+    for ( int j=0; j<3; j++ ) 
+    {
+      if (data)
+	cs->colourize( data[_node[i+j]], dataopac->on() ? dataopac->alpha(data[_node[i+j]]) : colour[3] );
+      else
+	glColor4fv( colour );
+      
+      if ( lightson && ptnrml ) 
+	glNormal3fv( ptnrml+_node[i+j]*3 );
+      glVertex3fv( _pt->pt(_node[i+j]) );
+    }	    
   }
+
   glEnd();
 }
 
@@ -117,14 +106,12 @@ bool Triangle :: read( const char *fname )
 
   gzFileBuffer file(in);
   while ( file.gets(buff, bufsize) != Z_NULL ) {
-  //while ( gzgets(in, buff, bufsize) != Z_NULL ) {
     sscanf( buff, "%d", &nele );
     _n += nele;
     _node  = (int *)realloc( _node, _n*3*sizeof(int) );
     _nrml = (GLfloat*)realloc( _nrml, _n*sizeof(GLfloat)*3 );
     for ( int i=_n-nele; i<_n; i++ ) {
       file.gets(buff, bufsize);
-      //gzgets(in, buff, bufsize);
       sscanf( buff, "%d %d %d %*d", _node+3*i, _node+3*i+1, _node+3*i+2 );
     }
   }

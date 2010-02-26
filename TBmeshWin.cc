@@ -636,9 +636,6 @@ int TBmeshWin::handle( int event )
     return Fl_Gl_Tb_Window::handle(event);
 }
 
-#include <iostream>
-#include <fstream>
-#include <ctime>
 
 /** read in the geometrical description
  *

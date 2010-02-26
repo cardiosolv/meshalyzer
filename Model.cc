@@ -9,6 +9,7 @@
 #include <sstream>
 #include <FL/filename.H>
 #include "gzFileBuffer.h"
+#include "logger.hpp"
 
 struct Face {
   int nsort[MAX_NUM_SURF_NODES];  //!< sorted nodes
@@ -46,6 +47,7 @@ make_face( Face *f, int n, int* orig )
 
 /** read in a line from a file, ignoring lines beginning with "#"
  *
+ * \warn (GD) lines are limited to 1024 bytes.
  * \warn not threadsafe
  * \return pointer to a static buffer
  */
@@ -81,7 +83,7 @@ int Model::new_region_label()
 
 
 Model::Model():
-    _base1(false), _surface(NULL), _vertnrml(NULL),_cable(NULL),
+    _base1(false), _surface(NULL), _vertnrml(NULL),
     _numReg(0), _region(NULL), _numVol(0), _vol(NULL), _cnnx(NULL) 
 {
   for ( int i=0; i<maxobject; i++ ) {
@@ -100,10 +102,7 @@ Model::Model():
 const int bufsize=1024;
 bool Model::read( const char* fnt, bool base1, bool no_elems )
 {
-  ofstream logger("logger.txt");
-  clock_t timer = clock();
-  logger << "starting to monitor" << std::endl;
-  logger.flush();
+  LOG_TIMER_RESET;
 
   _file = fnt;
   char fn[bufsize];
@@ -120,10 +119,7 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   }
   allvis.resize(pt.num());
   allvis.assign(pt.num(), true );
-
-  logger << "time1: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
-
+  LOG_TIMER("pt.read()");
 
   if ( !strcmp( ".gz", fn+strlen(fn)-3 ) ) // temporary
     fn[strlen(fn)-3] = '\0';
@@ -136,44 +132,29 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
 
   _cnnx   = new Connection( &pt );
   _cnnx->read( fn );
-
-  logger << "time2: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
-
-
+  LOG_TIMER("cnnx->read()");
+  
   _cable  = new ContCable( &pt );
   _cable->read( fn );
-
-  logger << "time3: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
-
+  LOG_TIMER("cable->read()");
 
   if( !no_elems ) read_elem_file( fn );
-  logger << "time4: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
-
+  LOG_TIMER("read_elem_file()");
 
   read_region_file( in, fn );
-  logger << "time5: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
+  LOG_TIMER("read_region_file()");
 
   determine_regions();
-  logger << "time6: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
-
+  LOG_TIMER("determine_regions()");
 
   add_surface_from_tri( fn );
-  logger << "time7: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
+  LOG_TIMER("add_surface_from_tri()");
 
   add_surface_from_surf( fn );
-  logger << "time8: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
+  LOG_TIMER("add_surface_from_surf()");
 
   add_surface_from_elem( fn );
-  logger << "time9: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
-
+  LOG_TIMER("add_surface_from_elem()");
 
   // find maximum dimension and bounding box
   const GLfloat *p = pt.pt();
@@ -182,10 +163,6 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
     if ( p[i]>_maxdim ) _maxdim = p[i];
 
   _vertnrml= new GLfloat[3*pt.num()];
-
-  logger << "time10: " << (clock() - timer) / (double) CLOCKS_PER_SEC << std::endl; timer = clock();
-  logger.flush();
-
 
   return true;
 }
@@ -292,6 +269,7 @@ void Model::determine_regions()
   }
 }
 
+
 /** add surface by selecting 2D elements from .elem file
  *
  *  A surface will be created for each different region specified.
@@ -315,28 +293,18 @@ int Model::add_surface_from_elem( const char *fn )
   map<string,int> surfs;             // number of elements in each surface
 
   gzFileBuffer file(in);
-  while ( file.gets(buff,bufsize) != Z_NULL ) 
-//while ( gzgets(in,buff,bufsize) != Z_NULL ) 
-  {
+  while ( file.gets(buff,bufsize) != Z_NULL ) {
     char   surfnum[10]="";
-    
-    if ( !strncmp(buff,"Tr",2) ) 
-    {
+    if ( !strncmp(buff,"Tr",2) ) {
       if ( sscanf(buff, "%*s %*d %*d %*d %s", surfnum )<1 )
-        strcpy(surfnum, "EMPTY");
-    } 
-    else if ( !strncmp(buff,"Qd",2) ) 
-    {
+        strcpy( surfnum, "EMPTY" );
+    } else if ( !strncmp(buff,"Qd",2) ) {
       if ( sscanf(buff, "%*s %*d %*d %*d %*d %s", &surfnum )<1 )
-        strcpy(surfnum, "EMPTY");
+        strcpy( surfnum, "EMPTY" );
     }
-    else
-      continue;
-
     if ( strlen(surfnum) )
       surfs[surfnum]++;
   }
-
   if ( !surfs.size() ) return numSurf();
 
   // allocate new surfaces
@@ -357,7 +325,6 @@ int Model::add_surface_from_elem( const char *fn )
 
   gzgets(in,buff,bufsize);      //throw away first line
   while( file2.gets(buff,bufsize) !=Z_NULL ) {
-//while( gzgets(in,buff,bufsize) !=Z_NULL ) {
 	char etype[10],reg[10];
 	int  idat[4];
 	if( !strncmp(buff,"Tr",2) ) {
@@ -488,8 +455,8 @@ int Model::add_surface_from_surf( const char *fn )
   int  surfnum = 0;
   char surflabel[bufsize];
 
-  while ( gzgets(in,buff,bufsize)!=Z_NULL && sscanf(buff, "%d", &nele )==1 ) {
-
+  gzFileBuffer file(in);
+  while ( file.gets(buff,bufsize)!=Z_NULL && sscanf(buff, "%d", &nele )==1 ) {
     _surface.push_back( new Surfaces( &pt ) );
 
     // use specified surface label if available
@@ -501,7 +468,7 @@ int Model::add_surface_from_surf( const char *fn )
     for ( int i=0; i<nele; i++ ) {
       int nl[5];
       char etype[12];
-      if ( gzgets(in,buff,bufsize) == Z_NULL ||
+      if ( file.gets(buff,bufsize) == Z_NULL ||
               sscanf(buff, "%s %d %d %d", etype, nl, nl+1, nl+2, nl+3, nl+4 ) < 4 ) {
         _surface.pop_back();
         return surfnum;
@@ -1045,31 +1012,28 @@ bool Model :: read_elem_file( const char *fname )
   _vol = new VolElement*[_numVol];
 
   gzFileBuffer file(in);
-
   int nele = _numVol;
   int ne    = 0;
   int surfe = 0;
   for( int i=0; i<nele; i++ ) {
-    //if( gzgets(in, buf, bufsize)==Z_NULL || !strlen(buf) ) break;
     if( file.gets(buf, bufsize)==Z_NULL || !strlen(buf) ) break;
-	int n[9];
-	if( tets ) 
-	  //sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
-	{
-	  char * p = buf;
-	  for (size_t i=0; i<5; i++)
-	    n[i] = strtol(p, &p, 10);
-	}
-	else
-	  //sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
-	  // 		n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
-	{
-	  eletype[0]=buf[0];
-	  eletype[1]=buf[1];
-	  char * p = buf+3;
-	  for (size_t i=0; i<9; i++)
-	    n[i] = strtol(p, &p, 10);
-	}
+       int n[9];
+       if( tets ) {
+         //sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
+         char * p = buf;
+         for (size_t i=0; *p && i<5; i++)
+  	   n[i] = strtol(p, &p, 10);
+       } 
+       else 
+       {
+       //sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
+       // 		n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
+         eletype[0]=buf[0];
+         eletype[1]=buf[1];
+         char * p = buf+3;
+         for (size_t i=0; *p && i<9; i++)
+	   n[i] = strtol(p, &p, 10);
+    }
 
     if( !strcmp( eletype, "Tt" ) ) {
 	  _vol[ne] = new Tetrahedral( &pt );

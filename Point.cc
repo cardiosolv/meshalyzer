@@ -142,7 +142,6 @@ bool Point :: read( const char *fname )
         _pts[i+j] = _pts[i+j-3];
       continue;
     }
-    //if ( gzgets(in, buff, bufsize) == Z_NULL ) throw 2;
     if ( file.gets(buff, bufsize) == Z_NULL ) throw 2;
     if ( sscanf( buff, "%f %f %f", _pts+i, _pts+i+1, _pts+i+2 ) < 3 )
       throw 3;
