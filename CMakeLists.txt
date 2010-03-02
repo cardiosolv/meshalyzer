@@ -42,6 +42,14 @@ else (PTHREAD_LIB)
   message(FATAL_ERROR "Couldn't find pthread library")
 endif (PTHREAD_LIB)
 
+#Check for GLU
+find_library(GLU_LIB GLU)
+if (GLU_LIB)
+  link_libraries(${GLU_LIB})
+else (GLU_LIB)
+  message(FATAL_ERROR "Couldn't find GLU")
+endif (GLU_LIB)
+
 
 # ok, now adding everything else
 add_definitions(
@@ -63,6 +71,7 @@ trimesh.fl
 
 add_executable(meshalyzer
 ${meshalyzer_FLTK_UI_SRCS}
+AuxGrid.cc
 Colourscale.cc
 Connection.cc
 ContCable.cc
