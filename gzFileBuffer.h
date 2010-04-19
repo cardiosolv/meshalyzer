@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 class gzFileBuffer
 {
@@ -75,7 +76,7 @@ public:
       return gets(buff, size);
     }
 
-    size_t bytes = std::min(pnl - p, (long)(size));
+    size_t bytes = std::min((long)(pnl - p), (long)(size));
     strncpy(buff, p, bytes);
     buff[bytes] = 0;
     p = pnl + 1;
