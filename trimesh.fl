@@ -59,7 +59,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1045 25 350 650} type Double box UP_BOX
+      xywh {924 50 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -94,7 +94,9 @@ for( int i=ns-nsa; i<ns; i++ )
   surflist->add( mwtb->model->surface(i)->label().c_str(),1);
 surflist->redraw();
 char *fn;
-if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", "region.surf" )){
+string surffn=mwtb->model->file();
+surffn += "surf";
+if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str() )){
   fl_cursor(FL_CURSOR_WAIT );
   ofstream outf(fn);
   for( int i=ns-nsa; i<ns; i++ ) {
@@ -1338,7 +1340,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {
+      Fl_Group colorscalegrp {selected
         xywh {10 490 330 60} box ENGRAVED_BOX
       } {
         Fl_Button {} {
@@ -1414,7 +1416,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 520 45 15} labelsize 10 align 16
         }
       }
-      Fl_Group animate_group {selected
+      Fl_Group animate_group {
         xywh {10 555 330 80} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
@@ -1717,8 +1719,7 @@ for( int mi=0; mi<surflist->nitems(); mi++ )
 
 colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
-cc->window->show();} {selected
-    }
+cc->window->show();} {}
   }
   Function {restore_state(const char* fname=NULL)} {open
   } {

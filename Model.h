@@ -60,6 +60,7 @@ class Model
     bool  threeD( Object_t o, int r ){ return _region[r<0?0:r]->threeD(o); }
     void  size( Object_t o, int r, float s ){ _region[r<0?0:r]->size(o, s); }
     float size( Object_t o, int r ){ return _region[r<0?0:r]->size(o); }
+    string file()const{return _file;}
 
     Point             pt;
     Connection*      _cnnx;

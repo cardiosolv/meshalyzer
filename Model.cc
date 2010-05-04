@@ -104,7 +104,6 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
 {
   LOG_TIMER_RESET;
 
-  _file = fnt;
   char fn[bufsize];
   strcpy( fn, fnt );
   gzFile in;
@@ -129,6 +128,8 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
     fn[strlen(fn)+1] ='\0';
     fn[strlen(fn)] ='.';
   }
+  _file = fn;
+
 
   _cnnx   = new Connection( &pt );
   _cnnx->read( fn );
