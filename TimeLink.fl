@@ -1,0 +1,116 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cc}
+decl {\#include <set>} {public local
+} 
+
+decl {\#include <sys/types.h>} {private local
+} 
+
+decl {\#include <unistd.h>} {private local
+} 
+
+decl {using namespace std;} {public global
+} 
+
+class TimeLink {open
+} {
+  decl {set <int> &linkages;} {private local
+  }
+  Function {TimeLink( set<int>& lnks ):linkages(lnks)} {open
+  } {
+    Fl_Window window {
+      label TimeLink open
+      xywh {1284 109 290 410} type Double box ENGRAVED_BOX color 27 visible
+    } {
+      Fl_Group {} {open
+        xywh {10 10 270 195} box GTK_UP_BOX color 14 align 65
+      } {
+        Fl_Browser meshList {
+          xywh {20 25 250 105} type Multi
+        }
+        Fl_Button {} {
+          label {link selected}
+          callback {link();}
+          xywh {55 140 170 25} color 6
+        }
+        Fl_Button {} {
+          label refresh
+          callback {list_mesh_pids();}
+          xywh {55 170 170 25} color 19
+        }
+      }
+      Fl_Group {} {open
+        xywh {10 215 270 155} box GTK_UP_BOX color 10
+      } {
+        Fl_Browser linkList {
+          xywh {15 220 250 110} type Multi selection_color 1
+        }
+        Fl_Button {} {
+          label {Unlink selected}
+          callback {unlink();}
+          xywh {55 335 170 25}
+        }
+      }
+      Fl_Button {} {
+        label close
+        callback {window->hide();}
+        xywh {45 375 190 25} box GTK_UP_BOX
+      }
+    }
+  }
+  Function {list_mesh_pids()} {
+    comment {list running meshalyzer PIDs which are not linked} open
+  } {
+    code {const char *cmd = "ps -a | grep meshalyzer";
+
+FILE *in = popen( cmd, "r" );
+
+meshList->clear();
+
+
+char procline[1024];
+
+while( fgets( procline, 1024, in ) != NULL ) {
+  int pid = atoi( procline );
+  if( getpid()!=pid && linkages.find(pid)==linkages.end() ) {
+    meshList->add(procline);
+  }
+}
+
+pclose( in );} {}
+  }
+  Function {link()} {
+    comment {Link the selected meshalyzer PIDs
+} open
+  } {
+    code {for( int i=1; i<=meshList->size(); i++ )
+  if( meshList->selected(i) )
+    linkages.insert( atoi(meshList->text(i)) );
+   
+list_links();
+list_mesh_pids();} {}
+  }
+  Function {unlink()} {open
+  } {
+    code {for( int i=meshList->size(); i>=1; i-- )
+  if( linkList->selected(i) ) {
+    linkages.erase( atoi(meshList->text(i)) );
+  }
+  
+list_links();
+list_mesh_pids();} {}
+  }
+  Function {list_links()} {open
+  } {
+    code {linkList->clear();
+
+set<int>::iterator it;
+for ( it=linkages.begin() ; it != linkages.end(); it++ ){
+  char pidtext[256];
+  sprintf( pidtext, "%d", *it );
+  linkList->add( pidtext );
+}} {}
+  }
+} 
