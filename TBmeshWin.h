@@ -4,6 +4,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <set>
 #include "Colourscale.h"
 #include <zlib.h>
 #include "trimesh.h"
@@ -20,6 +21,7 @@
 #include "isosurf.h"
 #include "IsoSurface.h"
 #include "IsoLines.h"
+#include "TimeLink.h"
 
 class Sequence;
 class HiLiteInfoWin;
@@ -68,10 +70,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
                                                                else return 0;}
     inline void  assc_obj( Object_t o, bool fo=false )  { vert_asc_obj=o; 
                                            fill_assc_obj=fo; redraw(); }
-    inline int reg_first( int s, Object_t t )
-    {
-      return  model->reg_first( s,t );
-    }
+    inline int reg_first( int s, Object_t t ) { return  model->reg_first( s,t ); }
     void hiliteinfo();
     void select_hi( int );
     void controlwin( Controls *c ){ contwin = c; }
@@ -116,6 +115,8 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     IsosurfControl *isosurfwin;
     int       readAuxGrid( char* agfile );
     AuxGrid  *auxGrid;
+    TimeLink *tmLink;
+    void      signal_links( int );
   private:
     int        hilight[maxobject];	// which object to highlight
     bool	   hilighton;			// whether to highlight
@@ -131,7 +132,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     Object_t   vert_asc_obj;			// object to draw with vertex
     double     solid_angle3Dpt( int v, int a, int b, int c );
     bool	   fill_hitet;			// true to fill hilighted tetrahedron
-    bool       revDrawOrder;			// draw surfaces in reverse order
+    bool       revDrawOrder;			// draw surfaces in reverse orderc++ convert int to string
     float      frame_delay;			// delay between frames
     int        frame_skip;         	// direction and #frames to skip
     int        tm;
@@ -166,6 +167,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     CutSurfaces **_cutsurface;      // clipped surfaces
     IsoSurface *iso0, *iso1;
     IsoLine    *isoline;
+    set<int>   timeLinks;           // other meshalyzer processes linked to this one
 };
 
 #include "DataOpacity.h"

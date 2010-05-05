@@ -5,6 +5,34 @@
 #include <libgen.h>
 #include <getopt.h>
 #include <FL/Fl_Text_Display.H>
+#include <signal.h>
+
+static Meshwin win;
+static Controls control;
+
+/** animate in response to a signal received: SIGUSR1 for forward, SIGUSR2 for backward
+ *
+ * \param sig the signal
+ */
+void animate_signal( int sig ) 
+{
+  if( sig!=SIGUSR1 && sig != SIGUSR2 )
+    return;
+
+  int fs = control.frameskip->value();
+  fs *= sig==SIGUSR1 ? 1 : -1;
+
+  int newtm = control.tmslider->value() + fs;
+
+  if( newtm<0 )
+    newtm += control.tmslider->maximum();
+  if( newtm> control.tmslider->maximum() )
+    newtm -= control.tmslider->maximum();
+
+  win.trackballwin->set_time( newtm );
+  control.tmslider->value(newtm);
+}
+
 
 /** read in the version and license information
  *
@@ -97,8 +125,6 @@ main( int argc, char *argv[] )
 {
   Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);
 
-  Meshwin win;
-  Controls control;
   bool iconcontrols = false;
   bool no_elems  = false;
 
@@ -190,6 +216,9 @@ main( int argc, char *argv[] )
   if ( iconcontrols )
     control.window->iconize();
   win.winny->position(1,1);
+
+  signal( 10, animate_signal );
+  signal( 12, animate_signal );
 
   return Fl::run();
 }

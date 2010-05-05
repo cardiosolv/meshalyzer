@@ -1,4 +1,5 @@
 #include "trimesh.h"
+#include <signal.h>
 #include <FL/Fl_File_Chooser.H>
 #include <FL/Fl_Progress.H>
 #include <fstream>
@@ -63,7 +64,9 @@ void animate_cb( void *v )
   if ( mw->tm<0 || mw->tm>ctrl->tmslider->maximum() ) {
     mw->tm -= mw->frame_skip;
     mw->frame_skip = 0;
-  }
+  } else
+    mw->signal_links( 1 );
+
   ctrl->tmslider->value(mw->tm);
   ctrl->tmslider->redraw();
   if ( mw->timeplotter->window->shown() ) mw->timeplotter->highlight( mw->tm );
@@ -71,16 +74,6 @@ void animate_cb( void *v )
   Fl::add_timeout( mw->frame_delay, animate_cb, v );
 }
 
-
-// determine whether or not to draw object type
-bool
-do_draw( int t_state, dataOpac *dopac )
-{
-  if ( ( (t_state==1) || (!dopac->on() && t_state==2)  )  || !t_state )
-    return true;
-  else
-    return false;
-}
 
 
 // determine the action if the play button is pressed on the control widget
@@ -148,6 +141,8 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
                                     = tet_color[3] = hipt_color[3] = hiptobj_color[3] = 1.;
   bgd( 1. );
   for ( int i=0; i<NUM_CP; i++ ) _cutsurface[i]=NULL;
+
+  tmLink = new TimeLink( timeLinks );
 }
 
 
@@ -589,6 +584,7 @@ int TBmeshWin::handle( int event )
                     contwin->frameskip->value()*
                     ((Fl::event_state()&FL_SHIFT)?shift_time_scale:1));
         if ( newtm <= contwin->tmslider->maximum() ) {
+          signal_links( 1 );
           contwin->tmslider->value(newtm);
           contwin->tmslider->redraw();
           set_time( newtm );
@@ -600,6 +596,7 @@ int TBmeshWin::handle( int event )
                     contwin->frameskip->value()*
                     ((Fl::event_state()&FL_SHIFT)?shift_time_scale:1));
         if ( newtm >= 0 ) {
+          signal_links( -1 );
           contwin->tmslider->value(newtm);
           contwin->tmslider->redraw();
           set_time( newtm );
@@ -1636,3 +1633,19 @@ TBmeshWin::draw_iso_lines()
 
   glPopAttrib( );
 }
+
+
+/** signal the time linked meshalyzer instances
+ *
+ *  \param dir direction
+ */
+void
+TBmeshWin::signal_links( int dir ) 
+{
+  set<int> :: iterator it;
+
+  for( it=timeLinks.begin(); it!=timeLinks.end(); it++ )
+    if( kill( *it, dir>0?SIGUSR1:SIGUSR2 ) )
+      timeLinks.erase( *it );
+}
+

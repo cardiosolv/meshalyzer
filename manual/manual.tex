@@ -872,4 +872,24 @@ Depressing the ``p'' key will enter vertex picking mode. It is a short cut for t
 ``Pick Vertex'' button.
 
 To reread the current data file, press ``r''.
+
+\section{Temporal Linking}
+
+\meshal responds to the following UNIX signals:
+
+\begin{longtable}{|l|l|}\hline
+Signal & Action \\ \hline
+SIGUSR1 & advance forward by the frame increment \\
+SIGUSR2 & go backwards by the frame increment \\ \hline
+\end{longtable}
+
+This can be used to have several instances of meshalyzer advance in time at once.
+To do this, in one instance of meshalyzer which will henceforth be the master, 
+select ``Temporal link'' under the ``File''menu.
+A window will pop open. In the top panel will be a list of process IDs for meshalyzer run by
+the user. Select the processes you would like linked and click on ``link selected''.
+Any of these can be unlinked by selecting them in the bottom list and hitting ``Unlink
+selected''. 
+Now, when the time is changed in the master window by using the arrow keys or animation button,
+the time in the other windows will also be changed.
 \end{document}

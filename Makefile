@@ -1,9 +1,9 @@
 HOSTMACHINE := $(shell uname)
 
 FLTK_INC      := $(shell fltk-config --use-gl --cxxflags)
-FLTK_LD_FLAGS := $(shell fltk-config --use-gl --ldflags)
+FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-gl --ldflags)
 COMMON_LIBS    = -lpng -lpthread -lm -lz 
-COMMON_INC     = -I. -O3 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX
+COMMON_INC     = -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX
 
 ifeq ($(HOSTMACHINE),Darwin)
 LIBS =  -L/sw/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS)
