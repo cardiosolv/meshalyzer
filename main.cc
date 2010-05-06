@@ -16,18 +16,15 @@ static Controls control;
  */
 void animate_signal( int sig ) 
 {
-  if( sig!=SIGUSR1 && sig != SIGUSR2 )
-    return;
-
   int fs = control.frameskip->value();
   fs *= sig==SIGUSR1 ? 1 : -1;
 
   int newtm = control.tmslider->value() + fs;
 
   if( newtm<0 )
-    newtm += control.tmslider->maximum();
+    newtm = control.tmslider->maximum();
   if( newtm> control.tmslider->maximum() )
-    newtm -= control.tmslider->maximum();
+    newtm = 0;
 
   win.trackballwin->set_time( newtm );
   control.tmslider->value(newtm);
@@ -217,8 +214,13 @@ main( int argc, char *argv[] )
     control.window->iconize();
   win.winny->position(1,1);
 
-  signal( 10, animate_signal );
-  signal( 12, animate_signal );
+  struct sigaction sigact;
+  sigact.sa_handler = animate_signal;
+  sigact.sa_flags   = 0;
+  sigfillset( &sigact.sa_mask );
+
+  sigaction( SIGUSR1, &sigact, NULL );
+  sigaction( SIGUSR2, &sigact, NULL );
 
   return Fl::run();
 }

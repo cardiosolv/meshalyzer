@@ -1644,6 +1644,10 @@ TBmeshWin::signal_links( int dir )
 {
   set<int> :: iterator it;
 
+  static int n=0;
+
+  cout << "Signalling time #" << n++ << endl;
+
   for( it=timeLinks.begin(); it!=timeLinks.end(); it++ )
     if( kill( *it, dir>0?SIGUSR1:SIGUSR2 ) )
       timeLinks.erase( *it );
