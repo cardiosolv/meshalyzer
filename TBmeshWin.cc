@@ -1634,6 +1634,7 @@ TBmeshWin::draw_iso_lines()
   glPopAttrib( );
 }
 
+extern sem_t *meshProcSem;
 
 /** signal the time linked meshalyzer instances
  *
@@ -1642,14 +1643,20 @@ TBmeshWin::draw_iso_lines()
 void
 TBmeshWin::signal_links( int dir ) 
 {
-  set<int> :: iterator it;
+  // make sure we start at zero
+  int numsem;
+  sem_getvalue( meshProcSem, &numsem );
+  for( int i=0; i<numsem; i++ )
+    sem_wait( meshProcSem ); 
 
-  static int n=0;
-
-  cout << "Signalling time #" << n++ << endl;
-
-  for( it=timeLinks.begin(); it!=timeLinks.end(); it++ )
+  int num_pending=0;
+  for( set<int>::iterator it=timeLinks.begin(); it!=timeLinks.end(); it++ )
     if( kill( *it, dir>0?SIGUSR1:SIGUSR2 ) )
       timeLinks.erase( *it );
+    else
+      num_pending++;
+
+  for( int i=0; i<num_pending; i++ )
+    sem_wait( meshProcSem );
 }
 

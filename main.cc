@@ -6,15 +6,20 @@
 #include <getopt.h>
 #include <FL/Fl_Text_Display.H>
 #include <signal.h>
+#include <semaphore.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 static Meshwin win;
 static Controls control;
+sem_t *meshProcSem;               // global semaphore for temporal linking
 
-/** animate in response to a signal received: SIGUSR1 for forward, SIGUSR2 for backward
+/** animate in response to a signal received: SIGUSR1 for forward, 
+ *  SIGUSR2 for backward
  *
  * \param sig the signal
  */
-void animate_signal( int sig ) 
+void animate_signal( int sig, siginfo_t *si, void *v ) 
 {
   int fs = control.frameskip->value();
   fs *= sig==SIGUSR1 ? 1 : -1;
@@ -28,6 +33,8 @@ void animate_signal( int sig )
 
   win.trackballwin->set_time( newtm );
   control.tmslider->value(newtm);
+
+  sem_post( meshProcSem );
 }
 
 
@@ -59,6 +66,7 @@ print_usage(void)
   cout << "--iconifycontrols|-i  iconify controls on startup" << endl;
   cout << "--no_elem|-n          do not read eleemnt info" << endl;
   cout << "--help|-h             print this message" << endl;
+  cout << "--groupID|g           meshalyzer group" << endl;
   exit(0);
 }
 
@@ -114,6 +122,7 @@ static struct option longopts[] = {
   { "iconifycontrols", no_argument, NULL, 'i' },
   { "no_elem"        , no_argument, NULL, 'n' },
   { "help"           , no_argument, NULL, 'h' },
+  { "goupID"         , 1          , NULL, 'g' },
   { NULL             , 0          , NULL, 0   }
 };
 
@@ -123,10 +132,11 @@ main( int argc, char *argv[] )
   Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);
 
   bool iconcontrols = false;
-  bool no_elems  = false;
+  bool no_elems     = false;
+  const char *grpID = "0";
 
   int ch;
-  while( (ch=getopt_long(argc, argv, "inh", longopts, NULL)) != -1 )
+  while( (ch=getopt_long(argc, argv, "inhg:", longopts, NULL)) != -1 )
 	switch(ch) {
 		case 'i':
 			iconcontrols = true;
@@ -134,6 +144,9 @@ main( int argc, char *argv[] )
         case 'n':
 			no_elems = true;
 			break;
+        case 'g':
+            grpID = strdup(optarg);
+            break;
 		case 'h':
 			print_usage();
 			break;
@@ -196,7 +209,8 @@ main( int argc, char *argv[] )
 
   win.trackballwin->show();
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
-    control.surflist->add( win.trackballwin->model->surface(i)->label().c_str(), 1 );
+    control.surflist->add( win.trackballwin->model->surface(i)->label().c_str(),
+                                                                        1 );
   }
   if ( vectordata ) control.vectorgrp->activate();
   control.tethi->maximum( win.trackballwin->model->numVol()-1 );
@@ -214,9 +228,17 @@ main( int argc, char *argv[] )
     control.window->iconize();
   win.winny->position(1,1);
 
+  // set up named semaphore
+  string semstr = "/mshz";
+  semstr += grpID;
+  meshProcSem = sem_open( semstr.c_str(), O_CREAT, S_IRWXU, 0 );
+  if( meshProcSem==SEM_FAILED )
+    cerr << "Temporal linking not possible" << endl;
+
+  // set up signal handling
   struct sigaction sigact;
-  sigact.sa_handler = animate_signal;
-  sigact.sa_flags   = 0;
+  sigact.sa_sigaction = animate_signal;
+  sigact.sa_flags     = SA_SIGINFO;
   sigfillset( &sigact.sa_mask );
 
   sigaction( SIGUSR1, &sigact, NULL );

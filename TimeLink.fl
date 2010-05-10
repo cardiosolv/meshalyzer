@@ -11,6 +11,9 @@ decl {\#include <sys/types.h>} {private local
 decl {\#include <unistd.h>} {private local
 } 
 
+decl {\#include <iostream>} {private local
+} 
+
 decl {using namespace std;} {public global
 } 
 
@@ -94,13 +97,14 @@ list_mesh_pids();} {}
   }
   Function {unlink()} {open
   } {
-    code {for( int i=meshList->size(); i>=1; i-- )
+    code {for( int i=linkList->size(); i>=1; i-- )
   if( linkList->selected(i) ) {
-    linkages.erase( atoi(meshList->text(i)) );
+    linkages.erase( atoi(linkList->text(i)) );
   }
   
 list_links();
-list_mesh_pids();} {}
+list_mesh_pids();} {selected
+    }
   }
   Function {list_links()} {open
   } {
