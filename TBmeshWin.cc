@@ -1,3 +1,4 @@
+#include <GLee.h>
 #include "trimesh.h"
 #include <signal.h>
 #include <FL/Fl_File_Chooser.H>
@@ -28,19 +29,56 @@ int intcomp( const void *a, const void *b );
 
 
 /* dump the frame buffer into a file */
-void write_frame( string fname, int w, int h )
+void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 {
-  GLubyte*  buffer = new GLubyte[w*h*4];
+  static int oldw=-1, oldh;
+  static GLubyte* buffer;
+  static GLuint fb, color_rb, depth_rb;
+
   FILE *out = fopen( fname.c_str(), "w" );
   PNGwrite* pngimg = new PNGwrite( out );
   pngimg->size( w, h );
   pngimg->depth( 8*sizeof(GLubyte) );
   pngimg->colour_type( PNG_COLOR_TYPE_RGB_ALPHA );
+
+  if( oldw==-1 || oldw!=w || oldh!=h ) {
+
+    if( oldw != -1 ) {
+      delete[] buffer;
+      glDeleteRenderbuffersEXT(1, &color_rb);
+      glDeleteRenderbuffersEXT(1, &depth_rb);
+      glDeleteFramebuffersEXT(1, &fb);
+    }
+    oldw = w;
+    oldh = h;
+
+    buffer = new GLubyte[w*h*4];
+
+    glGenFramebuffersEXT(1, &fb);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+    glGenRenderbuffersEXT(1, &color_rb);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, color_rb);
+    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, w, h );
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, 
+            GL_RENDERBUFFER_EXT, color_rb);
+    glGenRenderbuffersEXT(1, &depth_rb);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
+    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, w, h );
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
+            GL_RENDERBUFFER_EXT, depth_rb);
+  }
+
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
+
+  tbwm->valid(0);
+  tbwm->draw();
+
   glReadBuffer(GL_FRONT);
   glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid *)buffer);
   pngimg->write( buffer );
   delete pngimg;
-  delete[] buffer;
+
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
 }
 
 
@@ -126,7 +164,8 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     timevec(NULL), recording(false), dump_vert_list(false),
     disp(asSurface),data(NULL),facetshading(false),numframes(0),
     headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] ),
-    iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL)
+    iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL),
+    bgd_trans(true)
 {
   model = new Model();
   memset( hilight, 0, sizeof(int)*maxobject );
@@ -173,7 +212,7 @@ void TBmeshWin :: draw()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glViewport(0,0,w(),h());
-    glClearColor( bc[0], bc[1], bc[2], 0 );
+    glClearColor( bc[0], bc[1], bc[2], bgd_trans?0:1 );
     if ( renderMode == GL_SELECT ) {		// for picking and vertex list
       glInitNames();
       glPushName(~(GLuint)0);
@@ -940,20 +979,11 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
     }
     redraw();
     Fl::flush();
-    write_frame( foutname, w(), h() );
+    write_frame( foutname, w(), h(), this );
   }
   tm= start;
   redraw();
   Fl::flush();
-  /*
-  if( !fl_ask("Do you want the background transparent?") ) {
-  GLubyte bgdcol[] = {0,0,1};
-  for( int i=0; i<width*height; i++ )
-  if( !memcmp( bgdcol, buffer+i*4, 3*sizeof(GLubyte) ) )
-  buffer[i*4+3] = 255;
-  }
-   */
-  //if( sequence ) seqwidget->movieprog->copy_label("100%");
 }
 
 
@@ -1382,7 +1412,7 @@ void TBmeshWin::record_events( char* fn )
       char fnum[32];
       sprintf( fnum, "%05d", num++ );
       fname = fname + fnum + ".png";
-      write_frame( fname, w(), h() );
+      write_frame( fname, w(), h(), this );
     }
   }
   ostringstream msg;

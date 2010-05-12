@@ -123,6 +123,7 @@ static struct option longopts[] = {
   { "no_elem"        , no_argument, NULL, 'n' },
   { "help"           , no_argument, NULL, 'h' },
   { "goupID"         , 1          , NULL, 'g' },
+  { "PNGdump"        , 1          , NULL, 'p' },
   { NULL             , 0          , NULL, 0   }
 };
 
@@ -133,6 +134,7 @@ main( int argc, char *argv[] )
 
   bool iconcontrols = false;
   bool no_elems     = false;
+  bool dumpPNG      = false;
   const char *grpID = "0";
 
   int ch;
@@ -150,6 +152,9 @@ main( int argc, char *argv[] )
 		case 'h':
 			print_usage();
 			break;
+        case 'p':
+            dumpPNG = true;
+            break;
 		default:
 			break;
 	}
@@ -207,6 +212,11 @@ main( int argc, char *argv[] )
       win.trackballwin->get_data(argv[i], control.tmslider );
   }
 
+  if( dumpPNG ) {
+    exit(0);
+  }
+
+
   win.trackballwin->show();
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
     control.surflist->add( win.trackballwin->model->surface(i)->label().c_str(),
@@ -222,7 +232,6 @@ main( int argc, char *argv[] )
   control.maxcolval->value(win.trackballwin->cs->max());
   control.set_tet_region( win.trackballwin->model );
   control.window->show();
-  if ( vectordata ) control.vectorgrp->activate();
   if ( win.trackballwin->auxGrid ) control.auxgridgrp->activate();
   if ( iconcontrols )
     control.window->iconize();

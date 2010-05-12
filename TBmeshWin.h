@@ -117,6 +117,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     AuxGrid  *auxGrid;
     TimeLink *tmLink;
     void      signal_links( int );
+    void      transBgd( bool a ){ bgd_trans=a;valid(0); }
   private:
     int        hilight[maxobject];	// which object to highlight
     bool	   hilighton;			// whether to highlight
@@ -168,6 +169,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     IsoSurface *iso0, *iso1;
     IsoLine    *isoline;
     set<int>   timeLinks;           // other meshalyzer processes linked to this one
+    bool       bgd_trans;           //!< transparent background
 };
 
 #include "DataOpacity.h"
