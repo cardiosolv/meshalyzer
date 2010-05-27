@@ -70,10 +70,31 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
 
-  tbwm->valid(0);
+  GLenum gle=glCheckFramebufferStatus(GL_FRAMEBUFFER_EXT);
+  if( gle==GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT )
+    cout << "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT" << endl;
+  else if ( gle==GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT )
+    cout << "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS" << endl;
+  else if ( gle==GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT )
+    cout << "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT" << endl;
+  else if( gle==GL_FRAMEBUFFER_UNSUPPORTED_EXT )
+    cout << "GL_FRAMEBUFFER_UNSUPPORTED" << endl;
+  else if( gle==GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT )
+    cout << "FRAMEBUFFER_INCOMPLETE_FORMATS_EXT" << endl;
+  else if( gle==GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT )
+    cout << "FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT" << endl;
+  else if( gle==GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT )
+    cout << "FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT" << endl;
+
+  if( gle!=GL_FRAMEBUFFER_COMPLETE ) {
+    cout << "aborting:" << gle << endl;
+    return;
+  }
+
+  tbwm->valid(1);
   tbwm->draw();
 
-  glReadBuffer(GL_FRONT);
+  glReadBuffer(GL_BACK);
   glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid *)buffer);
   pngimg->write( buffer );
   delete pngimg;
@@ -981,6 +1002,8 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
     Fl::flush();
     write_frame( foutname, w(), h(), this );
   }
+  if ( sequence ) 
+    seqwidget->movieprog->label("100%");
   tm= start;
   redraw();
   Fl::flush();

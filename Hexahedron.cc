@@ -265,7 +265,7 @@ const int hex_iso_table[][28] = {
 };
 const int hex_num_surf = 6;                                      //!< \#surfaces defining hex
 const int hex_surface_table[][4] = {                             //!< local nodes defining surfaces
-   {0,3,2,1},{5,4,7,6},{3,5,6,2},{0,1,7,4},{3,0,4,5},{1,2,6,7}
+   {0,1,2,3},{5,6,7,4},{3,2,6,5},{0,4,7,1},{3,5,4,0},{1,7,6,2}
 };
 
 /** draw many Hexahedrons

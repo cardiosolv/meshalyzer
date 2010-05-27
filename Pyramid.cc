@@ -41,7 +41,7 @@ static const int pyramid_iso_table[][15] = {
 };
 const int pyr_num_surf = 5;
 const int pyr_surface_table[][4] = {
-   {0,3,2,1}, {4,1,2,-1}, {4,2,3,-1}, {4,3,0,-1}, {4,0,1,-1}
+   {0,1,2,3}, {4,2,1,-1}, {4,3,2,-1}, {4,0,3,-1}, {4,1,0,-1}
 };
 
 

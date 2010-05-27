@@ -1,3 +1,4 @@
+#include <GLee.h>
 #include "trimesh.h"
 #include "isosurf.h"
 #include <string>
@@ -56,21 +57,6 @@ read_version_info( Fl_Text_Display *txt )
 }
 
 
-/** output usage 
- */
-void
-print_usage(void) 
-{
-  cout << "meshalyzer [options] model_base[.] [file.dat] [file.xfrm] [file.mshz] [file.vpts]"<<endl;
-  cout << "with options: " << endl;
-  cout << "--iconifycontrols|-i  iconify controls on startup" << endl;
-  cout << "--no_elem|-n          do not read eleemnt info" << endl;
-  cout << "--help|-h             print this message" << endl;
-  cout << "--groupID|g           meshalyzer group" << endl;
-  exit(0);
-}
-
-
 /* read in a CG (CoolGraphics) input file
  *
  * \param fin     file name
@@ -118,11 +104,27 @@ void process_cg_format(char *fin, Meshwin *w, Controls* control, bool no_elems)
 }
 
 
+/** output usage 
+ */
+void
+print_usage(void) 
+{
+  cout << "meshalyzer [options] model_base[.] [file.dat] [file.xfrm] [file.mshz] [file.vpts]"<<endl;
+  cout << "with options: " << endl;
+  cout << "--iconifycontrols|-i  iconify controls on startup" << endl;
+  cout << "--no_elem|-n          do not read eleemnt info" << endl;
+  cout << "--help|-h             print this message" << endl;
+  cout << "--groupID=GID|-gGID   meshalyzer group" << endl;
+  cout << "--PNG=file|-pfile     output as PNG to file and exit" << endl;
+  exit(0);
+}
+
+
 static struct option longopts[] = {
   { "iconifycontrols", no_argument, NULL, 'i' },
   { "no_elem"        , no_argument, NULL, 'n' },
   { "help"           , no_argument, NULL, 'h' },
-  { "goupID"         , 1          , NULL, 'g' },
+  { "gpoupID"        , 1          , NULL, 'g' },
   { "PNGdump"        , 1          , NULL, 'p' },
   { NULL             , 0          , NULL, 0   }
 };
@@ -134,7 +136,7 @@ main( int argc, char *argv[] )
 
   bool iconcontrols = false;
   bool no_elems     = false;
-  bool dumpPNG      = false;
+  char *PNGfile     = NULL;
   const char *grpID = "0";
 
   int ch;
@@ -153,7 +155,7 @@ main( int argc, char *argv[] )
 			print_usage();
 			break;
         case 'p':
-            dumpPNG = true;
+            PNGfile = strdup(optarg);
             break;
 		default:
 			break;
@@ -187,7 +189,9 @@ main( int argc, char *argv[] )
   if( !stat( defstate.c_str(), &buf) )
     control.restore_state( defstate.c_str() );
 
-  win.winny->show();
+  //if( !PNGfile )
+    win.winny->show();
+
   // deal with command line files specified
   for ( int i=model_index+1; i<argc; i++ ) {
     if ( argv[i][0] == '-' ) 
@@ -212,12 +216,8 @@ main( int argc, char *argv[] )
       win.trackballwin->get_data(argv[i], control.tmslider );
   }
 
-  if( dumpPNG ) {
-    exit(0);
-  }
-
-
   win.trackballwin->show();
+
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
     control.surflist->add( win.trackballwin->model->surface(i)->label().c_str(),
                                                                         1 );
@@ -231,7 +231,8 @@ main( int argc, char *argv[] )
   control.mincolval->value(win.trackballwin->cs->min());
   control.maxcolval->value(win.trackballwin->cs->max());
   control.set_tet_region( win.trackballwin->model );
-  control.window->show();
+  if( !PNGfile )
+    control.window->show();
   if ( win.trackballwin->auxGrid ) control.auxgridgrp->activate();
   if ( iconcontrols )
     control.window->iconize();
@@ -253,6 +254,15 @@ main( int argc, char *argv[] )
   sigaction( SIGUSR1, &sigact, NULL );
   sigaction( SIGUSR2, &sigact, NULL );
 
+  void write_frame( string fname, int w, int h, TBmeshWin *tbwm );
+  if( PNGfile ) {
+    //Fl::wait();
+    GLeeInit();
+    GLeeForceLink("GL_EXT_framebuffer_object");
+    write_frame( PNGfile, 455, 455, win.trackballwin );
+    //write_frame( PNGfile, 455, 455, win.trackballwin );
+    exit(0);
+  }
   return Fl::run();
 }
 
