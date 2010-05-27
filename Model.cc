@@ -470,7 +470,8 @@ int Model::add_surface_from_surf( const char *fn )
       int nl[5];
       char etype[12];
       if ( file.gets(buff,bufsize) == Z_NULL ||
-              sscanf(buff, "%s %d %d %d", etype, nl, nl+1, nl+2, nl+3, nl+4 ) < 4 ) {
+              sscanf(buff, "%s %d %d %d %d %d",
+                             etype, nl, nl+1, nl+2, nl+3, nl+4 ) < 4 ) {
         _surface.pop_back();
         return surfnum;
       }
