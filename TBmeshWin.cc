@@ -1618,6 +1618,7 @@ TBmeshWin :: determine_cutplane( int cp )
   if ( fst ) {
     cpvis = new char[model->pt.num()];
     fst = false;
+  }
   memset( cpvis, 0, model->pt.num()*sizeof(char) );
 
   if ( _cutsurface[cp] != NULL ) delete _cutsurface[cp];
