@@ -1618,7 +1618,6 @@ TBmeshWin :: determine_cutplane( int cp )
   if ( fst ) {
     cpvis = new char[model->pt.num()];
     fst = false;
-  }
   memset( cpvis, 0, model->pt.num()*sizeof(char) );
 
   if ( _cutsurface[cp] != NULL ) delete _cutsurface[cp];
@@ -1644,11 +1643,17 @@ TBmeshWin :: determine_cutplane( int cp )
     if ( cpvis[j] && (dot( pp+3*j, cpf )<-cpf[3]) )
       cpvis[j] = false;
 
-  for ( int e=0; e<model->_numVol; e++ ) {
-    Interpolator<DATA_TYPE> *interp;
-    SurfaceElement *se = model->_vol[e]->cut( cpvis, cpf, interp );
-    if ( se!= NULL ) {
-      _cutsurface[cp]->addEle( se, cpf, interp );
+  for ( int r=0; r<model->_numReg; r++ ) {
+    if( !model->region(r)->visible() ) 
+      continue;
+    for ( int e=0; e<model->_numVol; e++ ) {
+      if( model->region(r)->ele_member(e) ) {
+        Interpolator<DATA_TYPE> *interp;
+        SurfaceElement *se = model->_vol[e]->cut( cpvis, cpf, interp );
+        if ( se!= NULL ) {
+          _cutsurface[cp]->addEle( se, cpf, interp );
+        }
+      }
     }
   }
 }
