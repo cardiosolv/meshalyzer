@@ -91,7 +91,7 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
     return;
   }
 
-  tbwm->valid(1);
+  tbwm->invalidate();
   tbwm->draw();
 
   glReadBuffer(GL_BACK);

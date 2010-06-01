@@ -64,7 +64,7 @@ void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
 
 VecData::VecData(const GLfloat *pt_offset, char* vptfile):_length(1),maxmag(0.),
     numpt(0),numtm(0),pts(NULL),vdata(NULL),sdata(NULL),_disp(true),
-    _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0)
+    _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0),_stride(1)
 {
   _colour[1] = _colour[2] = 0.;
   _colour[0] = _colour[3] = 1.;
