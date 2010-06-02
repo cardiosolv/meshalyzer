@@ -300,7 +300,7 @@ int Model::add_surface_from_elem( const char *fn )
       if ( sscanf(buff, "%*s %*d %*d %*d %s", surfnum )<1 )
         strcpy( surfnum, "EMPTY" );
     } else if ( !strncmp(buff,"Qd",2) ) {
-      if ( sscanf(buff, "%*s %*d %*d %*d %*d %s", &surfnum )<1 )
+      if ( sscanf(buff, "%*s %*d %*d %*d %*d %s", surfnum )<1 )
         strcpy( surfnum, "EMPTY" );
     }
     if ( strlen(surfnum) )

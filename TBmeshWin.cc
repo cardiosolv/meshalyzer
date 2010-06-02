@@ -840,7 +840,7 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
   } catch (...) {
     string alstr = "Unable to open data file: ";
     alstr += fn;
-    fl_alert( alstr.c_str() );
+    fl_alert( "%s",alstr.c_str() );
     return;
   }
   if ( dataBuffer != NULL ) delete dataBuffer;
@@ -1440,7 +1440,7 @@ void TBmeshWin::record_events( char* fn )
   }
   ostringstream msg;
   msg << num << " frames output";
-  fl_alert( msg.str().c_str() );
+  fl_alert( "%s", msg.str().c_str() );
 }
 
 

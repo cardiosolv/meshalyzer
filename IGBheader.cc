@@ -798,7 +798,8 @@ int IGBheader::read()
       else if ( in && ! isprint(in) ) {
         if (!Header_Quiet)
           fprintf(stderr,
-                  "\nERREUR caract. non imprim. 0x%.2X dans l'entete at byte number %d\n", in, gztell(file) );
+                  "\nERREUR caract. non imprim. 0x%.2X dans l'entete at byte number %ld\n",
+                                                                           in, gztell(file) );
         sprintf(Header_Message,
                 "\nERREUR caract. non imprim. 0x%.2X dans l'entete !\n", in );
         return ERR_UNPRINTABLE_CHAR;
@@ -1198,7 +1199,7 @@ int IGBheader::read()
     gzseek( file, 1024, SEEK_SET );
     if (!Header_Quiet) {
       fprintf(stderr,
-              "\nATTENTION: etiquette de grandeur non-standard: %d \n", gztell(file));
+              "\nATTENTION: etiquette de grandeur non-standard: %ld \n", gztell(file));
     }
     sprintf(Header_Message,
             "\nATTENTION: etiquette de grandeur non-standard \n");

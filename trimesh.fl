@@ -67,11 +67,11 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1045 25 350 650} type Double box UP_BOX
+      xywh {573 25 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -466,7 +466,7 @@ s->window->show();}
             }
             MenuItem transBgd {
               label {Transparent Bgd}
-              callback {mwtb->transBgd( transBgd->value() );} selected
+              callback {mwtb->transBgd( transBgd->value() );}
               xywh {0 0 30 20} type Toggle value 1
             }
           }
@@ -1562,7 +1562,8 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {} {
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1716,7 +1717,8 @@ mshzf << "ISOSURF_COLOUR 0 = ";
 save_colour( mshzf, mwtb->isosurfwin->issColor(0) );
 mshzf << endl;} {}
   }
-  Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
+  Function {save_colour( ofstream&ofs, const GLfloat *col )} {open
+  } {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
@@ -1966,7 +1968,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( mwtb->isosurfwin->opacity0, var, val )
   TEST_VAR( mwtb->isosurfwin->isoOn0, var, val )
   if( !strcmp( var, "ISOLINE_COLOUR" ) ){
-    sscanf( buf, "%*s = %d %f %f %f %f", &r, &g, &b, &a );
+    sscanf( buf, "%*s = %f %f %f %f", &r, &g, &b, &a );
     mwtb->isosurfwin->islColor(r,g,b,a);
     continue;
   }
@@ -1980,7 +1982,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {}
+mwtb->lights(illBut->value());} {selected
+    }
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
