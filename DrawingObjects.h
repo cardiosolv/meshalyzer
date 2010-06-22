@@ -17,6 +17,9 @@ gzFile openFile( const char*, const char* );
 class DrawingObj
 {
   public:
+    DrawingObj() : _n(0), _size(1), _3D(false) {}
+    virtual ~DrawingObj() {}
+
     //! draw single objs
     virtual void   draw( int, GLfloat*, float size=1 )=0;
     //! draw several objs
@@ -24,7 +27,7 @@ class DrawingObj
                          int stride=1, dataOpac* dopac=NULL )=0;
     virtual bool   read( const char * ) = 0;
     int    num() const { return _n; }		//!< get \#objects
-    DrawingObj( void ): _n(0),_size(1),_3D(false){}
+
     void   translucency( bool );            //!< set tranlucency
     void   size( float s ){ _size = s; }
     float  size( void ){ return _size; }
@@ -40,14 +43,15 @@ class DrawingObj
 class Point: public DrawingObj
 {
   public:
+    Point() : _pts(NULL), _base1(false) {}
+    virtual ~Point() { if ( _pts ) free(_pts); _pts = 0; }
+
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
     void     register_vertex( int, vector<bool>& );
     const   GLfloat* pt( int p=0 ){ return _pts+p*3; }
-    Point(): _pts(NULL), _base1(false) {}
-    ~Point() { if ( _n ) free(_pts); }
     const   GLfloat* pt( int p ) const { return _pts+p*3; }
     void     setVis( bool v ){ if (v) _visible=&_allvis; }
     void     setVis( vector<bool>* v ){ _visible=v; }
@@ -71,9 +75,9 @@ class Point: public DrawingObj
 class MultiPoint : public DrawingObj
 {
   public:
-    MultiPoint( Point *p, int n, int e ):_pt(p),_ptsPerObj(n),_node(NULL),
-                                 _nedge(e){}
-    ~MultiPoint(){ if ( _n ) delete[] _node; }
+    MultiPoint( Point *p, int n, int e ):_pt(p),_ptsPerObj(n),_node(NULL), _nedge(e) {}
+    virtual ~MultiPoint() { if ( _node ) delete[] _node; _node = 0; }
+
     const int* obj( int n=0 ) { return _node+n*_ptsPerObj; }
     int     ptsPerObj(){ return _ptsPerObj; }
     void    register_vertices(int, int, vector<bool>& );
@@ -95,6 +99,8 @@ class Connection : public MultiPoint
 {
   public:
     Connection(Point *p):MultiPoint(p,2,1) {}
+    virtual ~Connection() {}
+
     void add( int, int );	//!< add a connection
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
@@ -110,6 +116,8 @@ class ContCable : public MultiPoint
 {
   public:
     ContCable(Point *p):MultiPoint(p,1,1) {}
+    virtual ~ContCable() {}
+
     const int* obj( int n=0 ) { return _node+n; }
     void add( int, int );
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -126,6 +134,8 @@ class SurfaceElement : public MultiPoint
 {
   public:
     SurfaceElement(Point *p, int n):MultiPoint(p,n,n),_nrml(NULL) {}
+    virtual ~SurfaceElement(){ if ( _nrml!=NULL ) delete[] _nrml; }
+
     virtual void     compute_normals( int, int )=0;
     const   void     nrml( GLfloat *n ){ _nrml=n; };
   inline  const   GLfloat* nrml( int a=0 ) {return _nrml==NULL?NULL:_nrml+3*a; }
@@ -134,7 +144,7 @@ class SurfaceElement : public MultiPoint
                            int stride, dataOpac* dopac, const GLfloat * )=0;
     void     read_normals( int, int, const char * );
     void     vertnorm( GLfloat *a ){ _ptnrml=a; }
-    ~SurfaceElement(){ if ( _nrml!=NULL ) delete[] _nrml; }
+    
   protected:
     GLfloat* _nrml;
     GLfloat* _ptnrml;
@@ -143,7 +153,9 @@ class SurfaceElement : public MultiPoint
 class PolyGon : public SurfaceElement
 {
   public:
-    PolyGon( Point *p, int n ):SurfaceElement(p,n) {}
+    PolyGon( Point *p, int n ) : SurfaceElement(p,n) {}
+    virtual ~PolyGon() {}
+
     virtual void compute_normals( int a, int b );
     virtual void draw( int, GLfloat*, float size=1 );
     virtual void draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
@@ -160,6 +172,8 @@ class Triangle : public SurfaceElement
 {
   public:
     Triangle(Point *p):SurfaceElement(p,3) {}
+    virtual ~Triangle() {}
+
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
@@ -179,6 +193,8 @@ class Quadrilateral : public SurfaceElement
 {
   public:
     Quadrilateral(Point *p):SurfaceElement(p,4) {}
+    virtual ~Quadrilateral() {}
+
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
@@ -198,6 +214,8 @@ class VolElement : public MultiPoint
 {
   public:
     VolElement( Point *p, int n, int e ):MultiPoint( p, n, e ) {}
+    virtual ~VolElement() {}
+
     const   int* region() const { return _region; }
     int  region(int a) const { return _region[a]; }
     void region(int a, int b) { _region[a] = b; }
@@ -217,6 +235,8 @@ class Tetrahedral : public VolElement
 {
   public:
     Tetrahedral(Point *p ): VolElement(p,4,6) {}
+    virtual ~Tetrahedral() {}
+
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
@@ -231,6 +251,8 @@ class Prism : public VolElement
 {
   public:
     Prism(Point *p ): VolElement(p,6,9) {}
+    virtual ~Prism() {}
+
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
@@ -246,6 +268,8 @@ class Hexahedron : public VolElement
 {
   public:
     Hexahedron(Point *p ): VolElement(p,8,12) {}
+    virtual ~Hexahedron() {}
+
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
@@ -260,6 +284,8 @@ class Pyramid : public VolElement
 {
   public:
     Pyramid(Point *p ): VolElement(p,5,8) {}
+    virtual ~Pyramid() {}
+
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
@@ -269,4 +295,5 @@ class Pyramid : public VolElement
     const int* iso_polys( unsigned int );
     virtual int surfaces(int **, int v=0);
 };
+
 #endif

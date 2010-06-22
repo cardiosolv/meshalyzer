@@ -67,7 +67,7 @@ private:
   }
 
 public:
-  ~Logger()
+  virtual ~Logger()
   {
   }
 

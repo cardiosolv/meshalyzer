@@ -1159,11 +1159,7 @@ TBmeshWin::readAuxGrid( char* agfile )
     fl_message( "Number of times in Aux Grid does not match" );
     return 1;
   }
-  if ( auxGrid != NULL ) {
-    *newAuxGrid = *auxGrid;
-    delete auxGrid;
-  }
-
+  delete auxGrid;
   auxGrid = newAuxGrid;
   redraw();
   return 0;

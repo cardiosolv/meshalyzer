@@ -47,8 +47,8 @@ make_face( Face *f, int n, int* orig )
 
 /** read in a line from a file, ignoring lines beginning with "#"
  *
- * \warn (GD) lines are limited to 1024 bytes.
- * \warn not threadsafe
+ * \warning (GD) lines are limited to 1024 bytes.
+ * \warning not threadsafe
  * \return pointer to a static buffer
  */
 char *
@@ -59,6 +59,13 @@ get_line( gzFile in )
   char *retval;
   do {
 	retval = gzgets( in, buf, bufsize );
+	if (retval == Z_NULL)
+	  {
+	    int err;
+	    char const * errd = gzerror(in, &err);
+	    std::cerr << errd << std::endl;
+	    continue;
+	  }
   } while( retval != Z_NULL && buf[0]=='#' );
   
   return retval==Z_NULL?NULL:buf;
@@ -82,9 +89,15 @@ int Model::new_region_label()
 }
 
 
-Model::Model():
-    _base1(false), _surface(NULL), _vertnrml(NULL),
-    _numReg(0), _region(NULL), _numVol(0), _vol(NULL), _cnnx(NULL) 
+Model::Model()
+  : _base1(false), 
+    _vertnrml(NULL),
+    _numReg(0), 
+    _region(NULL), 
+    _numVol(0), 
+    _vol(NULL), 
+    _cnnx(NULL), 
+    _cable(0) 
 {
   for ( int i=0; i<maxobject; i++ ) {
     _outstride[i] = 1;
@@ -681,13 +694,25 @@ void Model :: randomize_color( Object_t obj )
 
 Model::~Model()
 {
-  delete    pt.pt();
-  delete[] _cnnx;
-  //delete[] _ptnrml;
-  for ( int i=0; i<_numVol; i++ )
+  if (_cnnx) {
+    delete _cnnx;
+    _cnnx = 0;
+  }
+
+  for ( int i=0; i<_numVol; i++ ) {
     delete _vol[i];
-  delete _vol;
-  delete _cable;
+  }
+
+  if (_vol) {
+    delete _vol;
+    _vol = 0;
+  }
+
+  if (_cable) {
+    delete _cable;
+    _cable = 0;
+  }
+
   for ( int i=0; i<numSurf(); i++ )
     delete _surface[i];
   _surface.clear();
@@ -1133,7 +1158,7 @@ bool Model :: read_instance( gzFile pt_in, gzFile elem_in,
     }
     pt.add( p, num_pt );
     pt.offset( offset );
-	pt.setVis( true );
+    pt.setVis( true );
     delete[] p;
   }
 
