@@ -67,6 +67,7 @@ isosurf.fl
 plottingwin.fl
 Sequence.fl
 trimesh.fl
+TimeLink.fl
 )
 
 add_executable(meshalyzer
@@ -108,4 +109,5 @@ Triangle.cc
 VecData.cc
 Vector3D.C
 Vector4D.C
+GLee.c
 )
