@@ -2,44 +2,36 @@
 version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "Surfaces.h"} {public local
+decl {\#include "Surfaces.h"} {public
 } 
 
-decl {\#include <GL/gl.h>} {public local
+decl {\#include <GL/gl.h>} {public
 } 
 
-decl {\#include <vector>} {private local
+decl {\#include <vector>} {} 
+
+decl {class TBmeshWin;} {public
 } 
 
-decl {class TBmeshWin;} {public local
+decl {class IsoSurface;} {public
 } 
 
-decl {class IsoSurface;} {public local
+decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {} 
+
+decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {} 
+
+decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {} 
+
+decl {\#define TEST_MENUVAR(A,B,C) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();continue;}} {} 
+
+decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {} 
+
+decl {\#include "Model.h"} {public
 } 
 
-decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {private local
-} 
+decl {\#include <set>} {} 
 
-decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {private local
-} 
-
-decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {private local
-} 
-
-decl {\#define TEST_MENUVAR(A,B,C) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();continue;}} {private local
-} 
-
-decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {private local
-} 
-
-decl {\#include "Model.h"} {public local
-} 
-
-decl {\#include <set>} {private local
-} 
-
-decl {\#include "colourchoice.h"} {private local
-} 
+decl {\#include "colourchoice.h"} {} 
 
 class Meshwin {} {
   Function {Meshwin()} {open
@@ -71,11 +63,11 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {open
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -206,7 +198,7 @@ mwtb->tmLink->window->show();}
           }
         }
         Submenu imgmenu {
-          label Image
+          label Image open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -420,6 +412,11 @@ mwtb->trackball.size = md;mwtb->redraw();}
             label {Reverse draw order}
             callback {mwtb->revdraworder( (bool)(o->mvalue()->value()) );}
             xywh {0 0 100 20} type Toggle
+          }
+          MenuItem norot {
+            label {No rotation}
+            callback {mwtb->norot((bool)(o->mvalue()->value()));}
+            xywh {0 0 30 20} type Toggle
           }
         }
         Submenu {} {
@@ -1435,7 +1432,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 520 45 15} labelsize 10 align 16
         }
       }
-      Fl_Group animate_group {
+      Fl_Group animate_group {selected
         xywh {10 555 330 80} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
@@ -1472,9 +1469,8 @@ mwtb->redraw();}
   } {
     code {mwtb = w;} {}
   }
-  decl {TBmeshWin *mwtb;} {private local
-  }
-  decl {Fl_Window* proginfo;} {public local
+  decl {TBmeshWin *mwtb;} {}
+  decl {Fl_Window* proginfo;} {public
   }
   Function {pickcolor(Object_t obj, const char* wintitle )} {open
   } {
@@ -1982,8 +1978,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {selected
-    }
+mwtb->lights(illBut->value());} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
@@ -2063,12 +2058,8 @@ class ObjProps {} {
     sizeinp->value( mwtb->size( obj, i ) );
   }} {}
   }
-  decl {TBmeshWin *mwtb;} {private local
-  }
-  decl {Object_t obj;} {private local
-  }
-  decl {int numreg;} {private local
-  }
-  decl {bool *sel;} {private local
-  }
+  decl {TBmeshWin *mwtb;} {}
+  decl {Object_t obj;} {}
+  decl {int numreg;} {}
+  decl {bool *sel;} {}
 } 

@@ -89,15 +89,9 @@ int Model::new_region_label()
 }
 
 
-Model::Model()
-  : _base1(false), 
-    _vertnrml(NULL),
-    _numReg(0), 
-    _region(NULL), 
-    _numVol(0), 
-    _vol(NULL), 
-    _cnnx(NULL), 
-    _cable(0) 
+Model::Model():
+    _base1(false), _surface(NULL), _vertnrml(NULL),_cable(0),
+    _numReg(0), _region(NULL), _numVol(0), _vol(NULL), _cnnx(NULL), _2D(false)
 {
   for ( int i=0; i<maxobject; i++ ) {
     _outstride[i] = 1;
@@ -143,7 +137,6 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   }
   _file = fn;
 
-
   _cnnx   = new Connection( &pt );
   _cnnx->read( fn );
   LOG_TIMER("cnnx->read()");
@@ -177,6 +170,13 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
     if ( p[i]>_maxdim ) _maxdim = p[i];
 
   _vertnrml= new GLfloat[3*pt.num()];
+
+  int i=0;
+  for( ; i<pt.num(); i++ )
+    if( pt.pt(i)[2] )
+      break;
+  if( i==pt.num() )
+    _2D = true;
 
   return true;
 }
@@ -966,7 +966,7 @@ void Model::read_region_file( gzFile in, const char *fnb )
       int firstpt, lastpt, label;
       gzgets(in, buff, bufsize);
       sscanf( buff, "%d %d %d", &firstpt, &lastpt, &label );
-      _region[i] = new RRegion( pt.num(), label, false );
+      _region[i] = new RRegion( pt.num(), 0, label, false );
       for ( int e=firstpt; e<=lastpt; e++ )
         _region[i]->pt_member(e,true);
     }

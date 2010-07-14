@@ -186,7 +186,7 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     disp(asSurface),data(NULL),facetshading(false),numframes(0),
     headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] ),
     iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL),
-    bgd_trans(true)
+    bgd_trans(true),_norot(false)
 {
   model = new Model();
   memset( hilight, 0, sizeof(int)*maxobject );
@@ -690,7 +690,9 @@ int TBmeshWin::handle( int event )
         break;
     }
   } else										    // do trackball thing
-    return Fl_Gl_Tb_Window::handle(event);
+    if( !_norot || Fl::event_button()!=FL_LEFT_MOUSE  || Fl::event_state(FL_SHIFT) ||
+                   Fl::event_state(FL_CTRL)                                            )
+      return Fl_Gl_Tb_Window::handle(event);
 }
 
 
@@ -729,6 +731,11 @@ void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt,
   trackball.size = maxdim;
   cplane->set_dim( maxdim*1.3 );
 
+  if( model->twoD() ){ 
+    _norot=true;
+    contwin->norot->set();
+  }
+    
   disp = asSurface;
 }
 

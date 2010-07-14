@@ -61,6 +61,7 @@ class Model
     void  size( Object_t o, int r, float s ){ _region[r<0?0:r]->size(o, s); }
     float size( Object_t o, int r ){ return _region[r<0?0:r]->size(o); }
     string file()const{return _file;}
+    bool  twoD(){return _2D; }
 
     Point             pt;
     Connection*      _cnnx;
@@ -88,6 +89,7 @@ class Model
     int             _numtm;
     int              new_region_label();
     string          _file;               //!< base file name
+    bool            _2D;
 };
 
 #endif
