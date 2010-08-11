@@ -70,12 +70,12 @@ class Master
 {
   public:
     Master(const char *fn,int s):slsz(s),fname(fn),maxtm(0),maxmin(NULL){}
-    FileType    ftype;      //!< What type of file is it?
+    fileType    ftype;      //!< What type of file is it?
     string      fname;      //!< Argument sent to the class
     const char* scanstr;    //!< Scan string
     int         slsz;       //!< \#points in a time slice (not bytes)
     int         maxtm;      //!< Max time (=\#slices-1)
-    Maxmin<T>*  maxmin;     //!< Pointer to maxmin structure
+    Maxmin<T>*  maxmin;     //!< PPointer to maxmin structure
 };
 
 
@@ -91,7 +91,7 @@ class Slave
   public:
     Slave(Master<T>*m=NULL, int datasize=0);
     ~Slave(){ pthread_cancel( threadID ); delete datareader; delete[] data; }
-    Master<T>*       mthread;        // Pointer to master
+    Master<T>*       mthread;        // PPointer to master
     int              rdtm;           // Read time
     T*               data;           // thread data buffer
     int              size;           // size of data buffer
@@ -141,14 +141,14 @@ class ThreadedData : public DataClass<T>
     virtual   T       max();	            //!< Maximum value of the entire series
     virtual   T       min(int);           //!< Minimum value at a slice of time
     virtual   T       min();              //!< Minimum value of the entire series
-    virtual   T*      slice(int);         //!< Pointer to slice of data at a time
-    virtual   void    time_series( int, T* );    //!< Pointer to time series
+    virtual   T*      slice(int);         //!< PPointer to slice of data at a time
+    virtual   void    time_series( int, T* );    //!< PPointer to time series
     virtual   void    increment(int increment);  //!< Sets increment
   private:
     Master<T>*        mthread;               //!< master thread
     Slave<T>*         sthread;               //!< slice reading threads
     Slave<T>*         stmsr;                 //!< thread to read time series
-    Maxmin<T>*        maxmin;            //!< Pointer to maxmin
+    Maxmin<T>*        maxmin;            //!< PPointer to maxmin
     int               incrementation;        //!< Increment value
     pthread_mutex_t   mutex_incrementation;  //!< Mutex to incrementation
     int               element;               //!< Value to decide the next thread

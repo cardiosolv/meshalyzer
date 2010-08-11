@@ -35,7 +35,7 @@ CutSurfaces :: addEle( SurfaceElement *se, GLfloat *n, Interpolator<DATA_TYPE> *
                                        (_numele/ADD_INC+1)*ADD_INC*sizeof(GLfloat)*3 ));
   }
   _ele.push_back(se);
-  _ptarr[_numele]  = const_cast<GLfloat *>(const_cast<Point*>(se->pt())->pt());
+  _ptarr[_numele]  = const_cast<GLfloat *>(const_cast<PPoint*>(se->pt())->pt());
   _interp[_numele] = ni;
   memcpy( _norm+3*_numele, n, sizeof(GLfloat)*3 );
 }

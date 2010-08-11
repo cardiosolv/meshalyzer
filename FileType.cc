@@ -34,7 +34,7 @@ using namespace std;
  *
  *  \return if everything fails, FTascii
  */
-FileType FileTypeFinder ( const char *fn )
+fileType FileTypeFinder ( const char *fn )
 {
   string fname = fn;
 

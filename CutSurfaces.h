@@ -19,7 +19,7 @@ class CutSurfaces : public Surfaces
     CutSurfaces();
     ~CutSurfaces();
     void get_vert_norms( GLfloat *vn ){}
-    void determine_vert_norms( Point & ){}
+    void determine_vert_norms( PPoint & ){}
     void addEle( SurfaceElement *e, GLfloat *n, Interpolator<DATA_TYPE>* );
     DATA_TYPE  interpolate( int e, DATA_TYPE *d, int p )
     {

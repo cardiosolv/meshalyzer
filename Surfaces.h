@@ -9,7 +9,7 @@
 class Surfaces
 {
   public:
-    Surfaces( Point *pl);
+    Surfaces( PPoint *pl);
     Surfaces():_p(NULL){}
     GLfloat* fillcolor( ){ return _fillcolor; }
     void     fillcolor(float r, float g, float b, float a=1);
@@ -22,7 +22,7 @@ class Surfaces
     inline bool outline( void ){  return _outline; }
     inline void outline( bool a ){ _outline=a; }
     void get_vert_norms( GLfloat *vn );
-    void determine_vert_norms( Point & );
+    void determine_vert_norms( PPoint & );
     SurfaceElement*& ele( int a ){ return _ele[a]; }
     int  num() const {return _ele.size();}
     void num(int a){_ele.resize(a);}
@@ -34,7 +34,7 @@ class Surfaces
     string label( void ) { return _label; }
     void   flip_norms();
   protected:
-    Point   *_p;
+    PPoint   *_p;
     GLfloat  _fillcolor[4];
     GLfloat  _outlinecolor[4];
     bool      is_visible;

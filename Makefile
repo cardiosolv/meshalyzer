@@ -6,8 +6,8 @@ COMMON_LIBS    = -lpng -lpthread -lm -lz
 COMMON_INC     = -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX
 
 ifeq ($(HOSTMACHINE),Darwin)
-LIBS =  -L/sw/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS)
-CFLAGS = -I/sw/include -I/usr/X11R6/include $(FLTK_INC) $(COMMON_INC)
+LIBS =  $(FLTK_LD_FLAGS) $(COMMON_LIBS)
+CFLAGS = -I/usr/X11R6/include $(FLTK_INC) $(COMMON_INC)
 else
 LIBS   = $(FLTK_LD_FLAGS) $(COMMON_LIBS)
 CFLAGS = $(FLTK_INC) $(COMMON_INC)

@@ -7,10 +7,10 @@
 #include <string>
 using namespace std;
 
-enum FileType{ FTIGB=1, FTascii, FTfileSeqCG, FTother };
 enum DataReaderEnum {AllInMem, Threaded };
+enum fileType { FTIGB=1, FTascii, FTfileSeqCG, FTother };
 
-FileType FileTypeFinder ( const char *fn );
+fileType FileTypeFinder ( const char *fn );
 
 void CG_file_list( map<int,string>&filelist, const char *fn );
 

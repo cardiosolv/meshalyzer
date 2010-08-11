@@ -286,7 +286,7 @@ VolElement::planecut( char *pd, GLfloat* cp,
   }
 
   // make new element
-  Point *pt = new Point;
+  PPoint *pt = new PPoint;
   pt->add( intersect, num_int );
   pt->setVis( true );
   pt->offset( _pt->offset() );
@@ -377,7 +377,7 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
       if( interp )
         interp->push_back(new Interpolator<DATA_TYPE>( n0, n1, d )); 
     }
-    Point   *pts = new Point;
+    PPoint   *pts = new PPoint;
     pts->add( pt, npts );
     pts->setVis(true);
     pts->offset(_pt->offset());

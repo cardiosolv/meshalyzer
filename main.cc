@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 
 static Meshwin win;
-static Controls control;
+static Controls *ctrl_ptr;
 sem_t *meshProcSem;               // global semaphore for temporal linking
 
 /** animate in response to a signal received: SIGUSR1 for forward, 
@@ -22,18 +22,18 @@ sem_t *meshProcSem;               // global semaphore for temporal linking
  */
 void animate_signal( int sig, siginfo_t *si, void *v ) 
 {
-  int fs = control.frameskip->value();
+  int fs = ctrl_ptr->frameskip->value();
   fs *= sig==SIGUSR1 ? 1 : -1;
 
-  int newtm = control.tmslider->value() + fs;
+  int newtm = ctrl_ptr->tmslider->value() + fs;
 
   if( newtm<0 )
-    newtm = control.tmslider->maximum();
-  if( newtm> control.tmslider->maximum() )
+    newtm = ctrl_ptr->tmslider->maximum();
+  if( newtm> ctrl_ptr->tmslider->maximum() )
     newtm = 0;
 
   win.trackballwin->set_time( newtm );
-  control.tmslider->value(newtm);
+  ctrl_ptr->tmslider->value(newtm);
 
   sem_post( meshProcSem );
 }
@@ -160,6 +160,9 @@ main( int argc, char *argv[] )
 		default:
 			break;
 	}
+
+  Controls control;
+  ctrl_ptr = &control;
 
   int model_index=optind;
   while( model_index<argc && argv[model_index][0]=='-' )

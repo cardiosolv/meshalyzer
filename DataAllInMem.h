@@ -125,7 +125,7 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
 
   slice_size = slsz;
 
-  FileType ftype=FileTypeFinder( fn );
+  fileType ftype=FileTypeFinder( fn );
 
   if ( (in=gzopen(fname.c_str(), "r")) == NULL ) {
     fname += ".gz";

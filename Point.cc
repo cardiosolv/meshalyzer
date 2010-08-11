@@ -24,7 +24,7 @@ void draw_sphere( const GLfloat *ctr, float radius )
 }
 
 
-/** draw many Points
+/** draw many PPoints
  *
  *  \param p0       first index of point to draw
  *  \param p1       last index of point to draw
@@ -32,7 +32,7 @@ void draw_sphere( const GLfloat *ctr, float radius )
  *  \param data     data associated with nodes (NULL for no data display)
  *  \param stride   draw every n'th point
  */
-void Point::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
+void PPoint::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
                   DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
   if ( p0>=_n || p1>=_n ) return;
@@ -87,7 +87,7 @@ void Point::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
  *  \param colour colour to use
  *  \param size   size of point
  */
-void Point :: draw( int p, GLfloat *colour, float size )
+void PPoint :: draw( int p, GLfloat *colour, float size )
 {
   if ( p<_n ) {
     glColor3fv( colour );
@@ -108,7 +108,7 @@ void Point :: draw( int p, GLfloat *colour, float size )
  * \param p       point to register
  * \param ptDrawn list of nodes registered or not
  */
-void Point::register_vertex( int p, vector<bool>& ptDrawn )
+void PPoint::register_vertex( int p, vector<bool>& ptDrawn )
 {
   if ( !ptDrawn[p] ) { // only register once
     ptDrawn[p] = true;
@@ -121,7 +121,7 @@ void Point::register_vertex( int p, vector<bool>& ptDrawn )
 
 
 /** read in the point file */
-bool Point :: read( const char *fname )
+bool PPoint :: read( const char *fname )
 {
   gzFile in = openFile( fname, "pts" );
 
@@ -170,7 +170,7 @@ bool Point :: read( const char *fname )
  *  \param p points stored in array as x1 y1 z1 x2 y2 z2 ... xn yn zn
  */
 void
-Point :: add( GLfloat *p, int n )
+PPoint :: add( GLfloat *p, int n )
 {
   _n += n;
   _pts = (GLfloat *)realloc( _pts, _n*3*sizeof(GLfloat) );

@@ -2,7 +2,7 @@
 #include <string.h>
 #include <VecData.h>
 
-Surfaces::Surfaces( Point *pl ) : _p(pl), is_visible(true),_filled(true),
+Surfaces::Surfaces( PPoint *pl ) : _p(pl), is_visible(true),_filled(true),
     _outline(false),_vertnorm(NULL)
 {
   fillcolor( 1., 0.5, 0.1 );
@@ -53,7 +53,7 @@ void Surfaces::get_vert_norms( GLfloat *vn )
  * \param pt all points
  *
  */
-void Surfaces::determine_vert_norms( Point& pt )
+void Surfaces::determine_vert_norms( PPoint& pt )
 {
   vector<bool> has_norm(pt.num());  // if elements attached to node
 

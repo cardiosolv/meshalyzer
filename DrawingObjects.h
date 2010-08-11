@@ -40,11 +40,11 @@ class DrawingObj
 };
 
 
-class Point: public DrawingObj
+class PPoint: public DrawingObj
 {
   public:
-    Point() : _pts(NULL), _base1(false) {}
-    virtual ~Point() { if ( _pts ) free(_pts); _pts = 0; }
+    PPoint() : _pts(NULL), _base1(false) {}
+    virtual ~PPoint() { if ( _pts ) free(_pts); _pts = 0; }
 
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
@@ -75,21 +75,21 @@ class Point: public DrawingObj
 class MultiPoint : public DrawingObj
 {
   public:
-    MultiPoint( Point *p, int n, int e ):_pt(p),_ptsPerObj(n),_node(NULL), _nedge(e) {}
+    MultiPoint( PPoint *p, int n, int e ):_pt(p),_ptsPerObj(n),_node(NULL), _nedge(e) {}
     virtual ~MultiPoint() { if ( _node ) delete[] _node; _node = 0; }
 
     const int* obj( int n=0 ) { return _node+n*_ptsPerObj; }
     int     ptsPerObj(){ return _ptsPerObj; }
     void    register_vertices(int, int, vector<bool>& );
     void    add( int *n );
-    const   Point* pt(){ return _pt; }
+    const   PPoint* pt(){ return _pt; }
     void    define( const int *nl, int n=1 );
     MultiPoint **isosurf( DATA_TYPE *d, DATA_TYPE val, int &, 
                                     vector<Interpolator<DATA_TYPE>*> *a=NULL );
     virtual const int*iso_polys(unsigned int)=0; 
   protected:
     int *  _node;			//!< list of nodes defining objects
-    Point* _pt;             //!< pointer to point list
+    PPoint* _pt;             //!< pointer to point list
     int    _ptsPerObj;		//!< \#nodes to define one object
     int    _nedge;          //!< \#edges
 };
@@ -98,7 +98,7 @@ class MultiPoint : public DrawingObj
 class Connection : public MultiPoint
 {
   public:
-    Connection(Point *p):MultiPoint(p,2,1) {}
+    Connection(PPoint *p):MultiPoint(p,2,1) {}
     virtual ~Connection() {}
 
     void add( int, int );	//!< add a connection
@@ -115,7 +115,7 @@ class Connection : public MultiPoint
 class ContCable : public MultiPoint
 {
   public:
-    ContCable(Point *p):MultiPoint(p,1,1) {}
+    ContCable(PPoint *p):MultiPoint(p,1,1) {}
     virtual ~ContCable() {}
 
     const int* obj( int n=0 ) { return _node+n; }
@@ -133,7 +133,7 @@ class ContCable : public MultiPoint
 class SurfaceElement : public MultiPoint
 {
   public:
-    SurfaceElement(Point *p, int n):MultiPoint(p,n,n),_nrml(NULL) {}
+    SurfaceElement(PPoint *p, int n):MultiPoint(p,n,n),_nrml(NULL) {}
     virtual ~SurfaceElement(){ if ( _nrml!=NULL ) delete[] _nrml; }
 
     virtual void     compute_normals( int, int )=0;
@@ -153,7 +153,7 @@ class SurfaceElement : public MultiPoint
 class PolyGon : public SurfaceElement
 {
   public:
-    PolyGon( Point *p, int n ) : SurfaceElement(p,n) {}
+    PolyGon( PPoint *p, int n ) : SurfaceElement(p,n) {}
     virtual ~PolyGon() {}
 
     virtual void compute_normals( int a, int b );
@@ -171,7 +171,7 @@ class PolyGon : public SurfaceElement
 class Triangle : public SurfaceElement
 {
   public:
-    Triangle(Point *p):SurfaceElement(p,3) {}
+    Triangle(PPoint *p):SurfaceElement(p,3) {}
     virtual ~Triangle() {}
 
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -192,7 +192,7 @@ class Triangle : public SurfaceElement
 class Quadrilateral : public SurfaceElement
 {
   public:
-    Quadrilateral(Point *p):SurfaceElement(p,4) {}
+    Quadrilateral(PPoint *p):SurfaceElement(p,4) {}
     virtual ~Quadrilateral() {}
 
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -213,7 +213,7 @@ class Quadrilateral : public SurfaceElement
 class VolElement : public MultiPoint
 {
   public:
-    VolElement( Point *p, int n, int e ):MultiPoint( p, n, e ) {}
+    VolElement( PPoint *p, int n, int e ):MultiPoint( p, n, e ) {}
     virtual ~VolElement() {}
 
     const   int* region() const { return _region; }
@@ -234,7 +234,7 @@ class VolElement : public MultiPoint
 class Tetrahedral : public VolElement
 {
   public:
-    Tetrahedral(Point *p ): VolElement(p,4,6) {}
+    Tetrahedral(PPoint *p ): VolElement(p,4,6) {}
     virtual ~Tetrahedral() {}
 
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -250,7 +250,7 @@ class Tetrahedral : public VolElement
 class Prism : public VolElement
 {
   public:
-    Prism(Point *p ): VolElement(p,6,9) {}
+    Prism(PPoint *p ): VolElement(p,6,9) {}
     virtual ~Prism() {}
 
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -267,7 +267,7 @@ class Prism : public VolElement
 class Hexahedron : public VolElement
 {
   public:
-    Hexahedron(Point *p ): VolElement(p,8,12) {}
+    Hexahedron(PPoint *p ): VolElement(p,8,12) {}
     virtual ~Hexahedron() {}
 
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -283,7 +283,7 @@ class Hexahedron : public VolElement
 class Pyramid : public VolElement
 {
   public:
-    Pyramid(Point *p ): VolElement(p,5,8) {}
+    Pyramid(PPoint *p ): VolElement(p,5,8) {}
     virtual ~Pyramid() {}
 
     virtual void     draw( int, GLfloat*, float size=1 );

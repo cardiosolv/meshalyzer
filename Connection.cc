@@ -81,7 +81,7 @@ initializeCyltexture( GLubyte *cgrad, GLuint *tn )
 }
 
 
-/** draw many Points
+/** draw many PPoints
  *
  *  \param p0       first connection of region
  *  \param p1       last connection of region

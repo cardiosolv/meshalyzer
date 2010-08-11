@@ -63,7 +63,7 @@ class Model
     string file()const{return _file;}
     bool  twoD(){return _2D; }
 
-    Point             pt;
+    PPoint             pt;
     Connection*      _cnnx;
     ContCable*       _cable;
     VolElement**     _vol;

@@ -20,6 +20,7 @@
 
 PNGwrite :: PNGwrite( FILE *out )
 {
+  /*
   fp = out;
   width = height = 0;
   ctype = PNG_COLOR_TYPE_RGB;
@@ -38,8 +39,9 @@ PNGwrite :: PNGwrite( FILE *out )
     png_destroy_write_struct(&png_ptr,  (png_infopp)NULL);
     return;
   }
-  setjmp(png_ptr->jmpbuf);
+  setjmp(png_jmpbuf(png_ptr));
   png_init_io(png_ptr, fp);
+  */
 }
 
 PNGwrite :: ~PNGwrite( void )
@@ -47,7 +49,7 @@ PNGwrite :: ~PNGwrite( void )
 
 int PNGwrite :: write( void *data )
 {
-  setjmp(png_jmpbuf(png_ptr));
+  /*setjmp(png_jmpbuf(png_ptr));
   png_set_IHDR( png_ptr, info_ptr, width, height, colour_depth, ctype,
                 interlace_type, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
@@ -75,5 +77,6 @@ int PNGwrite :: write( void *data )
   png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
   fclose( fp );
   return 1;
+  */
 }
 
