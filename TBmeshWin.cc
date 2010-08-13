@@ -31,9 +31,13 @@ int intcomp( const void *a, const void *b );
 /* dump the frame buffer into a file */
 void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 {
+#ifdef ONSCREEN_DUMP
+  GLubyte* buffer = new GLubyte[4*w*h];
+#else
   static int oldw=-1, oldh;
   static GLubyte* buffer;
   static GLuint fb, color_rb, depth_rb;
+#endif
 
   FILE *out = fopen( fname.c_str(), "w" );
   PNGwrite* pngimg = new PNGwrite( out );
@@ -41,6 +45,7 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
   pngimg->depth( 8*sizeof(GLubyte) );
   pngimg->colour_type( PNG_COLOR_TYPE_RGB_ALPHA );
 
+#ifndef ONSCREEN_DUMP
   if( oldw==-1 || oldw!=w || oldh!=h ) {
 
     if( oldw != -1 ) {
@@ -93,13 +98,18 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 
   tbwm->invalidate();
   tbwm->draw();
+#endif
 
   glReadBuffer(GL_BACK);
   glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid *)buffer);
   pngimg->write( buffer );
   delete pngimg;
 
+#ifdef ONSCREEN_DUMP
+  delete[] buffer;
+#else
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
+#endif
 }
 
 
