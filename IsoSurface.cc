@@ -1,7 +1,15 @@
 #include "IsoSurface.h"
 
-IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v, vector<bool>&member,
-		int t):_val(v),_tm(t)
+/** constructor
+ *
+ * \param m      model
+ * \param dat    data displayed on model
+ * \param v      isovalue
+ * \param member true if part of model
+ * \param t      time
+ */
+IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v, 
+        vector<bool>&member, int t):_val(v),_tm(t)
 {
   for( int i=0; i<m->numVol(); i++ ) {
     if( member[i] ) {

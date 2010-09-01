@@ -16,6 +16,7 @@ class IsoSurface {
 		int tm() const { return _tm; }
     private:
         vector<MultiPoint *> polygon;
+        vector<GLfloat *>    nrml;
         GLfloat              colour[4]; 
         double              _val;          // value
 		int                 _tm;           // time when surface calculated

@@ -400,15 +400,18 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
             break;
     }
     isoele[n]->define( simple_index );
-    if( poly[poly_start]>2 )                  // it is a surface element
-      dynamic_cast<SurfaceElement*>(isoele[n])->compute_normals( 0, 0 );
-    poly_start += npts*2+1;
+    if( poly[poly_start]>2 ) {                 // it is a surface element
+      //dynamic_cast<SurfaceElement*>(isoele[n])->compute_normals( 0, 0 );
+      // allocate the normals
+      // loop over the edges and create a normal along the 
+      // edge pointing away from the node above threshold.
+    }poly_start += npts*2+1;
   }
   return isoele;
 }
 
 /** 
- * return alist of lists of nodes defining the surface of a volume element
+ * return a list of lists of nodes defining the surface of a volume element
  *
  * the node table is filled in by row with the number of nodes and then
  * the global node numbers
@@ -422,7 +425,8 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
  * \return the number of faces
  */
 int 
-VolElement:: make_surf_nodelist( int ve, int **ft, const int ns, int nn, const int **nl )
+VolElement:: make_surf_nodelist( int ve, int **ft, const int ns, int nn, 
+                                                        const int **nl )
 {
   for( int s=0; s<ns; s++ ) {
     int i;
