@@ -401,10 +401,16 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
     }
     isoele[n]->define( simple_index );
     if( poly[poly_start]>2 ) {                 // it is a surface element
-      //dynamic_cast<SurfaceElement*>(isoele[n])->compute_normals( 0, 0 );
-      // allocate the normals
-      // loop over the edges and create a normal along the 
-      // edge pointing away from the node above threshold.
+      SurfaceElement *se = dynamic_cast<SurfaceElement*>(isoele[n]);
+      se->compute_normals(0,0);
+      GLfloat *ptnrml = new GLfloat[3*poly[poly_start]];
+      for( int i=0; i<poly[poly_start]; i++ ) {
+        int pindex = poly_start+1+i*2;
+        int n0 = _node[poly[pindex]];
+        int n1 = _node[poly[pindex+1]];
+        normalize(sub( pts->pt(n0), pts->pt(n1), ptnrml+i*3 ));
+      }
+      se->vertnorm( ptnrml );
     }poly_start += npts*2+1;
   }
   return isoele;
