@@ -50,14 +50,15 @@ public:
       *ext = '\0';
 
     _pts_in = index(_vec_pts_pos, filename, ".pts_t");
-    _elem_in = index(_vec_elem_pos, filename, ".elem_t", (int) _vec_pts_pos.size());
-    _dat_in = index(_vec_dat_pos, filename, ".dat_t", (int) _vec_pts_pos.size());
+    _elem_in = index(_vec_elem_pos, filename, ".elem_t", 
+                                              (int) _vec_pts_pos.size());
+    _dat_in = index(_vec_dat_pos, filename, ".dat_t",
+                                              (int) _vec_pts_pos.size());
 
     if (!_pts_in) {
       std::cerr << "Failed to open .pts_t file" << std::endl;
-      throw;
+      throw 2;
     }
-
   }
 
   /** destructor
@@ -97,7 +98,7 @@ public:
     // ensure the frame requested is valid
     if (frame >= _vec_pts_pos.size()) {
       std::cerr << "GetModel() request to invalid frame number" << std::endl;
-      throw;
+      throw 3;
     }
 
     // delete previous model
@@ -128,8 +129,10 @@ public:
     if (_dat_in) {
       int count = get_num(_dat_in);
       _data = new DATA_TYPE[count];
-      for (int i=0; i<count; i++)
-        _data[i] = get_num(_dat_in);
+      for (int i=0; i<count; i++) {
+        char *p = get_line(_dat_in );
+        if(p) _data[i] = strtod( p, NULL);
+      }
     }
   
     // update internal frame number
@@ -166,6 +169,32 @@ public:
     return true;
   }
 
+  /** return a time series for a point
+   *
+   * \param v the vertex number
+   * \param d the series (will be allocated)
+   * \return the size of the vector
+   */
+  int time_series( int v, double *&d )
+  {
+    if(!_dat_in) {
+      d = NULL;
+      return 0;
+    }
+    z_off_t place = gztell(_dat_in);
+    d = new double[_vec_dat_pos.size()];
+    for( int i=0; i<_vec_dat_pos.size(); i++ ) {
+      gzseek(_dat_in, _vec_dat_pos[i], SEEK_SET);
+      // add 1 to the loop to read the number of vertices in the frame
+      for( int j=0; j<v+1; j++ )
+        get_line(_dat_in);
+      d[i] = strtod( get_line(_dat_in), NULL );
+    }
+    gzseek( _dat_in, place, SEEK_SET );
+    return _vec_dat_pos.size();
+  }
+  
+
 private:  
 
   /** index a files frame positions and store in vector
@@ -200,7 +229,7 @@ private:
       if ((match_frames != -1) && (match_frames != frames )) {
         std::cerr << "incorrect number of timepoints in " << extention << 
             " file" << std::endl;
-        throw;
+        throw 1;
       }
 
       // iterate all frames in file
@@ -242,6 +271,7 @@ private:
     }
   }
 
+
   gzFile _pts_in;                       //!< points backing file
   gzFile _elem_in;                      //!< element backing file
   gzFile _dat_in;                       //!< data backing file
@@ -257,6 +287,10 @@ private:
 };
 
 
+/**************************************************************************/
+/********************** AuxGrid functions below here **********************/
+/**************************************************************************/
+
 /** constructor 
  *
  * \param fn        base file name
@@ -266,7 +300,7 @@ private:
  */
 AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
   : _display(true), _hilight(false), _hiVert(0), _plottable(false),
-    _indexer(new AuxGridIndexer(fn, pt_offset))
+    _indexer(new AuxGridIndexer(fn, pt_offset)),_timeplot(NULL)
 {
   for (int i=0; i<sizeof(*_3D); i++)
     _3D[i] = true;
@@ -278,6 +312,11 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
   }
 
   _plottable = _indexer->plottable();
+  if( _plottable ){
+    _timeplot = new PlotWin("Aux Time Series");
+    _sz_ts = _indexer->time_series(0,_time_series);
+    _timeplot->set_data( _sz_ts, _time_series, 0 );
+  }
 
   threeD( Cnnx, true );
 }
@@ -302,28 +341,25 @@ AuxGrid :: draw( int t )
   m->_cnnx->threeD(threeD(Cnnx));
   m->_cnnx->size(size(Cnnx));
 
-  // @TODO (GD) : Figure out why the tenary op ?
-  //              Guessing it's for single slice case or something.
-  //              Needed above but watch for the t>=num_tm() case up top.
-  //Model *m = _model[_num_tm_grid==1 ? 0 : t ];
-
   if( _autocol ) {
     optimize_cs(t);
   }
 
   if( _show[Vertex] ) {
-    m->pt.draw( 0, m->pt.num()-1, color(Vertex),
-		&cs, (_indexer->_data && _datafied[Vertex]) ? _indexer->_data : NULL, 1, NULL );
+    m->pt.draw( 0, m->pt.num()-1, color(Vertex), &cs, 
+     (_indexer->_data && _datafied[Vertex]) ? _indexer->_data : NULL, 1, NULL );
   }
 
   if( _hilight ) {
     GLfloat hicol[] = { 1, 0, 0, 1 };
     m->pt.draw( _hiVert, hicol, 10 ); 
+    if( _timeplot->window->shown() )
+      _timeplot->highlight(t);
   }
 
   if( _show[Cnnx] ) {
-    m->_cnnx->draw( 0, m->_cnnx->num()-1, color(Cnnx),
-		    &cs, (_indexer->_data && _datafied[Cnnx]) ? _indexer->_data : NULL, 1, NULL );
+    m->_cnnx->draw( 0, m->_cnnx->num()-1, color(Cnnx),&cs,
+       (_indexer->_data && _datafied[Cnnx]) ? _indexer->_data : NULL, 1, NULL );
   }
 
   if( _show[SurfEle]  ) {
@@ -339,8 +375,8 @@ AuxGrid :: draw( int t )
     
     GLfloat r[]={0,1,1,1};
     m->surface(0)->draw( color(SurfEle), &cs, 
-			 (_indexer->_data && _datafied[SurfEle]) ? _indexer->_data : NULL, 1, NULL, 
-			 m->vertex_normals(m->surface(0)) );
+	          (_indexer->_data && _datafied[SurfEle]) ? _indexer->_data : NULL,
+                                  1, NULL, m->vertex_normals(m->surface(0)) );
     glPopAttrib();
   }
 
@@ -368,6 +404,9 @@ AuxGrid::~AuxGrid()
 {
   delete _indexer;
   _indexer = 0;
+  if( _timeplot )
+    delete _timeplot;
+  _timeplot = NULL;
 }
 
 void AuxGrid :: optimize_cs( int tm )
@@ -407,5 +446,34 @@ void AuxGrid::plot()
 {
   if( !_plottable )
     return;
+  _timeplot->window->show();
 }
 
+/** is data present on the grid
+ */
+bool AuxGrid::data()
+{
+  return _indexer->_data != NULL;
+}
+
+
+/** specify a vertex to highlight
+ *
+ * \return true val is valid
+ * \post \p val contains the node data value
+ */
+bool AuxGrid :: highlight_vertex( int n, float &val )
+{
+  if( n >= _indexer->_model->pt.num() ) return false;
+
+  _hiVert = n;
+  if( _indexer->_data ) {
+    val = _indexer->_data[n];
+    if( _plottable && _timeplot->window->shown() ) {
+      _sz_ts = _indexer->time_series( _hiVert, _time_series );
+      _timeplot->set_data( _sz_ts, _time_series, 0 );
+    }
+    return true;
+  }
+  return false;
+}

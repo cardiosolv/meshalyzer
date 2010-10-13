@@ -1183,7 +1183,7 @@ TBmeshWin::getVecData( void *vp, char* vptfile )
 // read in Auxiliary grid
 // return nonzero if an error
 int
-TBmeshWin::readAuxGrid( char* agfile )
+TBmeshWin::readAuxGrid( void *vp, char* agfile )
 {
   AuxGrid* newAuxGrid;
 
@@ -1203,6 +1203,8 @@ TBmeshWin::readAuxGrid( char* agfile )
   if( auxGrid ) delete auxGrid;
 
   auxGrid = newAuxGrid;
+  ((Myslider *)vp)->maximum( max_time() );
+  contwin->window->redraw();
   redraw();
   return 0;
 }

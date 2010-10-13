@@ -461,6 +461,17 @@ where the first line indicates the time (\# same as in file extension)
 and each line contains three data.
 Currently, the first 2 are ignored but must be present.
 
+\subsection{Temporal Data Agreement}
+When temporal data is present, i.e., multiple frames of data exist for any
+grid, the number of instances must agree for all grids loaded.
+Given that one grid has $T$ frames of data where $T\ge2$, any grid can only
+have 0, 1, or $T$ frames of data.
+If there is one frame of data, it is always displayed.
+Thus, for example, if the scalar vertex data was loaded and contained 
+1 frame of data, an
+auxiliary grid with 100 frames could be read in, and subsequently a
+vector data grid could only be read if it had 1 or 100 frames of data.
+
 \section{Invocation}
 The program is run by typing\\[1ex]
 \centerline{

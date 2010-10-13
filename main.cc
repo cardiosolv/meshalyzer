@@ -214,7 +214,7 @@ main( int argc, char *argv[] )
     else if ( strstr( argv[i], ".vpts" ) != NULL )
       vectordata = !win.trackballwin->getVecData(control.tmslider, argv[i]);
     else if ( strstr( argv[i], ".pts_t" ) != NULL )
-      win.trackballwin->readAuxGrid( argv[i]);
+      win.trackballwin->readAuxGrid( control.tmslider, argv[i]);
     else
       win.trackballwin->get_data(argv[i], control.tmslider );
   }

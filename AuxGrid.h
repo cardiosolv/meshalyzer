@@ -10,7 +10,7 @@
 #include <vector>
 #include "Model.h"
 #include "DrawingObjects.h"
-#include "VecData.h"
+#include "plottingwin.h"
 
 class AuxGridIndexer;
 
@@ -30,6 +30,9 @@ class AuxGrid {
         bool         _plottable;    //!< true if a time series can be plotted
         int          _hiVert;
         bool         _hilight;
+        PlotWin*     _timeplot;
+        int          _sz_ts;        //!< size of time series
+        double*      _time_series;
 
     public:
         AuxGrid( char *fn, const GLfloat *ptoff=NULL );
@@ -52,9 +55,11 @@ class AuxGrid {
         void     volfill( bool b ){ _vol_fill=b; }
         void     autocolor( bool b ){ _autocol=b; }
         void     optimize_cs(int);
-        void     highlight_vertex(int n){_hiVert=n;}
+        bool     highlight_vertex(int n, float &val);
         void     highlight(bool b){_hilight=b;}
         void     plot();
+        bool     plottable(){return _plottable;}
+        bool     data();
 };
 
 #endif

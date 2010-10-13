@@ -20,7 +20,13 @@
 #include <FL/Fl_Widget.H>
 #include <FL/Fl_File_Chooser.H>
 
-// set the data to plot
+/** set the data to plot
+ *
+ *  \param n  number of points
+ *  \param d  ordinates
+ *  \param t  current time
+ *  \param xd abscissa
+ */
 void PlotWin :: set_data( int n, double *d, int t, double *xd )
 {
   if ( n != datasize ) {
@@ -43,7 +49,13 @@ void PlotWin :: set_data( int n, double *d, int t, double *xd )
 }
 
 
-// set the data to plot
+/** set the data to plot
+ *
+ *  \param n  number of points
+ *  \param d  ordinates
+ *  \param t  current time
+ *  \param xd abscissa
+ */
 void PlotWin :: set_data( int n, float *d, int t, float *xd )
 {
   if ( n != datasize ) {

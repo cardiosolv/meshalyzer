@@ -2,44 +2,36 @@
 version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "Surfaces.h"} {public local
+decl {\#include "Surfaces.h"} {public
 } 
 
-decl {\#include <GL/gl.h>} {public local
+decl {\#include <GL/gl.h>} {public
 } 
 
-decl {\#include <vector>} {private local
+decl {\#include <vector>} {} 
+
+decl {class TBmeshWin;} {public
 } 
 
-decl {class TBmeshWin;} {public local
+decl {class IsoSurface;} {public
 } 
 
-decl {class IsoSurface;} {public local
+decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {} 
+
+decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {} 
+
+decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {} 
+
+decl {\#define TEST_MENUVAR(A,B,C) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();continue;}} {} 
+
+decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {} 
+
+decl {\#include "Model.h"} {public
 } 
 
-decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {private local
-} 
+decl {\#include <set>} {} 
 
-decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {private local
-} 
-
-decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {private local
-} 
-
-decl {\#define TEST_MENUVAR(A,B,C) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();continue;}} {private local
-} 
-
-decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {private local
-} 
-
-decl {\#include "Model.h"} {public local
-} 
-
-decl {\#include <set>} {private local
-} 
-
-decl {\#include "colourchoice.h"} {private local
-} 
+decl {\#include "colourchoice.h"} {} 
 
 class Meshwin {} {
   Function {Meshwin()} {open
@@ -67,7 +59,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {573 58 350 650} type Double box UP_BOX
+      xywh {617 25 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -156,7 +148,7 @@ maxcolval->value(mwtb->cs->max());}
           MenuItem {} {
             label {Read Aux Grid}
             callback {char *fn = fl_file_chooser( "Auxiliary Grid", "*.pts_t", NULL );
-if( fn && !mwtb->readAuxGrid(fn) ) {
+if( fn && !mwtb->readAuxGrid(tmslider,fn) ) {
   auxgridgrp->activate();
   tabwidget->value(auxgridgrp);
 }}
@@ -1362,26 +1354,43 @@ mwtb->redraw();}
               }
             }
           }
-          Fl_Output auxvertval {
-            label Value selected
-            xywh {190 311 65 19} labelsize 10 align 2 textsize 10
-          }
           Fl_Button plotAuxTS {
             label Plot
             callback {mwtb->auxGrid->plot();}
-            xywh {305 310 25 20} labelsize 10
+            xywh {305 310 25 20} labelsize 10 deactivate
           }
           Fl_Light_Button hiAuxVert {
             label Hi
             callback {mwtb->auxGrid->highlight(o->value());
+if( o->value() ) {
+  auxhivert->activate();
+  if( mwtb->auxGrid->data() ) {
+   auxvertval->activate();
+   if( mwtb->auxGrid->plottable() )
+     plotAuxTS->activate();
+  }  
+  float val;
+  if(mwtb->auxGrid->highlight_vertex(auxhivert->value(),val) )
+    auxvertval->value(val);
+} else {
+  auxhivert->deactivate();
+  auxvertval->deactivate();
+  plotAuxTS->deactivate();
+}
 mwtb->redraw();}
-            xywh {265 310 30 20} labelsize 10
+            xywh {270 310 30 20} labelsize 10
           }
-          Fl_Value_Input {} {
+          Fl_Value_Input auxhivert {
             label Hilight
-            callback {mwtb->auxGrid->highlight_vertex(o->value());
-mwtb->redraw();}
-            xywh {125 310 60 19} labelsize 10 align 2 step 1 textsize 10
+            callback {float val;
+if( mwtb->auxGrid->highlight_vertex(o->value(),val) )
+  auxvertval->value(val);
+mwtb->redraw();} selected
+            xywh {125 310 45 19} labelsize 10 align 2 when 8 step 1 textsize 10 deactivate
+          }
+          Fl_Value_Output auxvertval {
+            label {hi value:}
+            xywh {180 311 85 18} color 17 selection_color 0 labelsize 10 align 2 textsize 10
           }
         }
       }
@@ -1498,9 +1507,8 @@ mwtb->redraw();}
   } {
     code {mwtb = w;} {}
   }
-  decl {TBmeshWin *mwtb;} {private local
-  }
-  decl {Fl_Window* proginfo;} {public local
+  decl {TBmeshWin *mwtb;} {}
+  decl {Fl_Window* proginfo;} {public
   }
   Function {pickcolor(Object_t obj, const char* wintitle )} {open
   } {
@@ -2088,12 +2096,8 @@ class ObjProps {} {
     sizeinp->value( mwtb->size( obj, i ) );
   }} {}
   }
-  decl {TBmeshWin *mwtb;} {private local
-  }
-  decl {Object_t obj;} {private local
-  }
-  decl {int numreg;} {private local
-  }
-  decl {bool *sel;} {private local
-  }
+  decl {TBmeshWin *mwtb;} {}
+  decl {Object_t obj;} {}
+  decl {int numreg;} {}
+  decl {bool *sel;} {}
 } 

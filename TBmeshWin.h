@@ -113,7 +113,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      size( Object_t o, int r, float b ){model->size(o,r,b); redraw();}
     float     size( Object_t o, int r ){ return model->size(o,r); }
     IsosurfControl *isosurfwin;
-    int       readAuxGrid( char* agfile );
+    int       readAuxGrid( void *, char* agfile );
     AuxGrid  *auxGrid;
     TimeLink *tmLink;
     void      signal_links( int );
