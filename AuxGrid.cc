@@ -253,6 +253,7 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
   for( int i=0; i<maxobject; i++ ) {
     _show[i]     = true;
     _datafied[i] = false;
+    _color[i][3] = 1;
   }
 
   threeD( Cnnx, true );

@@ -860,6 +860,14 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
     fl_alert( "%s",alstr.c_str() );
     return;
   }
+
+  if( max_time()>0 && newDataBuffer->max_tm()>0 && 
+                                          newDataBuffer->max_tm()!=max_time() ) {
+    fl_alert("%s","Incompatible number of frames in data" );
+    delete newDataBuffer;
+    return;
+  }
+
   if ( dataBuffer != NULL ) delete dataBuffer;
   dataBuffer = newDataBuffer;
 
@@ -1138,8 +1146,13 @@ TBmeshWin::illuminate( GLfloat max )
 }
 
 
-// read in vector data
-// return nonzero if an error
+/** read in vector data
+ * 
+ * \param vp      slider
+ * \param vptfile basename of vector data file
+ *
+ * \return nonzero if an error
+ */
 int
 TBmeshWin::getVecData( void *vp, char* vptfile )
 {
@@ -1150,7 +1163,15 @@ TBmeshWin::getVecData( void *vp, char* vptfile )
   } catch (...) {
     return 1;
   }
+  // make sure there is data and it matches the number of time instances
+  if( max_time()>0 && newvd->maxtime()>0 && newvd->maxtime() != max_time() ) {
+    fl_message( "Number of times in vector data does not agree" );
+    delete newvd;
+    return 2;
+  }
+
   if ( vecdata != NULL ) delete vecdata;
+
   vecdata = newvd;
   ((Myslider *)vp)->maximum( max_time() );
   contwin->window->redraw();
@@ -1171,32 +1192,41 @@ TBmeshWin::readAuxGrid( char* agfile )
   } catch (...) {
     return 1;
   }
-  if( max_time() && max_time() != newAuxGrid->num_tm()-1 ) {
+
+  // make sure there is data and it matches the number of time instances
+  if( max_time()>0 && newAuxGrid->num_tm()>1 && 
+                                        newAuxGrid->num_tm()-1 != max_time() ) {
+    fl_message( "Number of times in Aux Grid does not agree" );
     delete newAuxGrid;
-    fl_message( "Number of times in Aux Grid does not match" );
-    return 1;
+    return 2;
   }
-  delete auxGrid;
+  if( auxGrid ) delete auxGrid;
+
   auxGrid = newAuxGrid;
   redraw();
   return 0;
 }
 
 
-// return maximum time to display
+/** return maximum time to display
+ *
+ * \note There are 3 grids which must all agree on the number of time
+ *       instances. Grids with no data or only 1 instance of data
+ *       are compatible with any number of time frames since they are
+ *       static
+ */
 int TBmeshWin::max_time()
 {
-  // no or only 1 frame of vector data, scalar
-  if ( vecdata==NULL || vecdata->maxtime()==1 )
+  if( have_data == Dynamic )
     return numframes-1;
-  // no or 1 frame scalar data, vector
-  if ( have_data == NoData || have_data==Static )
-    if ( vecdata==NULL )
-      return 0;
-    else
-      return vecdata->maxtime();
-  // both kinds
-  return numframes-1<vecdata->maxtime() ? numframes-1 : vecdata->maxtime();
+  
+  if( vecdata && vecdata->maxtime()>0 )
+    return vecdata->maxtime();
+
+  if( auxGrid && auxGrid->num_tm()>0 )
+    return auxGrid->num_tm()-1;
+
+  return 0;
 }
 
 
