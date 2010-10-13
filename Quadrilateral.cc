@@ -32,7 +32,7 @@ const int quad_iso_table[][11] = {
 void Quadrilateral::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
                           DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
-  draw( p0, p1, colour, cs, data, stride, dataopac, NULL );
+  draw( p0, p1, colour, cs, data, stride, dataopac, _ptnrml );
 }
 
 

@@ -24,17 +24,18 @@ class AuxGrid {
         bool         _vol_fill;   //!< if false, draw wireframe
         bool         _autocol;
         bool         _show[maxobject]; //!< true to show object
-
-
-	bool         _3D[maxobject+2];
-	GLfloat      _color[maxobject+2][4];
-	float        _size[maxobject+2];
+        bool         _3D[maxobject+2];
+        GLfloat      _color[maxobject+2][4];
+        float        _size[maxobject+2];
+        bool         _plottable;    //!< true if a time series can be plotted
+        int          _hiVert;
+        bool         _hilight;
 
     public:
         AuxGrid( char *fn, const GLfloat *ptoff=NULL );
         virtual ~AuxGrid();
 
-	Colourscale cs;
+        Colourscale cs;
         void     draw( int );
         void     color( Object_t o, GLfloat *r );
         GLfloat * color( Object_t o ){ return _color[o]; }
@@ -51,6 +52,9 @@ class AuxGrid {
         void     volfill( bool b ){ _vol_fill=b; }
         void     autocolor( bool b ){ _autocol=b; }
         void     optimize_cs(int);
+        void     highlight_vertex(int n){_hiVert=n;}
+        void     highlight(bool b){_hilight=b;}
+        void     plot();
 };
 
 #endif

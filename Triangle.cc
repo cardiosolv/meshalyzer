@@ -18,7 +18,7 @@ static const int tri_iso_table[][6] = {
 void Triangle::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
                      DATA_TYPE* data, int stride, dataOpac* dataopac )
 {
-  draw( p0, p1, colour, cs, data, stride, dataopac, NULL );
+  draw( p0, p1, colour, cs, data, stride, dataopac, _ptnrml );
 }
 
 
@@ -51,12 +51,12 @@ void Triangle::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
     for ( int j=0; j<3; j++ ) 
     {
       if (data)
-	cs->colourize( data[_node[i+j]], dataopac->on() ? dataopac->alpha(data[_node[i+j]]) : colour[3] );
+        cs->colourize( data[_node[i+j]], dataopac->on() ? dataopac->alpha(data[_node[i+j]]) : colour[3] );
       else
-	glColor4fv( colour );
-      
+        glColor4fv( colour );
+
       if ( lightson && ptnrml ) 
-	glNormal3fv( ptnrml+_node[i+j]*3 );
+        glNormal3fv( ptnrml+_node[i+j]*3 );
       glVertex3fv( _pt->pt(_node[i+j]) );
     }	    
   }

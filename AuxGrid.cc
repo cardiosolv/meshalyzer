@@ -147,6 +147,25 @@ public:
     return (int) _vec_pts_pos.size();
   }
 
+  /** return true if all time instances have the same number of points
+   */
+  bool plottable()
+  {
+    if(_vec_pts_pos.size() == 1 ) return false;
+
+    seek(0);
+    int numpts = get_num(_pts_in);
+    for( int i=1; i<_vec_pts_pos.size(); i++ ) {
+      seek(i);
+      if( get_num(_pts_in) != numpts ) {
+        seek(0);
+        return false;
+      }
+    }
+    seek(0);
+    return true;
+  }
+
 private:  
 
   /** index a files frame positions and store in vector
@@ -156,14 +175,16 @@ private:
    * later use. If the expected frame count is required and provided, then we will
    * throw an exception if a different number of frames is encountered.
    * 
-   * \param vecpos vector of file positions to store when indexing
-   * \param filename to index (without extention)
-   * \param extention of filename to attempt to index
-   * \param match_frames number of frames we expect the file to have (-1 if not required to match)
+   * \param vecpos       vector of file positions to store when indexing
+   * \param filename     without extention
+   * \param extention    filename to attempt to index
+   * \param match_frames number of frames we expect the file to have 
+   *                     (-1 if not required to match)
    *
    * \return open file handle or 0 if file could not be opened
    */
-  gzFile index(std::vector<z_off_t> & vecpos, char const * filename, char const * extention, int match_frames = -1)
+  gzFile index(std::vector<z_off_t> & vecpos, char const * filename, 
+                                         char const * extention, int match_frames = -1)
   {
     try {
       // clear vector of positions (indexes)
@@ -178,7 +199,7 @@ private:
       // validate the number of frames
       if ((match_frames != -1) && (match_frames != frames )) {
         std::cerr << "incorrect number of timepoints in " << extention << 
-	  " file" << std::endl;
+            " file" << std::endl;
         throw;
       }
 
@@ -187,8 +208,8 @@ private:
         vecpos.push_back(gztell(infile));
 
         // skip lines of frame
-	if (frame >= 50)
-	  std::cerr << frame << std::endl;
+        if (frame >= 50)
+          std::cerr << frame << std::endl;
 
         int lines = get_num(infile);
         for (int line = 0; line < lines; line++) {
@@ -244,7 +265,7 @@ private:
  * \throw 1 if any error in input
  */
 AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
-  : _display(true),
+  : _display(true), _hilight(false), _hiVert(0), _plottable(false),
     _indexer(new AuxGridIndexer(fn, pt_offset))
 {
   for (int i=0; i<sizeof(*_3D); i++)
@@ -255,6 +276,8 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
     _datafied[i] = false;
     _color[i][3] = 1;
   }
+
+  _plottable = _indexer->plottable();
 
   threeD( Cnnx, true );
 }
@@ -267,9 +290,11 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
 void 
 AuxGrid :: draw( int t )
 {
-  if( !_display || t<0 || t>=num_tm() ) {
+  if( !_display || t<0 ) {
     return;
   }
+
+  if( t >= num_tm() ) t = num_tm()-1;
 
   Model *m = _indexer->GetModel(t);
   m->pt.size(size(Vertex));
@@ -289,6 +314,11 @@ AuxGrid :: draw( int t )
   if( _show[Vertex] ) {
     m->pt.draw( 0, m->pt.num()-1, color(Vertex),
 		&cs, (_indexer->_data && _datafied[Vertex]) ? _indexer->_data : NULL, 1, NULL );
+  }
+
+  if( _hilight ) {
+    GLfloat hicol[] = { 1, 0, 0, 1 };
+    m->pt.draw( _hiVert, hicol, 10 ); 
   }
 
   if( _show[Cnnx] ) {
@@ -326,7 +356,7 @@ AuxGrid :: draw( int t )
     }
     for( int i=0; i<m->number(VolEle); i++ ) {
       m->_vol[i]->draw( 0, m->_cnnx->num()-1, m->get_color(VolEle),
-			&cs, (_indexer->_data && _datafied[VolEle]) ? _indexer->_data : NULL, 1, NULL );
+		&cs, (_indexer->_data && _datafied[VolEle]) ? _indexer->_data : NULL, 1, NULL );
     }
     
     glPopAttrib();
@@ -371,3 +401,11 @@ int AuxGrid::num_tm()
 {
   return _indexer->num_tm();
 }
+
+
+void AuxGrid::plot()
+{
+  if( !_plottable )
+    return;
+}
+

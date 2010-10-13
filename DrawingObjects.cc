@@ -360,10 +360,10 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
       index += 1;
   }
 
-  const int* poly        = iso_polys(index);
-  npoly                  = poly[0];// number of polygons to create
-  int       poly_start   = 1;      // first polygon defined after \#polygons
-  MultiPoint **isoele = new MultiPoint *[poly[0]]; //element pointer list
+  const int* poly      = iso_polys(index);
+  npoly                = poly[0];// number of polygons to create
+  int       poly_start = 1;      // first polygon defined after \#polygons
+  MultiPoint **isoele  = new MultiPoint *[npoly]; //element pointer list
 
   for( int n=0; n<npoly; n++ ) {
     int      npts = poly[poly_start];         // \#nodes defining polygon
@@ -382,7 +382,7 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
     pts->setVis(true);
     pts->offset(_pt->offset());
 
-    switch(poly[poly_start]) {
+    switch( npts ) {
         case 1:
             assert(0);
             break;
@@ -400,21 +400,24 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
             break;
     }
     isoele[n]->define( simple_index );
-    if( poly[poly_start]>2 ) {                 // it is a surface element
+    if( npts>2 ) {                 // it is a surface element
       SurfaceElement *se = dynamic_cast<SurfaceElement*>(isoele[n]);
       se->compute_normals(0,0);
-      GLfloat *ptnrml = new GLfloat[3*poly[poly_start]];
-      for( int i=0; i<poly[poly_start]; i++ ) {
+      GLfloat *ptnrml = new GLfloat[3*npts];
+      for( int i=0; i<npts; i++ ) {
         int pindex = poly_start+1+i*2;
-        int n0 = _node[poly[pindex]];
+        int n0 = _node[poly[pindex]];   // local to global node number
         int n1 = _node[poly[pindex+1]];
-        normalize(sub( pts->pt(n0), pts->pt(n1), ptnrml+i*3 ));
+        normalize(sub( (*_pt)[n0], (*_pt)[n1], ptnrml+i*3 ));
+        if( dat[n0]>val ) scale(  ptnrml+i*3, -1 );
       }
       se->vertnorm( ptnrml );
-    }poly_start += npts*2+1;
+    }
+    poly_start += npts*2+1;
   }
   return isoele;
 }
+
 
 /** 
  * return a list of lists of nodes defining the surface of a volume element
