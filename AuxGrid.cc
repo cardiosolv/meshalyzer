@@ -319,6 +319,7 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
   }
 
   threeD( Cnnx, true );
+  threeD( Vertex, true );
 }
 
 

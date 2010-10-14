@@ -129,17 +129,14 @@ void animate_cb( void *v )
   Controls* ctrl = (Controls *)(((void **)v)[1]);
   if ( mw->frame_skip == 0 )
     return;
-  mw->tm += mw->frame_skip;
-  if ( mw->tm<0 || mw->tm>ctrl->tmslider->maximum() ) {
-    mw->tm -= mw->frame_skip;
+  int ntm = mw->tm + mw->frame_skip;
+  if ( ntm<0 || ntm>ctrl->tmslider->maximum() ) {
+    ntm -= mw->frame_skip;
     mw->frame_skip = 0;
   } else
     mw->signal_links( 1 );
 
-  ctrl->tmslider->value(mw->tm);
-  ctrl->tmslider->redraw();
-  if ( mw->timeplotter->window->shown() ) mw->timeplotter->highlight( mw->tm );
-  mw->redraw();
+  mw->set_time( ntm );
   Fl::add_timeout( mw->frame_delay, animate_cb, v );
 }
 
@@ -658,8 +655,6 @@ int TBmeshWin::handle( int event )
                     ((Fl::event_state()&FL_SHIFT)?shift_time_scale:1));
         if ( newtm <= contwin->tmslider->maximum() ) {
           signal_links( 1 );
-          contwin->tmslider->value(newtm);
-          contwin->tmslider->redraw();
           set_time( newtm );
         }
         return 1;
@@ -670,7 +665,6 @@ int TBmeshWin::handle( int event )
                     ((Fl::event_state()&FL_SHIFT)?shift_time_scale:1));
         if ( newtm >= 0 ) {
           signal_links( -1 );
-          contwin->tmslider->value(newtm);
           contwin->tmslider->redraw();
           set_time( newtm );
         }
@@ -1767,3 +1761,22 @@ TBmeshWin::signal_links( int dir )
     sem_wait( meshProcSem );
 }
 
+
+/** update the time
+ *
+ * \param a new time
+ */
+void
+TBmeshWin:: set_time(int a)
+{
+  tm=a;
+  if (timeplotter!=NULL)timeplotter->highlight(tm);
+  contwin->tmslider->value(tm);
+  contwin->tmslider->redraw();
+  if ( timeplotter->window->shown() ) timeplotter->highlight( tm );
+  redraw();
+  if( auxGrid && auxGrid->data() && contwin->auxautocalibratebut->value() ) {
+    contwin->auxmincolval->value( auxGrid->cs.min() );
+    contwin->auxmincolval->value( auxGrid->cs.max() );
+  }
+}
