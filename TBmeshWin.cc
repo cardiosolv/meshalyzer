@@ -439,7 +439,10 @@ void TBmeshWin :: draw()
   glEnable(GL_BLEND);
 
   if( vecdata != NULL ) vecdata->draw(tm,model->maxdim());
-  if( auxGrid) auxGrid->draw( tm );
+  if( auxGrid) {
+    auxGrid->draw( tm );
+    contwin->auxhivert->maximum( auxGrid->num_vert()-1 );
+  }
 
   glPopMatrix();
 }

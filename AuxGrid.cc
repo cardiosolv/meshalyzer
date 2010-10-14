@@ -352,7 +352,7 @@ AuxGrid :: draw( int t )
 
   if( _hilight ) {
     GLfloat hicol[] = { 1, 0, 0, 1 };
-    m->pt.draw( _hiVert, hicol, 10 ); 
+    m->pt.draw( _hiVert, hicol, 2*size(Vertex) ); 
     if( _timeplot->window->shown() )
       _timeplot->highlight(t);
   }
@@ -442,12 +442,20 @@ int AuxGrid::num_tm()
 }
 
 
-void AuxGrid::plot()
+/** show the plot of the time series
+ *
+ *  \param tm time currently displayed
+ */
+void AuxGrid::plot(int tm)
 {
   if( !_plottable )
     return;
+  _sz_ts = _indexer->time_series( _hiVert, _time_series );
   _timeplot->window->show();
-}
+  _timeplot->set_data( _sz_ts, _time_series, tm );
+  _timeplot->window->redraw();
+} 
+
 
 /** is data present on the grid
  */
@@ -456,6 +464,13 @@ bool AuxGrid::data()
   return _indexer->_data != NULL;
 }
 
+
+/** how many vertices at present
+ */
+int AuxGrid::num_vert()
+{
+  return _indexer->_model->pt.num();
+}
 
 /** specify a vertex to highlight
  *

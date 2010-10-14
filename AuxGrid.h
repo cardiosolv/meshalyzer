@@ -57,9 +57,10 @@ class AuxGrid {
         void     optimize_cs(int);
         bool     highlight_vertex(int n, float &val);
         void     highlight(bool b){_hilight=b;}
-        void     plot();
+        void     plot(int);
         bool     plottable(){return _plottable;}
         bool     data();
+        int      num_vert();
 };
 
 #endif

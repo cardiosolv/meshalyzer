@@ -2,36 +2,44 @@
 version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "Surfaces.h"} {public
+decl {\#include "Surfaces.h"} {public local
 } 
 
-decl {\#include <GL/gl.h>} {public
+decl {\#include <GL/gl.h>} {public local
 } 
 
-decl {\#include <vector>} {} 
-
-decl {class TBmeshWin;} {public
+decl {\#include <vector>} {private local
 } 
 
-decl {class IsoSurface;} {public
+decl {class TBmeshWin;} {public local
 } 
 
-decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {} 
-
-decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {} 
-
-decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {} 
-
-decl {\#define TEST_MENUVAR(A,B,C) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();continue;}} {} 
-
-decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {} 
-
-decl {\#include "Model.h"} {public
+decl {class IsoSurface;} {public local
 } 
 
-decl {\#include <set>} {} 
+decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {private local
+} 
 
-decl {\#include "colourchoice.h"} {} 
+decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {private local
+} 
+
+decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {private local
+} 
+
+decl {\#define TEST_MENUVAR(A,B,C) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();continue;}} {private local
+} 
+
+decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {private local
+} 
+
+decl {\#include "Model.h"} {public local
+} 
+
+decl {\#include <set>} {private local
+} 
+
+decl {\#include "colourchoice.h"} {private local
+} 
 
 class Meshwin {} {
   Function {Meshwin()} {open
@@ -59,7 +67,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {617 25 350 650} type Double box UP_BOX
+      xywh {639 58 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -1143,13 +1151,13 @@ mwtb->redraw();}
             label min
             callback {mwtb->auxGrid->cs.calibrate(o->value(),mwtb->auxGrid->cs.max());
 mwtb->redraw();}
-            xywh {20 345 65 20} labelsize 10 align 2 when 4 textsize 12
+            xywh {20 345 65 20} labelsize 10 align 2 when 4 textsize 10
           }
           Fl_Value_Input auxmaxcolval {
             label max
             callback {mwtb->auxGrid->cs.calibrate(mwtb->auxGrid->cs.min(),o->value());
 mwtb->redraw();}
-            xywh {90 345 65 20} labelsize 10 align 2 when 4 textsize 12
+            xywh {90 345 65 20} labelsize 10 align 2 when 4 textsize 10
           }
           Fl_Value_Input auxnumcolev {
             label levels
@@ -1211,7 +1219,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Lines open
+            label Lines
             xywh {65 405 255 25} labelsize 12 align 4
           } {
             Fl_Button auxlinecolor {
@@ -1259,7 +1267,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Surface open
+            label Surface
             xywh {65 430 265 20} labelsize 12 align 4
           } {
             Fl_Button auxsurfcolor {
@@ -1307,7 +1315,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label VoxEle open
+            label VoxEle
             xywh {65 454 245 22} labelsize 12 align 4
           } {
             Fl_Button auxvolcolor {
@@ -1356,8 +1364,8 @@ mwtb->redraw();}
           }
           Fl_Button plotAuxTS {
             label Plot
-            callback {mwtb->auxGrid->plot();}
-            xywh {305 310 25 20} labelsize 10 deactivate
+            callback {mwtb->auxGrid->plot(tmslider->value());} selected
+            tooltip {show time series for highlighted point} xywh {305 310 25 20} labelsize 10 deactivate
           }
           Fl_Light_Button hiAuxVert {
             label Hi
@@ -1378,19 +1386,19 @@ if( o->value() ) {
   plotAuxTS->deactivate();
 }
 mwtb->redraw();}
-            xywh {270 310 30 20} labelsize 10
+            tooltip {turn on highlighting} xywh {270 310 30 20} labelsize 10
           }
           Fl_Value_Input auxhivert {
             label Hilight
             callback {float val;
 if( mwtb->auxGrid->highlight_vertex(o->value(),val) )
   auxvertval->value(val);
-mwtb->redraw();} selected
-            xywh {125 310 45 19} labelsize 10 align 2 when 8 step 1 textsize 10 deactivate
+mwtb->redraw();}
+            tooltip {vertex to highlight and display time series if present} xywh {125 310 45 19} labelsize 10 align 2 step 1 textsize 10 deactivate
           }
           Fl_Value_Output auxvertval {
             label {hi value:}
-            xywh {180 311 85 18} color 17 selection_color 0 labelsize 10 align 2 textsize 10
+            tooltip {value of highlighted vertex} xywh {180 311 85 18} color 17 selection_color 0 labelsize 10 align 2 textsize 10
           }
         }
       }
@@ -1507,8 +1515,9 @@ mwtb->redraw();}
   } {
     code {mwtb = w;} {}
   }
-  decl {TBmeshWin *mwtb;} {}
-  decl {Fl_Window* proginfo;} {public
+  decl {TBmeshWin *mwtb;} {private local
+  }
+  decl {Fl_Window* proginfo;} {public local
   }
   Function {pickcolor(Object_t obj, const char* wintitle )} {open
   } {
@@ -2096,8 +2105,12 @@ class ObjProps {} {
     sizeinp->value( mwtb->size( obj, i ) );
   }} {}
   }
-  decl {TBmeshWin *mwtb;} {}
-  decl {Object_t obj;} {}
-  decl {int numreg;} {}
-  decl {bool *sel;} {}
+  decl {TBmeshWin *mwtb;} {private local
+  }
+  decl {Object_t obj;} {private local
+  }
+  decl {int numreg;} {private local
+  }
+  decl {bool *sel;} {private local
+  }
 } 
