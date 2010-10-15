@@ -55,7 +55,7 @@ class AuxGrid {
         void     volfill( bool b ){ _vol_fill=b; }
         void     autocolor( bool b ){ _autocol=b; }
         void     optimize_cs(int);
-        bool     highlight_vertex(int n, float &val);
+        bool     highlight_vertex(int n, float &val, bool update_plot=true);
         void     highlight(bool b){_hilight=b;}
         void     plot(int);
         bool     plottable(){return _plottable;}

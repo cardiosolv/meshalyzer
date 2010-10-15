@@ -154,6 +154,8 @@ public:
    */
   bool plottable()
   {
+    if( !_dat_in ) return false;
+
     if(_vec_pts_pos.size() == 1 ) return false;
 
     seek(0);
@@ -320,6 +322,7 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
 
   threeD( Cnnx, true );
   threeD( Vertex, true );
+  _indexer->GetModel(0);
 }
 
 
@@ -354,7 +357,7 @@ AuxGrid :: draw( int t )
   if( _hilight ) {
     GLfloat hicol[] = { 1, 0, 0, 1 };
     m->pt.draw( _hiVert, hicol, 2*size(Vertex) ); 
-    if( _timeplot->window->shown() )
+    if( _timeplot && _timeplot->window->shown() )
       _timeplot->highlight(t);
   }
 
@@ -478,14 +481,14 @@ int AuxGrid::num_vert()
  * \return true val is valid
  * \post \p val contains the node data value
  */
-bool AuxGrid :: highlight_vertex( int n, float &val )
+bool AuxGrid :: highlight_vertex( int n, float &val, bool update_plot )
 {
   if( n >= _indexer->_model->pt.num() ) return false;
 
   _hiVert = n;
   if( _indexer->_data ) {
     val = _indexer->_data[n];
-    if( _plottable && _timeplot->window->shown() ) {
+    if( update_plot && _plottable && _timeplot->window->shown() ) {
       _sz_ts = _indexer->time_series( _hiVert, _time_series );
       _timeplot->set_data( _sz_ts, _time_series, 0 );
     }

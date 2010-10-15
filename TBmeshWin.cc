@@ -436,9 +436,15 @@ void TBmeshWin :: draw()
   glEnable(GL_BLEND);
 
   if( vecdata != NULL ) vecdata->draw(tm,model->maxdim());
+
   if( auxGrid) {
     auxGrid->draw( tm );
     contwin->auxhivert->maximum( auxGrid->num_vert()-1 );
+    if(contwin->hiAuxVert->value()) {
+      float val;
+      if( auxGrid->highlight_vertex(contwin->auxhivert->value(),val,false) )
+        contwin->auxvertval->value(val);
+    }
   }
 
   glPopMatrix();
@@ -1777,6 +1783,6 @@ TBmeshWin:: set_time(int a)
   redraw();
   if( auxGrid && auxGrid->data() && contwin->auxautocalibratebut->value() ) {
     contwin->auxmincolval->value( auxGrid->cs.min() );
-    contwin->auxmincolval->value( auxGrid->cs.max() );
+    contwin->auxmaxcolval->value( auxGrid->cs.max() );
   }
 }
