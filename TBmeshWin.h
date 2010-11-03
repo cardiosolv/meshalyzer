@@ -30,6 +30,8 @@ class DataOpacity;
 class ClipPlane;
 class IsosurfControl;
 
+enum GridType { ScalarDataGrid, VecDataGrid, AuxDataGrid, NoDataGrid };
+
 class TBmeshWin:public Fl_Gl_Tb_Window
 {
   private:
@@ -152,7 +154,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      draw_cut_planes( RRegion * );
     void      draw_iso_surfaces( );
     void      draw_iso_lines();
-    int       max_time();
+    int       max_time( GridType g=NoDataGrid );
     GLenum    renderMode;			// mode for drawing
     vector<bool> ptDrawn;			// was a point drawn
     vector<bool> ptVisible;         // is a point is a visible region?

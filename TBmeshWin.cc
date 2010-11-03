@@ -864,7 +864,7 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
     return;
   }
 
-  if( max_time()>0 && newDataBuffer->max_tm()>0 && 
+  if( max_time(ScalarDataGrid)>0 && newDataBuffer->max_tm()>0 && 
                                           newDataBuffer->max_tm()!=max_time() ) {
     fl_alert("%s","Incompatible number of frames in data" );
     delete newDataBuffer;
@@ -1167,7 +1167,8 @@ TBmeshWin::getVecData( void *vp, char* vptfile )
     return 1;
   }
   // make sure there is data and it matches the number of time instances
-  if( max_time()>0 && newvd->maxtime()>0 && newvd->maxtime() != max_time() ) {
+  if( max_time(VecDataGrid)>0 && newvd->maxtime()>0 && 
+                                            newvd->maxtime() != max_time() ) {
     fl_message( "Number of times in vector data does not agree" );
     delete newvd;
     return 2;
@@ -1197,7 +1198,7 @@ TBmeshWin::readAuxGrid( void *vp, char* agfile )
   }
 
   // make sure there is data and it matches the number of time instances
-  if( max_time()>0 && newAuxGrid->num_tm()>1 && 
+  if( max_time(AuxDataGrid)>0 && newAuxGrid->num_tm()>1 && 
                                         newAuxGrid->num_tm()-1 != max_time() ) {
     fl_message( "Number of times in Aux Grid does not agree" );
     delete newAuxGrid;
@@ -1220,15 +1221,15 @@ TBmeshWin::readAuxGrid( void *vp, char* agfile )
  *       are compatible with any number of time frames since they are
  *       static
  */
-int TBmeshWin::max_time()
+int TBmeshWin::max_time( GridType ignore )
 {
-  if( have_data == Dynamic )
+  if( ignore!=ScalarDataGrid && have_data == Dynamic )
     return numframes-1;
   
-  if( vecdata && vecdata->maxtime()>0 )
+  if( ignore!=VecDataGrid && vecdata && vecdata->maxtime()>0 )
     return vecdata->maxtime();
 
-  if( auxGrid && auxGrid->num_tm()>0 )
+  if( ignore!=AuxDataGrid && auxGrid && auxGrid->num_tm()>0 )
     return auxGrid->num_tm()-1;
 
   return 0;

@@ -496,3 +496,4 @@ bool AuxGrid :: highlight_vertex( int n, float &val, bool update_plot )
   }
   return false;
 }
+
