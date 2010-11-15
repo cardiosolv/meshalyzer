@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT(Meshalyzer)
+PROJECT(meshalyzer)
 
 set(FLTK_SKIP_FLUID, ON)
 set(FLTK_SKIP_FORMS, ON)
@@ -111,3 +111,26 @@ Vector3D.C
 Vector4D.C
 GLee.c
 )
+
+install(TARGETS meshalyzer RUNTIME DESTINATION bin)
+
+set(CPACK_PACKAGE_VERSION_MAJOR 0)
+set(CPACK_PACKAGE_VERSION_MINOR 0)
+set(CPACK_PACKAGE_VERSION_PATCH r2660)
+set(CPACK_STRIP_FILES ON)
+
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Robert Blake <rblake@cardiosolv.com>")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Visualization software for CARP files.")
+set(CPACK_PACKAGE_DESCRIPTION "
+Meshalyzer is an OpenGL scientific visualization program for CARP data 
+files.  It is designed to read in CARP finite element meshes and the .dat/.igb
+files produced by CARP.
+
+For more information, go to http://cardiosolv.com
+")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfltk1.1 (>=1.1.10), libfltk1.1 (>= 1.1.10), zlib1g, libglu1-mesa")
+set(CPACK_DEBIAN_PACKAGE_SECTION "science")
+include(CPack)
+
+
+
