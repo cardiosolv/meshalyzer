@@ -118,7 +118,7 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 
     int n0 = _node[i*2], n1=_node[i*2+1];
 
-	if ( !_pt->vis( n0 ) || !_pt->vis( n1 ) )
+	if ( !_pt->vis( n0 ) )
 	  continue;
 	
 	if ( data != NULL ) {

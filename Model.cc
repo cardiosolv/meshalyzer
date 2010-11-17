@@ -90,7 +90,7 @@ int Model::new_region_label()
 
 
 Model::Model():
-    _base1(false), _surface(NULL), _vertnrml(NULL),_cable(0),
+    _base1(false), _vertnrml(NULL),_cable(0),
     _numReg(0), _region(NULL), _numVol(0), _vol(NULL), _cnnx(NULL), _2D(false)
 {
   for ( int i=0; i<maxobject; i++ ) {
@@ -274,7 +274,7 @@ void Model::determine_regions()
     for ( int r=0; r<_numReg; r++ ) {
       for ( int i=0; i<_cnnx->num(); i++ ) {
         const int *o = _cnnx->obj(i);
-        if ( _region[r]->pt_member(o[0])==true||_region[r]->pt_member(o[1])==true ) {
+        if ( _region[r]->pt_member(o[0])==true ) {
           _region[r]->first(Cnnx,i);
           break;
         }
