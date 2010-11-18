@@ -25,7 +25,7 @@ void ContCable::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 {
   if ( p0>=_n || p1>=_n ) return;
 
-  if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )     // data opacity
+  if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )    // data opacity
 	  translucency(true);
 
   GLuint texName;
@@ -87,8 +87,13 @@ void ContCable::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
       glEnd();
   }
 
-  if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )     // data opacity
-	  translucency(false);
+  if( _3D ) {
+    glDisable(GL_TEXTURE_2D );
+    glDeleteTextures( 1, &texName );
+  } 
+
+  if ( (dataopac!=NULL && dataopac->on()) || colour[3]<0.95 )  // data opacity
+    translucency(false);
 
 }
 

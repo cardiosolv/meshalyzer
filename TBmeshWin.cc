@@ -937,7 +937,7 @@ TBmeshWin :: select_hi( int n )
 
   // only process selected line if first character is a number
   int d;
-  if ( sscanf( txt, "%d", &d ) != 1 )
+  if ( sscanf( txt, "%d", &d )!=1 && sscanf( txt, "in %*s %d", &d)!=1 )
     return;
 
   int i=n;
