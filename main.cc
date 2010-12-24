@@ -14,6 +14,7 @@
 static Meshwin win;
 static Controls *ctrl_ptr;
 sem_t *meshProcSem;               // global semaphore for temporal linking
+sem_t *linkingProcSem;  // global semaphore for process linking
 
 /** animate in response to a signal received: SIGUSR1 for forward, 
  *  SIGUSR2 for backward
@@ -38,6 +39,26 @@ void animate_signal( int sig, siginfo_t *si, void *v )
   sem_post( meshProcSem );
 }
 
+/** animate in response to a signal received: SIGUSR1 for forward, 
+ *  SIGUSR2 for backward
+ *
+ * \param sig the signal
+ */
+void process_linkage_signal( int sig, siginfo_t *si, void *v ) 
+{
+  // if the signal is SIGALRM, it a new message queue is connected
+  // to this process, create bi-directional linking
+
+  // 1. call createBiDirectionalMessageQueue
+  if (sig != SIGALRM){
+    return;
+  }
+
+  win.trackballwin->CheckMessageQueue();  
+
+  // receive msg
+  sem_post( linkingProcSem );
+}
 
 /** read in the version and license information
  *
@@ -241,7 +262,7 @@ main( int argc, char *argv[] )
     control.window->iconize();
   win.winny->position(1,1);
 
-  // set up named semaphore
+  // set up named semaphore for meshProcSem
   string semstr = "/mshz";
   semstr += grpID;
   meshProcSem = sem_open( semstr.c_str(), O_CREAT, S_IRWXU, 0 );
@@ -257,6 +278,23 @@ main( int argc, char *argv[] )
   sigaction( SIGUSR1, &sigact, NULL );
   sigaction( SIGUSR2, &sigact, NULL );
 
+  // set up named semphore for linkingProcSem
+  string linkageStr = "/linkage";
+  linkageStr += grpID;
+  linkingProcSem = sem_open( linkageStr.c_str(), O_CREAT, S_IRWXU, 0 );
+  if (linkingProcSem == SEM_FAILED)
+    cerr << "Message Queue inter-process communication not possible"
+	 << endl;
+
+  // setup the signal handling
+  struct sigaction sigLinkAct;
+  sigLinkAct.sa_sigaction = process_linkage_signal;
+  sigLinkAct.sa_flags = SA_SIGINFO;
+  sigfillset( &sigLinkAct.sa_mask );
+
+  // overwrite the SIGALARM signal
+  sigaction( SIGALRM, &sigLinkAct, NULL );
+
   void write_frame( string fname, int w, int h, TBmeshWin *tbwm );
   if( PNGfile ) {
     //Fl::wait();
@@ -266,6 +304,9 @@ main( int argc, char *argv[] )
     //write_frame( PNGfile, 455, 455, win.trackballwin );
     exit(0);
   }
-  return Fl::run();
+
+  Fl::run();
+
+  return 0;
 }
 

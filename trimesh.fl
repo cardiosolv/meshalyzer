@@ -200,7 +200,7 @@ if( fn != NULL ){
             xywh {10 10 100 20} divider
           }
           MenuItem {} {
-            label {Temporal link}
+            label Link
             callback {mwtb->tmLink->list_mesh_pids();
 mwtb->tmLink->window->show();}
             xywh {0 0 30 20} divider
@@ -431,6 +431,11 @@ mwtb->trackball.size = md;mwtb->redraw();}
             label {No rotation}
             callback {mwtb->norot((bool)(o->mvalue()->value()));}
             xywh {0 0 30 20} type Toggle
+          }
+          MenuItem {} {
+            label {Viewport Sync}
+            callback {mwtb->SendViewportSyncMessage();}
+            xywh {0 0 30 20}
           }
         }
         Submenu {} {
@@ -1514,7 +1519,11 @@ mwtb->redraw();}
         Fl_Value_Input animdelay {
           label {delay:}
           callback {mwtb->animate_delay(o->value()/1000.);}
-          tooltip {delay between frames (ms )} xywh {260 605 70 20} maximum 2000 step 5 value 10
+          tooltip {delay between frames (ms )} xywh {260 620 70 20} maximum 2000 step 5 value 10
+        }
+        Fl_Button {} {
+          callback {mwtb->SendTimeSyncMessage();}
+          image {sync-icon.png} xywh {290 559 40 25} resizable
         }
       }
     }

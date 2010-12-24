@@ -13,10 +13,14 @@ class IsoSurface {
         GLfloat *color(){ return colour; }
         double isoval(){ return _val; } 
         void color(const GLfloat *c){memmove(colour,c, 4*sizeof(GLfloat));}
-		int tm() const { return _tm; }
-    private:
-        vector<MultiPoint *> polygon;
-        vector<GLfloat *>    nrml;
+	int tm() const { return _tm; }
+    private: // 
+	void determine_vert_norms(PPoint& pt);
+	
+    private: // member variables
+        vector<SurfaceElement*> polygon;
+	GLfloat* _vertnorm;  //!<vertex normals
+	int*     _vert;       //!< vertices for which normals are computed
         GLfloat              colour[4]; 
         double              _val;          // value
 		int                 _tm;           // time when surface calculated

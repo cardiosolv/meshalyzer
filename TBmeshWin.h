@@ -42,6 +42,8 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     string         flwintitle;
   public:
     TBmeshWin(int x, int y, int w, int h, const char *l = 0);
+    virtual ~TBmeshWin();
+
     Model*         model;
     virtual void draw();
     virtual int handle( int );
@@ -120,6 +122,11 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      signal_links( int );
     void      transBgd( bool a ){ bgd_trans=a;valid(0); }
     void      norot(bool a){_norot=a;}
+    void      CheckMessageQueue();
+    int       ProcessLinkMessage(const LinkMessage::CommandMsg& msg);
+    void      SendViewportSyncMessage();
+    void      SendTimeSyncMessage();
+
   private:
     int        hilight[maxobject];	// which object to highlight
     bool	   hilighton;			// whether to highlight
@@ -173,6 +180,9 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     set<int>   timeLinks;           // other meshalyzer processes linked to this one
     bool       bgd_trans;           //!< transparent background
     bool       _norot;              //!< allow rotations
+
+    // constants
+    static unsigned int MAX_MESSAGES_READ;
 };
 
 #include "DataOpacity.h"

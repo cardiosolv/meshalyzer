@@ -17,6 +17,8 @@
 #define OPAQUE_LIMIT 0.95       //!< consider opaque if alpha level above this
 #define MAX_SURFELE_REALTIME 400000 //!< max \#ele's to draw while moving
 
+unsigned int TBmeshWin::MAX_MESSAGES_READ = 100;
+
 const int   NUM_CP = 6;
 const GLenum CLIP_PLANE[] =
   {
@@ -212,6 +214,25 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
   tmLink = new TimeLink( timeLinks );
 }
 
+TBmeshWin::~TBmeshWin()
+{
+  if (tmLink != NULL){
+    delete tmLink;
+  }
+
+  // need to delete all stack allocated objects
+  if (model != NULL){
+    delete model;
+  }
+
+  if (iso0 != NULL){
+    delete iso0;
+  }
+
+  if (iso1 != NULL){
+    delete iso1;
+  }
+}
 
 void TBmeshWin :: draw()
 {
@@ -698,6 +719,14 @@ int TBmeshWin::handle( int event )
         contwin->window->show();
         return 1;
         break;
+      case 't': // time sync keyboard shortcut
+		SendTimeSyncMessage();
+		return 1;
+		break;
+      case 'v': // view port keyboard shortcut 
+		SendViewportSyncMessage();
+		return 1;
+		break;
       default:
         return 0;
         break;
@@ -1742,6 +1771,112 @@ TBmeshWin::draw_iso_lines()
   glPopAttrib( );
 }
 
+void TBmeshWin::CheckMessageQueue(){
+  
+  LinkMessage::CommandMsg msg;
+  
+  unsigned int numberOfMsgRead = 0;
+   
+  while ((tmLink->ReceiveMsg(msg) == 0) &&
+	   (numberOfMsgRead < MAX_MESSAGES_READ)) {
+	
+	// process a msg
+	ProcessLinkMessage(msg);
+
+	numberOfMsgRead++;
+  }  
+}
+
+int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
+{
+	if (strcmp(msg.command, LinkMessage::LINK_COMMAND_LINK) == 0)
+	  {
+	    tmLink->link(msg.senderPid);
+	  }
+	else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_UNLINK) == 0)
+	  {
+	    tmLink->unlink(msg.senderPid);
+	  }
+	else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_VIEWPORT_SYNC) == 0)
+	  {
+	    // retrieve vals
+	    trackball.SetScale(msg.trackballState.scale);
+	    trackball.SetTranslation(msg.trackballState.trans.X(),
+				     msg.trackballState.trans.Y(),
+				     msg.trackballState.trans.Z());
+	    trackball.SetOrigin(msg.trackballState.origin.X(),
+				msg.trackballState.origin.Y(),
+				msg.trackballState.origin.Z());
+
+	    trackball.qRot = msg.trackballState.qRot;
+	    trackball.qSpin = msg.trackballState.qSpin;
+	  
+	  
+	    // set the state
+	    redraw();
+	  }
+	else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_LINK_SYNC) == 0)
+	  {
+	    int newTm = msg.sliderTime;
+	    
+	    if (newTm > contwin->tmslider->maximum())
+	      {
+		newTm = contwin->tmslider->maximum();
+	      }
+	    else if (newTm < 0)
+	      {
+		newTm = 0;
+	      }
+
+	    // sync time
+	    contwin->tmslider->value(newTm);
+	    set_time(newTm);
+	  }
+	else
+	  {
+	    return -1;
+	  }
+	return 0;
+}
+
+void TBmeshWin::SendViewportSyncMessage()
+{
+   // create a viewport sending
+  float scale = 0.0;
+  V3f v3f_trans;
+  V3f p3f_origin;
+  Quaternion qSpin;
+  Quaternion qRot;
+
+  // retrieve vals
+  scale = trackball.GetScale();
+  v3f_trans = trackball.GetTranslation();
+  p3f_origin = trackball.GetOrigin();
+  qRot = trackball.GetRotation(); 
+  qSpin = trackball.qSpin;
+
+  LinkMessage::CommandMsg msgToSend;
+  msgToSend.trackballState.scale = scale;
+  msgToSend.trackballState.trans = v3f_trans;
+  msgToSend.trackballState.origin = p3f_origin;
+  msgToSend.trackballState.qSpin = qSpin;
+  msgToSend.trackballState.qRot = qRot;
+  
+  strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_VIEWPORT_SYNC);
+  
+  tmLink->SendMsgToAll(msgToSend);
+}
+
+void TBmeshWin::SendTimeSyncMessage()
+{
+  LinkMessage::CommandMsg msgToSend;
+  msgToSend.sliderTime = tm;
+  
+  strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_LINK_SYNC);
+  
+  tmLink->SendMsgToAll(msgToSend);
+}
+
 extern sem_t *meshProcSem;
 
 /** signal the time linked meshalyzer instances
@@ -1758,11 +1893,13 @@ TBmeshWin::signal_links( int dir )
     sem_wait( meshProcSem ); 
 
   int num_pending=0;
-  for( set<int>::iterator it=timeLinks.begin(); it!=timeLinks.end(); it++ )
+
+  for( set<int>::iterator it=timeLinks.begin(); it!=timeLinks.end(); it++ ){
     if( kill( *it, dir>0?SIGUSR1:SIGUSR2 ) )
       timeLinks.erase( *it );
     else
       num_pending++;
+  }
 
   for( int i=0; i<num_pending; i++ )
     sem_wait( meshProcSem );
