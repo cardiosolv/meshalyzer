@@ -893,25 +893,33 @@ Depressing the ``p'' key will enter vertex picking mode. It is a short cut for t
 
 To reread the current data file, press ``r''.
 
-\section{Temporal Linking}
+\section{Linking}
 
-\meshal responds to the following UNIX signals:
+Different \meshal instances can be linked together so that some operations are applied to all
+instances.
+To link instances of \meshal, click on ``File/Link'' which will open up a linking dialog 
+listing all running instances of \meshal.
+Linking is bidirectional so that linking a new process includes it in the group of currently
+linked processes. As such, operations performed in any of the linked processes will be sent to
+all processes.
 
+Currently, linking supports the following operations:
+\begin{description}
+\item[Temporal changes] Increments or decrements in time will be transmitted to all instances
+\item[Temporal syncing] Clicking on the ``sync'' button (beside the animation pause button)
+      will set all instances to the same time. This is also achieved by pressing ``t'' in the
+      model window.
+\item[Viewport syncing] Clicking ``Image/Viewport Sync'' or pressing ``v'' in the model window 
+     will transmit the current orientation, scale, and translation to all other instances.
+\end{description}
+
+\noindent
+As a side effect of temporal linking, \meshal responds to the following UNIX signals:
 \begin{longtable}{|l|l|}\hline
 Signal & Action \\ \hline
 SIGUSR1 & advance forward by the frame increment \\
 SIGUSR2 & go backwards by the frame increment \\ \hline
 \end{longtable}
-
-This can be used to have several instances of meshalyzer advance in time at once.
-To do this, in one instance of meshalyzer which will henceforth be the master, 
-select ``Temporal link'' under the ``File''menu.
-A window will pop open. In the top panel will be a list of process IDs for meshalyzer run by
-the user. Select the processes you would like linked and click on ``link selected''.
-Any of these can be unlinked by selecting them in the bottom list and hitting ``Unlink
-selected''. 
-Now, when the time is changed in the master window by using the arrow keys or animation button,
-the time in the other windows will also be changed.
 
 If you wish to have different masters controlling different groups of slaves, you need
 to specify a groupID on the command line for each group. The default is ``0''. 
