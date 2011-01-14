@@ -180,6 +180,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     set<int>   timeLinks;           // other meshalyzer processes linked to this one
     bool       bgd_trans;           //!< transparent background
     bool       _norot;              //!< allow rotations
+    float      _dt;                 //!< increment between time slices
 
     // constants
     static unsigned int MAX_MESSAGES_READ;

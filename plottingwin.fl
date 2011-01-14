@@ -1,31 +1,41 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0106 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "Graph.h"} {} 
+decl {\#include "Graph.h"} {private local
+} 
 
-decl {using namespace std;} {} 
+decl {using namespace std;} {private local
+} 
 
 class PlotWin {open
 } {
-  decl {double *data;} {}
-  decl {int datasize;} {}
-  decl {double datamin;} {}
-  decl {int tm;        // datum to highlight} {}
-  decl {double *xv;} {}
-  decl {double tmx[2], tmy[2];} {}
-  decl {Fl_Button *but;} {public
+  decl {double *data;} {private local
   }
-  decl {bool rotated;} {}
-  decl {void set_data( int, double *, int t=-1, double* xd=NULL);} {public
+  decl {int datasize;} {private local
   }
-  decl {void set_data( int, float *, int t=-1, float* xd=NULL);} {public
+  decl {double datamin;} {private local
   }
-  decl {void highlight( int );} {public
+  decl {int tm;        // datum to highlight} {private local
   }
-  decl {void rotate( bool );} {public
+  decl {double *xv;} {private local
   }
-  decl {void writedata();} {}
+  decl {double tmx[2], tmy[2];} {private local
+  }
+  decl {Fl_Button *but;} {public local
+  }
+  decl {bool rotated;} {private local
+  }
+  decl {void set_data( int, double *, int t=-1, float dt=1, double* xd=NULL);} {public local
+  }
+  decl {void set_data( int, float *, int t=-1, float dt=1, float* xd=NULL);} {selected public local
+  }
+  decl {void highlight( int );} {public local
+  }
+  decl {void rotate( bool );} {public local
+  }
+  decl {void writedata();} {private local
+  }
   Function {PlotWin(  string title )} {open
   } {
     Fl_Window window {
@@ -37,7 +47,7 @@ class PlotWin {open
       code1 {\#include <string>}
       code2 {using namespace std;} visible
     } {
-      Fl_Box graph {selected
+      Fl_Box graph {
         xywh {5 5 515 165} resizable
         code0 {\#include "Graph.h"}
         class Graph
@@ -84,7 +94,7 @@ rotated = false;
 window->label(strdup(title.c_str()));
 window->user_data(this);} {}
   }
-  decl {~PlotWin()} {public
+  decl {~PlotWin()} {public local
   }
   Function {autoscale(int a)} {} {
     code {graph->autoscale(a);} {}

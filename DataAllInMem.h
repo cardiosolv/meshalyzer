@@ -19,7 +19,7 @@ class DataAllInMem : public DataClass<T>
     using DataClass<T> :: filename;
 
   public:
-    DataAllInMem( const char *fn, int, bool );
+    DataAllInMem( const char *fn, int, bool, float & );
     ~DataAllInMem( );
     virtual T         max(int);	        // maximum value at a time instance
     virtual T         max();	        // maximum value
@@ -112,7 +112,7 @@ void DataAllInMem<T>::time_series( int offset, T* buffer )
  *  \param base1 whether node numbering starts at one
  */
 template<class T>
-DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
+DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1, float &dt)
 {
   bool            IGBdata;
   int             j = 0;
@@ -123,6 +123,7 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
   map<int,string> CGfiles;
   map<int,string>::iterator CGp;
 
+  dt = 1;
   slice_size = slsz;
 
   fileType ftype=FileTypeFinder( fn );
@@ -152,6 +153,7 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
       maxtm = -1;
       throw(1);
     }
+    dt = head->inc_t();
   } else if ( ftype == FTfileSeqCG ) {
     CG_file_list( CGfiles, fn );
     CGp = CGfiles.begin();

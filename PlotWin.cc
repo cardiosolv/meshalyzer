@@ -27,7 +27,7 @@
  *  \param t  current time
  *  \param xd abscissa
  */
-void PlotWin :: set_data( int n, double *d, int t, double *xd )
+void PlotWin :: set_data( int n, double *d, int t, float dt, double *xd )
 {
   if ( n != datasize ) {
     delete[] xv;
@@ -44,7 +44,7 @@ void PlotWin :: set_data( int n, double *d, int t, double *xd )
   if ( xd != NULL )
     memcpy( xv, xd, n*sizeof(double) );
   else
-    for ( int i=0; i<n; i++ ) xv[i] = i;
+    for ( int i=0; i<n; i++ ) xv[i] = i*dt;
   highlight( t );
 }
 
@@ -56,7 +56,7 @@ void PlotWin :: set_data( int n, double *d, int t, double *xd )
  *  \param t  current time
  *  \param xd abscissa
  */
-void PlotWin :: set_data( int n, float *d, int t, float *xd )
+void PlotWin :: set_data( int n, float *d, int t, float dt, float *xd )
 {
   if ( n != datasize ) {
     delete[] xv;
@@ -72,7 +72,7 @@ void PlotWin :: set_data( int n, float *d, int t, float *xd )
     if ( xd != NULL ) xv[i] = xd[i];
   }
   if ( xd == NULL )
-    for ( int i=0; i<n; i++ ) xv[i] = i;
+    for ( int i=0; i<n; i++ ) xv[i] = i*dt;
 
   highlight( t );
 }
