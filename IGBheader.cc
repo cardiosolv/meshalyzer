@@ -225,6 +225,10 @@ const char    *Header_Type[] =
 	"vec3f","vec3d","vec4f","vec4d"
   };
 
+const char  *deprecated[] = {
+  "fac_x", "fac_y", "fac_z", "fac_t" 
+};
+
 //* size of the stored data, not the variable type
 unsigned short   Data_Size[] =
   {
@@ -248,6 +252,14 @@ const char
   };
 
 
+static bool
+is_deprecated( char *s ) {
+  for( int i=0; i<sizeof(deprecated)/sizeof(deprecated[0]); i++ )
+    if( !strcmp( s, deprecated[i] ) )
+      return true;
+  return false;
+}
+
 IGBheader::IGBheader( gzFile in )
 {
   file = in;
@@ -260,7 +272,6 @@ IGBheader::IGBheader( gzFile in )
   v_inc_x = v_inc_y = v_inc_z = v_inc_t = 1.0 ;
   v_org_x = v_org_y = v_org_z = 1;
   v_org_t = 0.0 ;
-  v_fac_x = v_fac_y = v_fac_z = v_fac_t = 1.0 ;
   v_vect_z = NULL ;
   v_unites_x[0] = v_unites_x[40] = '\000' ;
   v_unites_y[0] = v_unites_y[40] = '\000' ;
@@ -288,7 +299,6 @@ IGBheader::IGBheader( gzFile in )
   bool_org_x = bool_org_y = bool_org_z = bool_org_t = FAUX;
   bool_inc_x = bool_inc_y = bool_inc_z = bool_inc_t = FAUX;
   bool_dim_x = bool_dim_y = bool_dim_z = bool_dim_t = FAUX;
-  bool_fac_x = bool_fac_y = bool_fac_z = bool_fac_t = FAUX;
   bool_vect_z = FAUX;
   bool_unites_x = bool_unites_y = bool_unites_z = bool_unites_t = FAUX;
   bool_unites = FAUX;
@@ -408,26 +418,6 @@ int IGBheader::write()
   }
   if (bool_org_t) {
     sprintf(&items[n_items][0], "org_t:%g ", v_org_t);
-    l_item[n_items] = strlen(&items[n_items][0]);
-    n_items++;
-  }
-  if (bool_fac_x) {
-    sprintf(&items[n_items][0], "fac_x:%g ", v_fac_x);
-    l_item[n_items] = strlen(&items[n_items][0]);
-    n_items++;
-  }
-  if (bool_fac_y) {
-    sprintf(&items[n_items][0], "fac_y:%g ", v_fac_y);
-    l_item[n_items] = strlen(&items[n_items][0]);
-    n_items++;
-  }
-  if (bool_fac_z) {
-    sprintf(&items[n_items][0], "fac_z:%g ", v_fac_z);
-    l_item[n_items] = strlen(&items[n_items][0]);
-    n_items++;
-  }
-  if (bool_fac_t) {
-    sprintf(&items[n_items][0], "fac_t:%g ", v_fac_t);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
   }
@@ -946,22 +936,6 @@ int IGBheader::read()
         v_dim_t = atof( pt_2 ) ;
         bool_dim_t = VRAI;
 
-      } else if ( ! strcmp( pt_1, "fac_x" ) ) {
-        v_fac_x = atof( pt_2 ) ;
-        bool_fac_x = VRAI;
-
-      } else if ( ! strcmp( pt_1, "fac_y" ) ) {
-        v_fac_y = atof( pt_2 ) ;
-        bool_fac_y = VRAI;
-
-      } else if ( ! strcmp( pt_1, "fac_z" ) ) {
-        v_fac_z = atof( pt_2 ) ;
-        bool_fac_z = VRAI;
-
-      } else if ( ! strcmp( pt_1, "fac_t" ) ) {
-        v_fac_t = atof( pt_2 ) ;
-        bool_fac_t = VRAI;
-
       } else if ( ! strcmp( pt_1, "inc_x" ) ) {
         v_inc_x = atof( pt_2 ) ;
         bool_inc_x = VRAI;
@@ -1042,12 +1016,15 @@ int IGBheader::read()
         bool_transparent = VRAI;
 
       } else {
-        if (!Header_Quiet)
-          fprintf(stderr,
-                  "\nATTENTION: mot-clef %s non reconnu !\n", pt_1 ) ;
-        sprintf(Header_Message,
+        if( is_deprecated( pt_1 ) ){
+          fprintf(stderr,"\nATTENTION: mot-clef %s obsolete !\n", pt_1 ) ;
+        } else {
+          if (!Header_Quiet)
+            fprintf(stderr,"\nATTENTION: mot-clef %s non reconnu !\n", pt_1 );
+          sprintf(Header_Message,
                 "\nATTENTION: mot-clef %s non reconnu !\n", pt_1 ) ;
-        statut |= MOT_CLEF_INV;
+          statut |= MOT_CLEF_INV;
+        }
       }
     }
   }

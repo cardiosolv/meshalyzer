@@ -1,33 +1,17 @@
-/*
-	flounder - copyright 2002 Edward J. Vigmond
-
-	This file is part of flounder.
-
-	flounder is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-	flounder is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License
-    along with flounder; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
 #include "plottingwin.h"
 #include <FL/Fl_Widget.H>
 #include <FL/Fl_File_Chooser.H>
 
 /** set the data to plot
  *
- *  \param n  number of points
- *  \param d  ordinates
- *  \param t  current time
- *  \param xd abscissa
+ *  \param n    number of points
+ *  \param d    ordinates
+ *  \param t    current time
+ *  \param xd   abscissa
+ *  \param torg initial time
  */
-void PlotWin :: set_data( int n, double *d, int t, float dt, double *xd )
+void PlotWin :: set_data( int n, double *d, int t, float dt, float torg, 
+                                                             double *xd )
 {
   if ( n != datasize ) {
     delete[] xv;
@@ -44,19 +28,21 @@ void PlotWin :: set_data( int n, double *d, int t, float dt, double *xd )
   if ( xd != NULL )
     memcpy( xv, xd, n*sizeof(double) );
   else
-    for ( int i=0; i<n; i++ ) xv[i] = i*dt;
+    for ( int i=0; i<n; i++ ) xv[i] = torg+i*dt;
   highlight( t );
 }
 
 
 /** set the data to plot
  *
- *  \param n  number of points
- *  \param d  ordinates
- *  \param t  current time
- *  \param xd abscissa
+ *  \param n    number of points
+ *  \param d    ordinates
+ *  \param t    current time
+ *  \param xd   abscissa
+ *  \param torg initial time
  */
-void PlotWin :: set_data( int n, float *d, int t, float dt, float *xd )
+void PlotWin :: set_data( int n, float *d, int t, float dt, float torg,
+                                                            float *xd )
 {
   if ( n != datasize ) {
     delete[] xv;
@@ -72,7 +58,7 @@ void PlotWin :: set_data( int n, float *d, int t, float dt, float *xd )
     if ( xd != NULL ) xv[i] = xd[i];
   }
   if ( xd == NULL )
-    for ( int i=0; i<n; i++ ) xv[i] = i*dt;
+    for ( int i=0; i<n; i++ ) xv[i] = torg + i*dt;
 
   highlight( t );
 }

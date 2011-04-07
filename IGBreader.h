@@ -15,11 +15,12 @@ class IGBreader : public DataReader<T>
     virtual void tmsr();
     virtual void  find_maxtm();
     float         dt(void){return head->inc_t();}
+    float         org_t(void){return head->org_t();}
 
   private:
-    using DataReader<T>::    mthread;
-    using DataReader<T>::    sthread;
-    using DataReader<T>::    maxmin_ptr;
+    using DataReader<T>::  mthread;
+    using DataReader<T>::  sthread;
+    using DataReader<T>::  maxmin_ptr;
     using DataReader<T>::  data;
     using DataReader<T>::  in;
     char*      buf;

@@ -878,10 +878,10 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
     switch ( getReaderType( fn ) ) {
       case AllInMem:
         newDataBuffer = new DataAllInMem<DATA_TYPE>( fn, model->pt.num(),
-                        model->base1(), _dt );
+                        model->base1() );
         break;
       case Threaded:
-        newDataBuffer = new ThreadedData<DATA_TYPE>( fn, model->pt.num(), _dt);
+        newDataBuffer = new ThreadedData<DATA_TYPE>( fn, model->pt.num() );
         break;
       default:
         throw 1;
@@ -1446,7 +1446,8 @@ void TBmeshWin::timeplot()
 
   dataBuffer->time_series( hilight[Vertex], timevec );
   timeplotter->window->show();
-  timeplotter->set_data( numframes, timevec, tm, _dt );
+  timeplotter->set_data( numframes, timevec, tm, dataBuffer->dt(), 
+                                                 dataBuffer->t0() );
   timeplotter->window->redraw();
 }
 

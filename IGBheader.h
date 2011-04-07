@@ -164,7 +164,6 @@ class IGBheader
     float  v_org_x, v_org_y, v_org_z, v_org_t ; //!< coin sup gauche --------
     float  v_inc_x, v_inc_y, v_inc_z, v_inc_t ; //!< distance entre pixels -
     float  v_dim_x, v_dim_y, v_dim_z, v_dim_t ; //!< dimension totale -------
-    float  v_fac_x, v_fac_y, v_fac_z, v_fac_t ; //!< facteurs d'echelle par pixel en X, Y, Z et T
     float *v_vect_z ;           //!< coord z de chaque tranche -----
     char   v_unites_x[41], v_unites_y[41], v_unites_z[41], v_unites_t[41] ;
     //!< unites de mesure --------------
@@ -189,7 +188,6 @@ class IGBheader
     bool bool_org_x, bool_org_y, bool_org_z, bool_org_t;
     bool bool_inc_x, bool_inc_y, bool_inc_z, bool_inc_t;
     bool bool_dim_x, bool_dim_y, bool_dim_z, bool_dim_t;
-    bool bool_fac_x, bool_fac_y, bool_fac_z, bool_fac_t;
     bool bool_vect_z;
     bool bool_unites_x, bool_unites_y, bool_unites_z, bool_unites_t;
     bool bool_unites;
@@ -291,18 +289,6 @@ class IGBheader
     inline void dim_t( float a ){ v_dim_t = a;  bool_dim_t = true;}
     inline float dim_t( bool &set ){ set=bool_dim_t; return v_dim_t; }
   inline float dim_t(void){ return v_dim_t; }
-    inline void fac_x( float a ){ v_fac_x = a; bool_fac_x = true; }
-    inline float fac_x( bool &set ){ set=bool_fac_x; return v_fac_x; }
-  inline float fac_x(void){ return v_fac_x; }
-    inline void fac_y( float a ){ v_fac_y = a; bool_fac_y = true; }
-    inline float fac_y( bool &set ){ set=bool_fac_y; return v_fac_y; }
-  inline float fac_y(void){ return v_fac_y; }
-    inline void fac_z( float a ){ v_fac_z = a; bool_fac_z = true; }
-    inline float fac_z( bool &set ){ set=bool_fac_z; return v_fac_z; }
-  inline float fac_z(void){ return v_fac_z; }
-    inline void fac_t( float a ){ v_fac_t = a; bool_fac_t = true; }
-    inline float fac_t( bool &set ){ set=bool_fac_t; return v_fac_t; }
-  inline float fac_t(void){ return v_fac_t; }
     inline void facteur( float a ){ v_facteur = a; bool_facteur = true; }
     inline float facteur( bool &set ){ set=bool_facteur; return v_facteur; }
   inline float facteur(void){ return v_facteur; }

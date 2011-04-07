@@ -26,9 +26,9 @@ class PlotWin {open
   }
   decl {bool rotated;} {private local
   }
-  decl {void set_data( int, double *, int t=-1, float dt=1, double* xd=NULL);} {public local
+  decl {void set_data( int, double *, int t=-1, float dt=1,float torg=0, double* xd=NULL);} {public local
   }
-  decl {void set_data( int, float *, int t=-1, float dt=1, float* xd=NULL);} {selected public local
+  decl {void set_data( int, float *, int t=-1, float dt=1, float torg=0, float* xd=NULL);} {selected public local
   }
   decl {void highlight( int );} {public local
   }

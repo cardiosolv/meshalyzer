@@ -30,6 +30,8 @@ class DataClass
     int    slice_sz(){return slice_size;} //!< size of 1 time slice
     void   slice_sz(int a){slice_size=a;} //!< set size of slice
     string file(){return filename;}       //!< return the file
+    float  t0(void){ return _t0; }        //!< initial time read
+    float  dt(void){ return _dt; }        //!< time increment
 
     DataClass():data(NULL),maxtm(0),last_tm(-1),slice_size(0){}
     virtual ~DataClass(){}
@@ -39,6 +41,8 @@ class DataClass
     int    maxtm;      //!< number of time slice
     int    last_tm;    //!< last time that can be requested
     int    slice_size; //!< amountof data in one time slice
+    float  _dt;        //!< time increment
+    float  _t0;        //!< initial time read in
     string filename;   //!< file containing data
 };
 

@@ -131,8 +131,10 @@ class ThreadedData : public DataClass<T>
     using DataClass<T> :: last_tm;
     using DataClass<T> :: slice_size;
     using DataClass<T> :: filename;
+    using DataClass<T> :: _dt;
+    using DataClass<T> :: _t0;
   public:
-    ThreadedData( const char *fn, int slsz, float &);
+    ThreadedData( const char *fn, int slsz );
     ~ThreadedData( );
     static    void*   ThreadCaller( void* _sthread );     //!< read in a time slice
     static    void*   minimax( void* _sthread );          //!< read max and min times
@@ -163,13 +165,14 @@ class ThreadedData : public DataClass<T>
  * \param slsz number of points in a slice
  */
 template<class T>
-ThreadedData<T>::ThreadedData( const char *fn, int slsz, float &dt ):
+ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
     mthread( new Master<T>(fn,slsz)),incrementation(1),element(0)
 {
 
   pthread_mutex_init( &mutex_incrementation, NULL );
   slice_size = slsz;
-  dt         = 1;
+  _dt         = 1;
+  _t0         = 1;
 
   mthread->ftype = FileTypeFinder( fn );
   mthread->maxmin = maxmin = new Maxmin<T>;
@@ -207,7 +210,8 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz, float &dt ):
       for ( int k=0; k<THREADS; k++ )
         sthread[k].datareader = new IGBreader<T>( mthread,
                                 sthread+k, maxmin);
-      dt = ((IGBreader<T>*)(slocal->datareader))->dt();
+      _dt = ((IGBreader<T>*)(slocal->datareader))->dt();
+      _t0 = ((IGBreader<T>*)(slocal->datareader))->org_t();
       break;
     case FTascii:
       sabs->datareader   = new asciireader<T>(mthread, sabs, maxmin);
