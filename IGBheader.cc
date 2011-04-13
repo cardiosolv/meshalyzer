@@ -732,10 +732,13 @@ int IGBheader::write()
  */
 int IGBheader::read()
 {
-  int go=VRAI, nosup=VRAI;
-  int in, com=0;
-  char    str[MAXL+1];
-  int statut=0;
+  int   go=VRAI, nosup=VRAI;
+  int   in, com=0;
+  char  str[MAXL+1];
+  int   statut=0;
+  float v_fac_t;
+  bool  bool_fac_t = false;
+
 
   /* --- pour toutes les lignes de l'entete (def=8) ou jusqu'a un <FF> -- */
   for ( int s=8; (s>0 || nosup) && go; s-- ) {
@@ -788,8 +791,8 @@ int IGBheader::read()
       else if ( in && ! isprint(in) ) {
         if (!Header_Quiet)
           fprintf(stderr,
-                  "\nERREUR caract. non imprim. 0x%.2X dans l'entete at byte number %ld\n",
-                                                                           in, gztell(file) );
+                  "\nERREUR caract. non imprim. 0x%.2X dans "
+                  "l'entete at byte number %ld\n", in, gztell(file) );
         sprintf(Header_Message,
                 "\nERREUR caract. non imprim. 0x%.2X dans l'entete !\n", in );
         return ERR_UNPRINTABLE_CHAR;
@@ -809,7 +812,7 @@ int IGBheader::read()
           strcpy( v_comment[com++], pt_1+1 ) ;
           if (com%NALLOC == 0)
             v_comment = (char **)
-                        realloc(v_comment, (com+NALLOC)*sizeof(char *));
+                realloc(v_comment, (com+NALLOC)*sizeof(char *));
           v_comment[com] = NULL ;
           bool_comment = VRAI;
         }
@@ -866,11 +869,11 @@ int IGBheader::read()
 
       } else if ( ! strcmp( pt_1, "type" ) ) {
 
-		for( int htype=IGB_MIN_TYPE; htype<=IGB_MAX_TYPE; htype++ )
-		  if ( !strcmp( pt_2, Header_Type[htype] ) ) {
-			v_type = htype;
-		  }
-		bool_type = VRAI;
+        for( int htype=IGB_MIN_TYPE; htype<=IGB_MAX_TYPE; htype++ )
+          if ( !strcmp( pt_2, Header_Type[htype] ) ) {
+            v_type = htype;
+          }
+        bool_type = VRAI;
 
       } else if ( ! strcmp( pt_1, "taille" ) ) {
         v_taille = atoi( pt_2 ) ;
@@ -1018,11 +1021,15 @@ int IGBheader::read()
       } else {
         if( is_deprecated( pt_1 ) ){
           fprintf(stderr,"\nATTENTION: mot-clef %s obsolete !\n", pt_1 ) ;
+          if( !strcmp( pt_1, "fac_t" ) ){
+            v_fac_t = atof( pt_2 );
+            bool_fac_t = VRAI;
+          }
         } else {
           if (!Header_Quiet)
             fprintf(stderr,"\nATTENTION: mot-clef %s non reconnu !\n", pt_1 );
           sprintf(Header_Message,
-                "\nATTENTION: mot-clef %s non reconnu !\n", pt_1 ) ;
+                  "\nATTENTION: mot-clef %s non reconnu !\n", pt_1 ) ;
           statut |= MOT_CLEF_INV;
         }
       }
@@ -1054,38 +1061,38 @@ int IGBheader::read()
 
   /* --- calcul des inc et dim --- */
   if ( bool_dim_x )
-	if ( bool_inc_x ) {
-	  float dim_x = v_inc_x * v_x ;
-	  if ( dim_x != v_dim_x ) {
-		if (!Header_Quiet) {
-		  fprintf(stderr, "\nATTENTION:\n") ;
-		  fprintf(stderr,
-			  "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
-				  v_x, v_inc_x, dim_x, v_dim_x) ;
-		}
-		sprintf(Header_Message,
-			"conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
-				v_x, v_inc_x, dim_x, v_dim_x) ;
-		statut = 1 ;
-	  }
-	} else {
-	  v_inc_x = v_dim_x / v_x ;
-	  bool_inc_x = VRAI;
-	}
-	else {
-	  v_dim_x = v_x * v_inc_x ;
-	  if ( bool_inc_x ) bool_dim_x = VRAI;
-	}
+    if ( bool_inc_x ) {
+      float dim_x = v_inc_x * v_x ;
+      if ( dim_x != v_dim_x ) {
+        if (!Header_Quiet) {
+          fprintf(stderr, "\nATTENTION:\n") ;
+          fprintf(stderr,
+               "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
+                  v_x, v_inc_x, dim_x, v_dim_x) ;
+        }
+        sprintf(Header_Message,
+              "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
+                v_x, v_inc_x, dim_x, v_dim_x) ;
+        statut = 1 ;
+      }
+    } else {
+      v_inc_x = v_dim_x / v_x ;
+      bool_inc_x = VRAI;
+    }
+    else {
+      v_dim_x = v_x * v_inc_x ;
+      if ( bool_inc_x ) bool_dim_x = VRAI;
+    }
 
   if ( bool_dim_y )
-	if ( bool_inc_y ) {
+    if ( bool_inc_y ) {
       float dim_y = v_inc_y * v_y ;
       if ( dim_y != v_dim_y ) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
               "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (.12g)\n",
-                  v_y, v_inc_y, dim_y, v_dim_y) ;
+                 v_y, v_inc_y, dim_y, v_dim_y) ;
         }
         sprintf(Header_Message,
               "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (.12g)\n",
@@ -1096,10 +1103,10 @@ int IGBheader::read()
       v_inc_y = v_dim_y / v_y ;
       bool_inc_y = VRAI;
     }
-  else {
-    v_dim_y = v_y * v_inc_y ;
-    if ( bool_inc_y ) bool_dim_y = VRAI;
-  }
+    else {
+      v_dim_y = v_y * v_inc_y ;
+      if ( bool_inc_y ) bool_dim_y = VRAI;
+    }
 
   if ( bool_dim_z )
     if ( bool_inc_z ) {
@@ -1108,11 +1115,11 @@ int IGBheader::read()
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
-               "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
-                  v_z, v_inc_z, dim_z, v_dim_z) ;
+              "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
+                 v_z, v_inc_z, dim_z, v_dim_z) ;
         }
         sprintf(Header_Message,
-               "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
+              "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
                 v_z, v_inc_z, dim_z, v_dim_z) ;
         statut = 1 ;
       }
@@ -1120,35 +1127,39 @@ int IGBheader::read()
       v_inc_z = v_dim_z / v_z ;
       bool_inc_z = VRAI;
     }
-  else {
-    v_dim_z = v_z * v_inc_z ;
-    if ( bool_inc_z ) bool_dim_z = VRAI;
-  }
+    else {
+      v_dim_z = v_z * v_inc_z ;
+      if ( bool_inc_z ) bool_dim_z = VRAI;
+    }
 
+  if( !bool_inc_t && bool_fac_t ) {
+    bool_inc_t = VRAI;
+    v_inc_t = v_fac_t;
+  }
   if ( bool_dim_t )
     if ( bool_inc_t ) {
-      float dim_t = v_inc_t * v_t ;
+      float dim_t = v_inc_t * (v_t-1) ;
       if ( dim_t != v_dim_t ) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
-                  "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (.12g)\n",
+              "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (.12g)\n",
                   v_t, v_inc_t, dim_t, v_dim_t) ;
         }
         sprintf(Header_Message,
-                "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (.12g)\n",
+              "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (.12g)\n",
                 v_t, v_inc_t, dim_t, v_dim_t) ;
         statut = 1 ;
       }
     } else {
-      v_inc_t = v_dim_t / v_t ;
+      v_inc_t = v_dim_t / (v_t - 1) ;
       bool_inc_t = VRAI;
     }
-  else {
-    v_dim_t = v_t * v_inc_t ;
-    if ( bool_inc_t )
-      bool_dim_t = VRAI;
-  }
+    else {
+      v_dim_t = (v_t-1) * v_inc_t ;
+      if ( bool_inc_t )
+        bool_dim_t = VRAI;
+    }
 
   if ( bool_taille ) {
     if (v_type!=IGB_STRUCTURE) {
