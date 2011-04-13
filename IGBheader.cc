@@ -232,8 +232,8 @@ char Header_Message[256];
         sprintf(Header_Message,"conflit entre (%s-1) (%d) * inc_%s (%.12g) = "\
                   "%.12g et dim_%s (%.12g)\n",\
                   #D, v_##D-1, #D, v_inc_##D, dim_##D, #D, v_dim_##D) ;\
-        dim_##D =  v_inc_##D * (v_##D-1);\
-        fprintf(stderr, "\tsetting dim_%s to %g\n", dim_##D) ;\
+        v_dim_##D =  v_inc_##D * (v_##D-1);\
+        fprintf(stderr, "\tsetting dim_%s to %g\n", #D, v_dim_##D) ;\
       }\
     } else {\
       v_inc_##D = v_##D>1 ? v_dim_##D / (v_##D - 1) : 0 ;\
