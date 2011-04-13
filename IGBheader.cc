@@ -218,6 +218,34 @@ int my_fputs( FILE *, char * );
 int  Header_Quiet = 0;
 char Header_Message[256];
 
+#define check_dim_consistency( D ) \
+  if ( bool_dim_##D ) {   \
+    if ( bool_inc_##D ) {\
+      float dim_##D = v_inc_##D * (v_##D-1) ;\
+      if ( dim_##D != v_dim_##D ) {\
+        if (!Header_Quiet) {\
+          fprintf(stderr, "\nATTENTION:\n") ;\
+          fprintf(stderr, "conflit entre (%s-1) (%d) * inc_%s (%.12g) = "\
+                  "%.12g et dim_%s (%.12g)\n",\
+                  #D, v_##D-1, #D, v_inc_##D, dim_##D, #D, v_dim_##D) ;\
+        }\
+        sprintf(Header_Message,"conflit entre (%s-1) (%d) * inc_%s (%.12g) = "\
+                  "%.12g et dim_%s (%.12g)\n",\
+                  #D, v_##D-1, #D, v_inc_##D, dim_##D, #D, v_dim_##D) ;\
+        dim_##D =  v_inc_##D * (v_##D-1);\
+        fprintf(stderr, "\tsetting dim_%s to %g\n", dim_##D) ;\
+      }\
+    } else {\
+      v_inc_##D = v_##D>1 ? v_dim_##D / (v_##D - 1) : 0 ;\
+      bool_inc_##D = VRAI;\
+    }\
+  } else {\
+      v_dim_##D = (v_##D-1) * v_inc_##D ;\
+      if ( bool_inc_##D )\
+        bool_dim_##D = VRAI;\
+    }
+
+
 const char    *Header_Type[] =
   {
     "", "byte", "char", "short", "long", "float", "double", "complex",
@@ -1060,106 +1088,15 @@ int IGBheader::read()
   }
 
   /* --- calcul des inc et dim --- */
-  if ( bool_dim_x )
-    if ( bool_inc_x ) {
-      float dim_x = v_inc_x * v_x ;
-      if ( dim_x != v_dim_x ) {
-        if (!Header_Quiet) {
-          fprintf(stderr, "\nATTENTION:\n") ;
-          fprintf(stderr,
-               "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
-                  v_x, v_inc_x, dim_x, v_dim_x) ;
-        }
-        sprintf(Header_Message,
-              "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (.12g)\n",
-                v_x, v_inc_x, dim_x, v_dim_x) ;
-        statut = 1 ;
-      }
-    } else {
-      v_inc_x = v_dim_x / v_x ;
-      bool_inc_x = VRAI;
-    }
-    else {
-      v_dim_x = v_x * v_inc_x ;
-      if ( bool_inc_x ) bool_dim_x = VRAI;
-    }
-
-  if ( bool_dim_y )
-    if ( bool_inc_y ) {
-      float dim_y = v_inc_y * v_y ;
-      if ( dim_y != v_dim_y ) {
-        if (!Header_Quiet) {
-          fprintf(stderr, "\nATTENTION:\n") ;
-          fprintf(stderr,
-              "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (.12g)\n",
-                 v_y, v_inc_y, dim_y, v_dim_y) ;
-        }
-        sprintf(Header_Message,
-              "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (.12g)\n",
-                v_y, v_inc_y, dim_y, v_dim_y) ;
-        statut = 1 ;
-      }
-    } else {
-      v_inc_y = v_dim_y / v_y ;
-      bool_inc_y = VRAI;
-    }
-    else {
-      v_dim_y = v_y * v_inc_y ;
-      if ( bool_inc_y ) bool_dim_y = VRAI;
-    }
-
-  if ( bool_dim_z )
-    if ( bool_inc_z ) {
-      float dim_z = v_inc_z * v_z ;
-      if ( dim_z != v_dim_z ) {
-        if (!Header_Quiet) {
-          fprintf(stderr, "\nATTENTION:\n") ;
-          fprintf(stderr,
-              "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
-                 v_z, v_inc_z, dim_z, v_dim_z) ;
-        }
-        sprintf(Header_Message,
-              "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (.12g)\n",
-                v_z, v_inc_z, dim_z, v_dim_z) ;
-        statut = 1 ;
-      }
-    } else {
-      v_inc_z = v_dim_z / v_z ;
-      bool_inc_z = VRAI;
-    }
-    else {
-      v_dim_z = v_z * v_inc_z ;
-      if ( bool_inc_z ) bool_dim_z = VRAI;
-    }
+  check_dim_consistency(x);
+  check_dim_consistency(y);
+  check_dim_consistency(z);
 
   if( !bool_inc_t && bool_fac_t ) {
     bool_inc_t = VRAI;
     v_inc_t = v_fac_t;
   }
-  if ( bool_dim_t )
-    if ( bool_inc_t ) {
-      float dim_t = v_inc_t * (v_t-1) ;
-      if ( dim_t != v_dim_t ) {
-        if (!Header_Quiet) {
-          fprintf(stderr, "\nATTENTION:\n") ;
-          fprintf(stderr,
-              "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (.12g)\n",
-                  v_t, v_inc_t, dim_t, v_dim_t) ;
-        }
-        sprintf(Header_Message,
-              "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (.12g)\n",
-                v_t, v_inc_t, dim_t, v_dim_t) ;
-        statut = 1 ;
-      }
-    } else {
-      v_inc_t = v_dim_t / (v_t - 1) ;
-      bool_inc_t = VRAI;
-    }
-    else {
-      v_dim_t = (v_t-1) * v_inc_t ;
-      if ( bool_inc_t )
-        bool_dim_t = VRAI;
-    }
+  check_dim_consistency(t);
 
   if ( bool_taille ) {
     if (v_type!=IGB_STRUCTURE) {
