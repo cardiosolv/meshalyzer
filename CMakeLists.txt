@@ -55,6 +55,7 @@ endif (GLU_LIB)
 add_definitions(
 -DOBJ_CLASS
 -D_REENTRANT
+-DNOMINMAX 
 )
 include_directories(.)
 
