@@ -122,9 +122,9 @@ install(TARGETS meshalyzer RUNTIME DESTINATION bin)
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 0)
 set(CPACK_PACKAGE_VERSION_PATCH r2660)
+set(CPACK_PACKAGE_VENDOR cardiosolv)
 set(CPACK_STRIP_FILES ON)
 
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Robert Blake <rblake@cardiosolv.com>")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Visualization software for CARP files.")
 set(CPACK_PACKAGE_DESCRIPTION "
 Meshalyzer is an OpenGL scientific visualization program for CARP data 
@@ -133,8 +133,22 @@ files produced by CARP.
 
 For more information, go to http://cardiosolv.com
 ")
+
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Robert Blake <rblake@cardiosolv.com>")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfltk1.1 (>=1.1.10), libfltk1.1 (>= 1.1.10), zlib1g, libglu1-mesa")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science")
+
+set(RPM_DISTRIBUTION "centos" CACHE STRING "Linux distribution for RPM, either centos, opensuse, or fedora")
+if (RPM_DISTRIBUTION STREQUAL "centos")
+  set(CPACK_RPM_PACKAGE_REQUIRES "fltk >= 1.1.7, zlib, freeglut, libpng")
+elseif(RPM_DISTRIBUTION STREQUAL "opensuse")
+  set(CPACK_RPM_PACKAGE_REQUIRES "libfltk1 >= 1.1.9, zlib, freeglut, libpng14-14")
+elseif(RPM_DISTRIBUTION STREQUAL "fedora")
+  set(CPACK_RPM_PACKAGE_REQUIRES "fltk >= 1.1.10, zlib, freeglut, libpng >= 1.2.44")
+else(RPM_DISTRIBUTION STREQUAL "centos")
+  message(SEND_ERROR "Invalid RPM distribution")
+endif(RPM_DISTRIBUTION STREQUAL "centos")
+
 include(CPack)
 
 
