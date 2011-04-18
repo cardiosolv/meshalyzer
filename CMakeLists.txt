@@ -50,6 +50,10 @@ else (GLU_LIB)
   message(FATAL_ERROR "Couldn't find GLU")
 endif (GLU_LIB)
 
+option(USE_GLFRAMEBUFFERS "Use the glFramebuffer* extensions to render PNG images.  It should be superior to onscreen rendering, but on nvidia cards it has problems." OFF)
+if (NOT USE_GLFRAMEBUFFERS)
+  add_definitions(-DONSCREEN_DUMP)
+endif (NOT USE_GLFRAMEBUFFERS)
 
 # ok, now adding everything else
 add_definitions(
