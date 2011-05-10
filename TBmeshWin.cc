@@ -249,12 +249,12 @@ void TBmeshWin :: draw()
     if ( facetshading ) {			// faster but no anti-aliasing
       glDisable( GL_POINT_SMOOTH );
       glDisable( GL_LINE_SMOOTH );
-      glDisable( GL_POLYGON_SMOOTH );
+      glDisable( GL_MULTISAMPLE );
       glShadeModel(GL_FLAT);
     } else {
       glEnable( GL_POINT_SMOOTH );
       glEnable( GL_LINE_SMOOTH );
-      glEnable( GL_POLYGON_SMOOTH );
+      glEnable( GL_MULTISAMPLE );
       glShadeModel(GL_SMOOTH);
     }
     glDepthFunc( GL_LEQUAL );
