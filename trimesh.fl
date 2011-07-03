@@ -1491,7 +1491,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 520 45 15} labelsize 10 align 16
         }
       }
-      Fl_Group animate_group {open
+      Fl_Group animate_group {
         xywh {10 555 330 85} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
@@ -1614,8 +1614,7 @@ mwtb->redraw();} {}
   sprintf( text, "%d", (model->region(i))->label() );
   reglist->add( text, 0 );
   reglist->checked(i+1,1);
-}} {selected
-    }
+}} {}
   }
   Function {regselected()} {return_type {bool *}
   } {
@@ -1648,6 +1647,12 @@ SAVE_WIDGET(mshzf,vertbut);
 SAVE_WIDGET(mshzf,cabbut);
 SAVE_WIDGET(mshzf,cnnxbut);
 //hilighttab
+if( mwtb->timeplotter->graph->n() >= 2 ) {
+  mshzf << "HELD_CURVES = ";
+  for(int i=2; i<mwtb->timeplotter->graph->n(); i++ ) 
+    mshzf << mwtb->timeplotter->graph->id(i) << " ";
+  mshzf << endl;
+}
 SAVE_WIDGET(mshzf,hilighton);
 SAVE_WIDGET(mshzf,hitettype);
 SAVE_WIDGET(mshzf,tethi);
@@ -1777,7 +1782,8 @@ SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoval0 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->opacity0 );
 mshzf << "ISOSURF_COLOUR 0 = ";
 save_colour( mshzf, mwtb->isosurfwin->issColor(0) );
-mshzf << endl;} {}
+mshzf << endl;} {selected
+    }
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {open
   } {
@@ -1823,6 +1829,18 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   char  var[1024];
   if( sscanf( buf, "%s = %f", var, &val ) <1 )
     continue;
+  if( !strcmp( var, "HELD_CURVES" ) ) {
+    istringstream iss( buf );
+    string curve;
+    iss >> curve; // read HELD_CURVES =
+    iss >> curve;
+    while( iss >> curve ) {
+      mwtb->highlight(Vertex,atoi(curve.c_str()));
+      mwtb->timeplot();
+      mwtb->timeplotter->graph->copy_curve(0);
+    }
+    continue;
+  }
   if( !strcmp( var, "TRACKBALL" ) ) {
 	mwtb->trackball.read(mshzf); 
 	continue;

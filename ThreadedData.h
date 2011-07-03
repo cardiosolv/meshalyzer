@@ -307,7 +307,6 @@ void* ThreadedData<T>::tmsrCollector( void* _sthread )
 
   while (1) {
     sem_wait( &sthr->start );
-    while ( !sthr->mthread->maxmin->v_bit_local ) {}
     sthr->datareader->tmsr();
     sem_post( &sthr->done );
   }
@@ -323,7 +322,7 @@ T ThreadedData<T>::max( int tm )
   if ( tm>maxtm && maxtm != -1 )
     return 0;
 
-while ( !maxmin->lv_bit[tm] ) { nanosleep( &sleepwait, NULL); }
+  while ( !maxmin->lv_bit[tm] ) { nanosleep( &sleepwait, NULL); }
   return maxmin->lmax[tm];
 }
 
@@ -332,18 +331,6 @@ while ( !maxmin->lv_bit[tm] ) { nanosleep( &sleepwait, NULL); }
 template<class T>
 T ThreadedData<T>::max()
 {
-  // When v_bit_abs, send back abs max
-  /*
-    if( maxmin_ptr->v_bit_abs )
-      return maxmin_ptr->abs_max;
-    else  {// return first min
-  	do {
-  	for( int i=0; i<=last_tm; i++ )
-  	  if( maxmin_ptr->lv_bit[i] )
-  		return maxmin_ptr->lmax[i];
-  	} while( 1 );
-    }
-  */
   while ( !maxmin->v_bit_abs ) {nanosleep( &sleepwait, NULL);}
   return maxmin->abs_max;
 }
@@ -360,7 +347,7 @@ T ThreadedData<T>::min( int tm )
   if ( tm>maxtm && maxtm != -1 )
     return 0;
   // When lv_bit set, send back local min
-while ( !maxmin->lv_bit[tm] ) { nanosleep( &sleepwait, NULL); }
+  while ( !maxmin->lv_bit[tm] ) { nanosleep( &sleepwait, NULL); }
   return maxmin->lmin[tm];
 }
 
@@ -369,17 +356,6 @@ while ( !maxmin->lv_bit[tm] ) { nanosleep( &sleepwait, NULL); }
 template<class T>
 T ThreadedData<T>::min()
 {
-  /*
-    if( maxmin_ptr->v_bit_abs )
-      return maxmin_ptr->abs_min;
-    else  {// return first min
-  	do {
-  	for( int i=0; i<=last_tm; i++ )
-  	  if( maxmin_ptr->lv_bit[i] )
-  		return maxmin_ptr->lmin[i];
-  	} while( 1 );
-    }
-  */
   while ( !maxmin->v_bit_abs ) { nanosleep(&sleepwait,NULL); }
   return maxmin->abs_min;
 }

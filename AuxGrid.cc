@@ -317,7 +317,7 @@ AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
   if( _plottable ){
     _timeplot = new PlotWin("Aux Time Series");
     _sz_ts = _indexer->time_series(0,_time_series);
-    _timeplot->set_data( _sz_ts, _time_series, 0 );
+    _timeplot->set_data( 0, _sz_ts, _time_series, 0 );
   }
 
   threeD( Cnnx, true );
@@ -456,7 +456,7 @@ void AuxGrid::plot(int tm)
     return;
   _sz_ts = _indexer->time_series( _hiVert, _time_series );
   _timeplot->window->show();
-  _timeplot->set_data( _sz_ts, _time_series, tm );
+  _timeplot->set_data( _hiVert, _sz_ts, _time_series, tm );
   _timeplot->window->redraw();
 } 
 
@@ -490,7 +490,7 @@ bool AuxGrid :: highlight_vertex( int n, float &val, bool update_plot )
     val = _indexer->_data[n];
     if( update_plot && _plottable && _timeplot->window->shown() ) {
       _sz_ts = _indexer->time_series( _hiVert, _time_series );
-      _timeplot->set_data( _sz_ts, _time_series, 0 );
+      _timeplot->set_data( _hiVert, _sz_ts, _time_series, 0 );
     }
     return true;
   }

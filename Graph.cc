@@ -109,7 +109,7 @@ Fl_Menu_Item graph_pop_menu[] = {
 
 // menu to display mouse coordinates
 Fl_Menu_Item graph_mouse_pos[] =  {
-                                    { "mouse position", 0, (Fl_Callback *)NULL },
+                      { "mouse position", 0, (Fl_Callback *)NULL },
                                     {0}
                                   };
 
@@ -139,8 +139,9 @@ void Graph::copy_curve( int c )
     ty[i] = yv[c][i];
   }
 
-  xv[numset] = tx;
-  yv[numset] = ty;
+  xv[numset]  = tx;
+  yv[numset]  = ty;
+  _id[numset] = _id[c];
   numset++;
 }
 
@@ -246,14 +247,15 @@ void Graph :: draw()
   \param setno set\# to change
 */
 int
-Graph :: set_2d_data( const double *x, const double *y, int n, int setno )
+Graph :: set_2d_data(const double *x, const double *y, int n, int setno, int i)
 {
   if ( setno >= max_num_sets )
     return 1;
 
-  xv[setno] = x;
-  yv[setno] = y;
-  np[setno] = n;
+  xv[setno]  = x;
+  yv[setno]  = y;
+  np[setno]  = n;
+  _id[setno] = i;
 
   scale();
 

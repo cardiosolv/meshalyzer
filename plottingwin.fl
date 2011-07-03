@@ -18,6 +18,8 @@ class PlotWin {open
   }
   decl {int tm;        // datum to highlight} {private local
   }
+  decl {int _id;  // vertex id} {private local
+  }
   decl {double *xv;} {private local
   }
   decl {double tmx[2], tmy[2];} {private local
@@ -26,9 +28,9 @@ class PlotWin {open
   }
   decl {bool rotated;} {private local
   }
-  decl {void set_data( int, double *, int t=-1, float dt=1,float torg=0, double* xd=NULL);} {public local
+  decl {void set_data( int, int, double *, int t=-1, float dt=1,float torg=0, double* xd=NULL);} {selected public local
   }
-  decl {void set_data( int, float *, int t=-1, float dt=1, float torg=0, float* xd=NULL);} {selected public local
+  decl {void set_data( int, int, float *, int t=-1, float dt=1, float torg=0, float* xd=NULL);} {public local
   }
   decl {void highlight( int );} {public local
   }

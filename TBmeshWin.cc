@@ -1429,7 +1429,8 @@ void TBmeshWin::output_pdf( char *fn, bool PDF )
     gl2psBeginPage ( "Title", "Meshalyzer", viewport,
                      format, GL2PS_BSP_SORT,
                      GL2PS_SIMPLE_LINE_OFFSET | GL2PS_SILENT |
-                     GL2PS_OCCLUSION_CULL | GL2PS_BEST_ROOT | GL2PS_DRAW_BACKGROUND,
+                     GL2PS_OCCLUSION_CULL | GL2PS_BEST_ROOT | 
+                     GL2PS_DRAW_BACKGROUND,
                      GL_RGBA, 0, NULL, 0, 0, 0, buffsize,
                      fp, fn );
     draw();
@@ -1446,8 +1447,8 @@ void TBmeshWin::timeplot()
 
   dataBuffer->time_series( hilight[Vertex], timevec );
   timeplotter->window->show();
-  timeplotter->set_data( numframes, timevec, tm, dataBuffer->dt(), 
-                                                 dataBuffer->t0() );
+  timeplotter->set_data(  hilight[Vertex], numframes, timevec, tm, 
+                               dataBuffer->dt(), dataBuffer->t0() );
   timeplotter->window->redraw();
 }
 

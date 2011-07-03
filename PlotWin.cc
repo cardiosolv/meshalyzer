@@ -4,14 +4,15 @@
 
 /** set the data to plot
  *
+ *  \param id   vertex ID
  *  \param n    number of points
  *  \param d    ordinates
  *  \param t    current time
  *  \param xd   abscissa
  *  \param torg initial time
  */
-void PlotWin :: set_data( int n, double *d, int t, float dt, float torg, 
-                                                             double *xd )
+void PlotWin :: set_data( int n, int id, double *d, int t, float dt,
+                                               float torg, double *xd )
 {
   if ( n != datasize ) {
     delete[] xv;
@@ -29,20 +30,23 @@ void PlotWin :: set_data( int n, double *d, int t, float dt, float torg,
     memcpy( xv, xd, n*sizeof(double) );
   else
     for ( int i=0; i<n; i++ ) xv[i] = torg+i*dt;
+
+  _id = id;
   highlight( t );
 }
 
 
 /** set the data to plot
  *
+ *  \param id   vertex ID
  *  \param n    number of points
  *  \param d    ordinates
  *  \param t    current time
  *  \param xd   abscissa
  *  \param torg initial time
  */
-void PlotWin :: set_data( int n, float *d, int t, float dt, float torg,
-                                                            float *xd )
+void PlotWin :: set_data( int id, int n, float *d, int t, float dt, float torg,
+                                                                float *xd )
 {
   if ( n != datasize ) {
     delete[] xv;
@@ -60,6 +64,7 @@ void PlotWin :: set_data( int n, float *d, int t, float dt, float torg,
   if ( xd == NULL )
     for ( int i=0; i<n; i++ ) xv[i] = torg + i*dt;
 
+  _id = id;
   highlight( t );
 }
 
@@ -79,9 +84,9 @@ void PlotWin :: highlight( int tindx=-1 )
 {
   if ( !(window->visible()) ) return;
   if ( !rotated )
-    graph->set_2d_data(xv,data,datasize,0);
+    graph->set_2d_data(xv,data,datasize,0,_id);
   else
-    graph->set_2d_data(data,xv,datasize,0);
+    graph->set_2d_data(data,xv,datasize,0,_id);
   tmx[0] = tmx[1] = xv[tindx];
   tmy[0] = datamin;
   tmy[1] = data[tindx];
@@ -113,7 +118,7 @@ void PlotWin :: writedata()
   if ( ofname == NULL ) return;
   ofstream of( ofname );
   for ( int i=0; i<graph->n(); i++ ) {
-    if ( i==1 ) continue;
+    if ( i==1 ) continue; //set 1 is the time highlight bar
     graph->write( of, i );
     of << endl;
   }

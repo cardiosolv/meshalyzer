@@ -195,6 +195,12 @@ main( int argc, char *argv[] )
     win.trackballwin->read_model( win.winny,
 			model_index<argc?argv[model_index]:0, no_elems );
 
+  control.tethi->maximum( win.trackballwin->model->numVol()-1 );
+  control.elehi->maximum( win.trackballwin->model->numVol()-1 );
+  control.cabhi->maximum( win.trackballwin->model->_cable->num()-1 );
+  control.verthi->maximum(win.trackballwin->model->pt.num()-1 );
+  control.cnnxhi->maximum(win.trackballwin->model->_cnnx->num()-1 );
+
   ProgInfo info;
   read_version_info( info.infotxt );
   control.proginfo = info.proginfo;
@@ -247,11 +253,6 @@ main( int argc, char *argv[] )
                                                                         1 );
   }
   if ( vectordata ) control.vectorgrp->activate();
-  control.tethi->maximum( win.trackballwin->model->numVol()-1 );
-  control.elehi->maximum( win.trackballwin->model->numVol()-1 );
-  control.cabhi->maximum( win.trackballwin->model->_cable->num()-1 );
-  control.verthi->maximum(win.trackballwin->model->pt.num()-1 );
-  control.cnnxhi->maximum(win.trackballwin->model->_cnnx->num()-1 );
   control.mincolval->value(win.trackballwin->cs->min());
   control.maxcolval->value(win.trackballwin->cs->max());
   control.set_tet_region( win.trackballwin->model );
@@ -274,9 +275,15 @@ main( int argc, char *argv[] )
   sigact.sa_sigaction = animate_signal;
   sigact.sa_flags     = SA_SIGINFO;
   sigfillset( &sigact.sa_mask );
+  // setup the signal handling
+  struct sigaction sigLinkAct;
+  sigLinkAct.sa_sigaction = process_linkage_signal;
+  sigLinkAct.sa_flags = SA_SIGINFO;
+  sigfillset( &sigLinkAct.sa_mask );
 
   sigaction( SIGUSR1, &sigact, NULL );
   sigaction( SIGUSR2, &sigact, NULL );
+  sigaction( SIGALRM, &sigLinkAct, NULL );
 
   // set up named semphore for linkingProcSem
   string linkageStr = "/linkage";
@@ -285,15 +292,6 @@ main( int argc, char *argv[] )
   if (linkingProcSem == SEM_FAILED)
     cerr << "Message Queue inter-process communication not possible"
 	 << endl;
-
-  // setup the signal handling
-  struct sigaction sigLinkAct;
-  sigLinkAct.sa_sigaction = process_linkage_signal;
-  sigLinkAct.sa_flags = SA_SIGINFO;
-  sigfillset( &sigLinkAct.sa_mask );
-
-  // overwrite the SIGALARM signal
-  sigaction( SIGALRM, &sigLinkAct, NULL );
 
   void write_frame( string fname, int w, int h, TBmeshWin *tbwm );
   if( PNGfile ) {

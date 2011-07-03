@@ -72,7 +72,7 @@ class Graph : public Fl_Widget
      */
     Graph(int X,int Y,int W,int H) : Fl_Widget(X,Y,W,H),v_autoscale(true),
         numset(0){}
-    int set_2d_data(const double *, const double *, int n, int c );
+    int  set_2d_data(const double *, const double *, int n, int c, int id=-1 );
     void reset_view( void );
     void range( double &, double &, double &, double& );
     void set_range( double, double, double, double );
@@ -84,16 +84,18 @@ class Graph : public Fl_Widget
     int  n(){ return numset; }
     void to_world( int x, int y, double &wx, double &wy );
     void rotate();
+    int  id( int a ){ if(a<numset)return _id[a]; }
   private:
     const double *xv[max_num_sets], *yv[max_num_sets];
-    double x0, x1, y0, y1;					// data range being plotted
-    double xmin, xmax, ymin, ymax;			// data extrema
-    int np[max_num_sets];					// #points/set
-    int numset;
-    char xlabel[num_labels][25], ylabel[num_labels][25];
-    void change_view( int, int, int, int );
-    void make_labels(void);
-    bool v_autoscale;						// autoscale with set change
+    double  x0, x1, y0, y1;					// data range being plotted
+    double  xmin, xmax, ymin, ymax;			// data extrema
+    int     np[max_num_sets];				// #points/set
+    int     _id[max_num_sets];               // identifier of set 
+    int     numset;
+    char    xlabel[num_labels][25], ylabel[num_labels][25];
+    void    change_view( int, int, int, int );
+    void    make_labels(void);
+    bool     v_autoscale;						// autoscale with set change
 };
 
 #endif
