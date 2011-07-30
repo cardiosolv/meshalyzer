@@ -8,14 +8,14 @@ class IGBreader : public DataReader<T>
 {
 
   public:
-    IGBreader( Master<T>* _mthread, Slave<T>* _sthread, Maxmin<T>* _maxmin_ptr );
+    IGBreader(Master<T>* _mthread, Slave<T>* _sthread, Maxmin<T>* _maxmin_ptr);
     ~IGBreader();
     virtual void reader();
     virtual void local_maxmin();
     virtual void tmsr();
-    virtual void  find_maxtm();
-    float         dt(void){return head->inc_t();}
-    float         org_t(void){return head->org_t();}
+    virtual void find_maxtm();
+    float        dt(void){return head->inc_t();}
+    float        org_t(void){return head->org_t();}
 
   private:
     using DataReader<T>::  mthread;
@@ -23,9 +23,9 @@ class IGBreader : public DataReader<T>
     using DataReader<T>::  maxmin_ptr;
     using DataReader<T>::  data;
     using DataReader<T>::  in;
-    char*      buf;
-    int        slsz;		//!< size of slice in bytes
-    IGBheader* head;
+    char*                  buf;
+    int                    slsz;		//!< size of slice in bytes
+    IGBheader*             head;
 };
 
 template<class T>
@@ -63,7 +63,7 @@ IGBreader<T>::~IGBreader()
 }
 
 
-/** read in a particular time which is specidfied in the slave thread */
+/** read in a particular time which is specified in the slave thread */
 template<class T>
 void IGBreader<T>::reader()
 {

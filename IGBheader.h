@@ -332,6 +332,7 @@ class IGBheader
  * \param dp    data buffer
  * \param numt  \#time slices
  * \param h     IGB header
+ * \param buf   temporary storage for a slice
  *
  * \return number of elements read
  */

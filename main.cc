@@ -242,6 +242,8 @@ main( int argc, char *argv[] )
       vectordata = !win.trackballwin->getVecData(control.tmslider, argv[i]);
     else if ( strstr( argv[i], ".pts_t" ) != NULL )
       win.trackballwin->readAuxGrid( control.tmslider, argv[i]);
+    else if ( strstr( argv[i], ".dynpt" ) != NULL )
+      win.trackballwin->read_dynamic_pts( argv[i], control.tmslider );
     else
       win.trackballwin->get_data(argv[i], control.tmslider );
   }

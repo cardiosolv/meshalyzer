@@ -21,7 +21,7 @@ class Model
     Model();
     ~Model();
     bool         read(const char *fn, bool base1, bool no_elems);
-    bool         read_instance( gzFile, gzFile, const GLfloat * );
+    bool         read_instance( gzFile, gzFile );
     int          add_surface_from_tri( const char * );
     int          add_surface_from_surf( const char * );
     int          add_region_surfaces( void );

@@ -33,9 +33,9 @@ class Maxmin
     Maxmin():sl_ptr(NULL), lmax(NULL), lmin(NULL), lv_bit(NULL), read(false),
         v_bit_local(false), v_bit_abs(false), num_slc(0){}
     ~Maxmin();
-    bool        read;			//!< offsets calculated
+    bool        read;		  //!< offsets calculated
     z_off_t**   sl_ptr;       //!< Slice pointer (byte offset)
-    int         num_slc;		//!< number of time slices
+    int         num_slc;	  //!< number of time slices
     T*          lmax;         //!< Local maxima
     T*          lmin;         //!< Local minima
     bool*       lv_bit;       //!< Array of local valid bit, each element correspond to the same element on the lmax and lmin
@@ -43,8 +43,7 @@ class Maxmin
     T           abs_max;      //!< Absolute maxmimum
     T           abs_min;      //!< Absolute minimum
     bool        v_bit_abs;    //!< Valid bit for abs_max and abs_min
-    void size(int n)
-    {
+    void size(int n) {
       lmax=new T[n]; lmin=new T[n]; lv_bit=new bool[n];
       memset( lv_bit, 0, sizeof(bool)*n );
     }
@@ -75,7 +74,7 @@ class Master
     const char* scanstr;    //!< Scan string
     int         slsz;       //!< \#points in a time slice (not bytes)
     int         maxtm;      //!< Max time (=\#slices-1)
-    Maxmin<T>*  maxmin;     //!< PPointer to maxmin structure
+    Maxmin<T>*  maxmin;     //!< Pointer to maxmin structure
 };
 
 
@@ -134,26 +133,26 @@ class ThreadedData : public DataClass<T>
     using DataClass<T> :: _dt;
     using DataClass<T> :: _t0;
   public:
-    ThreadedData( const char *fn, int slsz );
+    ThreadedData( const char *fn, int slsz, bool tm_anal=true );
     ~ThreadedData( );
-    static    void*   ThreadCaller( void* _sthread );     //!< read in a time slice
-    static    void*   minimax( void* _sthread );          //!< read max and min times
-    static    void*   tmsrCollector( void* _sthread );    //!< read in a time series
+    static    void*   ThreadCaller( void* _sthread );  //!< read in a time slice
+    static    void*   minimax( void* _sthread );       //!< read max & min times
+    static    void*   tmsrCollector( void* _sthread ); //!< read in time series
     virtual   T       max(int);	        //!< Maximum value at a slice of time
-    virtual   T       max();	            //!< Maximum value of the entire series
-    virtual   T       min(int);           //!< Minimum value at a slice of time
-    virtual   T       min();              //!< Minimum value of the entire series
-    virtual   T*      slice(int);         //!< PPointer to slice of data at a time
+    virtual   T       max();	        //!< Maximum value of the entire series
+    virtual   T       min(int);         //!< Minimum value at a slice of time
+    virtual   T       min();            //!< Minimum value of the entire series
+    virtual   T*      slice(int);       //!< PPointer to slice of data at a time
     virtual   void    time_series( int, T* );    //!< PPointer to time series
     virtual   void    increment(int increment);  //!< Sets increment
   private:
-    Master<T>*        mthread;               //!< master thread
-    Slave<T>*         sthread;               //!< slice reading threads
-    Slave<T>*         stmsr;                 //!< thread to read time series
-    Maxmin<T>*        maxmin;            //!< PPointer to maxmin
-    int               incrementation;        //!< Increment value
-    pthread_mutex_t   mutex_incrementation;  //!< Mutex to incrementation
-    int               element;               //!< Value to decide the next thread
+    Master<T>*        mthread;              //!< master thread
+    Slave<T>*         sthread;              //!< slice reading threads
+    Slave<T>*         stmsr;                //!< thread to read time series
+    Maxmin<T>*        maxmin;               //!< Pointer to maxmin
+    int               incrementation;       //!< Increment value
+    pthread_mutex_t   mutex_incrementation; //!< Mutex to incrementation
+    int               element;              //!< Value to decide the next thread
     gzFile            in;                    //!< file to read
     bool              replaceable( Slave<T>*, int );
 };
@@ -161,11 +160,12 @@ class ThreadedData : public DataClass<T>
 
 /**Constructor
  *
- * \param fn   filename
- * \param slsz number of points in a slice
+ * \param fn      filename
+ * \param slsz    number of points in a slice
+ * \param tm_anal do min/max analysis of time series?
  */
 template<class T>
-ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
+ThreadedData<T>::ThreadedData( const char *fn, int slsz, bool tm_anal ):
     mthread( new Master<T>(fn,slsz)),incrementation(1),element(0)
 {
 
@@ -178,7 +178,7 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
   mthread->maxmin = maxmin = new Maxmin<T>;
 
   // ugly but I don't know what else to do besides specialization which is ugly
-  if     ( typeid(T) == typeid(double) ) mthread->scanstr = "%lf";
+  if     ( typeid(T) == typeid(double) )  mthread->scanstr = "%lf";
   else if ( typeid(T) == typeid(float) )  mthread->scanstr = "%f";
   else if ( typeid(T) == typeid(int) )    mthread->scanstr = "%d";
   else if ( typeid(T) == typeid(short) )  mthread->scanstr = "%hd";
@@ -189,9 +189,13 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
   sthread = new Slave<T>[THREADS];
   for ( int k=0; k<THREADS; k++ )
     sthread[k].master( mthread, mthread->slsz );
-  stmsr            = new Slave<T>( mthread );
+
   Slave<T>* sabs   = new Slave<T>( mthread );
-  Slave<T>* slocal = new Slave<T>( mthread, mthread->slsz );
+  Slave<T>* slocal = NULL;
+  if( tm_anal ) {
+    stmsr  = new Slave<T>( mthread );
+    slocal = new Slave<T>( mthread, mthread->slsz );
+  }
 
 ///////////////////////////////////////////////////////////////////////////////
   // To add a new file type, add a case to the following switch statement.
@@ -212,6 +216,14 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
                                 sthread+k, maxmin);
       _dt = ((IGBreader<T>*)(slocal->datareader))->dt();
       _t0 = ((IGBreader<T>*)(slocal->datareader))->org_t();
+      break;
+    case FTDynPt:
+      sabs->datareader   = new IGBreader<T>(mthread, sabs, maxmin);
+      for ( int k=0; k<THREADS; k++ )
+        sthread[k].datareader = new IGBreader<T>( mthread,
+                                sthread+k, maxmin);
+      _dt = ((IGBreader<T>*)(sabs->datareader))->dt();
+      _t0 = ((IGBreader<T>*)(sabs->datareader))->org_t();
       break;
     case FTascii:
       sabs->datareader   = new asciireader<T>(mthread, sabs, maxmin);
@@ -246,19 +258,20 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz ):
   maxtm = mthread->maxtm;
   maxmin->size(maxtm+1);
 
-  // Call a thread to read in each time slice and get max&min times
-  if (pthread_create(&(slocal->threadID), NULL, minimax, (void*)slocal) )
-    throw(1);
-
-  for ( int i=0; i<THREADS; i++ ) {
-    if ( pthread_create(&sthread[i].threadID, NULL,
-                        ThreadCaller, (void*)&sthread[i]) )
+  if( tm_anal ) {
+    // Call a thread to read in each time slice and get max&min times
+    if (pthread_create(&(slocal->threadID), NULL, minimax, (void*)slocal) )
+      throw(1);
+    // Create a thread to read in time series
+    if ( pthread_create( &stmsr->threadID, NULL, tmsrCollector, (void*)stmsr) )
       throw(1);
   }
 
-  // Create a thread to read in time series
-  if ( pthread_create( &stmsr->threadID, NULL, tmsrCollector, (void*)stmsr) )
-    throw(1);
+  for ( int i=0; i<THREADS; i++ ) {
+    if ( pthread_create(&sthread[i].threadID, NULL,
+                ThreadCaller, (void*)&sthread[i]) )
+      throw(1);
+  }
 }
 
 /// Destructor

@@ -62,9 +62,9 @@ void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
 }
 
 
-VecData::VecData(const GLfloat *pt_offset, char* vptfile):_length(1),maxmag(0.),
+VecData::VecData(char* vptfile):_length(1),maxmag(0.),_stride(1),
     numpt(0),numtm(0),pts(NULL),vdata(NULL),sdata(NULL),_disp(true),
-    _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0),_stride(1)
+    _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0)
 {
   _colour[1] = _colour[2] = 0.;
   _colour[0] = _colour[3] = 1.;
@@ -98,7 +98,6 @@ VecData::VecData(const GLfloat *pt_offset, char* vptfile):_length(1),maxmag(0.),
   for ( int i=0; i<3*numpt; i+=3 ) {
     if ( gzgets(in, buff, bufsize) == Z_NULL ) return;
     if ( sscanf( buff, "%f %f %f", pts+i, pts+i+1, pts+i+2 ) != 3 ) return;
-    for ( int j=0; j<3; j++ ) pts[i+j] -= pt_offset[j];//centre wrt scalar data
   }
   gzclose( in );
 

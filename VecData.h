@@ -19,7 +19,7 @@ void draw_arrow( GLUquadricObj* quado,
 class VecData
 {
   public:
-    VecData(const GLfloat *, char*);
+    VecData(char*);
     ~VecData();
     int          maxtime(){ return numtm-1; }
     void         draw(int,float);

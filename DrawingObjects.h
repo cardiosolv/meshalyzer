@@ -8,6 +8,8 @@
 #include "DataOpacity.h"
 #include <zlib.h>
 #include "Interpolator.h"
+#include "DataAllInMem.h"
+#include "ThreadedData.h"
 
 gzFile openFile( const char*, const char* );
 
@@ -43,7 +45,7 @@ class DrawingObj
 class PPoint: public DrawingObj
 {
   public:
-    PPoint() : _pts(NULL), _base1(false) {}
+    PPoint() : _pts(NULL), _base1(false),_dynPt(NULL), _tm(-1) {}
     virtual ~PPoint() { if ( _pts ) free(_pts); _pts = 0; }
 
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -63,12 +65,19 @@ class PPoint: public DrawingObj
     void    base1(bool b){ _base1 = b; }
     void    add( GLfloat *, int n=1 );
     const   GLfloat* operator[] (int i){ return _pts+3*i; }
+    void    time( int a );
+    int     time(){ return _tm; }
+    int     dynamic( const char *, int );
+    int     num_tm(){ return _dynPt? _dynPt->max_tm()+1:0; }
   private:
     GLfloat*     _pts;		  //!< point list
     vector<bool>*_visible;    //!< points which get drawn
     GLfloat      _offset[3];  //!< centering offset
     bool         _base1;      //!< true for base 1
     vector<bool>_allvis;	  //!< all true
+    int         _maxtm;       //!< maximum time
+    int         _tm;          //!< current time
+    DataClass<float>* _dynPt; //!< dynamic point data
 };
 
 

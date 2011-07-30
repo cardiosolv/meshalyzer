@@ -37,11 +37,9 @@ public:
    * Indexes the associated file at construction
    *
    * \param filename to index (without extention)
-   * \param pt_offset in model to apply
    */
-  AuxGridIndexer(char * filename, GLfloat const * pt_offset)
-    : _pt_offset(pt_offset),
-      _model(0),
+  AuxGridIndexer(char * filename)
+    : _model(0),
       _data(0),
       _frame(-1)
   {
@@ -123,7 +121,7 @@ public:
 
     // load model from file
     _model = new Model();
-    _model->read_instance(_pts_in, _elem_in, _pt_offset);
+    _model->read_instance(_pts_in, _elem_in);
     
     // load data
     if (_dat_in) {
@@ -284,8 +282,6 @@ private:
 public:
   Model * _model;                       //!< current frame model
   DATA_TYPE *_data;                     //!< current frame data
-private:
-  GLfloat const * _pt_offset;           //!< offset to pass in for model creation (shouldn't really be here)
 };
 
 
@@ -296,13 +292,12 @@ private:
 /** constructor 
  *
  * \param fn        base file name
- * \param pt_offset center of model coordinates
  *
  * \throw 1 if any error in input
  */
-AuxGrid::AuxGrid( char *fn, const GLfloat* pt_offset )
+AuxGrid::AuxGrid( char *fn )
   : _display(true), _hilight(false), _hiVert(0), _plottable(false),
-    _indexer(new AuxGridIndexer(fn, pt_offset)),_timeplot(NULL)
+    _indexer(new AuxGridIndexer(fn)),_timeplot(NULL)
 {
   for (int i=0; i<sizeof(*_3D); i++)
     _3D[i] = true;

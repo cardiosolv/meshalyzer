@@ -10,6 +10,8 @@
  *  \param t    current time
  *  \param xd   abscissa
  *  \param torg initial time
+ *  
+ *  \note memory is allocated to hold the data
  */
 void PlotWin :: set_data( int n, int id, double *d, int t, float dt,
                                                float torg, double *xd )
@@ -44,6 +46,8 @@ void PlotWin :: set_data( int n, int id, double *d, int t, float dt,
  *  \param t    current time
  *  \param xd   abscissa
  *  \param torg initial time
+ *  
+ *  \note memory is allocated to hold the data
  */
 void PlotWin :: set_data( int id, int n, float *d, int t, float dt, float torg,
                                                                 float *xd )
@@ -111,6 +115,7 @@ void PlotWin :: rotate( bool a )
     highlight();
   }
 }
+
 #include <fstream>
 void PlotWin :: writedata()
 {

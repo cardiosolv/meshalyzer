@@ -35,7 +35,7 @@ class AuxGrid {
         double*      _time_series;
 
     public:
-        AuxGrid( char *fn, const GLfloat *ptoff=NULL );
+        AuxGrid( char *fn );
         virtual ~AuxGrid();
 
         Colourscale cs;

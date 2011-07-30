@@ -24,6 +24,7 @@ using namespace std;
  *
  *  - FTascii: one acsii number per line
  *  - FTIGB: IGB data
+ *  - FTDynPt : Dynamic point data, stored in IGB_Vec3_f format
  *  - FTfileSeqCG: Cool Graphics format of one ascii file per time, with the
  *         first line of the form <TT> t = [0-9]+</TT>. Files are named
  *         <TT>basename.t[0-9]+</TT>
@@ -60,6 +61,19 @@ fileType FileTypeFinder ( const char *fn )
       return FTIGB;
     }
 
+  } else if ( strstr( fn, ".dynpt" ) != NULL ) {
+
+    IGBheader* head = new IGBheader( in );
+    int res = head->read();
+    gzclose( in );
+
+    if ( res || head->type()!=IGB_VEC3_f ) {
+      return FTascii;
+    } else {
+      delete head;
+      return FTDynPt;
+    }
+ 
   } else {			// might be a CG file sequence
 
     const char* tpos = strrchr( fn, 't' ); // look for last "t" in the file name

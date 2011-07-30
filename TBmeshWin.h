@@ -30,7 +30,7 @@ class DataOpacity;
 class ClipPlane;
 class IsosurfControl;
 
-enum GridType { ScalarDataGrid, VecDataGrid, AuxDataGrid, NoDataGrid };
+enum GridType { ScalarDataGrid, VecDataGrid, AuxDataGrid, DynPtGrid, NoDataGrid };
 
 class TBmeshWin:public Fl_Gl_Tb_Window
 {
@@ -126,6 +126,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     int       ProcessLinkMessage(const LinkMessage::CommandMsg& msg);
     void      SendViewportSyncMessage();
     void      SendTimeSyncMessage();
+    int       read_dynamic_pts( const char *, Myslider * );
 
   private:
     int        hilight[maxobject];	// which object to highlight
@@ -177,7 +178,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     CutSurfaces **_cutsurface;      // clipped surfaces
     IsoSurface *iso0, *iso1;
     IsoLine    *isoline;
-    set<int>   timeLinks;           // other meshalyzer processes linked to this one
+    set<int>   timeLinks;           // other processes linked to this one
     bool       bgd_trans;           //!< transparent background
     bool       _norot;              //!< allow rotations
     float      _dt;                 //!< increment between time slices

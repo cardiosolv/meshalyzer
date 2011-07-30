@@ -8,7 +8,7 @@
 using namespace std;
 
 enum DataReaderEnum {AllInMem, Threaded };
-enum fileType { FTIGB=1, FTascii, FTfileSeqCG, FTother };
+enum fileType { FTIGB=1, FTascii, FTfileSeqCG, FTDynPt, FTother };
 
 fileType FileTypeFinder ( const char *fn );
 

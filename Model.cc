@@ -795,10 +795,8 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
     sprintf( txt, "value: %f", data[hilight[Vertex]] );
     hinfo->add( txt );
   }
-  const GLfloat*offset = pt.offset();
-  sprintf( txt, "( %.6g, %.6g, %.6g )", pt.pt()[hilight[Vertex]*3]+offset[0],
-           pt.pt()[hilight[Vertex]*3+1]+offset[1],
-           pt.pt()[hilight[Vertex]*3+2]+offset[2]);
+  sprintf( txt, "( %.6g, %.6g, %.6g )", pt.pt()[hilight[Vertex]*3],
+           pt.pt()[hilight[Vertex]*3+1], pt.pt()[hilight[Vertex]*3+2]);
   hinfo->add( txt );
   /*
   string reginfo( "in surface: " );
@@ -1144,8 +1142,7 @@ Model::surfKill( int s )
  *
  *  \return 
  */
-bool Model :: read_instance( gzFile pt_in, gzFile elem_in, 
-                                       const GLfloat* offset )
+bool Model :: read_instance( gzFile pt_in, gzFile elem_in )
 {
   // read in points
   if( pt_in != NULL ) {
@@ -1154,10 +1151,8 @@ bool Model :: read_instance( gzFile pt_in, gzFile elem_in,
     GLfloat *p = new GLfloat[num_pt*3];
     for( int i=0; i< num_pt; i++ ) {
       sscanf( get_line(pt_in), "%f %f %f", p+i*3, p+i*3+1, p+i*3+2 );
-      sub( p+i*3, offset, p+i*3 ); // center wrt fixed model
     }
     pt.add( p, num_pt );
-    pt.offset( offset );
     pt.setVis( true );
     delete[] p;
   }

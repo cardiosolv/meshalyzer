@@ -71,11 +71,11 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {open
         xywh {0 -1 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File
+          label File open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -168,6 +168,12 @@ if( fn && !mwtb->readAuxGrid(tmslider,fn) ) {
 }}
             xywh {0 0 100 20}
           }
+          MenuItem {} {
+            label {Read Dyn Pts}
+            callback {char *fn = fl_file_chooser("Dynamic Points", "*.dynpt", NULL );
+if( fn ) mwtb->read_dynamic_pts( fn, tmslider );}
+            xywh {0 0 30 20}
+          }
           MenuItem read_recalibrate {
             label {Recalibrate on read}
             xywh {0 0 100 20} type Toggle value 1 divider
@@ -220,7 +226,10 @@ mwtb->tmLink->window->show();}
             callback {mwtb->trackball.Reset();
 float md = mwtb->get_maxdim();
 mwtb->trackball.mouse.SetOglPosAndSize(-md, md, 2*md, 2*md );
-mwtb->trackball.size = md;mwtb->redraw();}
+mwtb->trackball.size = md;
+const GLfloat* po=mwtb->model->pt_offset();
+mwtb->trackball.SetOrigin(-po[0],-po[1],-po[2]);
+mwtb->redraw();} selected
             xywh {0 0 100 20}
           }
           Submenu {} {
@@ -696,11 +705,11 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open
+          label Highlight
           xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
@@ -1782,8 +1791,7 @@ SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoval0 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->opacity0 );
 mshzf << "ISOSURF_COLOUR 0 = ";
 save_colour( mshzf, mwtb->isosurfwin->issColor(0) );
-mshzf << endl;} {selected
-    }
+mshzf << endl;} {}
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {open
   } {

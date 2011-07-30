@@ -28,7 +28,7 @@ class PlotWin {open
   }
   decl {bool rotated;} {private local
   }
-  decl {void set_data( int, int, double *, int t=-1, float dt=1,float torg=0, double* xd=NULL);} {selected public local
+  decl {void set_data( int, int, double *, int t=-1, float dt=1,float torg=0, double* xd=NULL);} {public local
   }
   decl {void set_data( int, int, float *, int t=-1, float dt=1, float torg=0, float* xd=NULL);} {public local
   }
@@ -49,7 +49,7 @@ class PlotWin {open
       code1 {\#include <string>}
       code2 {using namespace std;} visible
     } {
-      Fl_Box graph {
+      Fl_Box graph {selected
         xywh {5 5 515 165} resizable
         code0 {\#include "Graph.h"}
         class Graph
@@ -88,7 +88,8 @@ class PlotWin {open
         }
       }
     }
-    code {xv = new double[1];
+    code {graph->num_dynamic(2);
+xv = new double[1];
 data = new double[1];
 tm = 0;
 datasize = -1;

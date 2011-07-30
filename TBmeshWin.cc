@@ -771,6 +771,8 @@ void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt,
   float maxdim = model->maxdim();
   trackball.mouse.SetOglPosAndSize(-maxdim, maxdim, 2*maxdim, 2*maxdim );
   trackball.size = maxdim;
+  const GLfloat *poff = model->pt_offset();
+  trackball.SetOrigin( -poff[0], -poff[1], -poff[2] );
   cplane->set_dim( maxdim*1.3 );
 
   if( model->twoD() ){ 
@@ -856,7 +858,7 @@ DataReaderEnum TBmeshWin::getReaderType( const char *fn )
   int       getNumberTimes( const char * );
 
   long long memoryAvail = getFreePages() +
-                          numframes*model->pt.num()*sizeof(DATA_TYPE)/getpagesize();
+                     numframes*model->pt.num()*sizeof(DATA_TYPE)/getpagesize();
 
   long long memreq = getNumberTimes( fn );
 
@@ -894,7 +896,7 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
   }
 
   if( max_time(ScalarDataGrid)>0 && newDataBuffer->max_tm()>0 && 
-                                          newDataBuffer->max_tm()!=max_time() ) {
+                                         newDataBuffer->max_tm()!=max_time() ) {
     fl_alert("%s","Incompatible number of frames in data" );
     delete newDataBuffer;
     return;
@@ -1191,7 +1193,7 @@ TBmeshWin::getVecData( void *vp, char* vptfile )
   VecData* newvd;
 
   try {
-    newvd = new VecData( model->pt_offset(), vptfile );
+    newvd = new VecData( vptfile );
   } catch (...) {
     return 1;
   }
@@ -1221,7 +1223,7 @@ TBmeshWin::readAuxGrid( void *vp, char* agfile )
   AuxGrid* newAuxGrid;
 
   try {
-    newAuxGrid = new AuxGrid( agfile, model->pt_offset() );
+    newAuxGrid = new AuxGrid( agfile );
   } catch (...) {
     return 1;
   }
@@ -1245,7 +1247,7 @@ TBmeshWin::readAuxGrid( void *vp, char* agfile )
 
 /** return maximum time to display
  *
- * \note There are 3 grids which must all agree on the number of time
+ * \note There are possibly 4 grids which must all agree on the number of time
  *       instances. Grids with no data or only 1 instance of data
  *       are compatible with any number of time frames since they are
  *       static
@@ -1260,6 +1262,9 @@ int TBmeshWin::max_time( GridType ignore )
 
   if( ignore!=AuxDataGrid && auxGrid && auxGrid->num_tm()>0 )
     return auxGrid->num_tm()-1;
+
+  if( ignore!=DynPtGrid && DynPtGrid && model->pt.num_tm()>0 )
+    return model->pt.num_tm()-1;
 
   return 0;
 }
@@ -1925,4 +1930,35 @@ TBmeshWin:: set_time(int a)
     contwin->auxmincolval->value( auxGrid->cs.min() );
     contwin->auxmaxcolval->value( auxGrid->cs.max() );
   }
+  if( model->pt.num_tm() )
+    model->pt.time(tm);
+}
+
+
+/** read in the dynamic points file
+ *
+ * \param fn the file name 
+ *
+ * \return nonzero on failure
+ *
+ * \note the dynamic points file is an IGB file of data type IBG_VEC3_f
+ */
+int
+TBmeshWin :: read_dynamic_pts( const char *fn, Myslider *mslide )
+{
+  int retval = model->pt.dynamic( fn, numframes );
+
+  if( retval == 2 ) {
+    fl_alert( "Incompatible number of time frames\n" );
+    return 1;
+  }
+  if( retval )
+    return 1;
+
+  model->pt.time(tm);
+  mslide->maximum( max_time() );
+  numframes = mslide->maximum()+1;
+  mslide->redraw();
+
+  return 0;
 }

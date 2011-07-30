@@ -68,12 +68,13 @@ void PPoint::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
     }
   } else {								 // all same colour
     glColor4fv( colour );
-    for (int i=p0; i<=p1; i+=stride )
+    for (int i=p0; i<=p1; i+=stride ){
       if ( (*_visible)[i] )
         if( _3D )
           draw_sphere( _pts+3*i, _size );
         else
           glVertex3fv( _pts+3*i );
+    }
   }
 
   glEnd();
@@ -153,8 +154,8 @@ bool PPoint :: read( const char *fname )
 
   // centre the model about the origin
   for ( int ti=0; ti<3; ti++ ) _offset[ti] = (min[ti]+max[ti])/2;
-  for ( int i=0; i<3*_n; i+=3 )
-    for ( int ti=0; ti<3; ti++ ) _pts[i+ti] -= _offset[ti];
+  //for ( int i=0; i<3*_n; i+=3 )
+    //for ( int ti=0; ti<3; ti++ ) _pts[i+ti] -= _offset[ti];
   gzclose(in);
 
   _allvis.resize( _n );
@@ -178,4 +179,49 @@ PPoint :: add( GLfloat *p, int n )
   _allvis.resize( _n );
   _allvis.assign( _n, true );
   setVis( true );
+}
+
+
+/** make the points dynamic 
+ *
+ *  \param fn  the name of the dynamic points file
+ *  \param ntm the number of times currently loaded
+ *
+ *  \retval 0 success
+ *  \retval 1 invalid file
+ *  \retval 2 incompatible number of points
+ */
+int
+PPoint :: dynamic( const char *fn, int ntm )
+{
+  ThreadedData<float>* newDynPt;
+
+  try{ 
+    newDynPt = new ThreadedData<float>( fn, _n*3, false );
+  }
+  catch(...) {
+    return 1;
+  }
+  if( ntm==1 || ntm==0 || ( newDynPt->max_tm()+1==ntm ) ) {
+    delete _dynPt;
+    _dynPt = newDynPt; 
+    return 0;
+  } else
+    return 2;
+}
+
+
+/** set points to the current time 
+ *
+ *  \param a the time
+ *
+ *  \note if the requested time is greater than the maximum and the 
+ *        maximum is greater than 0, it is an error
+ */
+void PPoint :: time( int a )
+{
+  if( _dynPt==NULL || a==_tm || a>_dynPt->max_tm() ) return;
+
+  if( _pts = _dynPt->slice( a ) ) 
+    _tm = a;
 }

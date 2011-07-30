@@ -1,16 +1,14 @@
 /* \file Graph.cc
  *
  * A class for drawing simple 2D plots on linear x and y scales (for now)
- * The graph widget can draw multiple sets. The first is the curret and
- * the second is the time indicator. Sets 3--? are static sets.
+ * The graph widget can draw multiple sets.
+ * Sets greater than 0 are the static sets.
  */
 #include "plottingwin.h"
 #include "Graph.h"
 #include <FL/Fl_Menu_Item.H>
 #include <FL/fl_ask.H>
 #include <sstream>
-
-#define MIN_STATIC_CURVE 2
 
 const int setcolour[]=
   {
@@ -98,20 +96,20 @@ clear_curves_cb( Fl_Widget *w )
 
 
 Fl_Menu_Item graph_pop_menu[] = {
-                                  { "reset view", 'r', (Fl_Callback *)reset_cb, 0, 0, 0, 0, 14, 56 },
-                                  { "X range", 'x',  (Fl_Callback *)xrange_cb, 0, 0, 0, 0, 14, 56  },
-                                  { "Y range", 'y',  (Fl_Callback *)yrange_cb, 0, 0, 0, 0, 14, 56  },
-                                  { "toggle button display", 'b',  (Fl_Callback *)but_disp_toggle_cb, 0, 0, 0, 0, 14, 56  },
-                                  { "clear static curves", 'c',  (Fl_Callback *)clear_curves_cb, 0, 0, 0, 0, 14, 56  },
-                                  { "close", 'c',  (Fl_Callback *)close_graph_cb, 0, 0, 0, 0, 14, 56  },
-                                  {0}
-                                };
+  { "reset view", 'r', (Fl_Callback *)reset_cb, 0, 0, 0, 0, 14, 56 },
+  { "X range", 'x',  (Fl_Callback *)xrange_cb, 0, 0, 0, 0, 14, 56  },
+  { "Y range", 'y',  (Fl_Callback *)yrange_cb, 0, 0, 0, 0, 14, 56  },
+  { "toggle button display", 'b',  (Fl_Callback *)but_disp_toggle_cb, 0, 0, 0, 0, 14, 56  },
+  { "clear static curves", 'c',  (Fl_Callback *)clear_curves_cb, 0, 0, 0, 0, 14, 56  },
+  { "close", 'c',  (Fl_Callback *)close_graph_cb, 0, 0, 0, 0, 14, 56  },
+  {0}
+};
 
 // menu to display mouse coordinates
 Fl_Menu_Item graph_mouse_pos[] =  {
-                      { "mouse position", 0, (Fl_Callback *)NULL },
-                                    {0}
-                                  };
+  { "mouse position", 0, (Fl_Callback *)NULL },
+  {0}
+};
 
 // plot the entire data set
 void Graph::reset_view(void)
@@ -122,7 +120,11 @@ void Graph::reset_view(void)
 }
 
 
-// make a static copy of the current curve
+/** make a static copy of the current curve, allocating the necessary
+ *  memory to make the copy
+ *
+ *  \param curve index to copy
+ */
 void Graph::copy_curve( int c )
 {
 
@@ -149,7 +151,7 @@ void Graph::copy_curve( int c )
 // clear curves
 void Graph :: clear_curves()
 {
-  for ( int c=MIN_STATIC_CURVE; c<numset; c++ ) {
+  for ( int c=num_dyn; c<numset; c++ ) {
     delete[] xv[c];
     delete[] yv[c];
     np[c] = 0;
@@ -240,6 +242,8 @@ void Graph :: draw()
 /** Set the data for a set
  *
  * to add a new set, set it to the next available set
+ *
+ * \note no memeory is allocated, only the pointers are copied
 
   \param x     abscissa vector
   \param y     ordinate vector
@@ -265,11 +269,11 @@ Graph :: set_2d_data(const double *x, const double *y, int n, int setno, int i)
   return 0;
 }
 
-
+//* rotate graph by 90 degrees
 void
 Graph :: rotate()
 {
-  for( int i=MIN_STATIC_CURVE; i<numset; i++ ) {
+  for( int i=num_dyn; i<numset; i++ ) {
     const double *t = xv[i];
     xv[i] = yv[i];
     yv[i] = t;
@@ -372,8 +376,8 @@ int Graph::handle(int event)
   return 0;
 }
 
-//! return the range currently plotted
-/*!
+/** return the range currently plotted
+
   \param a  minimum x value
   \param b  maximum x value
   \param c  minimum y value
@@ -417,7 +421,7 @@ void Graph::write( ostream& of, int s )
 }
 
 
-/** convert device coordinates top world coordinates
+/** convert device coordinates to world coordinates
  *
  *  \param x0 device x coord
  *  \param y0 device y coord

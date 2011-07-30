@@ -74,7 +74,7 @@ As well, all the structures formed by those vertices are part of the
 region.
 Vertices may belong to more than one region,
 and there is at least one region in a grid.
-If one is not specified, all strucutres belong to the default region.
+If one is not specified, all structures belong to the default region.
 If there is a element direction file (\texttt{.ttlon} file), and no 
 volume elements are tagged, elements with no direction will be region~0, 
 and other elements will be region~1.
@@ -89,7 +89,7 @@ Surfaces are independent of regions, and the relationship between the points
 and model structures is described in the Fig.~\ref{fig:UML}.
 \begin{figure}
 \centerline{\includegraphics[width=13cm]{UML}}
-\caption{Relationshop between vertices (Points) and other structures.}
+\caption{Relationship between vertices (Points) and other structures.}
 \label{fig:UML}
 \end{figure}
 
@@ -214,7 +214,7 @@ a material property indicator but it is unused.
 
 \subsection{Volume Elements}
 \label{sec:voleles}
-There are two formats for defining volume elements, either the depracated
+There are two formats for defining volume elements, either the deprecated
 tetrahedral file or the newer general element file. Details follow.
 
 \subsubsection{Mixed element files}
@@ -293,6 +293,7 @@ Thus if there are N vertices and data is sampled at 10 points in time,
 the file will comprise 10N lines with one value per line.
 
 \subsubsection{IGB format}
+\label{sec:IGB}
 IGB is a format developed at the University of Montreal and used in a 
 visualization program called flounder, for regularly spaced data.
 
@@ -341,7 +342,7 @@ The first block of key words need to be specified. The rest are optional.
 \end{longtable}
 
 \subsection{Vector Data}
-An auxillary set of points on which to display vector/scalar data is 
+An auxiliary set of points on which to display vector/scalar data is 
 defined by a file with the ``.vpts'' suffix.
 It follows the same format as the vertex file.
 A file with the same base name but the extension ``.vec'' defines the 
@@ -373,7 +374,7 @@ If scalar data has already been read in, the number of time instances in
 the auxiliary grid must either be one, or the same as the scalar data.
 
 A vertex file is mandatory and has the extension ``.pts\_t''.
-An element file is optonal. If present, it has the same base name as the
+An element file is optional. If present, it has the same base name as the
 vertex file but with the extension ``.elem\_t''.
 Scalar data may also be optionally defined on the auxiliary grid. The file
 has the same basename as the vertex file but with the extension
@@ -406,6 +407,14 @@ pt(1,1).x & pt(1,1).y & pt(1,1).z & . & data(1,1) \\
 . & . & . & . & . \\ \hline
 \end{longtable}
 
+\subsection{Dynamic Points}
+Points may also move in space as functions of time.
+This is often associated with displacement during contraction, for
+example.
+The number of points must remain constant for all time instances,
+as well as the elements defined by them.
+Dynamic point files use the IGB format (see \S\ref{sec:IGB}) with data type
+\texttt{vec3f}. The extension for the file in this case is ``.dynpt''.
 
 \subsection{CG meta format}
 Cool Graphics (CG) is a visualization program written chiefly by Jamey Eason
@@ -469,12 +478,14 @@ auxiliary grid with 100 frames could be read in, and subsequently a
 vector data grid could only be read if it had 1 or 100 frames of data.
 
 \section{Invocation}
-The program is run by typing\\[1ex]
-\centerline{
-{\texttt{meshalyzer cg\_in|[pts [vpts] [dat|tdat|out] [mshz] [tri ...]
-[pts\_t] 
-\raisebox{-2Ex}{\rule{0em}{3Ex}}
-}}}\\
+The program is run by typing
+\begin{verbatim}
+meshalyzer [pts [vpts] [dat|tdat|igb] [mshz] [tri ...] [pts_t] [dynpt]]
+\end{verbatim}
+or
+\begin{verbatim}
+meshalyzer cg_in
+\end{verbatim}
 where the extensions of the required file types are given.
 If no file is specified, a file input box will pop up.
 Note that for the ``pts'' file, the dot of the extension can be left in to facilitate
@@ -508,7 +519,7 @@ This will display all structures except volume elements.
 Display of each structure type can be toggled on and off on a
 region-by-region basis or all-at-once.
 The regions in which changes will take place are selected
-by hoghlighting them in the list.
+by highlighting them in the list.
 Any changes made to display structures will only occur to the regions selected.
 The opacity value of a region
 is changed by dragging in the opacity bar. It affects
@@ -520,7 +531,7 @@ The order can be reversed by checking ``Reverse Draw order'' under the ``Image''
 menu.
 
 For each structure, there is a button toggling its display, 
-and a button to select its dispaly properties.
+and a button to select its display properties.
 pressing the ``props'' button will open a widget to specify 
 colour when it is not displaying data, to specify the output stride, size 
 and if a 3D effect is to be used. 
@@ -577,7 +588,7 @@ A trace can be saved by clicking on the ``Hold'' button.
 Up to 8 traces can be saved this way.
 To clear the held traces, click on mouse button 3 and select 
 ``clear static curves.''
-The plotted traces can be saved in ascii format by clicking
+The plotted traces can be saved in ASCII format by clicking
 the ``Save'' button.
 Normally, when a new point is clicked, the x and y range are recalculated
 and the scale adjusted accordingly.
@@ -668,7 +679,7 @@ The colouring of the model components is controlled independently of the
 main grid.
 Widgets for selecting the colour scale and mapping of the scalar data to
 colour are available. See \S\ref{sec:scalardata} for details.
-Componets are grouped into line, surface and volume elements.
+Components are grouped into line, surface and volume elements.
 Each group of grid components can be coloured with a fixed colour chosen
 with the ``color'' button.
 If scalar data is present, the components can be coloured according to the
@@ -821,7 +832,7 @@ A dialogue will pop up indicating how many frames were written.
 A list of the visible nodes and clipping planes can be generated by
 selecting
 ``Output/Visible vertices''.
-You will be proompted for a filename and a file with the following format
+You will be prompted for a filename and a file with the following format
 will be produced:
 \begin{verbatim}
 number_clip_planes_on
