@@ -1163,7 +1163,7 @@ bool Model :: read_instance( gzFile pt_in, gzFile elem_in )
   if( elem_in != NULL ) {
     int num_elem;
 	sscanf( get_line(elem_in), "%d", &num_elem );
-	int *Cxpt = (int *)malloc(num_elem*2*sizeof(int) ), numCx=0;
+	int *Cxpt = NULL, numCx=0;
 	_vol = new VolElement*[num_elem];
 
 	int n[10];
@@ -1172,7 +1172,7 @@ bool Model :: read_instance( gzFile pt_in, gzFile elem_in )
       sscanf( get_line(elem_in),"%s %d %d %d %d %d %d %d %d %d %d",type,
 			  n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8, n+9 );
       if( !strcmp( type, "Ln") ) {
-        Cxpt = (int *)realloc( Cxpt, numCx*sizeof(int)*2+2 );
+        Cxpt = (int *)realloc( Cxpt, (numCx+1)*sizeof(int)*2+2 );
         Cxpt[numCx*2] = n[0];
         Cxpt[numCx*2+1] = n[1];
         numCx++;
