@@ -1040,6 +1040,8 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
   int frameskip=int(contwin->frameskip->value());
   for ( ; tm<=stop; tm+=frameskip ) {
 
+    if( model->pt.num_tm() ) model->pt.time(tm);//dynamic points
+
     string foutname( fn );
 
     if ( sequence ) {
@@ -1064,6 +1066,7 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
   if ( sequence ) 
     seqwidget->movieprog->label("100%");
   tm= start;
+  if( model->pt.num_tm() ) model->pt.time(tm);//dynamic points
   redraw();
   Fl::flush();
 }
