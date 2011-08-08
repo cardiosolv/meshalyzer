@@ -1896,6 +1896,8 @@ extern sem_t *meshProcSem;
 void
 TBmeshWin::signal_links( int dir ) 
 {
+  if( meshProcSem==SEM_FAILED ) return;
+
   // make sure we start at zero
   int numsem;
   sem_getvalue( meshProcSem, &numsem );
