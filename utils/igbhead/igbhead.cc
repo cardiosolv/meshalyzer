@@ -58,7 +58,7 @@ main( int argc, char* argv[] )
   }
 
   // the last arg must be a file name
-  gzFile in = gzopen( args_info.inputs[0], "r+" );
+  gzFile in = gzopen( args_info.inputs[0], "r" );
   if( in == NULL ) {
 	  cerr << "File not found: " << args_info.inputs[0] << endl;
 	  exit(1);
@@ -85,10 +85,6 @@ main( int argc, char* argv[] )
   if( args_info.dim_y_given ) header->dim_y( args_info.dim_y_arg );
   if( args_info.dim_z_given ) header->dim_z( args_info.dim_z_arg );
   if( args_info.dim_t_given ) header->dim_t( args_info.dim_t_arg );
-  if( args_info.fac_x_given ) header->fac_x( args_info.fac_x_arg );
-  if( args_info.fac_y_given ) header->fac_y( args_info.fac_y_arg );
-  if( args_info.fac_z_given ) header->fac_z( args_info.fac_z_arg );
-  if( args_info.fac_t_given ) header->fac_t( args_info.fac_t_arg );
   if( args_info.org_x_given ) header->org_x( args_info.org_x_arg );
   if( args_info.org_y_given ) header->org_y( args_info.org_y_arg );
   if( args_info.org_z_given ) header->org_z( args_info.org_z_arg );
@@ -97,6 +93,7 @@ main( int argc, char* argv[] )
   if( args_info.inc_y_given ) header->inc_y( args_info.inc_y_arg );
   if( args_info.inc_z_given ) header->inc_z( args_info.inc_z_arg );
   if( args_info.inc_t_given ) header->inc_t( args_info.inc_t_arg );
+  if( args_info.units_given ) header->unites( args_info.units_arg );
   if( args_info.x_units_given ) header->unites_x( args_info.x_units_arg );
   if( args_info.y_units_given ) header->unites_y( args_info.y_units_arg );
   if( args_info.z_units_given ) header->unites_z( args_info.z_units_arg );
@@ -230,10 +227,6 @@ void output_header( IGBheader* header )
 	if( tf ) {
         printf( "X origin:\t%g\n", header->org_x() );
     }
-    header->fac_x(tf);
-	if( tf ) {
-        printf( "X scale factor:\t%g\n", header->fac_x() );
-    }
     header->dim_y(tf);
 	if( tf ) {
         printf( "Y size:\t\t%g\n", header->dim_y() );
@@ -249,10 +242,6 @@ void output_header( IGBheader* header )
     header->org_y(tf);
 	if( tf ) {
         printf( "Y origin:\t%g\n", header->org_y() );
-    }
-    header->fac_y(tf);
-	if( tf ) {
-  		printf( "Y scale factor:\t%s\n\n", header->fac_y() );
     }
     header->dim_z(tf);
 	if( tf ) {
@@ -270,10 +259,6 @@ void output_header( IGBheader* header )
 	if( tf ) {
         printf( "Z origin:\t%g\n", header->org_z() );
     }
-    header->fac_z(tf);
-	if( tf ) {
-        printf( "Z scale factor:\t%g\n", header->fac_z() );
-    }
     header->dim_t(tf);
 	if( tf ) {
         printf( "T size:\t\t%g\n", header->dim_t() );
@@ -289,10 +274,6 @@ void output_header( IGBheader* header )
     header->org_t(tf);
 	if( tf ) {
         printf( "T origin:\t%g\n", header->org_t() );
-    }
-    header->fac_t(tf);
-	if( tf ) {
-        printf( "T scale factor:\t%g\n", header->fac_t() );
     }
 	printf( "Created on:\t%s\n", header->systemestr());
     header->aut_name(tf);

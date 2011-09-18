@@ -27,8 +27,103 @@ int get_num( gzFile in )
   return number;
 }
 
+class AuxGridFetcher
+{
+public:
+  AuxGridFetcher():_model(NULL),_frame(-1),_data(NULL){}
+  virtual Model *GetModel(int) =0;
+  virtual int    num_tm() =0;
+  virtual bool   plottable() =0;
+  virtual int    time_series( int v, double *&d ) =0;
+  Model *_model;
+  float *_data;                     //!< current frame data
+protected:
+  int _frame;
+};
+  
+
+class AuxGridHDF5 : public AuxGridFetcher {
+
+public:
+  AuxGridHDF5(const char * fn)
+  {
+#ifdef USE_HDF5
+    string gtype;
+    parse_HDF5_grid( fn, gtype, _indx );
+    string af = fn;
+    if( ch5_open( af.substr(0,af.find_last_of(":")).c_str(), &_hin ) )
+      throw 1;
+
+    ch5s_aux_grid info;
+    ch5s_aux_grid_info( _hin, _indx, &info );
+    _max_frame = info.time_steps;
+    ch5s_aux_free_grid_info( &info );
+#else
+    assert(0);
+#endif
+  }
+  ~AuxGridHDF5()
+  {
+#ifdef USE_HDF5
+    ch5_close( _hin );
+#endif
+  }
+  /** load model from frame in timepoints
+   *
+   * \param frame to load
+   * \return pointer to model
+   */
+  Model *GetModel(int frame)
+  { 
+#ifdef USE_HDF5
+    // check if we have the frame loaded, if so just return the current model
+    if (frame == _frame) {
+      return _model;
+    }
+ 
+    // ensure the frame requested is valid
+    if ( frame >= _max_frame ) {
+      std::cerr << "GetModel() request to invalid frame number" << std::endl;
+      throw 3;
+    }
+
+    // delete previous model
+    if (_model) {
+      delete _model;
+      _model = NULL;
+    }
+      
+    // delete previous data
+    if (_data) {
+      delete _data;
+      _data = NULL;
+    }
+    
+    _model = new Model();
+    _model->read_instance(_hin, _indx, frame, _data);
+    
+    // update internal frame number
+    _frame = frame;
+  
+    return _model;
+#else
+    assert(0);
+#endif
+  }
+  int  num_tm(){return _max_frame; }
+  bool plottable(){ return false; }
+  int  time_series( int v, double *&d ){d=NULL; return 0;}
+private:
+#ifdef USE_HDF5
+  hid_t        _hin;
+#endif
+  unsigned int _indx;     //!< grid index
+  int          _max_frame;
+};
+
+
 /** private internal helper function that indexes frames to file positions */
-class AuxGridIndexer
+class AuxGridIndexer : public AuxGridFetcher
 {
 public:
 
@@ -38,12 +133,9 @@ public:
    *
    * \param filename to index (without extention)
    */
-  AuxGridIndexer(char * filename)
-    : _model(0),
-      _data(0),
-      _frame(-1)
+  AuxGridIndexer(const char * filename)
   {
-    char *ext = strstr( filename, ".pts_t" );
+    char *ext = strdup(strstr( filename, ".pts_t" ));
     if( ext ) 
       *ext = '\0';
 
@@ -57,6 +149,7 @@ public:
       std::cerr << "Failed to open .pts_t file" << std::endl;
       throw 2;
     }
+    free( ext );
   }
 
   /** destructor
@@ -101,11 +194,6 @@ public:
 
     // delete previous model
     if (_model) {
-      // @todo (gd) : figure out why this is segfaulting, MEMORY LEAK!!!
-      // well turns out Models aren't really good in their destructors, and
-      // parent classes are missing virtual keywords in their destructors and
-      // I think generally it's kindof a mess, fix that then, uncomment the
-      // following line.
       delete _model;
       _model = 0;
     }
@@ -278,10 +366,6 @@ private:
   std::vector<z_off_t> _vec_pts_pos;    //!< frame indexed vector of positions into points file
   std::vector<z_off_t> _vec_elem_pos;   //!< frame indexed vector of positions into element file
   std::vector<z_off_t> _vec_dat_pos;    //!< frame indexed vector of positions into data file
-  int _frame;                           //!< current frame (-1 if no frame loaded)
-public:
-  Model * _model;                       //!< current frame model
-  DATA_TYPE *_data;                     //!< current frame data
 };
 
 
@@ -295,10 +379,17 @@ public:
  *
  * \throw 1 if any error in input
  */
-AuxGrid::AuxGrid( char *fn )
+AuxGrid::AuxGrid( const char *fn )
   : _display(true), _hilight(false), _hiVert(0), _plottable(false),
-    _indexer(new AuxGridIndexer(fn)),_timeplot(NULL)
+    _indexer(NULL),_timeplot(NULL)
 {
+  if( strstr( fn, ".pts_t" ) )
+    _indexer = new AuxGridIndexer(fn);
+  else if( strstr( fn, ".datH5:" ) )
+    _indexer = new AuxGridHDF5(fn);
+  else
+    throw 1;
+
   for (int i=0; i<sizeof(*_3D); i++)
     _3D[i] = true;
 
@@ -309,6 +400,7 @@ AuxGrid::AuxGrid( char *fn )
   }
 
   _plottable = _indexer->plottable();
+
   if( _plottable ){
     _timeplot = new PlotWin("Aux Time Series");
     _sz_ts = _indexer->time_series(0,_time_series);
@@ -317,7 +409,9 @@ AuxGrid::AuxGrid( char *fn )
 
   threeD( Cnnx, true );
   threeD( Vertex, true );
-  _indexer->GetModel(0);
+  if( _indexer )
+    _indexer->GetModel(0);
+
 }
 
 
@@ -334,7 +428,9 @@ AuxGrid :: draw( int t )
 
   if( t >= num_tm() ) t = num_tm()-1;
 
-  Model *m = _indexer->GetModel(t);
+  Model *m;
+  m = _indexer->GetModel(t);
+
   m->pt.size(size(Vertex));
   m->pt.threeD(threeD(Vertex));
   m->_cnnx->threeD(threeD(Cnnx));
@@ -402,7 +498,7 @@ AuxGrid :: draw( int t )
 AuxGrid::~AuxGrid()
 {
   delete _indexer;
-  _indexer = 0;
+  _indexer = NULL;
   if( _timeplot )
     delete _timeplot;
   _timeplot = NULL;

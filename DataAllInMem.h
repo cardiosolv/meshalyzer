@@ -6,6 +6,9 @@
 #include <zlib.h>
 #include <string>
 #include <typeinfo>
+#ifdef USE_HDF5
+#include "ch5/ch5.h"
+#endif
 
 /** reader for case when all data can fit in computer RAM at once */
 template<class T>
@@ -124,6 +127,11 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
                         scanner;
   map<int,string> CGfiles;
   map<int,string>::iterator CGp;
+#ifdef USE_HDF5
+  hid_t                  hin;
+  struct ch5s_nodal_grid info;
+  unsigned int           index;
+#endif
 
   _dt = 1;
   _t0 = 0;
@@ -131,10 +139,17 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
 
   fileType ftype=FileTypeFinder( fn );
 
-  if ( (in=gzopen(fname.c_str(), "r")) == NULL ) {
-    fname += ".gz";
-    if ( (in=gzopen(fname.c_str(), "r")) == NULL )
-      throw( 1 );
+  if ( ftype == FThdf5 )  {
+#ifdef USE_HDF5
+    if(ch5_open( fname.substr(0, fname.find_last_of(":")).c_str(), &hin ) )
+      throw(1);
+#endif
+  } else {
+    if ( (in=gzopen(fname.c_str(), "r")) == NULL ) {
+      fname += ".gz";
+      if ( (in=gzopen(fname.c_str(), "r")) == NULL )
+        throw( 1 );
+    }
   }
 
   filename = fn;
@@ -163,6 +178,15 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
     CGp = CGfiles.begin();
     scanner = "%*f %*f";
     scanner += scanstr;
+  } else if( ftype == FThdf5 ) {
+    string gtype;
+#ifdef USE_HDF5
+    if( parse_HDF5_grid( fn, gtype, index ) || gtype!="nodal" )
+      throw(1);
+    ch5s_nodal_grid_info( hin, index, &info );
+    _dt = info.time_delta;
+#endif
+    _t0 = 0;
   }
 
   // read in data, one time slice at a time
@@ -201,9 +225,21 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
           i++;
         }
         break;
+      case FThdf5:
+#ifdef USE_HDF5
+        data = (T *)realloc( data, info.time_steps*slice_size*sizeof(T) );
+        maxtm = info.time_steps;
+        i = ch5s_nodal_read( hin, index, 0, info.time_steps-1, data );
+#else
+        assert(0);
+#endif
+        break;
     }
 
     if ( (ftype==FTIGB||ftype==FTascii) && i!=slice_size )
+      break;
+
+    if ( ftype==FThdf5 )
       break;
 
     maxtm++;
@@ -225,6 +261,13 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
     if (ftype == FTfileSeqCG ) CGfiles.~map();
     throw( 1 );
   }
+
+#ifdef USE_HDF5
+  if ( ftype==FThdf5 ) {
+    ch5_close( hin );
+    ch5s_nodal_free_grid_info( &info );
+  }
+#endif
 }
 
 template<class T>

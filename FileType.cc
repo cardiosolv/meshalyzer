@@ -17,6 +17,10 @@
 #include <sys/vmmeter.h>
 #endif
 
+#ifdef USE_HDF5
+#include "ch5/ch5.h"
+#endif
+
 using namespace std;
 
 
@@ -28,10 +32,9 @@ using namespace std;
  *  - FTfileSeqCG: Cool Graphics format of one ascii file per time, with the
  *         first line of the form <TT> t = [0-9]+</TT>. Files are named
  *         <TT>basename.t[0-9]+</TT>
+ *  - FThdf5 : HDF5 data format
  *
  *  \param fn   file name
- *  \param in   stream pointer
- *  \param head IGB object pointer
  *
  *  \return if everything fails, FTascii
  */
@@ -43,11 +46,13 @@ fileType FileTypeFinder ( const char *fn )
   gzFile in;
   if ( (in=gzopen( fname.c_str(), "r")) == NULL ) {
     fname += ".gz";
-    if ( (in=gzopen( fname.c_str(), "r")) == NULL )
-      throw( 1 );
+    in=gzopen( fname.c_str(), "r");
   }
 
   if ( strstr( fn, ".igb" ) != NULL ) {
+
+    if( in == NULL ) 
+      throw(1);
 
     IGBheader* head = new IGBheader( in );
     int res = head->read();
@@ -63,6 +68,9 @@ fileType FileTypeFinder ( const char *fn )
 
   } else if ( strstr( fn, ".dynpt" ) != NULL ) {
 
+    if( in == NULL ) 
+      throw(1);
+
     IGBheader* head = new IGBheader( in );
     int res = head->read();
     gzclose( in );
@@ -73,8 +81,22 @@ fileType FileTypeFinder ( const char *fn )
       delete head;
       return FTDynPt;
     }
- 
+#ifdef USE_HDF5
+  } else if ( strstr( fn, ".datH5" ) != NULL ) {
+    hid_t hin;
+    string filename = fn;
+    filename = filename.substr(0,filename.find_last_of(":"));
+    if( ch5_open( filename.c_str(), &hin ) ) 
+      return FTascii;
+
+    ch5_close( hin );
+    return FThdf5;
+#endif
+
   } else {			// might be a CG file sequence
+
+    if( in == NULL ) 
+      throw(1);
 
     const char* tpos = strrchr( fn, 't' ); // look for last "t" in the file name
 
@@ -221,3 +243,31 @@ long long getFreePages( )
 
   return memoryAvail;
 }
+
+
+/** determine the grid index and grid type from a HDF5 grid name
+ *
+ *  \param filename[in]  grid name
+ *  \param gridtype[out] grid type
+ *  \param index[out]    index of grid
+ *
+ *  \note Grid names are of the form <TT>file:grid_type/index</TT>
+ *
+ *  \return 0 on success, 1 o.w.
+ */
+int
+parse_HDF5_grid( const char *filename, string& type, unsigned int& index )
+{
+  string fn = filename;
+
+  int ip = fn.find_last_of( "/" );
+  if( ip == string::npos )
+    return 1;
+  index = atoi( fn.substr(ip+1).c_str() );
+  int gt = fn.find_last_of( ":" );
+  if( ip < gt+2 )
+    return 1;
+  type = fn.substr( gt+1, ip-gt-1 );
+  return 0;
+}
+

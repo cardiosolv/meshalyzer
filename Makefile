@@ -1,19 +1,26 @@
 HOSTMACHINE := $(shell uname)
 
+HDF5API_ROOT  := ./hdf5api
+LIB_CH5       := (HDF5_ROOT)/lib/libch5.a
+
 FLTK_INC      := $(shell fltk-config --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-gl --ldflags)
-COMMON_LIBS    = -lpng -lpthread -lm -lz 
-COMMON_INC     = -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX 
+COMMON_LIBS    = -lpng -lpthread -lm -lz -lch5 -lhdf5 -lhdf5_hl 
+COMMON_INC     = -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX -DUSE_HDF5
+
+LIBS     = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS)
+LDFLAGS  = -L$(HDF5API_ROOT)/lib
 
 ifeq ($(HOSTMACHINE),Darwin)
-LIBS =  $(FLTK_LD_FLAGS) $(COMMON_LIBS)
-CFLAGS = -I/usr/X11R6/include $(FLTK_INC) $(COMMON_INC)
+CXXFLAGS = -I/usr/X11R6/include -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
 else
-LIBS   = $(FLTK_LD_FLAGS) $(COMMON_LIBS)
-CFLAGS = $(FLTK_INC) $(COMMON_INC)
+CXXFLAGS = -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
 endif
 
-CPPFLAGS = $(CFLAGS)
+CPPFLAGS = $(CFLAGS) -g
+ifdef ENABLE_LOGGING
+CPPFLAGS += -DLOGGING_ENABLED
+endif
 
 FLTK_SOURCES = $(wildcard *.fl)
 OBJS = $(FLTK_SOURCES:.fl=.o)\
@@ -21,19 +28,29 @@ OBJS = $(FLTK_SOURCES:.fl=.o)\
 	$(patsubst %.c,%.o,$(wildcard *.c))\
 	$(patsubst %.C,%.o,$(wildcard *.C))
 
-meshalyzer: $(FLTK_SOURCES:.fl=.cc) $(OBJS)
+all: meshalyzer $(LIB_CH5) 
+
+meshalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OBJS) $(LIB_CH5)
 	$(CXX) $(CFLAGS) -o meshalyzer $(sort $(OBJS)) $(LIBS)
-ifeq ($(HOSTMACHINE),Darwin)
 	fltk-config --post meshalyzer
-endif
+
+$(LIB_CH5): 
+	cd hdf5api && make all
 
 clean:
-	rm -rf $(FLTK_SOURCES:.fl=.h) $(FLTK_SOURCES:.fl=.cc) *.o *.d meshalyzer
+	rm -rf $(FLTK_SOURCES:.fl=.h) $(FLTK_SOURCES:.fl=.cc) *.o *.d meshalyzer meshalyzer.app
 
-utils:
-	(cd utils; make )
+utils: 
+	cd utils && make all
+
+docs: 
+	doxygen Doxyfile
+	cd hdf5api && doxygen Doxyfile
 
 %.h %.cc: %.fl
 	fluid -c $<
 
 -include $(OBJS:.o=.d)
+
+.PHONY: utils
+

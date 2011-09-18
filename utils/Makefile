@@ -1,31 +1,9 @@
-####################################################
-#
-# Makefile for igbutils
-#
-# All rights , etc., blah, blah, blah  Edward Vigmond
-#
-####################################################
+DIRS := $(subst /,,$(shell ls -d */ ))
 
-OBJS = igbhead.o \
-	IGBheader.o \
-	cmdline.o \
-	getopt.o \
-	getopt1.o
+all: $(DIRS)
 
-all: $(OBJS)
-	g++ $(CFLAGS) -I.. -g -static $(LDFLAGS) -o igbhead $(OBJS) -lz
+$(DIRS) :  FORCE
+	cd $@ && make all
 
-install: igbhead
-	$(INSTALL) igbhead $(bindir)
+FORCE: 
 
-%.o : %.cc
-	$(CXX) -c -g $(CPPFLAGS) -I../src $(CFLAGS) $(INCLUDES) -o $@ $<
-
-%.o : %.c
-	$(CC) -c -g $(CPPFLAGS)  $(CFLAGS) $(INCLUDES) -o $@  $<
-
-cmdline.c: igbhead.ggo
-	gengetopt -u < igbhead.ggo
-
-clean:
-	rm *.o 

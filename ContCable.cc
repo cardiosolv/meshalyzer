@@ -104,7 +104,7 @@ void ContCable::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
  *  \param colour colour to use
  *  \param size   size of point
  */
-void ContCable :: draw( int p, GLfloat *colour, float size )
+void ContCable::draw( int p, GLfloat *colour, float size )
 {
   if ( p<_n ) {
     glColor3fv( colour );
@@ -127,7 +127,7 @@ void ContCable :: draw( int p, GLfloat *colour, float size )
 
 
 /** read in the point file */
-bool ContCable :: read( const char *fname )
+bool ContCable::read( const char *fname )
 {
   gzFile in;
 
@@ -147,6 +147,26 @@ bool ContCable :: read( const char *fname )
   gzclose(in);
   return true;
 }
+
+#ifdef USE_HDF5
+bool ContCable::read(hid_t hdf_file)
+{
+  ch5_dataset dset_info;
+  if (ch5m_cabl_get_info(hdf_file, &dset_info))
+    return false;
+  
+  _n = dset_info.count;
+  _node = new int[dset_info.count];
+  if ( ch5m_cabl_get_all(hdf_file, _node) ){
+    cerr << "Error reading in cables" << endl;
+    _n = 0;
+    delete _node;
+    return false;
+  }
+  
+  return true;
+}
+#endif
 
 
 /** register vertices so that they can be picked

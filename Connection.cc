@@ -5,6 +5,9 @@
 #include "DrawingObjects.h"
 
 #include "VecData.h"
+#ifdef USE_HDF5
+#include <ch5/ch5.h>
+#endif
 
 void draw_cylinder( const GLfloat *start, const GLfloat* end, int radius )
 {
@@ -182,7 +185,7 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
  *  \param colour colour to use
  *  \param size   size of point
  */
-void Connection :: draw( int p, GLfloat *colour, float size )
+void Connection::draw( int p, GLfloat *colour, float size )
 {
   if ( p<_n ) {
     glColor3fv( colour );
@@ -201,7 +204,7 @@ void Connection :: draw( int p, GLfloat *colour, float size )
 
 
 /** read in the connection file */
-bool Connection :: read( const char *fname )
+bool Connection::read( const char *fname )
 {
   gzFile in;
 
@@ -221,3 +224,22 @@ bool Connection :: read( const char *fname )
   gzclose(in);
 }
 
+#ifdef USE_HDF5
+bool Connection::read(hid_t hdf_file)
+{
+  ch5_dataset dset_info;
+  if( ch5m_conn_get_info(hdf_file, &dset_info) )
+    return false;
+  
+  _n = dset_info.count;
+  _node = new int[_n * dset_info.width];
+  if ( ch5m_conn_get_all(hdf_file, _node) ){
+    cerr << "Error reading in connections" << endl;
+    _n = 0;
+    delete _node;
+    return false;
+  }
+  
+  return true;
+}
+#endif

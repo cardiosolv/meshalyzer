@@ -12,12 +12,11 @@
 #include "DrawingObjects.h"
 #include "plottingwin.h"
 
-class AuxGridIndexer;
+class AuxGridFetcher;
 
 class AuxGrid {
     private:
-        AuxGridIndexer * _indexer;  //!< private implementation of indexer
-
+        AuxGridFetcher * _indexer;  //!< private implementation of indexer
         bool         _display;
         bool         _datafied[maxobject];
         bool         _surf_fill;  //!< if false, draw outline
@@ -35,7 +34,7 @@ class AuxGrid {
         double*      _time_series;
 
     public:
-        AuxGrid( char *fn );
+        AuxGrid( const char *fn );
         virtual ~AuxGrid();
 
         Colourscale cs;

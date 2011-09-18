@@ -32,7 +32,7 @@ void read_IGB_vec_data( S* vdata, S* sdata, IGBheader& h )
 	  for( int j=0; j<h.slice_sz(); j++ ) {
 		for( int k=0; k<3; k++ )
 		  vdata[3*j+k+i*h.slice_sz()] = vd[j*4+k];
-		  sdata[j+i*h.slice_sz()] = vd[j*4+3];
+		sdata[j+i*h.slice_sz()] = vd[j*4+3];
 	  }
 	}
 	if( nread != h.slice_sz() ) {
@@ -62,7 +62,7 @@ void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
 }
 
 
-VecData::VecData(char* vptfile):_length(1),maxmag(0.),_stride(1),
+VecData::VecData(const char* vptfile):_length(1),maxmag(0.),_stride(1),
     numpt(0),numtm(0),pts(NULL),vdata(NULL),sdata(NULL),_disp(true),
     _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0)
 {
@@ -72,9 +72,99 @@ VecData::VecData(char* vptfile):_length(1),maxmag(0.),_stride(1),
   cs = new Colourscale;
 
   if ( vptfile==NULL )
-    if ( (vptfile=fl_file_chooser("Pick pts file", "*.vpts*", NULL)) == NULL ) throw -1;
+    if ( (vptfile=fl_file_chooser("Pick pts file", "*.vpts*", NULL)) == NULL )
+      throw -1;
+
+#ifdef USE_HDF5
+  if( strstr( vptfile, ".datH5:vector/" ) )
+    read_vec_HDF5( vptfile );
+  else
+#endif
+    read_vec_nonHDF5( vptfile );
+
+  //determine the largest magnitude vector and scalar extrema
+  maxmag = magnitude( vdata );
+  float  tmp;
+  for ( int i=1; i<numpt; i++ )
+    if ( (tmp=magnitude( vdata+i*3 )) > maxmag )
+      maxmag = tmp;
+  cs->calibrate(0,maxmag);
+
+  if ( sdata != NULL ) {
+    scalar_min = scalar_max = sdata[0];
+    for ( int i=1; i<numpt; i++ ) {
+      if ( sdata[i] > scalar_max ) scalar_max = sdata[i];
+      if ( sdata[i] < scalar_min ) scalar_min = sdata[i];
+    }
+  }
+
+  // get a quadric for OpenGL rendering;
+  quado = gluNewQuadric();
+  gluQuadricDrawStyle( quado, GLU_FILL );
+  gluQuadricOrientation(quado, GLU_INSIDE);
+}
+
+
+#ifdef USE_HDF5
+/** read HDF5 vector data 
+ *
+ * \param vecspec vector grid specification
+ */
+void
+VecData::read_vec_HDF5( const char*vecspec )
+{
+  unsigned int    indx;
+  string gtype;
+  hid_t  hin;
+  ch5s_vector_grid info;
+  string vn = vecspec;
+  int parse_HDF5_grid( const char*, string&, unsigned int& );
+
+  if( ch5_open( vn.substr(0,vn.find_last_of(":")).c_str(), &hin ) )
+    throw 1;
+
+  if( parse_HDF5_grid( vn.c_str(), gtype, indx ) || gtype!="vector" ||
+          ch5s_vector_grid_info(hin, indx, &info ) )
+    throw 1;
+
+  numpt = info.num_vectors;
+  pts   = new GLfloat[numpt*3];
+  numtm = info.time_steps;
+  ch5s_vector_read_points( hin, indx, pts );
+
+  vdata = (float *)realloc( vdata, 3*info.num_vectors*info.time_steps*
+                                                        sizeof(float) );
+  if( info.num_components==3 ) {  // no scalar data
+    ch5s_vector_read( hin, indx, 0, info.time_steps-1, vdata );
+
+  } else {
+    sdata = (float *)realloc( sdata,
+                           info.num_vectors*info.time_steps*sizeof(float) );
+    float *tdata = new float[info.num_vectors*info.num_components];
+    for( int i=0; i<info.time_steps; i++ ) {
+      ch5s_vector_read( hin, indx, i, i, tdata );
+      for( int j=0; j<info.num_vectors; j++ ){
+        memcpy( vdata+(i*info.num_vectors+j)*3, tdata+4*j, sizeof(float)*3 );
+        sdata[i*info.num_vectors+j] = tdata[4*j+3];
+      }
+    }
+    delete[] tdata;
+  }
+  ch5_close( hin );
+}
+#endif
+
+
+/** read  IGB or ASCII vector data
+ *
+ * \param vptfile vector points file
+ */
+void
+VecData::read_vec_nonHDF5( const char *vptfile )
+{
   const int bufsize=1024;
   char fn[1024], buff[bufsize];
+
   strcpy( fn, vptfile );
 
   // read in the vector points file (.vpts[.gz])
@@ -157,28 +247,8 @@ VecData::VecData(char* vptfile):_length(1),maxmag(0.),_stride(1),
 	  throw -1;
 	}
   }
-
-  //determine the largest magnitude vector and scalar extrema
-  maxmag = magnitude( vdata );
-  float  tmp;
-  for ( int i=1; i<numpt; i++ )
-    if ( (tmp=magnitude( vdata+i*3 )) > maxmag )
-      maxmag = tmp;
-  cs->calibrate(0,maxmag);
-
-  if ( sdata != NULL ) {
-    scalar_min = scalar_max = sdata[0];
-    for ( int i=1; i<numpt; i++ ) {
-      if ( sdata[i] > scalar_max ) scalar_max = sdata[i];
-      if ( sdata[i] < scalar_min ) scalar_min = sdata[i];
-    }
-  }
-
-  // get a quadric for OpenGL rendering;
-  quado = gluNewQuadric();
-  gluQuadricDrawStyle( quado, GLU_FILL );
-  gluQuadricOrientation(quado, GLU_INSIDE);
 }
+
 
 
 VecData::~VecData()

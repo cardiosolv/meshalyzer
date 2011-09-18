@@ -10,6 +10,10 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifdef USE_HDF5
+#include <hdf5.h>
+#include <ch5/ch5.h>
+#endif
 
 static Meshwin win;
 static Controls *ctrl_ptr;
@@ -124,6 +128,28 @@ void process_cg_format(char *fin, Meshwin *w, Controls* control, bool no_elems)
   w->trackballwin->get_data(datafile.c_str(), control->tmslider );
 }
 
+/* Reads in an HDF5 input file.
+ *
+ * \param fin      file name
+ * \param w        display widget
+ * \param control  control widget
+ */
+void process_h5_format(char *fin, Meshwin *w, Controls *control, bool no_elems)
+{
+#ifdef USE_HDF5
+  hid_t file;
+  
+  if (ch5_open(fin, &file)) {
+    cerr << "Invalid HDF5 file or not found" << endl;
+    exit(1);
+  }
+  w->trackballwin->read_model(w->winny, file, no_elems, false);
+  ch5_close(file);
+#else
+  assert(0);
+#endif
+}
+
 
 /** output usage 
  */
@@ -154,6 +180,7 @@ static struct option longopts[] = {
 main( int argc, char *argv[] )
 {
   Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);
+  H5Eset_auto1(NULL, NULL);// silence HDF errors
 
   bool iconcontrols = false;
   bool no_elems     = false;
@@ -191,6 +218,8 @@ main( int argc, char *argv[] )
 
   if (  model_index<argc && strstr( argv[model_index], ".cg_in" ) != NULL )
     process_cg_format( argv[1], &win, &control, no_elems );
+  else if (model_index < argc && strstr(argv[model_index], ".modH5") != NULL)
+    process_h5_format(argv[1], &win, &control, no_elems);
   else
     win.trackballwin->read_model( win.winny,
 			model_index<argc?argv[model_index]:0, no_elems );
@@ -232,22 +261,27 @@ main( int argc, char *argv[] )
         altdir += argv[i];
         win.trackballwin->add_surface(altdir.c_str());
       }
-    } else if ( strstr( argv[i], ".dat" ) != NULL )
+    } else if ( strstr( argv[i], ".datH5:nodal/" ) != NULL )
+      win.trackballwin->get_data(argv[i], control.tmslider );
+    else if ( strstr( argv[i], ".dat" )    != NULL )
       win.trackballwin->get_data(argv[i]);
     else if ( strstr( argv[i], ".xfrm" ) != NULL )
       win.trackballwin->trackball.read( argv[i] );
     else if ( strstr( argv[i], ".mshz" ) != NULL )
       control.restore_state( argv[i] );
-    else if ( strstr( argv[i], ".vpts" ) != NULL )
+    else if ( strstr( argv[i], ".vpts" )    != NULL ||
+              strstr( argv[i], ":vector/" ) != NULL )
       vectordata = !win.trackballwin->getVecData(control.tmslider, argv[i]);
-    else if ( strstr( argv[i], ".pts_t" ) != NULL )
+    else if ( strstr( argv[i], ".pts_t" )    != NULL  ||
+              strstr( argv[i], ":auxGrid/" ) != NULL )
       win.trackballwin->readAuxGrid( control.tmslider, argv[i]);
-    else if ( strstr( argv[i], ".dynpt" ) != NULL )
+    else if ( strstr( argv[i], ".dynpt" )  != NULL )
       win.trackballwin->read_dynamic_pts( argv[i], control.tmslider );
     else
       win.trackballwin->get_data(argv[i], control.tmslider );
   }
 
+  win.trackballwin->cplane->calc_intercept();
   win.trackballwin->show();
 
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {

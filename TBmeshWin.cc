@@ -12,6 +12,9 @@
 #endif
 #include "gl2ps.h"
 #include "PNGwrite.h"
+#ifdef USE_HDF5
+#include <ch5/ch5.h>
+#endif
 
 #define HITBUFSIZE   10000
 #define OPAQUE_LIMIT 0.95       //!< consider opaque if alpha level above this
@@ -738,6 +741,37 @@ int TBmeshWin::handle( int event )
 }
 
 
+/** set trackball and window information when reading a new model
+ *  
+ *  \param flwindow window identifier
+ *  \param modname  model name
+ */
+void  TBmeshWin::set_windows( Fl_Window *flwindow, const char *modname )
+{
+  ptDrawn.resize(model->pt.num());
+
+  flwin = flwindow;
+  flwintitle = "meshalyzer";
+  flwintitle += modname;
+  flwin->label( flwintitle.c_str() );
+
+  // set the dimensions for the trackball
+  float maxdim = model->maxdim();
+  const GLfloat *poff = model->pt_offset();
+  trackball.mouse.SetOglPosAndSize(-maxdim, maxdim, 2*maxdim, 2*maxdim );
+  trackball.size = maxdim;
+  trackball.SetOrigin( -poff[0], -poff[1], -poff[2] );
+  cplane->set_dim( maxdim*1.3 );
+
+  if( model->twoD() ){ 
+    _norot=true;
+    contwin->norot->set();
+  }
+    
+  disp = asSurface;
+}
+
+
 /** read in the geometrical description
  *
  * \param flwindow
@@ -745,7 +779,7 @@ int TBmeshWin::handle( int event )
  * \param base1    points begin numbering at 0
  * \param no_elems do not read element file
  */
-void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt, 
+void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt, 
 		bool no_elems, bool base1 )
 {
   if ( fnt == NULL ) {
@@ -758,30 +792,26 @@ void TBmeshWin :: read_model( Fl_Window *flwindow, const char* fnt,
 
   if ( !model->read( fnt, base1, no_elems ) ) return;
 
-  ptDrawn.resize(model->pt.num());
+  string wintitle =  fnt;
+  string::size_type  i0=wintitle.rfind("/");
+  if ( i0 < string::npos ) wintitle= wintitle.substr(i0+1,string::npos);
 
-  flwintitle =  fnt;
-  string::size_type  i0=flwintitle.rfind("/");
-  if ( i0 < string::npos ) flwintitle= flwintitle.substr(i0+1,string::npos);
-  flwintitle = "meshalyzer: " + flwintitle;
-  flwin = flwindow;
-  flwin->label( flwintitle.c_str() );
-
-  // set the dimensions for the trackball
-  float maxdim = model->maxdim();
-  trackball.mouse.SetOglPosAndSize(-maxdim, maxdim, 2*maxdim, 2*maxdim );
-  trackball.size = maxdim;
-  const GLfloat *poff = model->pt_offset();
-  trackball.SetOrigin( -poff[0], -poff[1], -poff[2] );
-  cplane->set_dim( maxdim*1.3 );
-
-  if( model->twoD() ){ 
-    _norot=true;
-    contwin->norot->set();
-  }
-    
-  disp = asSurface;
+  set_windows( flwindow, wintitle.c_str() );
 }
+
+
+#ifdef USE_HDF5
+void TBmeshWin::read_model(Fl_Window* flwindow, hid_t hdf_file, bool no_elems,
+    bool base1)
+{
+  if (!model->read(hdf_file, base1, no_elems)) return;
+  
+  char *modelname;
+  ch5_meta_get_name(hdf_file, &modelname);
+  set_windows( flwindow, modelname );
+  free(modelname);
+}
+#endif
 
 
 /** add a surface by reading in a .tri file, also try reading a normal file
@@ -1162,7 +1192,9 @@ TBmeshWin::illuminate( GLfloat max )
     // determine rotation axis
     cross( dir, zaxis, rotvect );
     // draw arrow through center of object
-    glTranslatef( -dir[0]*maxdim*1.1,-dir[1]*maxdim*1.1, -dir[2]*maxdim*1.1 );
+    const GLfloat *poff = model->pt_offset();
+    glTranslatef( -dir[0]*maxdim*1.1+poff[0],
+                  -dir[1]*maxdim*1.1+poff[1], -dir[2]*maxdim*1.1+poff[2] );
     if ( headlamp_mode )
       glRotatef( angle, rotvect[0], rotvect[1], rotvect[2] );
     else
@@ -1191,7 +1223,7 @@ TBmeshWin::illuminate( GLfloat max )
  * \return nonzero if an error
  */
 int
-TBmeshWin::getVecData( void *vp, char* vptfile )
+TBmeshWin::getVecData( void *vp, const char* vptfile )
 {
   VecData* newvd;
 
@@ -1221,7 +1253,7 @@ TBmeshWin::getVecData( void *vp, char* vptfile )
 // read in Auxiliary grid
 // return nonzero if an error
 int
-TBmeshWin::readAuxGrid( void *vp, char* agfile )
+TBmeshWin::readAuxGrid( void *vp, const char* agfile )
 {
   AuxGrid* newAuxGrid;
 
@@ -1492,9 +1524,10 @@ void TBmeshWin::draw_clip_plane( int cp )
 
   glBegin(GL_POLYGON);
   glColor4fv( planeColor);
+  const GLfloat *poff = model->pt_offset();
   for ( int i=0; i<4; i++ ) {
-    vert[v0] = 2*(2*(!i||i==3)-1)*model->maxdim();
-    vert[v1] = 2*(2*(i>1)-1)*model->maxdim();
+    vert[v0] = 2*(2*(!i||i==3)-1)*model->maxdim()+poff[0];
+    vert[v1] = 2*(2*(i>1)-1)*model->maxdim()+poff[1];
     vert[vf] = -(x[v0]*vert[v0]+x[v1]*vert[v1]+x[3])/x[vf];
     glVertex3fv( vert );
   }

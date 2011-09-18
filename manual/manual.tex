@@ -13,7 +13,7 @@
 
 \usepackage{overcite}                                 % superscript notation of references
 
-\usepackage [pdftex]{graphicx}                                % Grafikpaket für Bilder laden
+\usepackage [pdftex]{graphicx}                        % Grafikpaket für Bilder laden
 \usepackage[pdftex]{hyperref}                  % Für Referenzerstellung
 \usepackage{xspace}
 
@@ -416,9 +416,16 @@ as well as the elements defined by them.
 Dynamic point files use the IGB format (see \S\ref{sec:IGB}) with data type
 \texttt{vec3f}. The extension for the file in this case is ``.dynpt''.
 
+\subsection{HDF5 Format}
+All of the previous data types may now be packaged into one HDF5 file. Reading and
+writing of the data is done through an API so the data format will not be
+described. The HDF5 file should have the suffix ``.datH5'' and may contain multiple
+datasets of differing types.
+
 \subsection{CG meta format}
 Cool Graphics (CG) is a visualization program written chiefly by Jamey Eason
 and its file format was pretty much copied for this program.
+This format is kept for historical reasons and its use is deprecated.
 There must be a vertex file (as previously described) and there
 may a file for tetrahedra. These files must share a common basename.
 \emph{Note that a major difference between CG format and the previously described
@@ -696,6 +703,12 @@ Furthermore, if an auxiliary grid has the same number of vertices at all
 instances of time, the time series of the vertex data can be displayed by
 clicking on the ``Plot'' button.
 See \S\ref{sec:timeplot} for a description of the widget.
+
+\subsubsection{HDF5 data}
+
+A file with the suffix ``.datH5'' can be read in. This file may contain many data
+sets. Upon successfully opening the file, a dialog will open which displays the
+data sets from the file which may be viewed on the current grid.
 
 \subsubsection{Surfaces}
 

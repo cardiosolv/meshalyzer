@@ -120,6 +120,8 @@ Slave<T>::Slave( Master<T>*_mthread, int datasize ): mthread(_mthread),
 #include "IGBreader.h"
 #include "asciireader.h"
 #include "FileSeqCGreader.h"
+#include "HDF5reader.h"
+
 
 // class to control threaded data reading
 template<class T>
@@ -207,48 +209,64 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz, bool tm_anal ):
   /////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////
   switch ( mthread->ftype ) {
-    case FTIGB:
-      sabs->datareader   = new IGBreader<T>(mthread, sabs, maxmin);
-      slocal->datareader = new IGBreader<T>(mthread, slocal, maxmin);
-      stmsr->datareader  = new IGBreader<T>(mthread, stmsr, maxmin);
-      for ( int k=0; k<THREADS; k++ )
-        sthread[k].datareader = new IGBreader<T>( mthread,
-                                sthread+k, maxmin);
-      _dt = ((IGBreader<T>*)(slocal->datareader))->dt();
-      _t0 = ((IGBreader<T>*)(slocal->datareader))->org_t();
-      break;
-    case FTDynPt:
-      sabs->datareader   = new IGBreader<T>(mthread, sabs, maxmin);
-      for ( int k=0; k<THREADS; k++ )
-        sthread[k].datareader = new IGBreader<T>( mthread,
-                                sthread+k, maxmin);
-      _dt = ((IGBreader<T>*)(sabs->datareader))->dt();
-      _t0 = ((IGBreader<T>*)(sabs->datareader))->org_t();
-      break;
-    case FTascii:
-      sabs->datareader   = new asciireader<T>(mthread, sabs, maxmin);
-      slocal->datareader = new asciireader<T>(mthread, slocal, maxmin);
-      stmsr->datareader  = new asciireader<T>(mthread, stmsr, maxmin);
-      for ( int k=0; k<THREADS; k++ )
-        sthread[k].datareader = new asciireader<T>(mthread,
-                                sthread+k, maxmin);
-      break;
-    case FTfileSeqCG: {
-      map<int,string>   CGfiles;
-      CG_file_list( CGfiles, fn );
-      sabs->datareader =   new FileSeqCGreader<T>( mthread,
-                           sabs, maxmin, CGfiles );
-      slocal->datareader = new FileSeqCGreader<T>( mthread, slocal,
-                           maxmin, CGfiles);
-      stmsr->datareader =  new FileSeqCGreader<T>( mthread, stmsr,
-                           maxmin, CGfiles);
-      for ( int k=0; k<THREADS; k++ )
-        sthread[k].datareader = new FileSeqCGreader<T>( mthread,
-                                sthread+k, maxmin, CGfiles);
-    }
-    break;
-    default:
-      throw(1);
+      case FTIGB:
+          sabs->datareader   = new IGBreader<T>(mthread, sabs, maxmin);
+          if( tm_anal ) {
+            slocal->datareader = new IGBreader<T>(mthread, slocal, maxmin);
+            stmsr->datareader  = new IGBreader<T>(mthread, stmsr, maxmin);
+          }
+          for ( int k=0; k<THREADS; k++ )
+            sthread[k].datareader = new IGBreader<T>( mthread,
+                    sthread+k, maxmin);
+          _dt = ((IGBreader<T>*)(slocal->datareader))->dt();
+          _t0 = ((IGBreader<T>*)(slocal->datareader))->org_t();
+          break;
+      case FTDynPt:
+          sabs->datareader   = new IGBreader<T>(mthread, sabs, maxmin);
+          for ( int k=0; k<THREADS; k++ )
+            sthread[k].datareader = new IGBreader<T>( mthread,
+                    sthread+k, maxmin);
+          _dt = ((IGBreader<T>*)(sabs->datareader))->dt();
+          _t0 = ((IGBreader<T>*)(sabs->datareader))->org_t();
+          break;
+      case FTascii:
+          sabs->datareader   = new asciireader<T>(mthread, sabs, maxmin);
+          if( tm_anal ) {
+            slocal->datareader = new asciireader<T>(mthread, slocal, maxmin);
+            stmsr->datareader  = new asciireader<T>(mthread, stmsr, maxmin);
+          }
+          for ( int k=0; k<THREADS; k++ )
+            sthread[k].datareader = new asciireader<T>(mthread,
+                    sthread+k, maxmin);
+          break;
+      case FTfileSeqCG: 
+          {
+            map<int,string>   CGfiles;
+            CG_file_list( CGfiles, fn );
+            sabs->datareader =   new FileSeqCGreader<T>( mthread,
+                    sabs, maxmin, CGfiles );
+            if( tm_anal ) {
+              slocal->datareader = new FileSeqCGreader<T>( mthread, slocal,
+                      maxmin, CGfiles);
+              stmsr->datareader =  new FileSeqCGreader<T>( mthread, stmsr,
+                      maxmin, CGfiles);
+            }
+            for ( int k=0; k<THREADS; k++ )
+              sthread[k].datareader = new FileSeqCGreader<T>( mthread,
+                      sthread+k, maxmin, CGfiles);
+          }
+          break;
+      case FThdf5:
+          sabs->datareader   = new HDF5reader<T>( mthread, sabs, maxmin );
+          if( tm_anal ) {
+            slocal->datareader = new HDF5reader<T>( mthread, slocal, maxmin );
+            stmsr->datareader  = new HDF5reader<T>( mthread, stmsr, maxmin );
+          }
+          for ( int k=0; k<THREADS; k++ )
+            sthread[k].datareader = new HDF5reader<T>(mthread,sthread+k,maxmin);
+          break;
+      default:
+          throw(1);
   }
 
   filename = fn;

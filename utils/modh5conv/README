@@ -1,0 +1,43 @@
+NAME
+  modh5conv - converts Meshalyzer model files into HDF5 containers
+
+SYNOPSIS
+  modh5conv input_path_prefix output_file_path model_name
+
+DESCRIPTION
+  This program takes a series of files with a given name prefix and converts
+  them to a single, unified HDF5 file based on their extensions.
+
+EXAMPLE
+  Given a directory /users/foo/data with the following files:
+    model.pts
+    model.surf
+    model.cnnx
+    model.pkje
+  
+  modh5conv /users/foo/data/model /users/foo/data/converted.modh5 "Arachne"
+  
+  Converts the above files (/users/foo/data/model.*) into the file
+  /users/foo/data/converted.modh5 with the metadata name "Arachne".
+
+INSTALLING
+  This program requires that libcarph5 and libhdf5 are available.  To compile
+  and install:
+  
+    make
+    make install
+  
+  To uninstall:
+  
+    make uninstall
+  
+  To install/uninstall to a different prefix (default is /usr/local):
+  
+    make install -e prefix=/usr
+    make uninstall -e prefix=/usr
+
+AUTHOR
+  Paul Coyle <paul@paulcoyle.com>
+
+LAST UPDATED
+  August 17, 2011

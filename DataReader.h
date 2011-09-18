@@ -76,6 +76,8 @@ class DataReader
      * file (to be determined by the programmer)
      */
     DataReader():mthread(0),sthread(0),maxmin_ptr(0),data(0),in(NULL){}
+    DataReader(Master<T>*m, Slave<T>*s, Maxmin<T>* mnmx):
+              mthread(m),sthread(s),maxmin_ptr(mnmx),data(0),in(NULL){}
 
   protected:
     Master<T>*    mthread;

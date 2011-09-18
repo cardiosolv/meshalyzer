@@ -109,23 +109,23 @@ Model::Model():
 const int bufsize=1024;
 bool Model::read( const char* fnt, bool base1, bool no_elems )
 {
-  LOG_TIMER_RESET;
-
   char fn[bufsize];
   strcpy( fn, fnt );
   gzFile in;
   _base1 = base1;
   pt.base1( base1 );
-
+  
+  LOG_TIMER_RESET;
   try {
     pt.read( fn );
   } catch (...) {
     fprintf(stderr, "Unable to read proper points file\n" );
     exit(1);
   }
+  LOG_TIMER("Read Points");
+  
   allvis.resize(pt.num());
   allvis.assign(pt.num(), true );
-  LOG_TIMER("pt.read()");
 
   if ( !strcmp( ".gz", fn+strlen(fn)-3 ) ) // temporary
     fn[strlen(fn)-3] = '\0';
@@ -137,38 +137,212 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   }
   _file = fn;
 
+  LOG_TIMER_RESET;
   _cnnx   = new Connection( &pt );
   _cnnx->read( fn );
-  LOG_TIMER("cnnx->read()");
+  LOG_TIMER("Read Connections");
   
   _cable  = new ContCable( &pt );
   _cable->read( fn );
-  LOG_TIMER("cable->read()");
-
-  if( !no_elems ) read_elem_file( fn );
-  LOG_TIMER("read_elem_file()");
+  //LOG_TIMER("cable->read()");
+  
+  if(!no_elems) {
+    LOG_TIMER_RESET;
+    read_elem_file( fn );
+    LOG_TIMER("Read Elements");
+  }
 
   read_region_file( in, fn );
-  LOG_TIMER("read_region_file()");
+  //LOG_TIMER("read_region_file()");
 
   determine_regions();
-  LOG_TIMER("determine_regions()");
-
+  //LOG_TIMER("determine_regions()");
+  
+  LOG_TIMER_RESET;
   add_surface_from_tri( fn );
-  LOG_TIMER("add_surface_from_tri()");
-
+  LOG_TIMER("Add Surface from Tri");
+  
+  LOG_TIMER_RESET;
   add_surface_from_surf( fn );
-  LOG_TIMER("add_surface_from_surf()");
+  LOG_TIMER("Add Surface from Surf");
 
+  LOG_TIMER_RESET;
   add_surface_from_elem( fn );
-  LOG_TIMER("add_surface_from_elem()");
+  LOG_TIMER("Add Surface from Elements");
+  
+  find_max_dim_and_bounds();
 
-  // find maximum dimension and bounding box
+  return true;
+}
+
+#ifdef USE_HDF5
+bool Model::read(hid_t hdf_file, bool base1, bool no_elem)
+{
+  LOG_TIMER_RESET;
+  pt.read(hdf_file);
+  LOG_TIMER("Read Points");
+  
+  allvis.resize(pt.num());
+  allvis.assign(pt.num(), true);
+  
+  LOG_TIMER_RESET;
+  _cnnx = new Connection(&pt);
+  _cnnx->read(hdf_file);
+  LOG_TIMER("Read Connections");
+  
+  LOG_TIMER_RESET;
+  _cable = new ContCable(&pt);
+  _cable->read(hdf_file);
+  LOG_TIMER("Read Cables");
+  
+  LOG_TIMER_RESET;
+  if (!no_elem) add_elements(hdf_file);
+  LOG_TIMER("Read Elements");
+  
+  LOG_TIMER_RESET;
+  add_regions(hdf_file);
+  determine_regions();
+  LOG_TIMER("Add + Determine Regions");
+  
+  LOG_TIMER_RESET;
+  add_surfaces(hdf_file);
+  LOG_TIMER("Add Surfaces");
+  
+  find_max_dim_and_bounds();
+  
+  return true;
+}
+
+void Model::add_surfaces(hid_t hdf_file) {
+  int *elements;
+  ch5_dataset dset_info;
+  
+  // From 2D elements
+  if ( ch5m_elem_get_info(hdf_file, &dset_info) ){
+    cerr << "Could not find elements dataset" << endl;
+    return;
+  }
+  
+  elements = (int*) malloc(sizeof(int) * dset_info.count * dset_info.width);
+  if (elements == NULL) {
+    cerr << "Could not allocate memory for elements" << endl;
+    exit(1);
+  }
+  
+  if ( ch5m_elem_get_all(hdf_file, elements) ){
+    free(elements);
+    cerr << "Could not read from elements dataset" << endl;
+    return;
+  }
+  
+  add_surfaces(elements, dset_info.count, dset_info.width, NULL);
+  free(elements);
+  
+  // From explicitly defined surfaces
+  int surfaceCount = ch5m_surf_get_count(hdf_file);
+  for (int i = 0; i < surfaceCount; i++) {
+    hid_t surf_id;
+    ch5m_surf_open(hdf_file, i, &surf_id);
+    
+    ch5m_surf_get_elem_info(surf_id, &dset_info);
+    
+    elements = (int*) malloc(sizeof(int) * dset_info.count * dset_info.width);
+    if (elements == NULL) {
+      cerr << "Could not allocate memory for elements" << endl;
+      exit(1);
+    }
+
+    char file_name_buf[255];
+    char *surf_name;
+    int name_result = ch5m_surf_get_name(surf_id, &surf_name);
+    if (name_result != 1) {
+      H5Fget_name(hdf_file, file_name_buf, 255);
+      surf_name = (char*) malloc(sizeof(char) * 255);
+      sprintf(surf_name, "%s:%d", fl_filename_name(file_name_buf), i);
+    }
+    if ( !ch5m_elem_get_all_by_dset(surf_id, elements) )
+      add_surfaces(elements, dset_info.count, dset_info.width, surf_name);
+    else
+      cerr << "Could not read from surface " << i << " dataset" << endl;
+    free(elements);
+    free(surf_name);
+    
+    ch5m_surf_close(surf_id);
+    
+  }
+}
+
+void Model::add_surfaces(int *elements, int count, int max_width, char *name) {
+  // Count up the number of elements in each region and build some lookup maps
+  // for pairing regions to newly formed surfaces
+  map<int,int> regionCounts;
+  for (int i = 0; i < count; i++) {
+    if ((elements[i * max_width] == CH5_TRIANGLE) || (elements[i * max_width] == CH5_QUADRILATERAL))
+      regionCounts[elements[i * max_width + CH5_ELEM_REGION_OFFSET]]++;
+  }
+  if (regionCounts.size() == 0) return;
+  
+  map<int,int> regionToSurfaceIndex;
+  map<int,int> elementCounts;
+  map<int,int>::iterator regionCountsIter = regionCounts.begin();
+  map<int,int>::iterator regionCountsEnd  = regionCounts.end();
+  int newSurfaceCount = 0;
+  int origSurfaceEnd  = _surface.size();
+  while (true) {
+    if (regionCountsIter->second != 0) {
+      Surfaces *newSurf = new Surfaces(&pt);
+      newSurf->num(regionCountsIter->second);
+      if (name != NULL) newSurf->label(name);
+      _surface.push_back(newSurf);
+      regionToSurfaceIndex[regionCountsIter->first] = _surface.size() - 1;
+      elementCounts[regionCountsIter->first] = 0;
+      newSurfaceCount++;
+    }
+    if (++regionCountsIter == regionCountsEnd) break;
+  }
+  
+  // Iterate through elements and populate the surfaces
+  if (newSurfaceCount > 0) {
+    for (int i = 0; i < count; i++) {
+      int region = elements[i * max_width + CH5_ELEM_REGION_OFFSET];
+      int surfaceIndex = regionToSurfaceIndex[region];
+      int elementCount = elementCounts[region];
+      switch (elements[i * max_width]) {
+        case CH5_TRIANGLE:
+          _surface[surfaceIndex]->ele(elementCount) = new Triangle(&pt);
+          break;
+        
+        case CH5_QUADRILATERAL:
+          _surface[surfaceIndex]->ele(elementCount) = new Quadrilateral(&pt);
+          break;
+        
+        default:
+          break;
+      }
+      if (_surface[surfaceIndex]->ele(elementCount) == NULL) continue;
+      _surface[surfaceIndex]->ele(elementCount)->define(&elements[i * max_width + CH5_ELEM_DATA_OFFSET]);
+      _surface[surfaceIndex]->ele(elementCount)->compute_normals(0,0);
+      elementCounts[region]++;
+    }
+    
+    for (int i = origSurfaceEnd; i < origSurfaceEnd + newSurfaceCount; i++) {
+      _surface.at(i)->determine_vert_norms(pt);
+    }
+  }
+}
+#endif
+
+void Model::find_max_dim_and_bounds()
+{
   const GLfloat *p = pt.pt();
-  _maxdim =p[0];
-  for ( int i=1; i<pt.num()*3; i++ )
-    if ( p[i]>_maxdim ) _maxdim = p[i];
+  const GLfloat *offset = pt.offset();
 
+  _maxdim = fabs(p[0]-offset[0]);
+  for ( int i=0; i<pt.num()*3; i+=3 ) 
+    for( int j=0; j<3; j++ )
+      if ( fabs(p[i+j]-offset[j])>_maxdim ) 
+        _maxdim = fabs(p[i+j]-offset[j]);
+      
   _vertnrml= new GLfloat[3*pt.num()];
 
   int i=0;
@@ -177,8 +351,6 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
       break;
   if( i==pt.num() )
     _2D = true;
-
-  return true;
 }
 
 
@@ -601,7 +773,7 @@ int Model::add_surface_from_tri( const char *fn )
 
 /** set if an object is shown in a region
  */
-void Model :: showobj( Object_t obj, bool *r, bool f )
+void Model::showobj( Object_t obj, bool *r, bool f )
 {
   for ( int i=0; i<_numReg; i++ )
     if ( r[i] )
@@ -614,13 +786,13 @@ void Model :: showobj( Object_t obj, bool *r, bool f )
  *  \param obj object type
  *  \param s   region number
  */
-GLfloat* Model:: get_color( Object_t obj, int s )
+GLfloat* Model::get_color( Object_t obj, int s )
 {
   return _region[s<0?0:s]->get_color(obj);
 }
 
 
-void Model:: set_color( Object_t obj, int s, float r, float g, float b, float a )
+void Model::set_color( Object_t obj, int s, float r, float g, float b, float a )
 {
   if ( obj==Surface) {
     if ( s<0 )
@@ -643,12 +815,12 @@ void Model:: set_color( Object_t obj, int s, float r, float g, float b, float a 
   }
 }
 
-void Model :: visibility( int r, bool a )
+void Model::visibility( int r, bool a )
 {
   _region[r]->visible(a);
 }
 
-void Model :: opacity( int s, float opac )
+void Model::opacity( int s, float opac )
 {
   for ( int i=s<0?0:s; i<(s<0?_numReg:s+1); i++ ) {
     GLfloat *c = _region[i]->get_color(Cable);
@@ -660,7 +832,7 @@ void Model :: opacity( int s, float opac )
   }
 }
 
-void Model :: randomize_color( Object_t obj )
+void Model::randomize_color( Object_t obj )
 {
   const double min_brightness=1.5;		// minimum brighness for colour
   long maxl = ~0;
@@ -973,6 +1145,36 @@ void Model::read_region_file( gzFile in, const char *fnb )
 }
 
 
+#ifdef USE_HDF5
+void Model::add_regions(hid_t hdf_file)
+{
+  ch5_dataset dset_info;
+  if (ch5m_regn_get_info(hdf_file, &dset_info))
+    return;
+  
+  int readRegions[dset_info.count * dset_info.width];
+  if ( ch5m_regn_get_all(hdf_file, readRegions) ) {
+    cerr << "Could not read regions from HDF file" << endl;
+    exit(1);
+  }
+  
+  int oldNumReg = _numReg;
+  _numReg += dset_info.count;
+  _region = (RRegion**) realloc(_region, _numReg * sizeof(RRegion*));
+  if (_region == NULL) {
+    cerr << "Could not allocate memory for regions" << endl;
+    exit(1);
+  }
+  
+  for (int i = 0; i < dset_info.count; i++) {
+    _region[oldNumReg + i] = new RRegion(pt.num(), 0, 0, false);
+    for (int e = readRegions[i * 2]; e <= readRegions[i * 2 + 1]; e++)
+      _region[oldNumReg + i]->pt_member(e, true);
+  }
+}
+#endif
+
+
 int Model::number(Object_t a )
 {
   int nele=0;
@@ -1014,7 +1216,7 @@ Model::vertex_normals(Surfaces *sp)
  *
  * \param fn file name base
  */
-bool Model :: read_elem_file( const char *fname )
+bool Model::read_elem_file( const char *fname )
 {
   gzFile in;
   bool tets = false;
@@ -1101,6 +1303,66 @@ bool Model :: read_elem_file( const char *fname )
   }
   gzclose(in);
 }
+
+#ifdef USE_HDF5
+bool Model::add_elements(hid_t hdf_file)
+{
+  ch5_dataset info;
+  ch5m_elem_get_info(hdf_file, &info);
+  
+  _numVol = info.count;
+  _vol = new VolElement*[_numVol];
+  int *elements = (int*) malloc(sizeof(int) * info.count * info.width);
+  ch5m_elem_get_all(hdf_file, elements);
+  
+  for (int i = 0; i < _numVol; i++) {
+    switch (elements[i * info.width + CH5_ELEM_TYPE_OFFSET]) {
+      case CH5_TETRAHEDRON:
+        _vol[i] = new Tetrahedral(&pt);
+        break;
+      
+      case CH5_PYRAMID:
+        _vol[i] = new Pyramid(&pt);
+        break;
+      
+      case CH5_PRISM:
+        _vol[i] = new Prism(&pt);
+        break;
+      
+      case CH5_HEXAHEDRON:
+        _vol[i] = new Hexahedron(&pt);
+        break;
+      
+      // As in read_elem_file, other primitives are ignored
+      case CH5_TRIANGLE:
+      case CH5_QUADRILATERAL:
+        _numVol--;
+        break;
+      
+      // As in read_elem_file, unsupported types cause the function to clean
+      // up and return
+      default:
+        cerr << "Unsupported element type (ch5m_element_type): " <<
+          elements[i * info.width] << endl;
+    	  delete[] _vol;
+    	  _vol = NULL;
+    	  _numVol = 0;
+        return false;
+    }
+    _vol[i]->add(&elements[i * info.width + CH5_ELEM_DATA_OFFSET], elements[i * info.width + CH5_ELEM_REGION_OFFSET]);
+  }
+  
+  free(elements);
+  
+  // Shrink-fit elements array
+  VolElement **nv = new VolElement*[_numVol]; 
+	memcpy(nv, _vol, _numVol * sizeof(VolElement*));
+	delete[] _vol;
+	_vol = nv;
+  
+  return true;
+}
+#endif
 
 
 /** find the local surface element form the global number
@@ -1210,4 +1472,84 @@ bool Model :: read_instance( gzFile pt_in, gzFile elem_in )
 }
 
 
+#ifdef USE_HDF5
+/** read in one instant in time which is part of a element  time file
+ *
+ *  \param hid_t     already open HDF5 file
+ *  \param indx      grid index 
+ *  \param tm        time to fetch
+ *  \param data[out] data buffer which will be allocated
+ *
+ *  \return true on success, falsoe o.w.
+ */
+bool Model :: read_instance( hid_t hin, unsigned int indx, unsigned int tm,
+                                      float* &data )
+{
+  ch5s_aux_time_step info;
+  ch5s_aux_time_step_info( hin, indx, tm, &info );
 
+  GLfloat *p   = new GLfloat[info.num_points*3];
+  int  datawidth = info.max_element_width+2; // 1 for element type+1 for region
+
+  int *ele = info.num_elements ? 
+              new int[info.num_elements*datawidth] : NULL;
+  data = info.has_data ? new float[info.num_points] : NULL ;
+
+  ch5s_aux_read( hin, indx, tm, p, reinterpret_cast<unsigned int *>(ele), data);
+
+  pt.add( p, info.num_points );
+  pt.setVis( true );
+  delete[] p;
+
+  // make elements
+  _surface.push_back( new Surfaces( &pt ) );
+  _cnnx = new Connection( &pt );
+  if( info.num_elements ) {
+	int *Cxpt = NULL, numCx=0;
+	_vol = new VolElement*[info.num_elements];
+
+	for( int i=0; i<info.num_elements; i++ ) {
+      ch5m_element_type etype = 
+                    static_cast<ch5m_element_type>(ele[i*datawidth]);
+      if( etype==CH5_CONNECTION ) {
+        Cxpt = (int *)realloc( Cxpt, (numCx+1)*sizeof(int)*2+2 );
+        Cxpt[numCx*2]   = ele[i*datawidth+2];
+        Cxpt[numCx*2+1] = ele[i*datawidth+3];
+        numCx++;
+      } else if( etype==CH5_TRIANGLE ) {
+        _surface.back()->ele().push_back( new Triangle( &pt ) );
+        _surface.back()->ele().back()->define( ele+i*datawidth+2 );
+      } else if( etype==CH5_QUADRILATERAL ) {
+        _surface.back()->ele().push_back( new Quadrilateral( &pt ) );
+        _surface.back()->ele().back()->define( ele+i*datawidth+2 );
+        _surface.back()->ele().back()->compute_normals(0,0);
+      } else if( etype==CH5_TETRAHEDRON ){
+        _vol[_numVol] = new Tetrahedral( &pt );
+        _vol[_numVol]->add( ele+i*datawidth+2 );
+        _numVol++;
+      } else if( etype==CH5_HEXAHEDRON ){
+        _vol[_numVol] = new Hexahedron( &pt );
+        _vol[_numVol]->add( ele+i*datawidth+2 );
+        _numVol++;
+      } else if( etype==CH5_PYRAMID ){
+        _vol[_numVol] = new Pyramid( &pt );
+        _vol[_numVol]->add( ele+i*datawidth+2 );
+        _numVol++;
+      } else if( etype==CH5_PRISM ){
+        _vol[_numVol] = new Prism( &pt );
+        _vol[_numVol]->add( ele+i*datawidth+2 );
+        _numVol++;
+      } else {
+        //fl_alert( "\nUnknown element type: %d\n\n", etype );
+        delete[] _vol;
+        return false;
+      }
+    }
+    // define connections
+    _cnnx->define( Cxpt, numCx );
+    free( Cxpt );
+  }
+  determine_regions();
+  return true;
+}
+#endif

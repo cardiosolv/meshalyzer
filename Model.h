@@ -11,6 +11,9 @@
 #include "HiLiteWinInfo.h"
 #include "Surfaces.h"
 #include "Region.h"
+#ifdef USE_HDF5
+#include <ch5/ch5.h>
+#endif
 
 
 class DataOpacity;
@@ -21,6 +24,10 @@ class Model
     Model();
     ~Model();
     bool         read(const char *fn, bool base1, bool no_elems);
+#ifdef USE_HDF5
+    bool         read(hid_t hdf_file, bool base1, bool no_elems);
+    bool         read_instance( hid_t, unsigned int, unsigned int, float *& );
+#endif
     bool         read_instance( gzFile, gzFile );
     int          add_surface_from_tri( const char * );
     int          add_surface_from_surf( const char * );
@@ -82,9 +89,19 @@ class Model
     void             read_normals( gzFile, const char * );
     void             increase_ele( int );
     GLfloat*        _vertnrml;			 //!< vertex normals
+    void             find_max_dim_and_bounds();
     void             determine_regions();
     bool             read_elem_file(const char *);
+#ifdef USE_HDF5
+    bool             read_elements(hid_t);
+    bool             add_elements(hid_t hdf_file);
+    void             add_regions(hid_t hdf_file);
+    void             add_surfaces(hid_t hdf_file);
+    void             add_surfaces(int *elements, int count, int max_width, char *name);
+#endif
     int              add_surface_from_elem( const char *fn );
+    
+    
     vector<bool>     allvis;
     int             _numtm;
     int              new_region_label();

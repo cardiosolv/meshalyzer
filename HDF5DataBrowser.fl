@@ -1,0 +1,161 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0300 
+header_name {.h} 
+code_name {.cc}
+decl {\#include "ch5/ch5.h"} {private local
+} 
+
+decl {\#include "TBmeshWin.h"} {public local
+} 
+
+decl {\#define CTR(A,B,C) (A-B)/2,C,(A-B)/2,"" } {local
+} 
+
+class HDF5DataBrowser {open
+} {
+  Function {HDF5DataBrowser( const char *fn, TBmeshWin *meshwin )} {open
+  } {
+    Fl_Window hdf5dataWin {open
+      xywh {677 73 445 550} type Double visible
+    } {
+      Fl_Browser nodDatBrows {
+        label {Nodal Data}
+        xywh {10 25 420 100} type Hold color 247 labelfont 1 align 1
+      }
+      Fl_Browser vecDatBrows {
+        label Vectors
+        xywh {10 145 420 100} type Hold color 215 labelfont 1 align 1
+      }
+      Fl_Browser auxGridBrows {
+        label {Auxiliary Grids}
+        xywh {10 275 420 100} type Hold color 167 labelfont 1 align 1
+      }
+      Fl_Browser dynPtBrows {
+        label {Dynamic Points}
+        xywh {10 400 420 100} type Hold color 175 labelfont 1 align 1
+      }
+      Fl_Return_Button {} {
+        label Read
+        callback {process_selections();}
+        xywh {10 510 125 30}
+      }
+      Fl_Return_Button {} {
+        label Close
+        callback {hdf5dataWin->~Fl_Widget();}
+        xywh {300 510 125 30}
+      }
+      Fl_Return_Button {} {
+        label Clear
+        callback {nodDatBrows->select(nodDatBrows->value(),0);
+vecDatBrows->select(vecDatBrows->value(),0);
+auxGridBrows->select(auxGridBrows->value(),0);
+dynPtBrows->select(dynPtBrows->value(),0);}
+        xywh {155 510 125 30}
+      }
+    }
+    code {if( ch5_open( fn, &hdf_in ) ) {
+  fl_alert( "Not a valid HDF5 file: %s", fn );
+  return;
+}
+
+file = fn;
+
+hdf5dataWin->label( fn );
+tbmw = meshwin;
+int num_nodes = tbmw->model->pt.num();
+
+for( int i=0; i<ch5s_nodal_grid_count( hdf_in ); i++ ){
+  ch5s_nodal_grid info;
+  ch5s_nodal_grid_info( hdf_in, i, &info );
+  if( info.type==CH5_SCALAR && info.num_nodes==num_nodes && 
+          tbmw->compat_tm(info.time_steps) ) {
+    char line[100];
+    int len = info.label?strlen(info.label):6;
+    sprintf( line, "nodal/%d %*s%*s \#tm:%d", i, CTR(78,len,info.label),
+                                           info.time_steps );
+    nodDatBrows->add( line, (void *)(i) );
+  }
+  ch5s_nodal_free_grid_info( &info );
+}
+
+for( int i=0; i<ch5s_vector_grid_count( hdf_in ); i++ ){
+  ch5s_vector_grid info;
+  ch5s_vector_grid_info( hdf_in, i, &info );
+  if( tbmw->compat_tm(info.time_steps) ) {
+    char line[100];
+    int len  = info.label?strlen(info.label):6;
+    int slen = info.scalar_label?strlen(info.scalar_label):0;
+    sprintf( line, "vector/%d %*s%*s %*s%*s \#tm:%d", i, CTR(39,len,info.label),
+           CTR(39,slen,info.scalar_label?info.scalar_label:""), info.time_steps );
+    vecDatBrows->add( line, (void *)(i) );
+  }
+  ch5s_vector_free_grid_info( &info );
+}
+
+for( int i=0; i<ch5s_aux_grid_count( hdf_in ); i++ ){
+  ch5s_aux_grid info;
+  ch5s_aux_grid_info( hdf_in, i, &info );
+  if( tbmw->compat_tm(info.time_steps) ) {
+    char line[100];
+    int len  = info.label?strlen(info.label):6;
+    sprintf( line, "auxGrid/%d %*s%*s \#tm:%d", i, CTR(78,len,info.label),
+                                                             info.time_steps );
+    auxGridBrows->add( line, (void *)(i) );
+  }
+  ch5s_aux_free_grid_info( &info );
+}
+
+for( int i=0; i<ch5s_nodal_grid_count( hdf_in ); i++ ){
+  ch5s_nodal_grid info;
+  ch5s_nodal_grid_info( hdf_in, i, &info );
+  if( info.type==CH5_DYN_PTS && info.num_nodes == num_nodes && 
+          tbmw->compat_tm(info.time_steps) ) {
+    char line[100];
+    int len  = info.label?strlen(info.label):6;
+    sprintf( line, "nodal/%d %*s%*s \#tm:%d",i,CTR(78,len,info.label),info.time_steps);
+    dynPtBrows->add( line, (void *)(i) );
+  }
+  ch5s_nodal_free_grid_info( &info );
+}
+hdf5dataWin->show();} {}
+  }
+  Function {process_selections()} {open
+  } {
+    code {int ln = nodDatBrows->value();
+if( ln ) {
+  ostringstream grid;
+  grid << file << ":nodal/" << ((long)(nodDatBrows->data(ln)));
+  tbmw->get_data( grid.str().c_str(), tbmw->contwin->tmslider );
+}
+
+ln = vecDatBrows->value();
+if( ln ) {
+  stringstream grid;
+  grid << file << ":vector/" << ((long)(vecDatBrows->data(ln)));
+  if(!tbmw->getVecData( tbmw->contwin->tmslider, grid.str().c_str() ))
+    tbmw->contwin->vectorgrp->activate();
+}
+
+ln = auxGridBrows->value();
+if( ln ) {
+  stringstream grid;
+  grid << file << ":auxGrid/" << ((long)(auxGridBrows->data(ln)));
+  if(!tbmw->readAuxGrid( tbmw->contwin->tmslider, grid.str().c_str() ))
+    tbmw->contwin->auxgridgrp->activate();
+}
+
+ln = dynPtBrows->value();
+if( ln ) {
+  stringstream grid;
+  grid << file << ":nodal/" << ((long)(dynPtBrows->data(ln)));
+  tbmw->read_dynamic_pts( grid.str().c_str(), tbmw->contwin->tmslider );
+}} {selected
+    }
+  }
+  decl {TBmeshWin *tbmw;} {private local
+  }
+  decl {hid_t hdf_in;} {private local
+  }
+  decl {string file;} {private local
+  }
+} 

@@ -1,5 +1,6 @@
 package "igbhead"
-version "0.1"
+args "--default-optional"
+version "0.2"
 option "x"              x "number of x pixels" int no
 option "y"              y "number of y pixels" int no
 option "z"              z "number of z pixels" int no
@@ -25,6 +26,7 @@ option "inc-t"          L "Increment in t" float no
 option "data-factor"    S "Scaling factor for data" float no
 option "data-zero"      0 "Origin for data scaling" float no
 option "author"         A "Author name with no spaces" string no
+option "units"          u "Data units"  string no
 option "x-units"        1 "Units for x" string no
 option "y-units"        2 "Units for y" string no
 option "z-units"        3 "Units for z" string no

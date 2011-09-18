@@ -1,6 +1,9 @@
 #include "DrawingObjects.h"
 #include "VecData.h"
 #include "gzFileBuffer.h"
+#ifdef USE_HDF5
+#include <ch5/ch5.h>
+#endif
 
 /** draw a nice 3D sphere 
  *
@@ -135,7 +138,9 @@ bool PPoint :: read( const char *fname )
 
   if ( _base1 ) _n++;					// add initial bogus point
   _pts = (GLfloat *)malloc(_n*3*sizeof(GLfloat));
-  float min[3], max[3];
+
+  GLfloat min[3], max[3];
+
   for ( int i=0; i<3*_n; i+=3 ) {
 
     if ( i==3 && _base1 ) {				// copy the first point
@@ -152,10 +157,9 @@ bool PPoint :: read( const char *fname )
     }
   }
 
-  // centre the model about the origin
+  // centre the model about the origin and find maximum distance from origin
   for ( int ti=0; ti<3; ti++ ) _offset[ti] = (min[ti]+max[ti])/2;
-  //for ( int i=0; i<3*_n; i+=3 )
-    //for ( int ti=0; ti<3; ti++ ) _pts[i+ti] -= _offset[ti];
+
   gzclose(in);
 
   _allvis.resize( _n );
@@ -163,6 +167,36 @@ bool PPoint :: read( const char *fname )
 
   return true;
 }
+
+#ifdef USE_HDF5
+bool PPoint :: read(hid_t hdf_file)
+{
+  ch5_dataset info;
+  if (ch5m_pnts_get_info(hdf_file, &info)) return false;
+  
+  _pts = (GLfloat*) malloc(info.count * info.width * sizeof(GLfloat));
+  _n   = info.count;
+  if (ch5m_pnts_get_all(hdf_file, _pts)) {
+    free(_pts);
+    return false;
+  }
+  
+  // Centre model on origin
+  float min[3], max[3];
+  for (int i = 0; i < _n * 3; i += 3) {
+    for (int j = 0; j < 3; j++) {
+      if (i == 0 || _pts[i+j] > max[j]) max[j] = _pts[i+j];
+      if (i == 0 || _pts[i+j] < min[j]) min[j] = _pts[i+j];
+    }
+  }
+  for (int i = 0; i < 3; i++) _offset[i] = (min[i]+max[i])/2;
+  
+  _allvis.resize(info.count);
+  _allvis.assign(info.count, true );
+  
+  return true;
+}
+#endif
 
 
 /** add some points

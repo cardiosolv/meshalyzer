@@ -1,0 +1,42 @@
+package "Package_data"
+version "1.0"
+args "--default-optional"
+usage "package_data [--append] [--nodal=file.IGB [--label] [--comment]] \n\
+                    [--nodel=file --numnodes [generic_options] ]\n\
+                    [--vector=file.vpts [generic_options] ] \n\
+                    [--auxgrid=files.pts_t [generic_options] ]\n\
+                    [--dynpts=file.dynpt [generic_ptions] ]\n\
+                    [--text=file [--label] ]\n\
+                    [--time-series [generic_options] ] FILE.datH5"
+purpose "Concatenate several data files into one HDF5 data file"
+
+option "append"        A "append to existing data file" flag off
+text "different data types"
+option "nodal"         n "nodal data"        string typestr="filename" multiple
+option "numnodes"      N "number nodes for non-IGB" int multiple default="0"
+        details = "\
+        ignored for IGB files. If not specified for a file,
+        searches for previous specifications"
+option "vector"        v "vector data"       string typestr="filename" multiple
+       details = "\
+       label and units may be specified twice, the first time for vector
+       data and the second time for optional scalar data"
+option "time-series"   T "time series"       string typestr="filename" multiple
+option "auxgrid"       a "auxilliary grid"   string typestr="filename.vpts" multiple
+option "dynpts"        d "dynamic points"    string typestr="filename.dynpt" multiple
+option "text"          t "free format textual data" string typestr="filename" multiple
+text "The following are generic options ignored for IGB"
+option "label"         l "data label"        string multiple
+option "comment"       c "general comment"   string multiple
+option "units"         u "units for data"    string multiple
+option "tm-units"      s "units for time"    string multiple
+option "dt"            D "time step"         float  multiple
+option "t0"            o "initial time"      float  multiple
+text "The following are only for time series"
+option "quantities"    q "quantities for time series columns" string multiple
+text "\n\
+Example: package_data --numnodes=556812 -na.igb --label=Vm --vector J.vpts\n\
+    --la=CurrentDensity --units=A/m^2 --lMagJ -uA/m^2 --auxgrid filaments.pts_t\n\
+    --nodal=act.dat --time-series a.dat --quantities=\"t|I_Na|I_k|Vm\" \n\
+    --label=\"Node 39\" --units=\"ms|uA/m^2|uA/m^2\" complete.datH5\n"
+

@@ -22,6 +22,7 @@
 #include "IsoSurface.h"
 #include "IsoLines.h"
 #include "TimeLink.h"
+#include <hdf5.h>
 
 class Sequence;
 class HiLiteInfoWin;
@@ -47,7 +48,10 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     Model*         model;
     virtual void draw();
     virtual int handle( int );
-    void read_model(Fl_Window*,const char *fn,bool no_elems,bool base1=false);
+    void read_model(Fl_Window*, const char *fn, bool no_elems, bool base1=false);
+#ifdef USE_HDF5
+    void read_model(Fl_Window*, hid_t hdf_file, bool no_elems, bool base1=false);
+#endif
     void highlight(Object_t obj, int a);
     inline void set_hilight( bool a ){ hilighton=a; redraw(); }
     inline void dispmode( Display_t d ){ disp = d; redraw(); }
@@ -92,7 +96,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     friend void animate_cb( void *v );
     DataOpacity *dataopac;			// data opacity
     ClipPlane* cplane;
-    int       getVecData(void *, char *vptsfile=NULL);
+    int       getVecData(void *, const char *vptsfile=NULL);
     VecData  *vecdata;
     void      select_vertex();
     PlotWin  *timeplotter;
@@ -116,7 +120,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      size( Object_t o, int r, float b ){model->size(o,r,b); redraw();}
     float     size( Object_t o, int r ){ return model->size(o,r); }
     IsosurfControl *isosurfwin;
-    int       readAuxGrid( void *, char* agfile );
+    int       readAuxGrid( void *, const char* agfile );
     AuxGrid  *auxGrid;
     TimeLink *tmLink;
     void      signal_links( int );
@@ -127,6 +131,9 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      SendViewportSyncMessage();
     void      SendTimeSyncMessage();
     int       read_dynamic_pts( const char *, Myslider * );
+    bool      compat_tm( int t ){ return (t==1 || max_time()==0 || max_time()==t-1); }
+    friend class Controls;
+    friend class HDF5DataBrowser;
 
   private:
     int        hilight[maxobject];	// which object to highlight
@@ -162,7 +169,6 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      draw_cut_planes( RRegion * );
     void      draw_iso_surfaces( );
     void      draw_iso_lines();
-    int       max_time( GridType g=NoDataGrid );
     GLenum    renderMode;			// mode for drawing
     vector<bool> ptDrawn;			// was a point drawn
     vector<bool> ptVisible;         // is a point is a visible region?
@@ -182,6 +188,8 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     bool       bgd_trans;           //!< transparent background
     bool       _norot;              //!< allow rotations
     float      _dt;                 //!< increment between time slices
+    void       set_windows( Fl_Window*, const char * );
+    int       max_time( GridType g=NoDataGrid );
 
     // constants
     static unsigned int MAX_MESSAGES_READ;

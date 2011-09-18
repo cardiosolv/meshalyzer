@@ -1,18 +1,21 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0106 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "TBmeshWin.h"} {public
+decl {\#include "TBmeshWin.h"} {public local
 } 
 
-decl {\#include <math.h>} {public
+decl {\#include <math.h>} {public local
 } 
 
-decl {\#define SAVE_CP(A) xdir\#\#A->value()<<" "<<ydir\#\#A->value()<<" "<<zdir\#\#A->value()<<" "<<intercept\#\#A->value()<<" "<<dispas\#\#A->value()} {} 
+decl {\#define SAVE_CP(A) xdir\#\#A->value()<<" "<<ydir\#\#A->value()<<" "<<zdir\#\#A->value()<<" "<<intercept\#\#A->value()<<" "<<dispas\#\#A->value()} {private local
+} 
 
-decl {\#define READ_CP(A,S) {double val; S>>val; xdir\#\#A->value(val); S>>val; ydir\#\#A->value(val); S>>val; zdir\#\#A->value(val);S>>val; intercept\#\#A->value(val); S>>val; dispas\#\#A->value(int(val));}}{}
+decl {\#define READ_CP(A,S) {double val; S>>val; xdir\#\#A->value(val); S>>val; ydir\#\#A->value(val); S>>val; zdir\#\#A->value(val);S>>val; intercept\#\#A->value(val); S>>val; dispas\#\#A->value(int(val));}} {private local
+} 
 
-decl {\#define CHECK_CP(A) {int val=dispas\#\#A->value();if(val==3||val==4)tbmw->determine_cutplane(A);}} {} 
+decl {\#define CHECK_CP(A) {int val=dispas\#\#A->value();if(val==3||val==4)tbmw->determine_cutplane(A);}} {private local
+} 
 
 class ClipPlane {open
 } {
@@ -20,7 +23,7 @@ class ClipPlane {open
   } {
     Fl_Window window {
       label {Clipping Plane} open
-      xywh {229 164 575 495} type Double hide
+      xywh {863 23 575 495} type Double visible
     } {
       Fl_Group Clip0 {
         label {Clipping Plane 1} open
@@ -59,38 +62,38 @@ normcb(0);}
         }
         Fl_Value_Slider intercept0 {
           label Intercept
-          callback {normcb(0);}
+          callback {normcb(0);} selected
           tooltip {control intercept of plane with axes} xywh {145 25 25 195} selection_color 10 minimum -1
         }
         Fl_Choice dispas0 {
           xywh {20 30 110 20} down_box BORDER_BOX
         } {
-          menuitem {} {
+          MenuItem {} {
             label Off
             callback {drawIntercept( 0, false );
 tbmw->redraw();}
             xywh {0 0 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label On
             callback {drawIntercept( 0, false );
 tbmw->redraw();}
             xywh {0 0 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label {Whole Plane}
             callback {drawIntercept( 0, false );
 tbmw->redraw();}
             xywh {0 0 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Intersection
             callback {drawIntercept( 0, true );
 tbmw->determine_cutplane(0);
 tbmw->redraw();}
             xywh {0 0 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Datified
             callback {drawIntercept( 0, true );
 tbmw->determine_cutplane(0);
@@ -142,32 +145,32 @@ normcb(1);}
         Fl_Choice dispas1 {
           xywh {210 30 110 20} down_box BORDER_BOX
         } {
-          menuitem {} {
+          MenuItem {} {
             label Off
             callback {drawIntercept( 1, false );
 tbmw->redraw();}
             xywh {10 10 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label On
             callback {drawIntercept( 1, false );
 tbmw->redraw();}
             xywh {10 10 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label {Whole Plane}
             callback {drawIntercept( 1, false );
 tbmw->redraw();}
             xywh {10 10 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Intersection
             callback {drawIntercept( 1, true );
 tbmw->determine_cutplane(1);
 tbmw->redraw();}
             xywh {10 10 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Datified
             callback {drawIntercept( 1, true );
 tbmw->determine_cutplane(1);
@@ -219,32 +222,32 @@ normcb(2);}
         Fl_Choice dispas2 {
           xywh {395 30 110 20} down_box BORDER_BOX
         } {
-          menuitem {} {
+          MenuItem {} {
             label Off
             callback {drawIntercept( 2, false );
 tbmw->redraw();}
             xywh {20 20 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label On
             callback {drawIntercept( 2, false );
 tbmw->redraw();}
             xywh {20 20 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label {Whole Plane}
             callback {drawIntercept( 2, false );
 tbmw->redraw();}
             xywh {20 20 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Intersection
             callback {drawIntercept( 2, true );
 tbmw->determine_cutplane(2);
 tbmw->redraw();}
             xywh {20 20 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Datified
             callback {drawIntercept( 2, true );
 tbmw->determine_cutplane(2);
@@ -258,7 +261,7 @@ tbmw->redraw();}
         xywh {5 250 185 220} box UP_BOX align 2
       } {
         Fl_Group {} {
-          label {Plane Normal4} open
+          label {Plane Normal4}
           xywh {15 305 115 145} box UP_BOX
         } {
           Fl_Value_Input xdir3 {
@@ -296,32 +299,32 @@ normcb(3);}
         Fl_Choice dispas3 {
           xywh {20 260 110 20} down_box BORDER_BOX
         } {
-          menuitem {} {
+          MenuItem {} {
             label Off
             callback {drawIntercept( 3, false );
 tbmw->redraw();}
             xywh {30 30 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label On
             callback {drawIntercept( 3, false );
 tbmw->redraw();}
             xywh {30 30 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label {Whole Plane}
             callback {drawIntercept( 3, false );
 tbmw->redraw();}
             xywh {30 30 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Intersection
             callback {drawIntercept( 3, true );
 tbmw->determine_cutplane(3);
 tbmw->redraw();}
             xywh {30 30 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Datified
             callback {drawIntercept( 3, true );
 tbmw->determine_cutplane(3);
@@ -373,32 +376,32 @@ normcb(4);}
         Fl_Choice dispas4 {
           xywh {210 260 110 20} down_box BORDER_BOX
         } {
-          menuitem {} {
+          MenuItem {} {
             label Off
             callback {drawIntercept( 4, false );
 tbmw->redraw();}
             xywh {40 40 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label On
             callback {drawIntercept( 4, false );
 tbmw->redraw();}
             xywh {40 40 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label {Whole Plane}
             callback {drawIntercept( 4, false );
 tbmw->redraw();}
             xywh {40 40 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Intersection
             callback {drawIntercept( 4, true );
 tbmw->determine_cutplane(4);
 tbmw->redraw();}
             xywh {40 40 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Datified
             callback {drawIntercept( 4, true );
 tbmw->determine_cutplane(4);
@@ -450,32 +453,32 @@ normcb(5);}
         Fl_Choice dispas5 {
           xywh {400 260 110 20} down_box BORDER_BOX
         } {
-          menuitem {} {
+          MenuItem {} {
             label Off
             callback {drawIntercept( 5, false );
 tbmw->redraw();}
             xywh {50 50 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label On
             callback {drawIntercept( 5, false );
 tbmw->redraw();}
             xywh {50 50 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label {Whole Plane}
             callback {drawIntercept( 5, false );
 tbmw->redraw();}
             xywh {50 50 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Intersection
             callback {drawIntercept( 5, true );
 tbmw->determine_cutplane(5);
 tbmw->redraw();}
             xywh {50 50 30 20}
           }
-          menuitem {} {
+          MenuItem {} {
             label Datified
             callback {drawIntercept( 5, true );
 tbmw->determine_cutplane(5);
@@ -497,12 +500,20 @@ x[3][0] = -1;
 x[4][1] = -1;
 x[5][2] = -1;
 
-for( int i=0; i<6; i++ ) intercept[i] = 0;} {}
+for( int i=0; i<6; i++ ){
+  intercept[i] = 0;
+}} {}
   }
-  decl {GLdouble x[6][4];} {}
-  decl {bool intercept[6];} {}
-  decl {float dim;} {}
-  decl {TBmeshWin* tbmw;} {}
+  decl {GLdouble x[6][4];} {private local
+  }
+  decl {bool intercept[6];} {private local
+  }
+  decl {float dim;} {private local
+  }
+  decl {TBmeshWin* tbmw;} {private local
+  }
+  decl {float ctr_intercept[6];} {private local
+  }
   Function {on(int cp)} {return_type bool
   } {
     code {if( cp==0 )
@@ -518,52 +529,52 @@ else if( cp==4 )
 else if( cp==5 )
   return dispas5->value()>0;} {}
   }
-  Function {plane(int cp)} {return_type {GLdouble*}
+  Function {plane(int cp)} {open return_type {GLdouble*}
   } {
     code {return x[cp];} {}
   }
-  Function {normcb( int cp)} {private return_type void
+  Function {normcb( int cp)} {open private return_type void
   } {
     code {if( !cp ) {
   x[cp][0] = xdir0->value();
   x[cp][1] = ydir0->value(); 
   x[cp][2] = zdir0->value();
-  x[cp][3] = intercept0->value()*dim;
+  x[cp][3] = intercept0->value()*dim+ctr_intercept[0];
   if( drawIntercept(0) ) tbmw->determine_cutplane( 0 );
   if( dispas0->value()>0 ) tbmw->redraw();
 } else if (cp==1) {
   x[cp][0] = xdir1->value();
   x[cp][1] = ydir1->value();
   x[cp][2] = zdir1->value();
-  x[cp][3] = intercept1->value()*dim;
+  x[cp][3] = intercept1->value()*dim+ctr_intercept[1];
   if( drawIntercept(1) ) tbmw->determine_cutplane( 1 );
   if( dispas1->value()>0 ) tbmw->redraw();
 }else if (cp==2) {
   x[cp][0] = xdir2->value();
   x[cp][1] = ydir2->value();
   x[cp][2] = zdir2->value();
-  x[cp][3] = intercept2->value()*dim;
+  x[cp][3] = intercept2->value()*dim+ctr_intercept[2];
   if( drawIntercept(2) ) tbmw->determine_cutplane( 2 );
   if( dispas2->value()>0 ) tbmw->redraw();
 }else if (cp==3) {
   x[cp][0] = xdir3->value();
   x[cp][1] = ydir3->value();
   x[cp][2] = zdir3->value();
-  x[cp][3] = intercept3->value()*dim;
+  x[cp][3] = intercept3->value()*dim+ctr_intercept[3];
   if( drawIntercept(3) ) tbmw->determine_cutplane( 3 );
   if( dispas3->value()>0 ) tbmw->redraw();
 }else if (cp==4) {
   x[cp][0] = xdir4->value();
   x[cp][1] = ydir4->value();
   x[cp][2] = zdir4->value();
-  x[cp][3] = intercept4->value()*dim;
+  x[cp][3] = intercept4->value()*dim+ctr_intercept[4];
   if( drawIntercept(4) ) tbmw->determine_cutplane( 4 );
   if( dispas4->value()>0 ) tbmw->redraw();
 }else if (cp==5) {
   x[cp][0] = xdir5->value();
   x[cp][1] = ydir5->value();
   x[cp][2] = zdir5->value();
-  x[cp][3] = intercept5->value()*dim;
+  x[cp][3] = intercept5->value()*dim+ctr_intercept[5];
   if( drawIntercept(5) ) tbmw->determine_cutplane( 5 );
   if( dispas5->value()>0 ) tbmw->redraw();
 }} {}
@@ -632,11 +643,11 @@ else if( cp==5 )
 }
 normcb(cp);} {}
   }
-  Function {drawIntercept( int cp, bool b )} {private
+  Function {drawIntercept( int cp, bool b )} {open private
   } {
     code {intercept[cp] = b;} {}
   }
-  Function {drawIntercept( int cp )} {return_type bool
+  Function {drawIntercept( int cp )} {open return_type bool
   } {
     code {return intercept[cp];} {}
   }
@@ -655,8 +666,7 @@ else if( cp==4 )
 else if( cp==5 )
   return dispas5->value()==4;} {}
   }
-  Function {save(ostream& ofs)} {open
-  } {
+  Function {save(ostream& ofs)} {} {
     code {ofs << SAVE_CP(0) << endl;
 ofs << SAVE_CP(1) << endl;
 ofs << SAVE_CP(2) << endl;
@@ -669,8 +679,7 @@ for( int i=0; i<6; i++ ) {
   ofs << intercept[i] << endl;
 }} {}
   }
-  Function {read(istream& ifs)} {open
-  } {
+  Function {read(istream& ifs)} {} {
     code {READ_CP(0,ifs);
 READ_CP(1,ifs);
 READ_CP(2,ifs);
@@ -687,11 +696,20 @@ CHECK_CP(1);
 CHECK_CP(2);
 CHECK_CP(3);
 CHECK_CP(4);
-CHECK_CP(5);} {selected
-    }
+CHECK_CP(5);} {}
+  }
+  Function {calc_intercept()} {open
+  } {
+    code {for( int i=0; i<6; i++ ){
+  const GLfloat* ctr = tbmw->model->pt_offset();
+  ctr_intercept[i] = -(ctr[0]*x[i][0]+ctr[1]*x[i][1]+ctr[2]*x[i][2]);
+  normcb(i);
+}} {}
   }
 } 
 
-decl {\#include <iostream>} {} 
+decl {\#include <iostream>} {private local
+} 
 
-decl {using namespace std;} {} 
+decl {using namespace std;} {private local
+} 

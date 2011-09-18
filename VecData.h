@@ -11,6 +11,11 @@
 #include <GL/glu.h>
 #include "Colourscale.h"
 
+
+#ifdef USE_HDF5
+#include "ch5/ch5.h"
+#endif
+
 enum DataType {Vector,Scalar,FixedVCdata};
 
 void draw_arrow( GLUquadricObj* quado,
@@ -19,7 +24,7 @@ void draw_arrow( GLUquadricObj* quado,
 class VecData
 {
   public:
-    VecData(char*);
+    VecData(const char*);
     ~VecData();
     int          maxtime(){ return numtm-1; }
     void         draw(int,float);
@@ -53,6 +58,10 @@ class VecData
     GLUquadricObj* quado;
     int      _last_tm;      // last time drawn
     int      _stride;
+#ifdef USE_HDF5
+    void     read_vec_HDF5( const char *);
+#endif
+    void     read_vec_nonHDF5( const char *);
 };
 
 

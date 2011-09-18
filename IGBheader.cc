@@ -218,34 +218,6 @@ int my_fputs( FILE *, char * );
 int  Header_Quiet = 0;
 char Header_Message[256];
 
-#define check_dim_consistency( D ) \
-  if ( bool_dim_##D ) {   \
-    if ( bool_inc_##D ) {\
-      float dim_##D = v_inc_##D * (v_##D-1) ;\
-      if ( dim_##D != v_dim_##D ) {\
-        if (!Header_Quiet) {\
-          fprintf(stderr, "\nATTENTION:\n") ;\
-          fprintf(stderr, "conflict between (%s-1) (%d) * inc_%s (%.12g) = "\
-                  "%.12g and dim_%s (%.12g)\n",\
-                  #D, v_##D-1, #D, v_inc_##D, dim_##D, #D, v_dim_##D) ;\
-        }\
-        sprintf(Header_Message,"conflict between (%s-1) (%d) * inc_%s (%.12g) = "\
-                  "%.12g and dim_%s (%.12g)\n",\
-                  #D, v_##D-1, #D, v_inc_##D, dim_##D, #D, v_dim_##D) ;\
-        v_dim_##D =  v_inc_##D * (v_##D-1);\
-        fprintf(stderr, "\tsetting dim_%s to %g\n", #D, v_dim_##D) ;\
-      }\
-    } else {\
-      v_inc_##D = v_##D>1 ? v_dim_##D / (v_##D - 1) : 0 ;\
-      bool_inc_##D = VRAI;\
-    }\
-  } else {\
-      v_dim_##D = (v_##D-1) * v_inc_##D ;\
-      if ( bool_inc_##D )\
-        bool_dim_##D = VRAI;\
-    }
-
-
 const char    *Header_Type[] =
   {
     "", "byte", "char", "short", "long", "float", "double", "complex",
@@ -282,7 +254,7 @@ const char
 
 static bool
 is_deprecated( char *s ) {
-  for( int i=0; i<sizeof(deprecated)/sizeof(deprecated[0]); i++ )
+  for( unsigned int i=0; i<sizeof(deprecated)/sizeof(deprecated[0]); i++ )
     if( !strcmp( s, deprecated[i] ) )
       return true;
   return false;
@@ -363,15 +335,15 @@ int IGBheader::write()
 
   if (file==NULL) {
     if (!Header_Quiet)
-      cerr<< "\nERROR: invalid file descriptor\n";
-    sprintf(Header_Message, "\nERROR: invalid file descriptor\n");
+      cerr<< "\nERREUR: descripteur de fichier nul\n";
+    sprintf(Header_Message, "\nERREUR: descripteur de fichier nul\n");
     return(0) ;
   }
 
   if (v_type<IGB_MIN_TYPE || v_type>IGB_MAX_TYPE) {
     if (!Header_Quiet)
-      cerr<< "\nHeader_Write: unknown type: "<< v_type;
-    sprintf(Header_Message, "\nHeader_Write: unknown type: %d\n",
+      cerr<< "\nHeader_Write: type inconnu: "<< v_type;
+    sprintf(Header_Message, "\nHeader_Write: type inconnu: %d\n",
             v_type);
     return (0);
   }
@@ -379,22 +351,22 @@ int IGBheader::write()
 
   if (v_type==IGB_STRUCTURE && v_taille<1) {
     if (!Header_Quiet)
-      cerr << "\nHeader_Write: invalid size:" << v_taille << endl;
-    sprintf(Header_Message, "\nHeader_Write: invalid size: %d\n",
+      cerr << "\nHeader_Write: taille invalide:" << v_taille << endl;
+    sprintf(Header_Message, "\nHeader_Write: taille invalide: %d\n",
             v_taille);
     return (0);
   }
 
   if (v_trame<MIN_TRAME || v_trame>MAX_TRAME) {
     if (!Header_Quiet)
-      fprintf(stderr, "\nHeader_Write: invalid frame: %d\n", v_trame);
-    sprintf(Header_Message, "\nHeader_Write: invalid frame: %d\n",
+      fprintf(stderr, "\nHeader_Write: trame inconnue: %d\n", v_trame);
+    sprintf(Header_Message, "\nHeader_Write: trame inconnue: %d\n",
             v_trame);
     return (0);
   }
 
   // we will now only allow writing of big or little endian */
-  const char* systeme=(endian()==IGB_BIG_ENDIAN)?"big_endian":"little_endian";
+  //const char* systeme=(endian()==IGB_BIG_ENDIAN)?"big_endian":"little_endian";
 
   char ligne[1024];
   if (bool_t) {
@@ -581,7 +553,7 @@ int IGBheader::write()
     char *p=(char *)v_transparent, value[MAXL];
     int a;
     for ( a=0; a<Data_Size[v_type]; a++ )
-      sprintf( value+a*2, "%0.2x", *(p++) );
+      sprintf( value+a*2, "%.2x", *(p++) );
     value[2*Data_Size[v_type]] = '\0';
     sprintf(&items[n_items][0], "transparent:%s ", value );
     l_item[n_items] = strlen(&items[n_items][0]);
@@ -622,11 +594,11 @@ int IGBheader::write()
       n_car_total += n_car;
       if (puts_fcn((void *)file, ligne)==-1) {
         if (!Header_Quiet) {
-          fprintf(stderr, "\nHeader_Write: Error writing \n");
+          fprintf(stderr, "\nHeader_Write: Erreur a l'ecriture \n");
           perror("\n *** ");
           fprintf(stderr,  "\n");
         }
-        sprintf(Header_Message, "\nHeader_Write: Error writing \n");
+        sprintf(Header_Message, "\nHeader_Write: Erreur a l'ecriture \n");
         return (0);
       }
       strcpy(ligne, &items[i][0]);
@@ -644,11 +616,11 @@ int IGBheader::write()
   n_car_total += n_car;
   if (puts_fcn((void *)file, ligne )==-1) {
     if (!Header_Quiet) {
-      fprintf(stderr, "\nHeader_Write: Error writing \n");
+      fprintf(stderr, "\nHeader_Write: Erreur a l'ecriture \n");
       perror("\n *** ");
       fprintf(stderr,  "\n");
     }
-    sprintf(Header_Message, "\nHeader_Write: Error writing \n");
+    sprintf(Header_Message, "\nHeader_Write: Erreur a l'ecriture \n");
     return (0);
   }
   n_lignes++;
@@ -676,11 +648,11 @@ int IGBheader::write()
       n_car = gzprintf(file, "#%.80s\r\n", *comment++);
       if (n_car==0) {
         if (!Header_Quiet) {
-          fprintf(stderr, "\nHeader_Write: Error writing \n");
+          fprintf(stderr, "\nHeader_Write: Erreur a l'ecriture \n");
           perror("\n *** ");
           fprintf(stderr,  "\n");
         }
-        sprintf(Header_Message, "\nHeader_Write: Error writing \n");
+        sprintf(Header_Message, "\nHeader_Write: Erreur a l'ecriture \n");
         return (0);
       }
     }
@@ -696,11 +668,11 @@ int IGBheader::write()
   for (int i=0;i<n_lig_sup-1;i++) {
     if (puts_fcn((void *)file, ligne)==-1) {
       if (!Header_Quiet) {
-        fprintf(stderr, "\nHeader_Write: Error writing \n");
+        fprintf(stderr, "\nHeader_Write: Erreur a l'ecriture \n");
         perror("\n *** ");
         fprintf(stderr,  "\n");
       }
-      sprintf(Header_Message, "\nHeader_Write: Error writing \n");
+      sprintf(Header_Message, "\nHeader_Write: Erreur a l'ecriture \n");
       return 0;
     }
   }
@@ -715,24 +687,24 @@ int IGBheader::write()
   ligne[n_car_dl] = '\000';
   if (puts_fcn( (void *)file, ligne )==-1) {
     if (!Header_Quiet) {
-      fprintf(stderr, "\nHeader_Write: Error writing \n");
+      fprintf(stderr, "\nHeader_Write: Erreur a l'ecriture \n");
       perror("\n *** ");
       fprintf(stderr,  "\n");
     }
-    sprintf(Header_Message, "\nHeader_Write: Error writing \n");
+    sprintf(Header_Message, "\nHeader_Write: Erreur a l'ecriture \n");
     return (0);
   }
 
   if (n_car_total>1024) {
     if (!Header_Quiet)
       fprintf(stderr,
-              "\nHeader_Write ATTENTION: non-standard header size \n");
+              "\nHeader_Write ATTENTION: etiquette de grandeur non-standard \n");
     sprintf(Header_Message,
-            "\nHeader_Write ATTENTION: non-standard header size \n");
+            "\nHeader_Write ATTENTION: etiquette de grandeur non-standard \n");
     statut |= GRANDEUR_INV;
   } else {
     sprintf(Header_Message,
-            "\nHeader_Write: Header read without problems\n");
+            "\nHeader_Write: Entete transcrite sans problemes\n");
   }
 
   /*
@@ -773,7 +745,7 @@ int IGBheader::read()
 
     /* --- lit la ligne dans le fichier --- */
     int i = 0 ;
-    int bytes_read = gztell(file);
+    //int bytes_read = gztell(file);
 
     while (1) {
 
@@ -781,9 +753,9 @@ int IGBheader::read()
       if ( i >= 80 ) {
         if (!Header_Quiet)
           fprintf(stderr,
-                  "\nERROR line too long (> 80) in the header !\n" ) ;
+                  "\nERREUR ligne trop longue (>80) dans l'entete !\n" ) ;
         sprintf(Header_Message,
-                "\nERROR line too long (> 80) in the header !\n" ) ;
+                "\nERREUR ligne trop longue (>80) dans l'entete !\n" ) ;
         return ERR_LINE_TOO_LONG;
       }
 
@@ -794,9 +766,9 @@ int IGBheader::read()
       if ( in == -1 ) {
         if (!Header_Quiet)
           fprintf(stderr,
-                  "\nERROR EOF in header !\n" ) ;
+                  "\nERREUR Fin de fichier dans l'entete !\n" ) ;
         sprintf(Header_Message,
-                "\nERROR EOF in header !\n" ) ;
+                "\nERREUR Fin de fichier dans l'entete !\n" ) ;
         return ERR_EOF_IN_HEADER;
       }
 
@@ -819,10 +791,10 @@ int IGBheader::read()
       else if ( in && ! isprint(in) ) {
         if (!Header_Quiet)
           fprintf(stderr,
-                  "\nERROR non-alphanumeric character 0x%.2X in "
-                  "header at byte number %ld\n", in, gztell(file) );
+                  "\nERREUR caract. non imprim. 0x%.2X dans "
+                  "l'entete at byte number %ld\n", in, gztell(file) );
         sprintf(Header_Message,
-                "\nERROR non-alphanumeric character 0x%.2X in header !\n", in );
+                "\nERREUR caract. non imprim. 0x%.2X dans l'entete !\n", in );
         return ERR_UNPRINTABLE_CHAR;
       } else {
         str[i++] = (char) in ;
@@ -831,6 +803,7 @@ int IGBheader::read()
     }
 
     /* --- ----- ----- ----- sauve les commentaires ----- ----- --- */
+    bool val_reached;
     for ( char* pt_1=str; *pt_1; pt_1++ ) {
 
       /* --- '*' ou '#' = commentaires ------> dans comment --- */
@@ -848,9 +821,9 @@ int IGBheader::read()
         break ;
       }
 
+      if( *pt_1 == ':' ) val_reached = true;
       /* --- convertit majuscule un minuscules --- */
-      if (isupper(*pt_1)) *pt_1 = tolower( *pt_1 ) ;
-
+      if (!val_reached && isupper(*pt_1)) *pt_1 = tolower( *pt_1 ) ;
     }
 
 
@@ -865,9 +838,9 @@ int IGBheader::read()
         if ( ! *pt_2 ) {
           if (!Header_Quiet)
             fprintf(stderr,
-                    "\nERROR syntax in the header (%s)\n", pt_1);
+                    "\nERREUR de syntaxe dans l'entete (%s)\n", pt_1);
           sprintf(Header_Message,
-                  "\nERROR syntax in the header (%s)\n", pt_1);
+                  "\nERREUR de syntaxe dans l'entete (%s)\n", pt_1);
           return ERR_IGB_SYNTAX;
         }
 
@@ -1048,16 +1021,16 @@ int IGBheader::read()
 
       } else {
         if( is_deprecated( pt_1 ) ){
-          fprintf(stderr,"\nATTENTION: IGB header keyword %s obsolete !\n", pt_1 ) ;
+          fprintf(stderr,"\nATTENTION: mot-clef %s obsolete !\n", pt_1 ) ;
           if( !strcmp( pt_1, "fac_t" ) ){
             v_fac_t = atof( pt_2 );
             bool_fac_t = VRAI;
           }
         } else {
           if (!Header_Quiet)
-            fprintf(stderr,"\nATTENTION: IGB header keyword %s not recognized !\n", pt_1 );
+            fprintf(stderr,"\nATTENTION: mot-clef %s non reconnu !\n", pt_1 );
           sprintf(Header_Message,
-                  "\nATTENTION: IGB header keyword %s not recognized !\n", pt_1 ) ;
+                  "\nATTENTION: mot-clef %s non reconnu !\n", pt_1 ) ;
           statut |= MOT_CLEF_INV;
         }
       }
@@ -1082,38 +1055,130 @@ int IGBheader::read()
   /* --- l'info x y et type est obligatoire --- */
   if ( !bool_x || !bool_y || !bool_type ) {
     if (!Header_Quiet)
-      fprintf(stderr, "\nERROR x, y, or type not defined\n") ;
-    sprintf(Header_Message, "\nERROR x, y, or type not defined\n") ;
+      fprintf(stderr, "\nERREUR x, y ou type non definis\n") ;
+    sprintf(Header_Message, "\nERREUR x, y ou type non definis\n") ;
     return ERR_UNDEFINED_X_Y_TYPE ;
   }
 
   /* --- calcul des inc et dim --- */
-  check_dim_consistency(x);
-  check_dim_consistency(y);
-  check_dim_consistency(z);
+  if ( bool_dim_x )
+    if ( bool_inc_x ) {
+      float dim_x = v_inc_x * v_x ;
+      if ( dim_x != v_dim_x ) {
+        if (!Header_Quiet) {
+          fprintf(stderr, "\nATTENTION:\n") ;
+          fprintf(stderr,
+              "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (%.12g)\n",
+                  v_x, v_inc_x, dim_x, v_dim_x) ;
+        }
+        sprintf(Header_Message,
+              "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (%.12g)\n",
+                v_x, v_inc_x, dim_x, v_dim_x) ;
+        statut = 1 ;
+      }
+    } else {
+      v_inc_x = v_dim_x / v_x ;
+      bool_inc_x = VRAI;
+    }
+    else {
+      v_dim_x = v_x * v_inc_x ;
+      if ( bool_inc_x ) bool_dim_x = VRAI;
+    }
+
+  if ( bool_dim_y )
+    if ( bool_inc_y ) {
+      float dim_y = v_inc_y * v_y ;
+      if ( dim_y != v_dim_y ) {
+        if (!Header_Quiet) {
+          fprintf(stderr, "\nATTENTION:\n") ;
+          fprintf(stderr,
+              "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (%.12g)\n",
+                 v_y, v_inc_y, dim_y, v_dim_y) ;
+        }
+        sprintf(Header_Message,
+              "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (%.12g)\n",
+                v_y, v_inc_y, dim_y, v_dim_y) ;
+        statut = 1 ;
+      }
+    } else {
+      v_inc_y = v_dim_y / v_y ;
+      bool_inc_y = VRAI;
+    }
+    else {
+      v_dim_y = v_y * v_inc_y ;
+      if ( bool_inc_y ) bool_dim_y = VRAI;
+    }
+
+  if ( bool_dim_z )
+    if ( bool_inc_z ) {
+      float dim_z = v_inc_z * v_z ;
+      if ( dim_z != v_dim_z ) {
+        if (!Header_Quiet) {
+          fprintf(stderr, "\nATTENTION:\n") ;
+          fprintf(stderr,
+              "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (%.12g)\n",
+                 v_z, v_inc_z, dim_z, v_dim_z) ;
+        }
+        sprintf(Header_Message,
+              "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (%.12g)\n",
+                v_z, v_inc_z, dim_z, v_dim_z) ;
+        statut = 1 ;
+      }
+    } else {
+      v_inc_z = v_dim_z / v_z ;
+      bool_inc_z = VRAI;
+    }
+    else {
+      v_dim_z = v_z * v_inc_z ;
+      if ( bool_inc_z ) bool_dim_z = VRAI;
+    }
 
   if( !bool_inc_t && bool_fac_t ) {
     bool_inc_t = VRAI;
     v_inc_t = v_fac_t;
   }
-  check_dim_consistency(t);
+  if ( bool_dim_t )
+    if ( bool_inc_t ) {
+      float dim_t = v_inc_t * (v_t-1) ;
+      if ( dim_t != v_dim_t ) {
+        if (!Header_Quiet) {
+          fprintf(stderr, "\nATTENTION:\n") ;
+          fprintf(stderr,
+              "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (%.12g)\n",
+                  v_t, v_inc_t, dim_t, v_dim_t) ;
+        }
+        sprintf(Header_Message,
+              "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (%.12g)\n",
+                v_t, v_inc_t, dim_t, v_dim_t) ;
+        v_dim_t = (v_t-1)*v_inc_t;
+        statut = 0 ;
+      }
+    } else {
+      v_inc_t = v_dim_t / (v_t - 1) ;
+      bool_inc_t = VRAI;
+    }
+    else {
+      v_dim_t = (v_t-1) * v_inc_t ;
+      if ( bool_inc_t )
+        bool_dim_t = VRAI;
+    }
 
   if ( bool_taille ) {
     if (v_type!=IGB_STRUCTURE) {
       if (!Header_Quiet)
         fprintf(stderr,
-                "\nERROR size redefined to a type other than structure\n") ;
+                "\nERREUR taille redefinie pour type autre que structure\n") ;
       sprintf(Header_Message,
-              "\nERROR size redefined to a type other than structure\n") ;
+              "\nERREUR taille redefinie pour type autre que structure\n") ;
       return ERR_SIZE_REDEFINED;
     }
   } else {
     if (v_type==IGB_STRUCTURE) {
       if (!Header_Quiet)
         fprintf(stderr,
-                "\nERROR undefined size for structure type\n") ;
+                "\nERREUR taille non definie pour type structure\n") ;
       sprintf(Header_Message,
-              "\nERROR undefined size for structure type\n") ;
+              "\nERREUR taille non definie pour type structure\n") ;
       return ERR_SIZE_NOT_DEFINED;
     } else {
       v_taille = Data_Size[v_type];
@@ -1124,14 +1189,14 @@ int IGBheader::read()
     gzseek( file, 1024, SEEK_SET );
     if (!Header_Quiet) {
       fprintf(stderr,
-              "\nATTENTION: non-standard header size: %ld \n", gztell(file));
+              "\nATTENTION: etiquette de grandeur non-standard: %ld \n", gztell(file));
     }
     sprintf(Header_Message,
-            "\nATTENTION: non-standard header size \n");
+            "\nATTENTION: etiquette de grandeur non-standard \n");
     statut |= GRANDEUR_INV;
   } else {
     sprintf(Header_Message,
-            "\nHeader_Read: Header read without problems\n");
+            "\nHeader_Read: Etiquette lue sans problemes\n");
   }
 
   if (bool_vect_z) {

@@ -10,6 +10,10 @@
 #include "Interpolator.h"
 #include "DataAllInMem.h"
 #include "ThreadedData.h"
+#ifdef USE_HDF5
+#include <hdf5.h>
+#include <ch5/ch5.h>
+#endif
 
 gzFile openFile( const char*, const char* );
 
@@ -52,6 +56,9 @@ class PPoint: public DrawingObj
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
+#ifdef USE_HDF5
+    virtual bool     read( hid_t );
+#endif
     void    register_vertex( int, vector<bool>& );
     const   GLfloat* pt( int p=0 ){ return _pts+p*3; }
     const   GLfloat* pt( int p ) const { return _pts+p*3; }
@@ -116,6 +123,9 @@ class Connection : public MultiPoint
                            int stride=1, dataOpac* dopac=NULL );
     virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){}
     virtual bool     read( const char * );
+#ifdef USE_HDF5
+    virtual bool     read( hid_t hdf_file );
+#endif
     const int *iso_polys(unsigned int index){return NULL;}
 };
 
@@ -133,6 +143,9 @@ class ContCable : public MultiPoint
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
+#ifdef USE_HDF5
+    virtual bool     read( hid_t hdf_file );
+#endif
     void             register_vertices( int, int, vector<bool>& );
     const int *iso_polys(unsigned int index){return NULL;}
 };

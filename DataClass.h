@@ -8,11 +8,12 @@
 using namespace std;
 
 enum DataReaderEnum {AllInMem, Threaded };
-enum fileType { FTIGB=1, FTascii, FTfileSeqCG, FTDynPt, FTother };
+enum fileType { FTIGB=1, FTascii, FTfileSeqCG, FTDynPt, FThdf5, FTother };
 
 fileType FileTypeFinder ( const char *fn );
-
 void CG_file_list( map<int,string>&filelist, const char *fn );
+int  parse_HDF5_grid( const char *fn, string& type, unsigned int& index );
+
 
 /** The basic class for reading data */
 template<class T>

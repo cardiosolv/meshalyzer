@@ -14,6 +14,9 @@ decl {\#include <vector>} {private local
 decl {class TBmeshWin;} {public local
 } 
 
+decl {\#include "HDF5DataBrowser.h"} {private local
+} 
+
 decl {class IsoSurface;} {public local
 } 
 
@@ -67,7 +70,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1402 58 350 650} type Double box UP_BOX
+      xywh {588 58 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -174,6 +177,11 @@ if( fn && !mwtb->readAuxGrid(tmslider,fn) ) {
 if( fn ) mwtb->read_dynamic_pts( fn, tmslider );}
             xywh {0 0 30 20}
           }
+          MenuItem hdfreadbut {
+            label {Read  HDF5 Data}
+            callback {HDF5DataBrowser *brow =  new HDF5DataBrowser( fl_file_chooser("Choose HDF5 data file", "*.datH5", NULL ), mwtb );} selected
+            xywh {0 0 30 20}
+          }
           MenuItem read_recalibrate {
             label {Recalibrate on read}
             xywh {0 0 100 20} type Toggle value 1 divider
@@ -229,7 +237,7 @@ mwtb->trackball.mouse.SetOglPosAndSize(-md, md, 2*md, 2*md );
 mwtb->trackball.size = md;
 const GLfloat* po=mwtb->model->pt_offset();
 mwtb->trackball.SetOrigin(-po[0],-po[1],-po[2]);
-mwtb->redraw();} selected
+mwtb->redraw();}
             xywh {0 0 100 20}
           }
           Submenu {} {
@@ -1536,6 +1544,11 @@ mwtb->redraw();}
         }
       }
     }
+    code {\#ifdef USE_HDF5
+hdfreadbut->activate();
+\#else
+hdfreadbut->deactivate();
+\#endif} {}
   }
   Function {outputwin( TBmeshWin *w )} {return_type void
   } {
@@ -1545,8 +1558,7 @@ mwtb->redraw();}
   }
   decl {Fl_Window* proginfo;} {public local
   }
-  Function {pickcolor(Object_t obj, const char* wintitle )} {open
-  } {
+  Function {pickcolor(Object_t obj, const char* wintitle )} {} {
     code {bool* sel=regselected();
 for( int i=0; i<reglist->nitems(); i++ )
   if( sel[i] ) { 
@@ -1616,8 +1628,7 @@ mwtb->trackball.Rotation(-view*M_PI_2,zaxis);
 
 mwtb->redraw();} {}
   }
-  Function {set_tet_region( Model *model)} {open
-  } {
+  Function {set_tet_region( Model *model)} {} {
     code {for( int i=0; i<model->_numReg; i++ ) {
   char text[256];
   sprintf( text, "%d", (model->region(i))->label() );
@@ -1632,8 +1643,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1793,8 +1803,7 @@ mshzf << "ISOSURF_COLOUR 0 = ";
 save_colour( mshzf, mwtb->isosurfwin->issColor(0) );
 mshzf << endl;} {}
   }
-  Function {save_colour( ofstream&ofs, const GLfloat *col )} {open
-  } {
+  Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
@@ -1817,8 +1826,7 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
+  Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
