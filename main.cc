@@ -180,7 +180,9 @@ static struct option longopts[] = {
 main( int argc, char *argv[] )
 {
   Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);
+#ifdef USE_HDF5
   H5Eset_auto1(NULL, NULL);// silence HDF errors
+#endif
 
   bool iconcontrols = false;
   bool no_elems     = false;

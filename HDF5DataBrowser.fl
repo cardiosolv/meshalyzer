@@ -8,7 +8,7 @@ decl {\#include "ch5/ch5.h"} {private local
 decl {\#include "TBmeshWin.h"} {public local
 } 
 
-decl {\#define CTR(A,B,C) (A-B)/2,C,(A-B)/2,"" } {local
+decl {\#define CTR(A,B,C) (A-B)/2,C,(A-B)/2,""} {private local
 } 
 
 class HDF5DataBrowser {open
@@ -53,7 +53,8 @@ dynPtBrows->select(dynPtBrows->value(),0);}
         xywh {155 510 125 30}
       }
     }
-    code {if( ch5_open( fn, &hdf_in ) ) {
+    code {\#ifdef USE_HDF5
+if( ch5_open( fn, &hdf_in ) ) {
   fl_alert( "Not a valid HDF5 file: %s", fn );
   return;
 }
@@ -117,7 +118,9 @@ for( int i=0; i<ch5s_nodal_grid_count( hdf_in ); i++ ){
   }
   ch5s_nodal_free_grid_info( &info );
 }
-hdf5dataWin->show();} {}
+hdf5dataWin->show();
+\#endif} {selected
+    }
   }
   Function {process_selections()} {open
   } {
@@ -149,8 +152,7 @@ if( ln ) {
   stringstream grid;
   grid << file << ":nodal/" << ((long)(dynPtBrows->data(ln)));
   tbmw->read_dynamic_pts( grid.str().c_str(), tbmw->contwin->tmslider );
-}} {selected
-    }
+}} {}
   }
   decl {TBmeshWin *tbmw;} {private local
   }
