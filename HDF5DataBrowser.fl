@@ -2,7 +2,10 @@
 version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "ch5/ch5.h"} {private local
+declblock {\#ifdef USE_HDF5} {open public after {\#endif}
+} {
+  decl {\#include "ch5.h"} {selected public global
+  }
 } 
 
 decl {\#include "TBmeshWin.h"} {public local
@@ -119,8 +122,7 @@ for( int i=0; i<ch5s_nodal_grid_count( hdf_in ); i++ ){
   ch5s_nodal_free_grid_info( &info );
 }
 hdf5dataWin->show();
-\#endif} {selected
-    }
+\#endif} {}
   }
   Function {process_selections()} {open
   } {
@@ -156,8 +158,11 @@ if( ln ) {
   }
   decl {TBmeshWin *tbmw;} {private local
   }
-  decl {hid_t hdf_in;} {private local
-  }
   decl {string file;} {private local
+  }
+  declblock {\#ifdef USE_HDF5} {open public after {\#endif}
+  } {
+    decl {hid_t hdf_in;} {private local
+    }
   }
 } 

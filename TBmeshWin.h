@@ -22,7 +22,9 @@
 #include "IsoSurface.h"
 #include "IsoLines.h"
 #include "TimeLink.h"
+#ifdef USE_HDF5
 #include <hdf5.h>
+#endif
 
 class Sequence;
 class HiLiteInfoWin;
