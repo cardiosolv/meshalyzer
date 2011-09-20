@@ -24,8 +24,7 @@ void cnx_convert_to_hdf5(FILE *cnx_file, hid_t file_id, char *model_name) {
     }
   }
   
-  int result = ch5m_conn_set_all(file_id, total, connections);
-  if (result == 0) {
+  if ( ch5m_conn_set_all(file_id, total, connections) ){
     fprintf(stderr, "Could not write connections.\n");
     exit(1);
   }
