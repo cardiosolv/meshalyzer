@@ -2,6 +2,8 @@ HOSTMACHINE := $(shell uname)
 
 HDF5API_ROOT  := ./hdf5api
 
+FLTK_INC      := $(shell fltk-config --use-gl --cxxflags)
+FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-gl --ldflags)
 COMMON_INC    := -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX 
 
 ifdef HDF5
@@ -13,18 +15,11 @@ LIB_CH5       :=
 LIB_HDF5      := 
 endif
 
-FLTK_INC      := $(shell fltk-config --use-gl --cxxflags)
-FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-gl --ldflags)
 COMMON_LIBS    = -lpng -lpthread -lm -lz $(LIB_HDF5) 
 
 LIBS     = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS)
 LDFLAGS  = -L$(HDF5API_ROOT)/lib
-
-ifeq ($(HOSTMACHINE),Darwin)
-CXXFLAGS = -I/usr/X11R6/include -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
-else
 CXXFLAGS = -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
-endif
 
 CPPFLAGS = $(CFLAGS) -g
 ifdef ENABLE_LOGGING

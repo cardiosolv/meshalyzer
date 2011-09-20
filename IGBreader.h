@@ -2,6 +2,7 @@
 #define IGBREADER_H
 
 #include "DataReader.h"
+#include <unistd.h>
 
 template<class T>
 class IGBreader : public DataReader<T>

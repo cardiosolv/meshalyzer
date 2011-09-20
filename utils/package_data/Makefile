@@ -4,8 +4,7 @@ CXXFLAGS     := -g -O0 -Wall -I$(HDF5API_ROOT)/src
 
 OBJ1         := $(patsubst %.c, %.o, $(wildcard *.c))
 OBJ1         += $(patsubst %.cc, %.o, $(wildcard *.cc))
-OBJS         := $(filter-out cmdline.o, $(OBJ1) ) #remove cmdline.o if present
-OBJS         += cmdline.o                         #now make sure it is there only once
+OBJS         := cmdline.o $(filter-out cmdline.o, $(OBJ1) )
 
 BINNAME      := package_data
 BINPATH      := $(BINNAME)
@@ -20,7 +19,7 @@ all: $(BINPATH)
 $(BINPATH): $(OBJS) 
 	$(CXX) $(CFLAGS) $(OBJS) $(LDFLAGS) -o $(BINPATH)
 
-cmdline.c: pd.ggo
+cmdline.h cmdline.c: pd.ggo
 	gengetopt -u < pd.ggo
 
 clean:
