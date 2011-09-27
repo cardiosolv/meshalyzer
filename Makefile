@@ -18,7 +18,7 @@ endif
 COMMON_LIBS    = -lpng -lpthread -lm -lz $(LIB_HDF5) 
 
 LIBS     = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS)
-LDFLAGS  = -L$(HDF5API_ROOT)/lib
+LDFLAGS  =  
 CXXFLAGS = -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
 
 CPPFLAGS = $(CFLAGS) -g
@@ -32,10 +32,10 @@ OBJS = $(FLTK_SOURCES:.fl=.o)\
 	$(patsubst %.c,%.o,$(wildcard *.c))\
 	$(patsubst %.C,%.o,$(wildcard *.C))
 
-all: meshalyzer $(LIB_CH5) 
+all: meshalyzer
 
 meshalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OBJS) $(LIB_CH5)
-	$(CXX) $(CFLAGS) -o meshalyzer $(sort $(OBJS)) $(LIBS)
+	$(CXX) $(LDFLAGS) -o meshalyzer $(sort $(OBJS)) $(LIBS)
 	fltk-config --post meshalyzer
 
 ifdef HDF5

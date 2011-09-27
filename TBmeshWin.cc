@@ -1090,6 +1090,7 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
       }
     }
     redraw();
+    Fl::check();
     Fl::flush();
     write_frame( foutname, w(), h(), this );
   }

@@ -23,7 +23,7 @@ class ClipPlane {open
   } {
     Fl_Window window {
       label {Clipping Plane} open
-      xywh {863 23 575 495} type Double visible
+      xywh {863 23 575 805} type Double visible
     } {
       Fl_Group Clip0 {
         label {Clipping Plane 1} open
@@ -62,7 +62,7 @@ normcb(0);}
         }
         Fl_Value_Slider intercept0 {
           label Intercept
-          callback {normcb(0);} selected
+          callback {normcb(0);}
           tooltip {control intercept of plane with axes} xywh {145 25 25 195} selection_color 10 minimum -1
         }
         Fl_Choice dispas0 {
@@ -257,11 +257,11 @@ tbmw->redraw();}
         }
       }
       Fl_Group Clip3 {
-        label {Clipping Plane 4}
+        label {Clipping Plane 4} open
         xywh {5 250 185 220} box UP_BOX align 2
       } {
         Fl_Group {} {
-          label {Plane Normal4}
+          label {Plane Normal4} open
           xywh {15 305 115 145} box UP_BOX
         } {
           Fl_Value_Input xdir3 {
@@ -487,6 +487,16 @@ tbmw->redraw();}
           }
         }
       }
+      Fl_Box cporient {
+        label label
+        xywh {140 579 130 97} box UP_BOX color 17
+        code0 {\#include "Orienter.h"}
+        class Orienter
+      }
+      Fl_Return_Button {} {
+        label button
+        xywh {245 630 66 20}
+      }
     }
     code {tbmw = tb;
 dim = 1;
@@ -529,7 +539,7 @@ else if( cp==4 )
 else if( cp==5 )
   return dispas5->value()>0;} {}
   }
-  Function {plane(int cp)} {open return_type {GLdouble*}
+  Function {plane(int cp)} {return_type {GLdouble*}
   } {
     code {return x[cp];} {}
   }
@@ -539,6 +549,7 @@ else if( cp==5 )
   x[cp][0] = xdir0->value();
   x[cp][1] = ydir0->value(); 
   x[cp][2] = zdir0->value();
+  calc_intercept(cp);
   x[cp][3] = intercept0->value()*dim+ctr_intercept[0];
   if( drawIntercept(0) ) tbmw->determine_cutplane( 0 );
   if( dispas0->value()>0 ) tbmw->redraw();
@@ -546,6 +557,7 @@ else if( cp==5 )
   x[cp][0] = xdir1->value();
   x[cp][1] = ydir1->value();
   x[cp][2] = zdir1->value();
+  calc_intercept(cp);
   x[cp][3] = intercept1->value()*dim+ctr_intercept[1];
   if( drawIntercept(1) ) tbmw->determine_cutplane( 1 );
   if( dispas1->value()>0 ) tbmw->redraw();
@@ -553,6 +565,7 @@ else if( cp==5 )
   x[cp][0] = xdir2->value();
   x[cp][1] = ydir2->value();
   x[cp][2] = zdir2->value();
+  calc_intercept(cp);
   x[cp][3] = intercept2->value()*dim+ctr_intercept[2];
   if( drawIntercept(2) ) tbmw->determine_cutplane( 2 );
   if( dispas2->value()>0 ) tbmw->redraw();
@@ -560,6 +573,7 @@ else if( cp==5 )
   x[cp][0] = xdir3->value();
   x[cp][1] = ydir3->value();
   x[cp][2] = zdir3->value();
+  calc_intercept(cp);
   x[cp][3] = intercept3->value()*dim+ctr_intercept[3];
   if( drawIntercept(3) ) tbmw->determine_cutplane( 3 );
   if( dispas3->value()>0 ) tbmw->redraw();
@@ -567,6 +581,7 @@ else if( cp==5 )
   x[cp][0] = xdir4->value();
   x[cp][1] = ydir4->value();
   x[cp][2] = zdir4->value();
+  calc_intercept(cp);
   x[cp][3] = intercept4->value()*dim+ctr_intercept[4];
   if( drawIntercept(4) ) tbmw->determine_cutplane( 4 );
   if( dispas4->value()>0 ) tbmw->redraw();
@@ -574,6 +589,7 @@ else if( cp==5 )
   x[cp][0] = xdir5->value();
   x[cp][1] = ydir5->value();
   x[cp][2] = zdir5->value();
+  calc_intercept(cp);
   x[cp][3] = intercept5->value()*dim+ctr_intercept[5];
   if( drawIntercept(5) ) tbmw->determine_cutplane( 5 );
   if( dispas5->value()>0 ) tbmw->redraw();
@@ -608,7 +624,7 @@ else if( cp==4 )
 else if( cp==5 )
   return dispas5->value()==2;} {}
   }
-  Function {flip(int cp)} {private return_type void
+  Function {flip(int cp)} {open private return_type void
   } {
     code {if( cp==0 ) {
   xdir0->value(-xdir0->value());
@@ -643,11 +659,11 @@ else if( cp==5 )
 }
 normcb(cp);} {}
   }
-  Function {drawIntercept( int cp, bool b )} {open private
+  Function {drawIntercept( int cp, bool b )} {private
   } {
     code {intercept[cp] = b;} {}
   }
-  Function {drawIntercept( int cp )} {open return_type bool
+  Function {drawIntercept( int cp )} {return_type bool
   } {
     code {return intercept[cp];} {}
   }
@@ -698,13 +714,17 @@ CHECK_CP(3);
 CHECK_CP(4);
 CHECK_CP(5);} {}
   }
-  Function {calc_intercept()} {open
+  Function {calc_intercepts()} {open
   } {
     code {for( int i=0; i<6; i++ ){
-  const GLfloat* ctr = tbmw->model->pt_offset();
-  ctr_intercept[i] = -(ctr[0]*x[i][0]+ctr[1]*x[i][1]+ctr[2]*x[i][2]);
+  calc_intercept(i);
   normcb(i);
 }} {}
+  }
+  Function {calc_intercept( int i )} {open selected private
+  } {
+    code {const GLfloat* ctr = tbmw->model->pt_offset();
+ctr_intercept[i] = -(ctr[0]*x[i][0]+ctr[1]*x[i][1]+ctr[2]*x[i][2]);} {}
   }
 } 
 

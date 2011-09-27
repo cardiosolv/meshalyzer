@@ -283,7 +283,7 @@ main( int argc, char *argv[] )
       win.trackballwin->get_data(argv[i], control.tmslider );
   }
 
-  win.trackballwin->cplane->calc_intercept();
+  win.trackballwin->cplane->calc_intercepts();
   win.trackballwin->show();
 
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
