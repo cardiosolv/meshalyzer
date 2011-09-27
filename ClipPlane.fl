@@ -22,11 +22,11 @@ class ClipPlane {open
   Function {ClipPlane( TBmeshWin *tb )} {open
   } {
     Fl_Window window {
-      label {Clipping Plane} open
-      xywh {863 23 575 805} type Double visible
+      label {Clipping Plane} open selected
+      xywh {1237 131 575 495} type Double visible
     } {
       Fl_Group Clip0 {
-        label {Clipping Plane 1} open
+        label {Clipping Plane 1}
         xywh {5 20 185 220} box UP_BOX
       } {
         Fl_Group {} {
@@ -257,7 +257,7 @@ tbmw->redraw();}
         }
       }
       Fl_Group Clip3 {
-        label {Clipping Plane 4} open
+        label {Clipping Plane 4}
         xywh {5 250 185 220} box UP_BOX align 2
       } {
         Fl_Group {} {
@@ -487,16 +487,6 @@ tbmw->redraw();}
           }
         }
       }
-      Fl_Box cporient {
-        label label
-        xywh {140 579 130 97} box UP_BOX color 17
-        code0 {\#include "Orienter.h"}
-        class Orienter
-      }
-      Fl_Return_Button {} {
-        label button
-        xywh {245 630 66 20}
-      }
     }
     code {tbmw = tb;
 dim = 1;
@@ -721,7 +711,7 @@ CHECK_CP(5);} {}
   normcb(i);
 }} {}
   }
-  Function {calc_intercept( int i )} {open selected private
+  Function {calc_intercept( int i )} {open private
   } {
     code {const GLfloat* ctr = tbmw->model->pt_offset();
 ctr_intercept[i] = -(ctr[0]*x[i][0]+ctr[1]*x[i][1]+ctr[2]*x[i][2]);} {}
