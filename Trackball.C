@@ -35,6 +35,8 @@ void Trackball::DoTransform() {
   glMultMatrixf(m4fRot.m);
   // move origin
   glTranslatef(p3f_origin.X(), p3f_origin.Y(), p3f_origin.Z());
+  
+  transformed = true;
 } // DoTransform
 
 // update the trackball state using the current mouse state
@@ -82,7 +84,8 @@ void Trackball::Update() {
   default:
     //qRot = qSpin * qRot;
 	break;
-  }   
+  }
+  transformed = !isChanged;
 } // Update
   
 // Implementation of a virtual trackball.  Original code by Gavin Bell, lots

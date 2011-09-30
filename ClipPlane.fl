@@ -17,20 +17,29 @@ decl {\#define READ_CP(A,S) {double val; S>>val; xdir\#\#A->value(val); S>>val; 
 decl {\#define CHECK_CP(A) {int val=dispas\#\#A->value();if(val==3||val==4)tbmw->determine_cutplane(A);}} {private local
 } 
 
+decl {class Orienter;} {public global
+} 
+
 class ClipPlane {open
 } {
   Function {ClipPlane( TBmeshWin *tb )} {open
   } {
     Fl_Window window {
-      label {Clipping Plane} open selected
-      xywh {1237 131 575 495} type Double visible
+      label {Clipping Plane} open
+      xywh {405 23 575 685} type Double visible
     } {
+      Fl_Box cporienter {
+        label Box
+        xywh {190 490 190 190} box UP_BOX
+        code0 {\#include "Orienter.h"}
+        class Orienter
+      }
       Fl_Group Clip0 {
-        label {Clipping Plane 1}
+        label {Clipping Plane 1} open
         xywh {5 20 185 220} box UP_BOX
       } {
         Fl_Group {} {
-          label {Plane Normal1}
+          label {Plane Normal1} open
           xywh {15 75 115 145} box UP_BOX
         } {
           Fl_Value_Input xdir0 {
@@ -487,6 +496,41 @@ tbmw->redraw();}
           }
         }
       }
+      Fl_Group {} {
+        label {Clipping plane} open
+        xywh {105 520 70 160} box SHADOW_BOX
+      } {
+        Fl_Round_Button {} {
+          label 1
+          callback {select_cp(0);}
+          xywh {115 530 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+        }
+        Fl_Round_Button {} {
+          label 2
+          callback {select_cp(1);}
+          xywh {115 555 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+        }
+        Fl_Round_Button {} {
+          label 3
+          callback {select_cp(2);}
+          xywh {115 580 45 15} type Radio down_box ROUND_DOWN_BOX value 1 labelsize 18
+        }
+        Fl_Round_Button {} {
+          label 4
+          callback {select_cp(3);}
+          xywh {115 605 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+        }
+        Fl_Round_Button {} {
+          label 5
+          callback {select_cp(4);}
+          xywh {115 630 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+        }
+        Fl_Round_Button {} {
+          label 6
+          callback {select_cp(5);} selected
+          xywh {115 650 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+        }
+      }
     }
     code {tbmw = tb;
 dim = 1;
@@ -502,7 +546,9 @@ x[5][2] = -1;
 
 for( int i=0; i<6; i++ ){
   intercept[i] = 0;
-}} {}
+}
+Clip2->color(FL_LIGHT2);
+window->user_data(this);} {}
   }
   decl {GLdouble x[6][4];} {private local
   }
@@ -529,11 +575,11 @@ else if( cp==4 )
 else if( cp==5 )
   return dispas5->value()>0;} {}
   }
-  Function {plane(int cp)} {return_type {GLdouble*}
+  Function {plane(int cp)} {open return_type {GLdouble*}
   } {
     code {return x[cp];} {}
   }
-  Function {normcb( int cp)} {open private return_type void
+  Function {normcb( int cp)} {return_type void
   } {
     code {if( !cp ) {
   x[cp][0] = xdir0->value();
@@ -647,7 +693,11 @@ else if( cp==5 )
   zdir5->value(-zdir5->value());
   intercept5->value(-intercept5->value());
 }
-normcb(cp);} {}
+normcb(cp);
+if( cp==cporienter->cp() ){
+  cporienter->cp(cp);
+  cporienter->redraw();
+}} {}
   }
   Function {drawIntercept( int cp, bool b )} {private
   } {
@@ -704,22 +754,85 @@ CHECK_CP(3);
 CHECK_CP(4);
 CHECK_CP(5);} {}
   }
-  Function {calc_intercepts()} {open
-  } {
+  Function {calc_intercepts()} {} {
     code {for( int i=0; i<6; i++ ){
   calc_intercept(i);
   normcb(i);
 }} {}
   }
-  Function {calc_intercept( int i )} {open private
+  Function {calc_intercept( int i )} {private
   } {
     code {const GLfloat* ctr = tbmw->model->pt_offset();
 ctr_intercept[i] = -(ctr[0]*x[i][0]+ctr[1]*x[i][1]+ctr[2]*x[i][2]);} {}
   }
-} 
-
-decl {\#include <iostream>} {private local
-} 
-
-decl {using namespace std;} {private local
+  Function {update_dir( double x, double y, double z, int cp)} {} {
+    code {if( cp==0 ) {
+  xdir0->value(x);
+  ydir0->value(y);
+  zdir0->value(z);
+} else if( cp==1 ){
+  xdir1->value(x);
+  ydir1->value(y);
+  zdir1->value(z);
+} else if( cp==2 ){
+  xdir2->value(x);
+  ydir2->value(y);
+  zdir2->value(z);
+}else if( cp==3 ){
+  xdir3->value(x);
+  ydir3->value(y);
+  zdir3->value(z);
+} else if( cp==4 ){
+  xdir4->value(x);
+  ydir4->value(y);
+  zdir4->value(z);
+}else if( cp==5 ){
+  xdir5->value(x);
+  ydir5->value(y);
+  zdir5->value(z);
+}
+normcb(cp);} {}
+  }
+  Function {darken_bgs()} {} {
+    code {Clip0->color(FL_GRAY);
+Clip1->color(FL_GRAY);
+Clip2->color(FL_GRAY);
+Clip3->color(FL_GRAY);
+Clip4->color(FL_GRAY);
+Clip5->color(FL_GRAY);
+Clip0->redraw();
+Clip1->redraw();
+Clip2->redraw();
+Clip3->redraw();
+Clip4->redraw();
+Clip5->redraw();} {}
+  }
+  Function {setView( Quaternion r )} {} {
+    code {if( cporienter->setView( r ) )
+  cporienter->redraw();} {}
+  }
+  Function {select_cp( int cp )} {} {
+    code {darken_bgs();
+cporienter->cp(cp);
+if( cp==0 ) {
+  Clip0->color(FL_LIGHT2);
+  Clip0->redraw();
+} else if( cp==1 ) {
+  Clip1->color(FL_LIGHT2);
+  Clip1->redraw();
+} else if( cp==2 ) {
+  Clip2->color(FL_LIGHT2);
+  Clip2->redraw();
+} else if( cp==3 ) {
+  Clip3->color(FL_LIGHT2);
+  Clip3->redraw();
+} else if( cp==4 ) {
+  Clip4->color(FL_LIGHT2);
+  Clip4->redraw();
+} else if( cp==5 ) {
+  Clip5->color(FL_LIGHT2);
+  Clip5->redraw();
+}
+cporienter->redraw();} {}
+  }
 } 

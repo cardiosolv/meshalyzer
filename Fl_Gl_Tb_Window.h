@@ -28,8 +28,8 @@ class Fl_Gl_Tb_Window : public Fl_Gl_Window
 
     void DoTransform(); // Call this from draw() to transform the view
   protected:
-    int handle(int);
-	void draw(){}
+    virtual int handle(int);
+	virtual void draw(){}
 
   public:
     Mouse mouse;

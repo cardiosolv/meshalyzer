@@ -33,6 +33,7 @@ class Trackball
     Quaternion qRot;        // quaternion total rotation
     bool isSpinning;         // if the user did a SPIN
     bool isChanged;          // if the view changed
+    bool transformed;        // if the transform has been applied
   public:
     static void	Demo (int argc, char *argv[]);
     inline Trackball (Mouse & m) : mouse(m) { Reset(); }
@@ -44,6 +45,7 @@ class Trackball
       size = 1; scale=1; v3f_trans(0,0,0); p3f_origin(0,0,0); qSpin(1,0,0,0); qRot(1,0,0,0);
       isSpinning = false;
       isChanged = true;
+      transformed = true;
       return *this;
     }
     friend ostream & operator << (ostream & os, Trackball & trackball) { return trackball.Ostream(os); }
@@ -67,6 +69,7 @@ class Trackball
     // trackball/scene rotation (angle assumed in [-pi, +pi])
     inline void  SetRotation(float angle, V3f & axis) { qRot.SetRotationAboutAxis(angle, axis);  }
     inline void  Rotation(float angle, V3f & axis) {  qSpin.SetRotationAboutAxis(angle, axis);qRot = qSpin*qRot; }
+    inline void  Rotation(Quaternion spin) { qRot = spin*qRot; }
     inline const Quaternion & GetRotation( ) { return qRot; }
     // trackball/scene translation
     inline void  SetTranslation(float x, float y, float z) { v3f_trans(x, y, z); }

@@ -296,6 +296,7 @@ void TBmeshWin :: draw()
     } else
       glDisable( CLIP_PLANE[i] );
   }
+  cplane->setView( trackball.qRot );
 
   // since it is really slow to draw tetras, don't draw them if we are
   // moving the trackball
@@ -1515,7 +1516,7 @@ void TBmeshWin::draw_clip_plane( int cp )
 
   GLfloat vert[3];
   int v0, v1, vf;
-  if ( fabs(x[2])>fabs(x[0]) && fabs(x[2])>fabs(x[1]) ) {// mostly in z-direction
+  if ( fabs(x[2])>fabs(x[0]) && fabs(x[2])>fabs(x[1]) ) {//mostly in z-direction
     v0 = 0; v1 = 1; vf = 2;
   } else if ( fabs(x[1]) > fabs(x[0]) ) {	// mostly in y direction
     v0 = 2; v1 = 0; vf = 1;

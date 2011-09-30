@@ -25,6 +25,14 @@ class Quaternion
 switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: return z;}
       ; return 0;
     }
+    inline bool operator == ( Quaternion &q ) const
+    {
+      return w==q.w && x==q.x && y==q.y && z==q.z;
+    }
+    inline bool operator != ( Quaternion &q ) const
+    {
+      return w!=q.w || x!=q.x || y!=q.y || z!=q.z;
+    }
     inline const float & operator [] (int index) const
     {
       assert(index < 0 && index < 4);
@@ -37,7 +45,9 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
       return os;
     }
     inline float Length() { return sqrt(w*w + x*x + y*y + z*z); }
-    inline void Normalize() { float l=Length(); w/=l; x/=l; y/=l; z/=l; }
+    inline Quaternion & Normalize() { 
+      float l=Length(); w/=l; x/=l; y/=l; z/=l;return *this; 
+    }
     inline void SetRotationAboutAxis(float angle, V3f & axis)
     {
       w = cos(angle / 2.); float s=sin(angle/2.);
@@ -45,10 +55,14 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
       x = s*axis.X();  y = s*axis.Y();  z = s*axis.Z();
     }
     inline void SetConjugate() { x=-x; y=-y; z=-z; }
-    inline const Quaternion GetConjugate() const { return Quaternion(w,-x,-y,-z); }
-
-    inline const Quaternion operator * (const Quaternion & q) const { return Muliply(q); }
-    inline const Quaternion Mul        (const Quaternion & q) const { return Muliply(q); }
+    inline const Quaternion GetConjugate() const {
+      return Quaternion(w,-x,-y,-z); 
+    }
+    inline const Quaternion operator * (const Quaternion & q) const 
+    { 
+      return Muliply(q); 
+    }
+    inline const Quaternion Mul(const Quaternion & q) const { return Muliply(q);}
     inline const Quaternion Muliply(const Quaternion & q) const
     {
       return  Quaternion(w*q.w - x*q.x - y*q.y - z*q.z,
