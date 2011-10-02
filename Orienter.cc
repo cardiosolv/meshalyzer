@@ -4,18 +4,18 @@ void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
                                          GLfloat stick_rad, GLfloat head_rad );
 
 Orienter::Orienter(int x, int y, int w, int h, const char *l )
-    : Fl_Gl_Tb_Window(x, y, w, h, l),_cp(2)
+    : Fl_Gl_Tb_Window(x, y, w, h, l),_cp(2),_dl(0)
 {
   gluobj = gluNewQuadric();
   gluQuadricDrawStyle( gluobj, GLU_FILL );
   gluQuadricOrientation(gluobj, GLU_INSIDE);
   cp(_cp);
+  redraw();
 }
 
 void
 Orienter:: draw()
 { 
-  //valid(1);
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
@@ -37,30 +37,71 @@ Orienter:: draw()
   // not if the model was rotated
   if( !trackball.transformed ){ 
     GLdouble *x = static_cast<ClipPlane*>(parent()->user_data())->plane(_cp);
-    Quaternion pcoeff(0, x[0], x[1], x[2]);
-    pcoeff.Normalize();
-    Quaternion newpcoeff= trackball.qSpin*pcoeff*trackball.qSpin.GetConjugate();
-    ((ClipPlane *)(parent()->user_data()))->update_dir( newpcoeff.x,
-    newpcoeff.y, newpcoeff.z,_cp );
+    Quaternion cp_norm(0, x[0], x[1], x[2]);
+    cp_norm.Normalize();
+    Quaternion new_norm= trackball.qSpin*cp_norm*trackball.qSpin.GetConjugate();
+    ((ClipPlane *)(parent()->user_data()))->update_dir( new_norm.x,
+                                           new_norm.y, new_norm.z, _cp );
   }
   
   trackball.Rotation(_view); // adjust for model rotation
   trackball.DoTransform();
 
-  // draw cliiping plane
-  glColor4f( 0, 1, 0, 0.2 );
-  glBegin(GL_QUADS);
-  glVertex3f(-1, -1, 0 );
-  glVertex3f(-1,  1, 0 );
-  glVertex3f( 1,  1, 0 );
-  glVertex3f( 1, -1, 0 );
-  glEnd();
-  //draw the arrow
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT1);
-  glColor3f( 0, 0, 1 );
-  glTranslatef( 0, 0, -1 );
-  draw_arrow( gluobj, 1.6, 0.4, 0.1, 0.2 );
+  // mae a displaylist the first time through
+  if(!_dl) {
+    _dl = glGenLists(1);
+#ifdef DRAW_SQUARE_PLANE
+    //draw clipping plane
+    glColor4f( 0, 1, 0, 0.2 );
+    glBegin(GL_QUADS);
+    glVertex3f(-1, -1, 0 );
+    glVertex3f(-1,  1, 0 );
+    glVertex3f( 1,  1, 0 );
+    glVertex3f( 1, -1, 0 );
+    glEnd();
+#else // draw sphere 
+    glNewList(_dl, GL_COMPILE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glColor3f( 0, 0, 0 );
+    glBegin(GL_POLYGON);
+    for( float i=0; i<360; i+=5 ) 
+      glVertex3f( 0, cos(i*M_PI/180.), sin(i/180*M_PI) );
+    glEnd();
+    glBegin(GL_POLYGON);
+    for( float i=0; i<360; i+=5 ) 
+      glVertex3f( cos(i/180*M_PI), 0, sin(i/180*M_PI) );
+    glEnd();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glBegin(GL_POLYGON);
+    for( float i=0; i<360; i+=5 ) 
+      glVertex3f( cos(i/180*M_PI), sin(i/180*M_PI), 0 );
+    glEnd();
+    glColor4f( 0, 1, 0, 0.2 );
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glBegin(GL_POLYGON);
+    for( float i=0; i<360; i+=5 ) 
+      glVertex3f( cos(i/180*M_PI), sin(i/180*M_PI), 0 );
+    glEnd();
+#endif
+    //draw arrow
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT1);
+    GLfloat ambient0[] = { 0., 0., 0., 1. };
+    GLfloat diffuse0[] = { 0.1, 0.1, 0.1, 1. };
+    GLfloat specular0[] = { 1., 0., 0., 1. };
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular0);
+    glMaterialfv(GL_FRONT, GL_SHININESS, specular0);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse0);
+    glLightfv(GL_LIGHT1, GL_AMBIENT, ambient0);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse0);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, specular0);
+    glColor3f( 1, 0, 0 );
+    glTranslatef( 0, 0, -1 );
+    draw_arrow( gluobj, 1.6, 0.4, 0.1, 0.2 );
+    glEndList();
+  } 
+  glCallList(_dl);
+
   glPopMatrix();
 
   trackball.Rotation(_view.GetConjugate()); // remove model rotation

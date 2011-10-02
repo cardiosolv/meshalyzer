@@ -420,7 +420,7 @@ tbmw->redraw();}
         }
       }
       Fl_Group Clip5 {
-        label {Clipping Plane 6}
+        label {Clipping Plane 6} open
         xywh {385 250 185 220} box UP_BOX align 2
       } {
         Fl_Group {} {
@@ -660,7 +660,7 @@ else if( cp==4 )
 else if( cp==5 )
   return dispas5->value()==2;} {}
   }
-  Function {flip(int cp)} {open private return_type void
+  Function {flip(int cp)} {private return_type void
   } {
     code {if( cp==0 ) {
   xdir0->value(-xdir0->value());
