@@ -5,7 +5,7 @@
 
 #ifndef COLOURSCALE_INC
 #define COLOURSCALE_INC
-#include <GL/gl.h>
+#include <FL/gl.h>
 #include <math.h>
 
 typedef enum {

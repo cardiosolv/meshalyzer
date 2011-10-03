@@ -7,10 +7,13 @@
 #ifndef VECDATA_H
 #define VECDATA_H
 
-#include <GL/gl.h>
-#include <GL/glu.h>
 #include "Colourscale.h"
 
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
+#include <GL/glu.h>
+#endif
 
 #ifdef USE_HDF5
 #include "ch5/ch5.h"

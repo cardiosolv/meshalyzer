@@ -1,9 +1,12 @@
 #ifndef ORIENTER_H
 #define ORIENTER_H
 
-#include <FL/Fl.H>
-#include <GL/gl.h>
+#include <FL/gl.h>
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
 #include <GL/glu.h>
+#endif
 #include <FL/Fl_Double_Window.H>
 #include "drawgl.h"
 

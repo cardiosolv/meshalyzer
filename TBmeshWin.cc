@@ -6,7 +6,6 @@
 #include <fstream>
 #include <sstream>
 #include <set>
-#include <GL/glu.h>
 #ifdef __WIN32__
 #  include <GL/glext.h>
 #endif

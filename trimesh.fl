@@ -5,7 +5,7 @@ code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
 } 
 
-decl {\#include <GL/gl.h>} {public local
+decl {\#include <FL/gl.h>} {selected public local
 } 
 
 decl {\#include <vector>} {private local
@@ -70,7 +70,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {588 58 350 650} type Double box UP_BOX
+      xywh {743 44 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -179,7 +179,7 @@ if( fn ) mwtb->read_dynamic_pts( fn, tmslider );}
           }
           MenuItem hdfreadbut {
             label {Read  HDF5 Data}
-            callback {HDF5DataBrowser *brow =  new HDF5DataBrowser( fl_file_chooser("Choose HDF5 data file", "*.datH5", NULL ), mwtb );} selected
+            callback {HDF5DataBrowser *brow =  new HDF5DataBrowser( fl_file_chooser("Choose HDF5 data file", "*.datH5", NULL ), mwtb );}
             xywh {0 0 30 20}
           }
           MenuItem read_recalibrate {

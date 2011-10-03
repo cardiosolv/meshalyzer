@@ -15,8 +15,9 @@
 #include <ch5/ch5.h>
 #endif
 
-static Meshwin win;
 static Controls *ctrl_ptr;
+static Meshwin  *win_ptr;
+
 sem_t *meshProcSem;               // global semaphore for temporal linking
 sem_t *linkingProcSem;  // global semaphore for process linking
 
@@ -37,7 +38,7 @@ void animate_signal( int sig, siginfo_t *si, void *v )
   if( newtm> ctrl_ptr->tmslider->maximum() )
     newtm = 0;
 
-  win.trackballwin->set_time( newtm );
+  win_ptr->trackballwin->set_time( newtm );
   ctrl_ptr->tmslider->value(newtm);
 
   sem_post( meshProcSem );
@@ -58,7 +59,7 @@ void process_linkage_signal( int sig, siginfo_t *si, void *v )
     return;
   }
 
-  win.trackballwin->CheckMessageQueue();  
+  win_ptr->trackballwin->CheckMessageQueue();  
 
   // receive msg
   sem_post( linkingProcSem );
@@ -184,6 +185,7 @@ main( int argc, char *argv[] )
   H5Eset_auto1(NULL, NULL);// silence HDF errors
 #endif
 
+
   bool iconcontrols = false;
   bool no_elems     = false;
   char *PNGfile     = NULL;
@@ -213,6 +215,8 @@ main( int argc, char *argv[] )
 
   Controls control;
   ctrl_ptr = &control;
+  Meshwin win;
+  win_ptr = &win;
 
   int model_index=optind;
   while( model_index<argc && argv[model_index][0]=='-' )
