@@ -138,9 +138,9 @@ Orienter :: handle( int event )
 }
 
 
-/** work on a new cliiping plane
+/** work on a new clipping plane
  *
- * \param cp cliiping plane
+ * \param cp clipping plane
  */
 void 
 Orienter :: cp( int cp )

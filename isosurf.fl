@@ -5,7 +5,7 @@ code_name {.cc}
 decl {\#include "TBmeshWin.h"} {public global
 } 
 
-decl {\#include <FL/gl.h>} {selected public global
+decl {\#include <FL/gl.h>} {public global
 } 
 
 decl {\#include <FL/Fl_Color_Chooser.H>} {private global
@@ -18,7 +18,7 @@ class IsosurfControl {open
   Function {IsosurfControl(TBmeshWin *tb)} {open
   } {
     Fl_Window isowin {open
-      xywh {799 44 305 270} type Double visible
+      xywh {445 37 305 295} type Double visible
     } {
       Fl_Group {} {
         label {Isosurface 0} open
@@ -57,40 +57,43 @@ if( isoOn0->value() )
       }
       Fl_Group {} {
         label Isolines open
-        xywh {5 135 290 125} box UP_BOX labeltype EMBOSSED_LABEL labelsize 16 align 17
+        xywh {10 135 290 150} box UP_BOX labeltype EMBOSSED_LABEL labelsize 16 align 17
       } {
         Fl_Light_Button isolineOn {
           label on
           callback {mwtb->redraw();}
-          xywh {20 165 45 30}
+          xywh {25 165 65 30}
         }
         Fl_Value_Input isolineVal0 {
           label {start value:}
           callback {_islDirty = true;
+isoinc->value((isolineVal1->value()-isolineVal0->value())/(float)(isoNumLines->value()-1.));
 if( isolineOn->value() ) mwtb->redraw();}
-          xywh {220 161 60 29} when 4
+          xywh {225 161 60 29} when 4
         }
         Fl_Value_Input isolineVal1 {
           label {end value:}
           callback {_islDirty = true;
+isoinc->value((isolineVal1->value()-isolineVal0->value())/(isoNumLines->value()-1.));
 if( isolineOn->value() ) mwtb->redraw();}
-          xywh {220 191 60 29} when 4
+          xywh {225 191 60 29} when 4
         }
         Fl_Spinner isoNumLines {
           label {\#lines:}
           callback {_islDirty = true;
-if( isolineOn->value() ) mwtb->redraw();}
-          xywh {220 221 60 24}
+isoinc->value((isolineVal1->value()-isolineVal0->value())/(isoNumLines->value()-1.));
+if( isolineOn->value() ) mwtb->redraw();} selected
+          xywh {225 221 60 24}
         }
         Fl_Spinner isolineThick {
           label thickness
           callback {if( isolineOn->value() ) mwtb->redraw();}
-          xywh {25 221 60 24} align 5 minimum 0
+          xywh {25 251 60 24} align 5 minimum 0
         }
         Fl_Light_Button islDatify {
           label datified
           callback {if( isolineOn->value() ) mwtb->redraw();}
-          xywh {75 165 68 30}
+          xywh {25 200 65 30}
         }
         Fl_Button islcol {
           label colour
@@ -101,7 +104,11 @@ if(fl_color_chooser( "Isoline",r,g,b ) ){
   _islColor[2] = b;
   if( isolineOn->value() ) mwtb->redraw();
 }}
-          xywh {95 216 55 29}
+          xywh {100 200 50 30}
+        }
+        Fl_Value_Output isoinc {
+          label {increment:}
+          tooltip {increment between isolines} xywh {200 248 87 27} color 3 selection_color 17
         }
       }
     }
