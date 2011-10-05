@@ -18,7 +18,8 @@ class  Orienter : public Fl_Gl_Tb_Window
         GLUquadricObj* gluobj;
         int           _cp; //current clipping plane
         Quaternion    _view;
-        GLuint       _dl;
+        GLuint        _dl;
+        void           init_graphics();
     public:
         Orienter(int x, int y, int w, int h, const char *l = 0);
         virtual ~Orienter(){}
