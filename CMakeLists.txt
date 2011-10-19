@@ -73,6 +73,7 @@ plottingwin.fl
 Sequence.fl
 trimesh.fl
 TimeLink.fl
+HDF5DataBrowser.fl
 )
 
 add_executable(meshalyzer
@@ -115,6 +116,7 @@ VecData.cc
 Vector3D.C
 Vector4D.C
 GLee.c
+Orienter.cc
 )
 
 install(TARGETS meshalyzer RUNTIME DESTINATION bin)
