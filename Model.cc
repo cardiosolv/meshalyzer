@@ -669,6 +669,10 @@ int Model::add_surface_from_surf( const char *fn )
         return surfnum;
       }
       _surface.back()->ele(i)->define(nl);
+      if( !check_element( _surface.back()->ele(i) ) )  {
+        _surface.pop_back();
+        return surfnum;
+      }
       _surface.back()->ele(i)->compute_normals(0,0);
     }
     _surface.back()->determine_vert_norms( pt );
@@ -735,6 +739,10 @@ int Model::add_surface_from_tri( const char *fn )
           return surfnum;
         }
         _surface.back()->ele(i)->define(nl);
+        if( !check_element( _surface.back()->ele(i) ) ) {
+          _surface.pop_back();
+          return surfnum;
+        }
         _surface.back()->ele(i)->compute_normals(0,0);
       }
       _surface.back()->determine_vert_norms( pt );
@@ -1468,6 +1476,18 @@ bool Model :: read_instance( gzFile pt_in, gzFile elem_in )
     free( Cxpt );
   }
   determine_regions();
+  return true;
+}
+
+
+bool
+Model::check_element( SurfaceElement *e )
+{
+  const int *n=e->obj();
+  for( int i=0; i<e->ptsPerObj(); i++ )
+    if( n[i] >= pt.num() )
+      return false;
+
   return true;
 }
 

@@ -824,7 +824,8 @@ int TBmeshWin :: add_surface( const char *fn )
 {
   int nsa; 
   if ( (nsa=model->add_surface_from_tri( fn ))<=0 )
-    nsa = model->add_surface_from_surf( fn );
+    if( (nsa=model->add_surface_from_surf( fn )) <= 0 )
+      fl_alert( "Incompatible surface found in %s", fn );
   return nsa;
 }
 

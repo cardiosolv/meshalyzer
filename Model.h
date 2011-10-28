@@ -100,6 +100,7 @@ class Model
     void             add_surfaces(int *elements, int count, int max_width, char *name);
 #endif
     int              add_surface_from_elem( const char *fn );
+    bool             check_element( SurfaceElement *e );
     
     
     vector<bool>     allvis;
