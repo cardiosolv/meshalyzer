@@ -782,12 +782,28 @@ void  TBmeshWin::set_windows( Fl_Window *flwindow, const char *modname )
 void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt, 
 		bool no_elems, bool base1 )
 {
-  if ( fnt == NULL ) {
-    fnt = fl_file_chooser( "Pick one", "*.pts*", NULL );
+  if ( fnt == NULL || !strlen(fnt) ) {
+      
+    // if available, go to the first Model Dir directory
+    char  cdir[8192] = {0}, *moddir=NULL;
+    if( getenv("MESHALYZER_MODEL_DIR") ) {
+      moddir = strdup( getenv("MESHALYZER_MODEL_DIR") );
+      char *p = strchr( moddir, ':' );
+      if( p ) p = '\0';
+    }
+    
+    Fl_File_Chooser modchooser( moddir, "*.pts*", Fl_File_Chooser::SINGLE, "Pick one" ); 
+    modchooser.show();
+    while( modchooser.shown() )
+      Fl::wait();
+
+    fnt = modchooser.value();
     if (fnt == NULL) {
       fprintf(stderr, "No file selected.  Exiting.\n");
       exit(0);
     }
+    else
+      fnt = strdup( fnt );
   }
 
   if ( !model->read( fnt, base1, no_elems ) ) return;

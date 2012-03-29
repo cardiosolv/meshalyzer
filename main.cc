@@ -83,6 +83,39 @@ read_version_info( Fl_Text_Display *txt )
 }
 
 
+/* find out where model is located
+ *
+ * \param fn specified file name
+ *
+ * \return path to the model
+ */
+string
+find_model_dir( string fn )
+{
+  if( fn.empty() ) return "";
+
+  if( ifstream(fn.c_str()) ) return fn;
+  if( ifstream((fn+"pts").c_str()) ) return fn;
+  if( ifstream((fn+"pts.gz").c_str()) ) return fn;
+  if( ifstream((fn+".pts").c_str()) ) return fn;
+  if( ifstream((fn+".pts.gz").c_str()) ) return fn;
+  if( fn.at(0) == '/' ) return "";
+
+  char *path_var = strdup(getenv("MESHALYZER_MODEL_DIR"));
+  char *ptr = strtok( path_var, ":" );
+  while( ptr ) {
+    string filename = ptr;
+    filename += "/" + fn;
+    if( ifstream(filename.c_str()) ) return filename;
+    if( ifstream((filename+"pts").c_str()) ) return filename;
+    if( ifstream((filename+"pts.gz").c_str()) ) return filename;
+    if( ifstream((filename+".pts").c_str()) ) return filename;
+    if( ifstream((filename+".pts.gz").c_str()) ) return filename;
+  }
+  return "";
+}
+
+
 /* read in a CG (CoolGraphics) input file
  *
  * \param fin     file name
@@ -222,13 +255,14 @@ main( int argc, char *argv[] )
   while( model_index<argc && argv[model_index][0]=='-' )
 	model_index++;
 
-  if (  model_index<argc && strstr( argv[model_index], ".cg_in" ) != NULL )
+  string model_path = find_model_dir( model_index<argc?argv[model_index]:"" );
+
+  if (  model_path.rfind(".cg_in" ) == model_path.length()-6 )
     process_cg_format( argv[1], &win, &control, no_elems );
-  else if (model_index < argc && strstr(argv[model_index], ".modH5") != NULL)
+  else if ( model_path.rfind(".modH5" ) == model_path.length()-6)
     process_h5_format(argv[1], &win, &control, no_elems);
   else
-    win.trackballwin->read_model( win.winny,
-			model_index<argc?argv[model_index]:0, no_elems );
+    win.trackballwin->read_model( win.winny, model_path.c_str(), no_elems );
 
   control.tethi->maximum( win.trackballwin->model->numVol()-1 );
   control.elehi->maximum( win.trackballwin->model->numVol()-1 );

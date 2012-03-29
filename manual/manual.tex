@@ -501,6 +501,16 @@ For example, if the vertices file was called \emph{model.pts},
 one could specify ``model.pts'', ``model.'', or ``model'' on the command line.
 This only applies to the vertices file.
 
+\subsection{Environment variables}
+\meshal reads the following environment variables:
+\begin{description}
+\item[MESHALYZER\_MODEL\_DIR] This is a colon separated list of directories
+which will be searched for models. If a model is not found as
+specified, the model will be searched relative to these directories.
+Also, when \meshal is invoked with no model file, the chooser will open in
+the first directory specified in the variable.
+\end{description}
+
 \section{GUI}
 
 \begin{figure}[htbp]
