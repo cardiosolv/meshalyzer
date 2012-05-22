@@ -5,7 +5,7 @@ code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
 } 
 
-decl {\#include <FL/gl.h>} {selected public local
+decl {\#include <FL/gl.h>} {public local
 } 
 
 decl {\#include <vector>} {private local
@@ -70,7 +70,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {743 44 350 650} type Double box UP_BOX
+      xywh {747 66 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -713,12 +713,12 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
-          xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          label Highlight open
+          xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -1117,7 +1117,7 @@ mwtb->redraw();}
         }
         Fl_Group auxgridgrp {
           label {Aux Grid} open
-          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
+          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
             label On
@@ -1508,7 +1508,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 520 45 15} labelsize 10 align 16
         }
       }
-      Fl_Group animate_group {
+      Fl_Group animate_group {open
         xywh {10 555 330 85} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
@@ -2094,6 +2094,11 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   elehi->maximum(mwtb->model->number(SurfEle)-1);
   mwtb->redraw();
   surflist->redraw();} {}
+  }
+  Function {dispVertVal(double d)} {open
+  } {
+    code {vertvalout->value(d);} {selected
+    }
   }
 } 
 

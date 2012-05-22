@@ -306,9 +306,11 @@ void TBmeshWin :: draw()
     actual_disp = disp;
   actual_disp = disp;
 
-  if ( have_data != NoData )
+  if ( have_data != NoData ) {
     if ( (data = dataBuffer->slice(tm)) == NULL )
       data = dataBuffer->slice(dataBuffer->max_tm());
+    contwin->dispVertVal(data[hilight[Vertex]]);
+  }
 
   if ( autocol == true ) {
     optimize_cs();
@@ -1971,7 +1973,9 @@ TBmeshWin::signal_links( int dir )
 
 /** update the time
  *
- * \param a new time
+ * \param a new time index
+ *
+ * \pre a is a valid time index
  */
 void
 TBmeshWin:: set_time(int a)
