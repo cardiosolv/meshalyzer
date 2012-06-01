@@ -135,21 +135,22 @@ public:
    */
   AuxGridIndexer(const char * filename)
   {
-    char *ext = strdup(strstr( filename, ".pts_t" ));
-    if( ext ) 
-      *ext = '\0';
+    string base = filename;
 
-    _pts_in = index(_vec_pts_pos, filename, ".pts_t");
-    _elem_in = index(_vec_elem_pos, filename, ".elem_t", 
-                                              (int) _vec_pts_pos.size());
-    _dat_in = index(_vec_dat_pos, filename, ".dat_t",
-                                              (int) _vec_pts_pos.size());
+    if (strstr(filename, ".pts_t") != NULL)
+      base.erase(base.size()-6,6); // remove extension
+
+    _pts_in  = index(_vec_pts_pos,  base.c_str(), ".pts_t");
+    _elem_in = index(_vec_elem_pos, base.c_str(), ".elem_t",
+                                                    (int) _vec_pts_pos.size());
+    _dat_in  = index(_vec_dat_pos,  base.c_str(), ".dat_t",
+                                                    (int) _vec_pts_pos.size());
 
     if (!_pts_in) {
       std::cerr << "Failed to open .pts_t file" << std::endl;
       throw 2;
     }
-    free( ext );
+    base.clear();
   }
 
   /** destructor
