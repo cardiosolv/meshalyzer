@@ -26,31 +26,27 @@ int* ele_parse_to_array(FILE *ele_file, int *total, char *label, int *max_width,
     fprintf(stderr, "ele_parse_to_array - incompatible file\n");
     exit(1);
   }
-  util_consume_witespace(ele_file);
-  
-  /* Store file position for parsing after finding largest element */
-  fpos_t data_position;
-  fgetpos(ele_file, &data_position);
   
   char prefixbuff[3] = { [2]=0 };
-  int type, size;
-  if (force_type != -1) *max_width = ch5m_elem_get_width_for_type(force_type);
+  if (force_type != -1) 
+    *max_width = ch5m_elem_get_width_for_type(force_type);
   else {
-    for (int i = 0; i < (*total); i++) {
+    for (int i = 0; i < *total; i++) {
       fgets(linebuff, 1024, ele_file);
-      sscanf(linebuff, "%c%c", &prefixbuff[0], &prefixbuff[1]);
-      type = ch5m_elem_get_type_by_prefix(prefixbuff);
+      sscanf(linebuff, "%2c", prefixbuff);
+      int type = ch5m_elem_get_type_by_prefix(prefixbuff);
       if (type == -1) {
         fprintf(stderr, "ele_parse_to_array - could not divine primitive type from %s\n", prefixbuff);
         exit(1);
       }
-      size = ch5m_elem_get_width_for_type(type);
+      int size = ch5m_elem_get_width_for_type(type);
       if (size > (*max_width)) *max_width = size;
     }
   }
-  
+
   /* Restore position and begin parsing */
-  fsetpos(ele_file, &data_position);
+  rewind(ele_file);
+  fgets(linebuff, 1024, ele_file);
   int *elements = (int*) malloc(sizeof(int) * (*total) * ((*max_width) + CH5_ELEM_WIDTH_ADD));
   int parse_result = ele_parse_data(ele_file, *total, (*max_width) + CH5_ELEM_WIDTH_ADD, elements,
     set_default_region, force_type);
@@ -66,40 +62,43 @@ int* ele_parse_to_array(FILE *ele_file, int *total, char *label, int *max_width,
 int ele_parse_data(FILE *ele_file, int total, int max_width, int *elements,
   int set_default_region, int force_type)
 {
-  int nscan;
+  char linebuff[1024], *lb;
   char buff[3] = { [2]=0 };
+  int  consumed;
+
   for (int i = 0; i < total; i++) {
     int type;
+    lb = linebuff;
+    fgets(lb, 1024, ele_file);
     if (force_type == -1) {
-      fscanf(ele_file, "%c%c", &buff[0], &buff[1]);
+      sscanf(lb, " %2c%n", buff, &consumed);
       type = ch5m_elem_get_type_by_prefix(buff);
       if (type == -1) {
         fprintf(stderr, "ele_parse_data - could not divine primitive type from %s\n", buff);
         exit(1);
       }
-    }
-    else type = force_type;
-    
+      lb += consumed;
+    } else 
+      type = force_type;
+
     int read_width  = ch5m_elem_get_width_for_type(type);
     int offset = i * max_width;
-    
+
     elements[offset + CH5_ELEM_TYPE_OFFSET] = type;
-    
+
     for (int d = 0; d < (max_width - CH5_ELEM_WIDTH_ADD); d++) {
       if (d < read_width) {
-        nscan = fscanf(ele_file, "%d", &elements[offset + CH5_ELEM_DATA_OFFSET + d]);
-        if (nscan != 1) return 0;
-      }
-      else elements[offset + CH5_ELEM_DATA_OFFSET + d] = 0;
+        if( !sscanf(lb, "%d%n", &elements[offset + CH5_ELEM_DATA_OFFSET + d],
+                                                                &consumed ) )
+          return 0;
+        else
+          lb += consumed;
+      } else 
+        elements[offset + CH5_ELEM_DATA_OFFSET + d] = 0;
     }
     
-    if (set_default_region) elements[offset + CH5_ELEM_REGION_OFFSET] = 0;
-    else {
-      nscan = fscanf(ele_file, "%d", &elements[offset + CH5_ELEM_REGION_OFFSET]);
-      if (nscan != 1) return 0;
-    }
-    
-    util_consume_witespace(ele_file);
+    elements[offset + CH5_ELEM_REGION_OFFSET] = set_default_region;
+    sscanf(lb, "%d", &elements[offset + CH5_ELEM_REGION_OFFSET]);
   }
   
   return 1;
