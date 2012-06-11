@@ -99,7 +99,7 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_CG:
       intrvl = ispan/4.;
-      for ( ; i<intrvl; i++ ) {
+      for ( i=0; i<intrvl; i++ ) {
         cmap[i][0] = 0;
         cmap[i][1] = (float)(i)/intrvl;
         cmap[i][2] = 1;
@@ -122,10 +122,10 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_MATLAB:
       intrvl = ispan/8.;
-      for ( ; i<intrvl; i++ ) {
+      for ( i=0; i<intrvl; i++ ) {
         cmap[i][0] = 0;
         cmap[i][1] = 0;
-        cmap[i][2] = 0.5 + (float)(i)/(2*intrvl);
+        cmap[i][2] = 0.5 + (float)(i+1)/(2*intrvl);
       }
       for ( ; i<3*intrvl; i++ ) {
         cmap[i][0] = 0;
