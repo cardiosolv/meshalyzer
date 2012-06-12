@@ -120,7 +120,35 @@ void Colourscale :: scale( CScale_t cs )
         cmap[i][2] = 0;
       }
       break;
-    case CS_MATLAB:
+    case CS_MATLAB: // should be CS_MATLAB_REV according controls window
+      intrvl = ispan/8.;
+      for ( i=0; i<intrvl; i++ ) {
+        cmap[i][0] = 0.5 + (float)(i)/(2*intrvl);
+        cmap[i][1] = 0;
+        cmap[i][2] = 0;
+      }
+      for ( ; i<3*intrvl; i++ ) {
+        cmap[i][0] = 1;
+        cmap[i][1] = (float)(i-intrvl)/(2*intrvl);
+        cmap[i][2] = 0;
+      }
+      for ( ; i<5*intrvl; i++ ) {
+        cmap[i][0] = (float)(5*intrvl-i)/(2*intrvl);
+        cmap[i][1] = 1;
+        cmap[i][2] = (float)(i-3*intrvl)/(2*intrvl);
+      }
+      for ( ; i<7*intrvl; i++ ) {
+        cmap[i][0] = 0;
+        cmap[i][1] = (float)(7*intrvl-i)/(2*intrvl);
+        cmap[i][2] = 1;
+      }
+      for ( ; i<n; i++ ) {
+        cmap[i][0] = 0;
+        cmap[i][1] = 0;
+        cmap[i][2] = (float)(9*intrvl-i)/(2*intrvl);;
+      }
+      break;
+    case CS_MATLAB_REV: // should be CS_MATLAB
       intrvl = ispan/8.;
       for ( i=0; i<intrvl; i++ ) {
         cmap[i][0] = 0;
@@ -129,21 +157,21 @@ void Colourscale :: scale( CScale_t cs )
       }
       for ( ; i<3*intrvl; i++ ) {
         cmap[i][0] = 0;
-        cmap[i][1] = (float)(i-intrvl)/(2*intrvl);
+        cmap[i][1] = (float)(i-intrvl+1)/(2*intrvl);
         cmap[i][2] = 1;
       }
       for ( ; i<5*intrvl; i++ ) {
-        cmap[i][0] = (float)(i-3*intrvl)/(2*intrvl);
+        cmap[i][0] = (float)(i-3*intrvl+1)/(2*intrvl);
         cmap[i][1] = 1;
-        cmap[i][2] = (float)(5*intrvl-i)/(2*intrvl);
+        cmap[i][2] = (float)(5*intrvl-i-1)/(2*intrvl);
       }
       for ( ; i<7*intrvl; i++ ) {
         cmap[i][0] = 1;
-        cmap[i][1] = (float)(7*intrvl-i)/(2*intrvl);
+        cmap[i][1] = (float)(7*intrvl-i-1)/(2*intrvl);
         cmap[i][2] = 0;
       }
       for ( ; i<n; i++ ) {
-        cmap[i][0] = 0.5 + (float)(8*intrvl-i)/(2*intrvl);
+        cmap[i][0] = 0.5 + (float)(8*intrvl-i-1)/(2*intrvl);
         cmap[i][1] = 0;
         cmap[i][2] = 0;
       }
