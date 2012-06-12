@@ -42,6 +42,7 @@ class VecData
     void         auto_cs(bool a){ autocal=a; }
     void         optimize_cs();
     void         stride( int a ){ _stride=a; }
+    void         stoch_stride( bool a ){ _stoch = a; }
     Colourscale *cs;			// colour scale for display
   private:
     int      numpt;			// number of spatial points
@@ -61,6 +62,7 @@ class VecData
     GLUquadricObj* quado;
     int      _last_tm;      // last time drawn
     int      _stride;
+    bool     _stoch;        // true for stochastic stride
 #ifdef USE_HDF5
     void     read_vec_HDF5( const char *);
 #endif

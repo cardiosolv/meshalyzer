@@ -64,7 +64,8 @@ void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
 
 VecData::VecData(const char* vptfile):_length(1),maxmag(0.),_stride(1),
     numpt(0),numtm(0),pts(NULL),vdata(NULL),sdata(NULL),_disp(true),
-    _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0)
+    _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0),
+    _stoch(false)
 {
   _colour[1] = _colour[2] = 0.;
   _colour[0] = _colour[3] = 1.;
@@ -305,7 +306,18 @@ VecData::draw(int tm, float maxdim)
   // We must move translate and rotate the world to get the proper orientation
   GLfloat rotvect[3], zaxis[]={0,0,1};
 
-  for ( int i=0; i<3*numpt; i+=3*_stride ) {
+  //for ( int i=0; i<3*numpt; i+=3*_stride ) {
+  for ( int i=0; i<3*numpt; i+=3 ) {
+
+    if( _stride>1 ) {
+      if( _stoch ) {
+        if( random() > RAND_MAX/_stride )
+          continue;
+      } else {
+        if( (i/3)%_stride )
+          continue;
+      }
+    }
 
     // determine size to draw vectors
     float size = base_size;

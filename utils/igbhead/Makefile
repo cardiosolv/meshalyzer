@@ -15,7 +15,7 @@ OBJS = igbhead.o \
 all:  igbhead
 	
 igbhead : $(OBJS)
-	g++ $(CFLAGS) -I.. -g -static $(LDFLAGS) -o igbhead $(OBJS) -lz
+	g++ $(CFLAGS) -I.. -g $(LDFLAGS) -o igbhead $(OBJS) -lz
 
 install: igbhead
 	$(INSTALL) igbhead $(bindir)

@@ -1252,32 +1252,32 @@ bool Model::read_elem_file( const char *fname )
   int surfe = 0;
   for( int i=0; i<nele; i++ ) {
     if( file.gets(buf, bufsize)==Z_NULL || !strlen(buf) ) break;
-       int n[9];
-       if( tets ) {
-         //sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
-         char * p = buf;
-         for (size_t i=0; *p && i<5; i++)
-  	   n[i] = strtol(p, &p, 10);
-       } 
-       else 
-       {
-       //sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
-       // 		n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
-         eletype[0]=buf[0];
-         eletype[1]=buf[1];
-         char * p = buf+3;
-         for (size_t i=0; *p && i<9; i++)
-	   n[i] = strtol(p, &p, 10);
+    int n[9];
+    if( tets ) {
+      //sscanf( buf, "%d %d %d %d %d", n, n+1, n+2, n+3, n+4 );
+      char * p = buf;
+      for (size_t i=0; *p && i<5; i++)
+        n[i] = strtol(p, &p, 10);
+    } 
+    else 
+    {
+      //sscanf( buf, "%2s %d %d %d %d %d %d %d %d %d", eletype,
+      // 		n, n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8 );
+      eletype[0]=buf[0];
+      eletype[1]=buf[1];
+      char * p = buf+3;
+      for (size_t i=0; *p && i<9; i++)
+        n[i] = strtol(p, &p, 10);
     }
 
     if( !strcmp( eletype, "Tt" ) ) {
-	  _vol[ne] = new Tetrahedral( &pt );
-	  _vol[ne]->add( n, n[4] );
-	  ne++;
-	} else if( !strcmp( eletype, "Hx" ) ) {
-	  _vol[ne] = new Hexahedron( &pt );
-	  _vol[ne]->add( n, n[8] );
-	  ne++;
+      _vol[ne] = new Tetrahedral( &pt );
+      _vol[ne]->add( n, n[4] );
+      ne++;
+    } else if( !strcmp( eletype, "Hx" ) ) {
+      _vol[ne] = new Hexahedron( &pt );
+      _vol[ne]->add( n, n[8] );
+      ne++;
 	} else if( !strcmp( eletype, "Py" ) ) {
 	  _vol[ne] = new Pyramid( &pt );
 	  _vol[ne]->add( n, n[5] );
@@ -1320,31 +1320,37 @@ bool Model::add_elements(hid_t hdf_file)
   
   _numVol = info.count;
   _vol = new VolElement*[_numVol];
+  int  surfe    = 0;
+  int  ne       = 0;
   int *elements = (int*) malloc(sizeof(int) * info.count * info.width);
   ch5m_elem_get_all(hdf_file, elements);
   
-  for (int i = 0; i < _numVol; i++) {
+  for (int i = 0; i < info.count; i++) {
+
+    _vol[ne] = NULL;
+    
     switch (elements[i * info.width + CH5_ELEM_TYPE_OFFSET]) {
       case CH5_TETRAHEDRON:
-        _vol[i] = new Tetrahedral(&pt);
+        _vol[ne] = new Tetrahedral(&pt);
         break;
       
       case CH5_PYRAMID:
-        _vol[i] = new Pyramid(&pt);
+        _vol[ne] = new Pyramid(&pt);
         break;
       
       case CH5_PRISM:
-        _vol[i] = new Prism(&pt);
+        _vol[ne] = new Prism(&pt);
         break;
       
       case CH5_HEXAHEDRON:
-        _vol[i] = new Hexahedron(&pt);
+        _vol[ne] = new Hexahedron(&pt);
         break;
       
       // As in read_elem_file, other primitives are ignored
       case CH5_TRIANGLE:
       case CH5_QUADRILATERAL:
         _numVol--;
+        surfe++;
         break;
       
       // As in read_elem_file, unsupported types cause the function to clean
@@ -1357,17 +1363,19 @@ bool Model::add_elements(hid_t hdf_file)
     	  _numVol = 0;
         return false;
     }
-    _vol[i]->add(&elements[i * info.width + CH5_ELEM_DATA_OFFSET], elements[i * info.width + CH5_ELEM_REGION_OFFSET]);
+    if ( _vol[ne] )
+      _vol[ne++]->add(&elements[i * info.width + CH5_ELEM_DATA_OFFSET], 
+              elements[i * info.width + CH5_ELEM_REGION_OFFSET]);
   }
-  
+
   free(elements);
-  
+
   // Shrink-fit elements array
   VolElement **nv = new VolElement*[_numVol]; 
-	memcpy(nv, _vol, _numVol * sizeof(VolElement*));
-	delete[] _vol;
-	_vol = nv;
-  
+  memcpy(nv, _vol, _numVol * sizeof(VolElement*));
+  delete[] _vol;
+  _vol = nv;
+
   return true;
 }
 #endif
