@@ -11,14 +11,13 @@ decl {\#include <FL/gl.h>} {public global
 decl {\#include <FL/Fl_Color_Chooser.H>} {private global
 } 
 
-class IsosurfControl {open
-} {
+class IsosurfControl {} {
   decl {friend class TBmeshWin;} {private local
   }
   Function {IsosurfControl(TBmeshWin *tb)} {open
   } {
     Fl_Window isowin {open
-      xywh {445 37 305 295} type Double visible
+      xywh {970 213 305 295} type Double hide
     } {
       Fl_Group {} {
         label {Isosurface 0} open
@@ -82,7 +81,7 @@ if( isolineOn->value() ) mwtb->redraw();}
           label {\#lines:}
           callback {_islDirty = true;
 isoinc->value((isolineVal1->value()-isolineVal0->value())/(isoNumLines->value()-1.));
-if( isolineOn->value() ) mwtb->redraw();} selected
+if( isolineOn->value() ) mwtb->redraw();}
           xywh {225 221 60 24}
         }
         Fl_Spinner isolineThick {
@@ -104,7 +103,7 @@ if(fl_color_chooser( "Isoline",r,g,b ) ){
   _islColor[2] = b;
   if( isolineOn->value() ) mwtb->redraw();
 }}
-          xywh {100 200 50 30}
+          xywh {95 200 50 30}
         }
         Fl_Value_Output isoinc {
           label {increment:}
@@ -150,17 +149,18 @@ _issDirty = true;} {}
   _color0[3] = a;
 }} {}
   }
-  Function {islDirty()} {return_type bool
+  Function {islDirty(bool b=false)} {return_type bool
   } {
     code {bool od = _islDirty;
-_islDirty = false;
+_islDirty = b;
 return od;} {}
   }
-  Function {issDirty()} {return_type bool
+  Function {issDirty(bool b=false)} {return_type bool
   } {
     code {bool od = _issDirty;
-_issDirty = false;
-return od;} {}
+_issDirty = b;
+return od;} {selected
+    }
   }
   Function {islThickness()} {return_type GLfloat
   } {

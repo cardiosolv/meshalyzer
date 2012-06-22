@@ -45,6 +45,29 @@ void read_IGB_vec_data( S* vdata, S* sdata, IGBheader& h )
 }
 
 
+/** just copy all nondata fields, the ones
+ *  related to display
+ *
+ * \param v vector data
+ */
+VecData &
+VecData::operator=( const VecData* v )
+{
+  if( this == v )
+    return *this;
+
+  _length     = v->_length;
+  maxmag      = v->maxmag;
+  _stride     = v->_stride;
+  _length_det = v->_length_det;
+  _colour_det = v->_colour_det;
+  autocal     = v->autocal;
+  _stoch      = v->_stoch;
+
+  return *this;
+}
+
+
 /** draw an arrow
    \param quado      GLU quadric object
    \param stick      length of stick portion

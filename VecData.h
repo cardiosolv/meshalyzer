@@ -44,6 +44,7 @@ class VecData
     void         stride( int a ){ _stride=a; }
     void         stoch_stride( bool a ){ _stoch = a; }
     Colourscale *cs;			// colour scale for display
+    VecData&     operator=(const VecData*);
   private:
     int      numpt;			// number of spatial points
     int      numtm;			// number of time instances

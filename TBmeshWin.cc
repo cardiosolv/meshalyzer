@@ -981,7 +981,9 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
   if ( i0 < string::npos ) fname= fname.substr(i0+1,string::npos);
   fname = flwintitle + " --- " + fname;
   flwin->label( fname.c_str() );
-
+  
+  isosurfwin->islDirty(true);
+  isosurfwin->issDirty(true);
   if ( timeplotter->window->shown() ) timeplot();
 
   redraw();
@@ -1260,7 +1262,10 @@ TBmeshWin::getVecData( void *vp, const char* vptfile )
     return 2;
   }
 
-  if ( vecdata != NULL ) delete vecdata;
+  if ( vecdata != NULL ) {
+    *newvd = vecdata;
+    delete vecdata;
+  }
 
   vecdata = newvd;
   ((Myslider *)vp)->maximum( max_time() );
