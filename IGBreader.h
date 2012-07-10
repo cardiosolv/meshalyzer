@@ -119,15 +119,15 @@ void IGBreader<T>::tmsr()
 {
   T temp;
 
-  gzseek(head->fileptr(), 1024+sthread->unlock*head->data_size(), SEEK_SET );
+  gzseek((gzFile)head->fileptr(), 1024+sthread->unlock*head->data_size(), SEEK_SET );
   for ( int i=0; i<=mthread->maxtm; i++ ) {
-    gzread( head->fileptr(), buf, head->data_size() );
+    gzread( (gzFile)head->fileptr(), buf, head->data_size() );
     if ( head->endian() != head->systeme() ) head->swab( buf, 1 );
     sthread->data[i] = IGB_convert_buffer_datum<T>( head, buf, 0 );
     if ( i<mthread->maxtm )
-      gzseek( head->fileptr(), slsz-head->data_size(), SEEK_CUR );
+      gzseek( (gzFile)head->fileptr(), slsz-head->data_size(), SEEK_CUR );
   }
-  gzrewind(head->fileptr());
+  gzrewind((gzFile)head->fileptr());
 }
 
 

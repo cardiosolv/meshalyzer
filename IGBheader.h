@@ -348,7 +348,7 @@ read_IGB_data( T* dp, int numt, IGBheader* h, char *buf )
     alloc_buf = true;
   }
   
-  int numread = gzread( h->fileptr(), buf, slicesize )/h->data_size();
+  int numread = gzread( (gzFile)h->fileptr(), buf, slicesize )/h->data_size();
   if ( numread == Z_NULL ) return 0;
   if ( h->systeme() != h->endian() ) h->swab(buf, numread);
 

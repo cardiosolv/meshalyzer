@@ -645,7 +645,7 @@ int IGBheader::write()
   if (bool_comment) {
     comment = v_comment;
     while (*comment != NULL) {
-      n_car = gzprintf(file, "#%.80s\r\n", *comment++);
+      n_car = gzprintf((gzFile)file, "#%.80s\r\n", *comment++);
       if (n_car==0) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nHeader_Write: Erreur a l'ecriture \n");
@@ -760,7 +760,7 @@ int IGBheader::read()
       }
 
       /* --- lit le caractere suivant --- */
-      in = gzgetc( file ) ;
+      in = gzgetc( (gzFile)file ) ;
 
       /* --- (EOF dans l'entete) --> erreur --- */
       if ( in == -1 ) {
@@ -792,7 +792,7 @@ int IGBheader::read()
         if (!Header_Quiet)
           fprintf(stderr,
                   "\nERREUR caract. non imprim. 0x%.2X dans "
-                  "l'entete at byte number %ld\n", in, gztell(file) );
+                  "l'entete at byte number %ld\n", in, gztell((gzFile)file) );
         sprintf(Header_Message,
                 "\nERREUR caract. non imprim. 0x%.2X dans l'entete !\n", in );
         return ERR_UNPRINTABLE_CHAR;
@@ -1186,10 +1186,10 @@ int IGBheader::read()
   }
 
   if (gztell((gzFile)file)!=1024) {
-    gzseek( file, 1024, SEEK_SET );
+    gzseek( (gzFile)file, 1024, SEEK_SET );
     if (!Header_Quiet) {
       fprintf(stderr,
-              "\nATTENTION: etiquette de grandeur non-standard: %ld \n", gztell(file));
+              "\nATTENTION: etiquette de grandeur non-standard: %ld \n", gztell((gzFile)file));
     }
     sprintf(Header_Message,
             "\nATTENTION: etiquette de grandeur non-standard \n");
@@ -1201,7 +1201,7 @@ int IGBheader::read()
 
   if (bool_vect_z) {
     v_vect_z = (float *)malloc(v_z*sizeof(float));
-    gzread(file, v_vect_z, sizeof(float)*v_z);
+    gzread((gzFile)file, v_vect_z, sizeof(float)*v_z);
   }
 
   return statut;
