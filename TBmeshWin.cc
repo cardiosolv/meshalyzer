@@ -455,7 +455,7 @@ void TBmeshWin :: draw()
   for (int i=0;i<NUM_CP;i++)
     if (cplane->on(i)&&cplane->visible(i)) draw_clip_plane(i);
 
-  if ( contwin->draw_axes->value() ) draw_axes();
+  if ( contwin->draw_axes->value() ) draw_axes( model->pt.offset() );
 
   glDepthMask(GL_TRUE);
   gl2psEnable(GL2PS_BLEND);
@@ -484,8 +484,6 @@ void TBmeshWin::draw_iso_surfaces()
 
   bool dirty =  isosurfwin->issDirty();
   glPushAttrib(GL_ALL_ATTRIB_BITS);
-  glEnable(GL_BLEND);
-  glDepthMask(GL_FALSE);
 
   for ( int s=0; s<model->_numReg; s++ ) {
     RRegion *reg = model->region(s);
@@ -497,10 +495,12 @@ void TBmeshWin::draw_iso_surfaces()
 	  reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
 			  reg->ele_membership(), tm );
 	reg->_iso0->color( isosurfwin->issColor(0) );
+
+    translucency( reg->_iso0->color()[3]<OPAQUE_LIMIT );
+
 	reg->_iso0->draw();
   } 
 
-  glDepthMask(GL_TRUE);
   glPopAttrib();
 }
 
@@ -613,7 +613,7 @@ void TBmeshWin::draw_vertices(RRegion* reg)
 
 
 // draw_axes
-void TBmeshWin::draw_axes()
+void TBmeshWin::draw_axes(const GLfloat *offset)
 {
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_LIGHTING);
@@ -636,7 +636,8 @@ void TBmeshWin::draw_axes()
     float angle = -acos( axis.Dot( zaxis ))*180./M_PI;
     V3f rotvect = axis.Cross(zaxis);
     org *= trackball.GetScale();
-    //glTranslatef( org.X(), org.Y(), org.Z() );
+    //imps_list.txtglTranslatef( org.X(), org.Y(), org.Z() );
+    glTranslatef( offset[0], offset[1], offset[2] );
     glPushMatrix(); // save the translation but not rotation
     glRotatef( angle, rotvect.X(), rotvect.Y(), rotvect.Z() );
     glColor3f( 0., 0., 1. );
@@ -1551,8 +1552,8 @@ void TBmeshWin::draw_clip_plane( int cp )
   glColor4fv( planeColor);
   const GLfloat *poff = model->pt_offset();
   for ( int i=0; i<4; i++ ) {
-    vert[v0] = 2*(2*(!i||i==3)-1)*model->maxdim()+poff[0];
-    vert[v1] = 2*(2*(i>1)-1)*model->maxdim()+poff[1];
+    vert[v0] = 2*(2*(!i||i==3)-1)*model->maxdim()+poff[v0];
+    vert[v1] = 2*(2*(i>1)-1)*model->maxdim()+poff[v1];
     vert[vf] = -(x[v0]*vert[v0]+x[v1]*vert[v1]+x[3])/x[vf];
     glVertex3fv( vert );
   }

@@ -315,7 +315,7 @@ VolElement::planecut( char *pd, GLfloat* cp,
  *  \param p1    vertex 1
  *  \param dat1  data on p1
  *  \param val   data between dat0 and dat1
- *  \param pint  location of val (computed)
+ *  \param pint[out]  location of val 
  *
  *  \return relative weight of node 0
  */
@@ -367,8 +367,7 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
   int       poly_start   = 1;      // first polygon defined after \#polygons
   
   // do not continue if number of polygons are zero
-  if (npoly == 0)
-  {
+  if (!npoly) {
     return NULL;
   }
   
@@ -411,24 +410,32 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
             break;
     }
     isoele[n]->define( simple_index );
+
     if( poly[poly_start]>2 ) {                 // it is a surface element
       SurfaceElement *se = dynamic_cast<SurfaceElement*>(isoele[n]);
       se->compute_normals(0,0);
 
-	  // determine the vertex normal
       GLfloat *ptnrml = new GLfloat[3*poly[poly_start]];
       for( int i=0; i<poly[poly_start]; i++ ) {
-        int pindex = poly_start+1+i*2;
-        int n0 = _node[poly[pindex]];
-        int n1 = _node[poly[pindex+1]];
-        
-        // fix a up from n0 to 0 and n1 to 1
-	   // note: need to fix up the normalization algorithm.
-        normalize(sub( pts->pt(0), pts->pt(1), ptnrml+i*3 ));
+        memcpy( ptnrml+3*i, se->nrml(), 3*sizeof(GLfloat) );
       }
+      
+      // make sure the normal points the correct way
+      int n0 = _node[poly[poly_start+1]];
+      int n1 = _node[poly[poly_start+2]];
+
+      GLfloat norm[3];
+      sub( _pt->pt(n0), _pt->pt(n1), norm );
+      if( dat[n0]>val )
+        scale( norm, -1 );
+
+      if( dot( norm,  se->nrml() ) < 0 )
+        for( int ni=0; ni<poly[poly_start]; ni++ )
+          scale( ptnrml+ni*3, -1 );
 
       se->vertnorm( ptnrml );
-    }poly_start += npts*2+1;
+    }
+    poly_start += npts*2+1;
   }
   return isoele;
 }

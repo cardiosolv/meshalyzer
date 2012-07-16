@@ -47,7 +47,7 @@ void Triangle::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
   for ( int i=3*p0; i<=3*p1; i+=3*stride ) {
     if ( !_pt->vis(_node[i]) || !_pt->vis(_node[i+1]) || !_pt->vis(_node[i+2]) )
       continue;
-    
+
     for ( int j=0; j<3; j++ ) 
     {
       if (data)

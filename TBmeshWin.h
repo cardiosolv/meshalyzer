@@ -166,7 +166,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      draw_cables(RRegion *);
     void      draw_cnnx(RRegion *);
     void      draw_vertices(RRegion *);
-    void      draw_axes();
+    void      draw_axes(const GLfloat *);
     void      draw_clip_plane( int cp );
     void      draw_cut_planes( RRegion * );
     void      draw_iso_surfaces( );

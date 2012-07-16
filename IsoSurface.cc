@@ -16,6 +16,7 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v,
 		       vector<bool>&member, int t)
   :_vertnorm(NULL),_vert(NULL),_val(v),_tm(t)
 {
+#pragma omp parallel for schedule(dynamic,100)
   for( int i=0; i<m->numVol(); i++ ) {
     if( member[i] ) {
       int npoly;
@@ -24,6 +25,7 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v,
       if (lpoly != NULL){
         for( int j=0; j<npoly; j++ )
         {
+#pragma omp critical
           polygon.push_back(static_cast<SurfaceElement*>(lpoly[j]));
         }
         delete[] lpoly;
@@ -32,7 +34,7 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v,
   }
     
   // determine the vertex normals for all the polygons
-  determine_vert_norms(m->pt);
+  //determine_vert_norms(m->pt);
 }
 
 IsoSurface::~IsoSurface()
@@ -41,13 +43,14 @@ IsoSurface::~IsoSurface()
     delete polygon[i]->pt();
     delete polygon[i];
   }
+  delete _vertnorm;
 }
 
 void IsoSurface::draw()
 {
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   for( int i=0; i<polygon.size(); i++ ) {
-    polygon[i]->draw(0, 0, colour, NULL, NULL, 1, NULL, _vertnorm );
+    polygon[i]->draw(0, 0, colour, NULL, NULL, 1, NULL, polygon[i]->ptnrml() );
   }
 }
 
@@ -63,26 +66,29 @@ void IsoSurface::draw()
 void IsoSurface::determine_vert_norms(PPoint& pt)
 {
   vector<bool> has_norm(pt.num());  // if elements attached to node
+  GLfloat *tvn = (GLfloat *)calloc(pt.num()*3,sizeof(GLfloat));
 
-  GLfloat *tvn = new GLfloat[pt.num()*3];
-  memset( tvn, 0, pt.num()*3*sizeof(GLfloat) );
-
-  const GLfloat* n;
-
-  for ( int i = 0; i < polygon.size(); i++ )
-  {
+#pragma omp parallel for
+  for ( int i = 0; i < polygon.size(); i++ ) {
+    const GLfloat* n;
     if ( (n=polygon[i]->nrml(0)) == NULL ) continue;
     const int *pnt = polygon[i]->obj();
     for ( int j=0; j<polygon[i]->ptsPerObj(); j++ ) {
-      for ( int k=0; k<3; k++ ) tvn[3*pnt[j]+k] += n[k];
+      for ( int k=0; k<3; k++ ) 
+#pragma omp atomic
+        tvn[3*pnt[j]+k] += n[k];
       has_norm[pnt[j]] = true;
     }
   }
   // count \# nodes in surface
   int numvert = 0;
+#pragma omp parallel for
   for ( int i=0; i<pt.num(); i++ ) {
-    if ( has_norm[i] ) normalize(tvn+i*3);
-    numvert++;
+    if ( has_norm[i] ) {
+      normalize(tvn+i*3);
+#pragma omp atomic
+      numvert++;
+    }
   }
 
   _vert = (int *)realloc(_vert, sizeof(int)*(numvert+1));
@@ -97,5 +103,5 @@ void IsoSurface::determine_vert_norms(PPoint& pt)
   }
 
   _vert[numvert] = -1;
-  delete[] tvn;
+  free(tvn);
 }

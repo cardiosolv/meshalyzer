@@ -161,6 +161,7 @@ class SurfaceElement : public MultiPoint
     virtual void     compute_normals( int, int )=0;
     const   void     nrml( GLfloat *n ){ _nrml=n; };
   inline  const   GLfloat* nrml( int a=0 ) {return _nrml==NULL?NULL:_nrml+3*a; }
+  inline  const   GLfloat* ptnrml( int a=0 ) {return _ptnrml==NULL?NULL:_ptnrml+3*a; }
     virtual void     draw( int, GLfloat*, float=1 )=0;
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride, dataOpac* dopac, const GLfloat * )=0;
