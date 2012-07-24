@@ -70,7 +70,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1071 95 350 650} type Double box UP_BOX
+      xywh {1075 117 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -404,7 +404,7 @@ mwtb->redraw();}
               xywh {15 15 100 20}
             }
             MenuItem {} {
-              label triangles
+              label {surface eles}
               callback {mwtb->randomize_color(SurfEle);}
               xywh {0 0 100 20}
             }
@@ -466,7 +466,7 @@ mwtb->redraw();}
           }
           MenuItem {} {
             label Clipping
-            callback {mwtb->cplane->window->show();}
+            callback {mwtb->cplane->window->show();} selected
             xywh {10 10 100 20}
           }
           MenuItem {} {
@@ -1117,7 +1117,7 @@ mwtb->redraw();}
           Fl_Check_Button vecstoch {
             label Stochastic
             callback {mwtb->vecdata->stoch_stride(o->value());
-mwtb->redraw();} selected
+mwtb->redraw();}
             xywh {115 450 70 25} down_box DOWN_BOX
           }
         }

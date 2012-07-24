@@ -1536,6 +1536,11 @@ void TBmeshWin::draw_clip_plane( int cp )
   for ( int i=0; i<NUM_CP; i++ ) glDisable(CLIP_PLANE[i]);
 
   GLdouble* x = cplane->plane(cp);
+  //GLdouble  mag = magnitude( x );
+  GLdouble  mag = 1.;
+  GLdouble  cpc[4];
+  for ( int j=0; j<4; j++ ) cpc[j] = x[j]/mag;
+
   GLfloat  planeColor[4] = { 0, 1, 0,  clipPlaneOpacity }; //translucent green
 
   GLfloat vert[3];
@@ -1554,7 +1559,7 @@ void TBmeshWin::draw_clip_plane( int cp )
   for ( int i=0; i<4; i++ ) {
     vert[v0] = 2*(2*(!i||i==3)-1)*model->maxdim()+poff[v0];
     vert[v1] = 2*(2*(i>1)-1)*model->maxdim()+poff[v1];
-    vert[vf] = -(x[v0]*vert[v0]+x[v1]*vert[v1]+x[3])/x[vf];
+    vert[vf] = -(cpc[v0]*vert[v0]+cpc[v1]*vert[v1]+cpc[3])/cpc[vf];
     glVertex3fv( vert );
   }
   glEnd();

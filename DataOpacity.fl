@@ -1,22 +1,23 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0107 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "TBmeshWin.h"} {} 
-
-decl {\#include<iostream>} {public
+decl {\#include "TBmeshWin.h"} {private local
 } 
 
-decl {\#include "objects.h"} {selected public
+decl {\#include<iostream>} {public local
 } 
 
-decl {using namespace std;} {public
+decl {\#include "objects.h"} {public local
 } 
 
-decl {\#define NUM_OBJ 7} {public
+decl {using namespace std;} {public local
 } 
 
-decl {class TBmeshWin;} {public
+decl {\#define NUM_OBJ 7} {public local
+} 
+
+decl {class TBmeshWin;} {public local
 } 
 
 class dataOpac {open
@@ -29,17 +30,17 @@ dmin = 0;
 dmax = 0;
 ofactor = 0;} {}
   }
-  decl {float ofactor;} {public
+  decl {float ofactor;} {public local
   }
-  decl {float dmin;} {public
+  decl {float dmin;} {public local
   }
-  decl {float dmax;} {public
+  decl {float dmax;} {public local
   }
-  decl {float omin;} {public
+  decl {float omin;} {public local
   }
-  decl {float omax;} {public
+  decl {float omax;} {public local
   }
-  decl {bool _on;} {public
+  decl {bool _on;} {public local
   }
   Function {alpha( float data )} {return_type float
   } {
@@ -61,7 +62,7 @@ class DataOpacity {open
   } {
     Fl_Window window {
       label {Data Opacity Controls} open
-      xywh {579 44 380 150} type Double visible
+      xywh {583 66 380 150} type Double visible
     } {
       Fl_Value_Slider minopacval {
         label {Minimum Opacity}
@@ -109,7 +110,7 @@ mwtb->redraw();}
 minopacval->value(dop[a].omin);
 maxopacval->value(dop[a].omax);
 mindatval->value(dop[a].dmin);
-maxdatval->value(dop[a].dmax);onbut->value(dop[a]._on);}
+maxdatval->value(dop[a].dmax);onbut->value(dop[a]._on);} open
         tooltip {apply to which object type} xywh {75 10 120 30} down_box BORDER_BOX
       } {
         MenuItem {} {
@@ -121,7 +122,7 @@ maxdatval->value(dop[a].dmax);onbut->value(dop[a]._on);}
           xywh {0 0 100 20}
         }
         MenuItem {} {
-          label Triangle
+          label SurfEle selected
           xywh {0 0 100 20}
         }
         MenuItem {} {
@@ -132,8 +133,9 @@ maxdatval->value(dop[a].dmax);onbut->value(dop[a]._on);}
     }
     code {mwtb = tbmw;} {}
   }
-  decl {TBmeshWin *mwtb;} {}
-  decl {dataOpac dop[NUM_OBJ];} {public
+  decl {TBmeshWin *mwtb;} {private local
+  }
+  decl {dataOpac dop[NUM_OBJ];} {public local
   }
   Function {get_ot( int a )} {open return_type Object_t
   } {

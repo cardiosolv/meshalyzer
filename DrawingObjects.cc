@@ -200,9 +200,10 @@ void VolElement::add( int *n, int r )
  *  \param pd      visible points
  *  \param cp      normalized clip plane, cp[0]x + cp[1]y +cp[2]z + cp[3] = 0
  *  \param e       the element in the list
- *  \param interp  construct to interpolate data
+ *  \param interp[out]  construct to interpolate data
  *  \param numedge number of edges for element
  *  \param edges   list of nodes defining edges
+ *  \param e       element number
  *
  *  \return a surface element if intersection, NULL otherwise
  */

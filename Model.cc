@@ -10,6 +10,7 @@
 #include <FL/filename.H>
 #include "gzFileBuffer.h"
 #include "logger.hpp"
+#include <algorithm>
 
 struct Face {
   int nsort[MAX_NUM_SURF_NODES];  //!< sorted nodes
@@ -18,6 +19,8 @@ struct Face {
 };
 
 int intcmp( const void *a, const void *b ){ return *(int *)a-*(int *)b; }
+
+int Surfaces :: nGlobEle = 0;
 
 /** compare 2 faces for sorting */
 bool cmpface( const Face *A, const Face *B)
@@ -159,6 +162,10 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   //LOG_TIMER("determine_regions()");
   
   LOG_TIMER_RESET;
+  add_surface_from_elem( fn );
+  LOG_TIMER("Add Surface from Elements");
+  
+  LOG_TIMER_RESET;
   add_surface_from_tri( fn );
   LOG_TIMER("Add Surface from Tri");
   
@@ -166,10 +173,6 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   add_surface_from_surf( fn );
   LOG_TIMER("Add Surface from Surf");
 
-  LOG_TIMER_RESET;
-  add_surface_from_elem( fn );
-  LOG_TIMER("Add Surface from Elements");
-  
   find_max_dim_and_bounds();
 
   return true;
@@ -309,11 +312,11 @@ void Model::add_surfaces(int *elements, int count, int max_width, char *name) {
       int elementCount = elementCounts[region];
       switch (elements[i * max_width]) {
         case CH5_TRIANGLE:
-          _surface[surfaceIndex]->ele(elementCount) = new Triangle(&pt);
+          _surface[surfaceIndex]->addele(elementCount, new Triangle(&pt));
           break;
         
         case CH5_QUADRILATERAL:
-          _surface[surfaceIndex]->ele(elementCount) = new Quadrilateral(&pt);
+          _surface[surfaceIndex]->addele(elementCount, new Quadrilateral(&pt));
           break;
         
         default:
@@ -510,18 +513,19 @@ int Model::add_surface_from_elem( const char *fn )
   gzFileBuffer file2(in);
 
   gzgets(in,buff,bufsize);      //throw away first line
+  int globele = 0;              //global element index number
   while( file2.gets(buff,bufsize) !=Z_NULL ) {
 	char etype[10],reg[10];
 	int  idat[4];
 	if( !strncmp(buff,"Tr",2) ) {
 	  if(sscanf( buff,"%s %d %d %d %s", etype, idat, idat+2, idat+1, reg)<5 )
 		strcpy(reg,"EMPTY");
-	  _surface[surfmap[reg]]->ele(surfs[reg]) = new Triangle( &pt );
+	  _surface[surfmap[reg]]->addele(surfs[reg],new Triangle( &pt ));
 	} else  if( !strncmp(buff,"Qd",2) ) {
 	  if(sscanf( buff,"%s %d %d %d %d %s", etype, idat, idat+3, idat+2, 
 				  idat+1, reg)<6 )
 		strcpy(reg,"EMPTY");
-	  _surface[surfmap[reg]]->ele(surfs[reg]) = new Quadrilateral( &pt );
+	  _surface[surfmap[reg]]->addele(surfs[reg],new Quadrilateral( &pt ));
 	} else
 	  continue;  //ignore volume elements
 	_surface[surfmap[reg]]->ele(surfs[reg])->define(idat);
@@ -591,9 +595,9 @@ int Model::add_region_surfaces()
         newface = *iter;
 
         if( newface->nnode == 3 ) {
-          _surface.back()->ele(e) = new Triangle( &pt );
+          _surface.back()->addele(e, new Triangle( &pt ));
         } else if( newface->nnode==4 ) {
-          _surface.back()->ele(e) = new Quadrilateral( &pt );
+          _surface.back()->addele(e, new Quadrilateral( &pt ));
         } else
           assert(0);
 
@@ -661,9 +665,9 @@ int Model::add_surface_from_surf( const char *fn )
         return surfnum;
       }
       if( !strcmp(etype, "Tr" ) )
-        _surface.back()->ele(i) = new Triangle( &pt );
+        _surface.back()->addele(i,new Triangle( &pt ));
       else if( !strcmp(etype, "Qd") )
-        _surface.back()->ele(i) = new Quadrilateral( &pt );
+        _surface.back()->addele(i,new Quadrilateral( &pt ));
       else {
         _surface.pop_back();
         return surfnum;
@@ -731,7 +735,7 @@ int Model::add_surface_from_tri( const char *fn )
 
       _surface.back()->num(ntri);
       for ( int i=0; i<ntri; i++ ) {
-        _surface.back()->ele(i) = new Triangle( &pt );
+        _surface.back()->addele(i,new Triangle( &pt ));
         int nl[3];
         if ( gzgets(in,buff,bufsize) == Z_NULL ||
              sscanf(buff, "%d %d %d", nl, nl+1, nl+2 ) < 3 ) {
@@ -765,7 +769,7 @@ int Model::add_surface_from_tri( const char *fn )
       }
 #define ELEINC 10000
 	  if( !(curele%ELEINC) ) _surface.back()->num(curele+ELEINC);
-	  _surface.back()->ele(curele) = new Triangle( &pt );
+	  _surface.back()->addele(curele,new Triangle( &pt ));
   	  _surface.back()->ele(curele)->define(nl);
 	  _surface.back()->ele(curele++)->compute_normals(0,0);
 	}while( gzgets(in,buff,bufsize)!=Z_NULL );
@@ -936,11 +940,12 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
   // SurfEles
   int elesurf, lele;
   if ( numSurf() ) {
-    sprintf(txt, "@b@C%6dSurface Element: %d of %d", FL_BLUE, hilight[SurfEle],
-            number(SurfEle) );
+    lele = localElemnum( hilight[SurfEle], elesurf );
+    sprintf(txt, "@b@C%6dSurface Element: %d of %d (local %d of %d)",
+            FL_BLUE, hilight[SurfEle], number(SurfEle),
+            lele, surface(elesurf)->num());
     hinfo->add( txt );
     hinfo->add( "nodes:\t" );
-    lele = localElemnum( hilight[SurfEle], elesurf );
     for ( int i=0; i<surface(elesurf)->ele(lele)->ptsPerObj(); i++ ) {
       int node=surface(elesurf)->ele(lele)->obj()[i];
       if ( data != NULL )
@@ -978,16 +983,16 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
   sprintf( txt, "( %.6g, %.6g, %.6g )", pt.pt()[hilight[Vertex]*3],
            pt.pt()[hilight[Vertex]*3+1], pt.pt()[hilight[Vertex]*3+2]);
   hinfo->add( txt );
-  /*
-  string reginfo( "in surface: " );
-  for( int s=0; s<_numReg; s++ )
-  if( hilight[Vertex]>=_surface[s]->start(Vertex) && 
-  hilight[Vertex]<=_surface[s]->end(Vertex)		){
 
-  break;
+  for( int s=0; s<numSurf(); s++ ) {
+    vector<int> &ge =  _surface[s]->_globele;
+    if( binary_search(ge.begin(), ge.end(), hilight[Vertex]) ){
+      sprintf(txt, "in surface: %d", s );
+      hinfo->add( txt );
+      break;
+    }
   }
-  hinfo->add( txt );
-  */
+ 
   if ( _cable->num() ) {
     const int* cab=_cable->obj();
     for ( int cabnum=0; cabnum<_cable->num();cabnum++ )
@@ -1036,7 +1041,7 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
         const int* nl = ele[j]->obj();
         for ( int k=0; k<ele[j]->ptsPerObj(); k++ ) {
           if ( nl[k]==hilight[Vertex] ) {
-            sprintf( txt, "\t%6d", j );
+            sprintf( txt, "\t%6d", surface(i)->_globele[j] );
             if ( j==hilight[SurfEle] )
               sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
             hinfo->add( txt );
@@ -1381,7 +1386,7 @@ bool Model::add_elements(hid_t hdf_file)
 #endif
 
 
-/** find the local surface element form the global number
+/** find the local surface element from the global number
  *
  * \param gele global element number
  * \param surf surface containing the element
@@ -1390,10 +1395,14 @@ bool Model::add_elements(hid_t hdf_file)
  */
 int Model::localElemnum( int gele, int& surf )
 {
-  for ( surf=0; surf<_surface.size(); surf++ )
-    if ( (gele-=_surface[surf]->num())<0) break;
+  for ( surf=0; surf<_surface.size(); surf++ ) {
+    vector<int> ge = _surface[surf]->_globele;
+    vector<int>::iterator p=lower_bound(ge.begin(),ge.end(),gele);
+    if( p != ge.end() )
+        return distance( ge.begin(), p );
+  }
 
-  return gele+_surface[surf]->num();
+  return -1;
 }
 
 

@@ -24,6 +24,7 @@ class Surfaces
     void get_vert_norms( GLfloat *vn );
     void determine_vert_norms( PPoint & );
     SurfaceElement*& ele( int a ){ return _ele[a]; }
+    void addele(int a,SurfaceElement*e){_ele[a]=e;_globele.push_back(nGlobEle++);}
     int  num() const {return _ele.size();}
     void num(int a){_ele.resize(a);}
     vector<SurfaceElement*>& ele(){return _ele;}
@@ -33,6 +34,7 @@ class Surfaces
     void   label( string s ){ _label=s; }
     string label( void ) { return _label; }
     void   flip_norms();
+    vector<int> _globele; // global element number
   protected:
     PPoint   *_p;
     GLfloat  _fillcolor[4];
@@ -44,6 +46,8 @@ class Surfaces
     int*     _vert;       //!< vertices for which normals are computed
     vector<SurfaceElement*> _ele; //!< list of elelments to draw
     string   _label;
+  private:
+    static int nGlobEle;
 };
 
 #endif

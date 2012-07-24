@@ -32,7 +32,7 @@ inline string & operator << (string & s, const double & d) { static char num[30]
 //inline char * c_str(const double & d) { static char num[100]; sprintf(num,"%f",d); return num; } // needed to fix above template when using doubles
 
 static const char * const BoolStr[] = {"Oh No ! :-( ",":-) "};
-static void Dummy() { cout<<BoolStr[0]; Dummy(); }
+static void Dummy() { cout<<BoolStr[0]; }
 
 typedef unsigned char uchar;
 
