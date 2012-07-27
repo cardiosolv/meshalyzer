@@ -1128,6 +1128,10 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
 /** control lighting in the model
  *
  *  \param max maximum model dimension
+ *
+ *  \Todo Lighting is messed up big time. For so,e reason, back and front are
+ *        mixed up but if I switch the normals, it does not reverse front
+ *        and back face lighting, but mmakes it all bad
  */
 void
 TBmeshWin::illuminate( GLfloat max )
@@ -1142,13 +1146,13 @@ TBmeshWin::illuminate( GLfloat max )
   }
   glEnable(GL_RESCALE_NORMAL);
 
-  GLfloat diffusef [] = { 0.8, 0.8, 0.8, 1.0 };
-  GLfloat specularf [] = { 0.8, 0.8, 0.8, 1.0 };
-  GLfloat shininessf [] = { 50.0 };
+  GLfloat diffuseb [] = { 0.8, 0.8, 0.8, 1.0 };
+  GLfloat specularb [] = { 0.8, 0.8, 0.8, 1.0 };
+  GLfloat shininessb [] = { 50.0 };
   float k = contwin->backintensityslide->value();
-  GLfloat diffuseb [] = {diffusef[0]*k, diffusef[1]*k, diffusef[2]*k, 1.0};
-  GLfloat specularb [] = {specularf[0]*k,specularf[1]*k,specularf[2]*k,1.0};
-  GLfloat shininessb [] = { shininessf[0]*k };
+  GLfloat diffusef [] = {diffuseb[0]*k, diffuseb[1]*k, diffuseb[2]*k, 1.0};
+  GLfloat specularf [] = {specularb[0]*k,specularb[1]*k,specularb[2]*k,1.0};
+  GLfloat shininessf [] = { shininessb[0]*k };
 
   // Define material properties of specular color and degree of
   // shininess.  Since this is only done once in this particular
@@ -1192,8 +1196,8 @@ TBmeshWin::illuminate( GLfloat max )
   const GLfloat am= contwin->ambientslide->value();
   GLfloat modamb[] = { am, am, am, 1. };
   glLightModelfv( GL_LIGHT_MODEL_AMBIENT, modamb );
-  glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, 0 );
-  glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
+  glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, 1 );
+  //glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
 
   // draw an arrow showing the light direction
   if ( contwin->showLightDir->value() == 1 ) {

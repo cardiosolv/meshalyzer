@@ -1985,7 +1985,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     IGNORE_VAR( veconbut, var ) 
     IGNORE_VAR( veclength, var ) 
     IGNORE_VAR( vecautocal, var ) 
-    IGNORE_VAR( vecstide, var ) 
+    IGNORE_VAR( vecstride, var ) 
     IGNORE_VAR( vecstoch, var ) 
   }
   TEST_VAR( lightx, var, val ) 
