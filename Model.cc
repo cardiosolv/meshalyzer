@@ -487,7 +487,7 @@ int Model::add_surface_from_elem( const char *fn )
 
   gzFileBuffer file(in);
   while ( file.gets(buff,bufsize) != Z_NULL ) {
-    char   surfnum[10]="";
+    char   surfnum[16]="";
     if ( !strncmp(buff,"Tr",2) ) {
       if ( sscanf(buff, "%*s %*d %*d %*d %s", surfnum )<1 )
         strcpy( surfnum, "EMPTY" );
@@ -508,6 +508,11 @@ int Model::add_surface_from_elem( const char *fn )
   map<string,int> :: iterator iter = surfs.begin();
   for ( int s=oldnumSurf; iter!=surfs.end(); iter++, s++ ) {
     _surface[s]->num(iter->second );
+    string sname;
+    if( iter->first != "EMPTY" )
+      sname = iter->first+"-";
+    sname.append( fn, strlen(fn)-1 );
+    _surface[s]->label( sname );
     surfmap[iter->first] = s;   // map region to surface index
   }
 
@@ -538,12 +543,8 @@ int Model::add_surface_from_elem( const char *fn )
   }
   gzclose( in );
 
-  for ( int s=oldnumSurf; s<_surface.size(); s++ ) {
+  for ( int s=oldnumSurf; s<_surface.size(); s++ ) 
     _surface[s]->determine_vert_norms( pt );
-    ostringstream slabel(fname);
-    slabel << s-oldnumSurf;
-    _surface[s]->label( slabel.str() );
-  }
 
   return _surface.size();
 }

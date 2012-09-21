@@ -722,6 +722,7 @@ int TBmeshWin::handle( int event )
         return 1;
         break;
       case 'c':
+        contwin->window->hide();
         contwin->window->show();
         return 1;
         break;
