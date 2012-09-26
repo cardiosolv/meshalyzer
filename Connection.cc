@@ -179,6 +179,21 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 }
 
 
+/** add a list of connections
+ *  \param n  number of connections
+ *  \param nl node list [c0_0, c0_1, c1_0, c1_1, c2_0, etc]
+ */
+void Connection:: add( int n, int *nl )
+{
+  int *new_nl = new int[(_n+n)*_ptsPerObj];
+  memcpy( new_nl, _node, _n*sizeof(int)*_ptsPerObj );
+  delete _node;
+  memcpy( new_nl+_n*sizeof(int)*_ptsPerObj, nl, n*sizeof(int)*_ptsPerObj );
+  _node = new_nl;
+  _n += n;
+}
+
+
 /** highlight a connection
  *
  *  \param p      node to highlight

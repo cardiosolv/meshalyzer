@@ -11,6 +11,8 @@
 #include "gzFileBuffer.h"
 #include "logger.hpp"
 #include <algorithm>
+#include <queue>
+
 
 struct Face {
   int nsort[MAX_NUM_SURF_NODES];  //!< sorted nodes
@@ -1260,6 +1262,8 @@ bool Model::read_elem_file( const char *fname )
   int nele = _numVol;
   int ne    = 0;
   int surfe = 0;
+  queue<pair<int,int> > new_cnnx;
+
   for( int i=0; i<nele; i++ ) {
     if( file.gets(buf, bufsize)==Z_NULL || !strlen(buf) ) break;
     int n[9];
@@ -1296,6 +1300,8 @@ bool Model::read_elem_file( const char *fname )
 	  _vol[ne] = new Prism( &pt );
 	  _vol[ne]->add( n, n[6] );
 	  ne++;
+	} else if( !strcmp( eletype, "Ln" ) ) {
+      new_cnnx.push( make_pair(n[0],n[1]) );
 	} else if( !strcmp( eletype, "Tr" ) || !strcmp( eletype, "Qd" )  ) {
 	  // surface elements ignored
 	  _numVol--;
@@ -1309,16 +1315,32 @@ bool Model::read_elem_file( const char *fname )
       return false;
     }
   }
-  if( ne+surfe<nele) {
+  if( ne+surfe+new_cnnx.size()<nele) {
 	fprintf( stderr, "Warning: truncated element file? stated elements: %d, "
-			         " surface elements read: %d, volume elements read: %d\n",
-			            nele, surfe, ne );
+			         " surface elements read: %d, volume elements read: %d,"
+                     "line elments read: %d\n",
+			            nele, surfe, ne, new_cnnx.size() );
+  }
+  if( ne != _numVol ) { 
 	_numVol=ne;
 	VolElement **nv =new VolElement*[_numVol]; 
 	memcpy( nv, _vol, ne*sizeof(VolElement*) );
 	delete[] _vol;
 	_vol = nv;
   }
+  // add any line elements as connections
+  if(  !new_cnnx.empty() ) {
+    int  nc = new_cnnx.size();
+    int *nl = new int[nc*2];
+    for( int a=0; a<nc; a++ ) {
+      nl[a*2]   = new_cnnx.front().first;
+      nl[a*2+1] = new_cnnx.front().second;
+      new_cnnx.pop();
+    }
+    _cnnx->add( nc, nl );
+    delete[] nl;
+  }
+      
   gzclose(in);
 }
 

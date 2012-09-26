@@ -118,6 +118,7 @@ class Connection : public MultiPoint
     virtual ~Connection() {}
 
     void add( int, int );	//!< add a connection
+    void add( int, int* );   //!< add connections
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
