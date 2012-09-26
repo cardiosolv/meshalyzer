@@ -70,7 +70,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1075 117 350 650} type Double box UP_BOX
+      xywh {1078 140 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -90,6 +90,7 @@ if( fn != NULL ) {
     for( int s=0; s<sn; s++ ) {
       surflist->add(mwtb->model->surface(surflist->nitems())->label().c_str(),1);
     }
+    elehi->activate();
     elehi->maximum(mwtb->model->number(SurfEle)-1);
     mwtb->redraw();
     surflist->redraw();
@@ -466,7 +467,7 @@ mwtb->redraw();}
           }
           MenuItem {} {
             label Clipping
-            callback {mwtb->cplane->window->show();} selected
+            callback {mwtb->cplane->window->show();}
             xywh {10 10 100 20}
           }
           MenuItem {} {
@@ -589,7 +590,7 @@ mainbar->redraw();}
           xywh {15 15 100 20}
         }
         MenuItem {} {
-          label Triangles
+          label {Surface Edges}
           callback {mwtb->datify(SurfEle);}
           xywh {5 5 100 20}
         }
@@ -718,7 +719,7 @@ op->win->show();}
       } {
         Fl_Group hilightgrp {
           label Highlight open
-          xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -762,7 +763,7 @@ vertvalout->value(mwtb->vertex_val(int(o->value())));}
             xywh {100 315 85 25}
           }
           Fl_Choice attachtype {
-            label attached
+            label attached selected
             tooltip {draw which objects associated with vertex} xywh {95 435 90 25} down_box BORDER_BOX align 2 when 1
           } {
             MenuItem {} {
@@ -982,14 +983,16 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
 surfselected(lst);
 for( int i=lst.size()-1; i>=0; i-- )
   mwtb->model->surfKill( lst[i] );
-refresh_surflist();}
+refresh_surflist();
+if( !mwtb->model->number(SurfEle) )
+  elehi->deactivate();}
               xywh {0 0 30 20}
             }
           }
         }
         Fl_Group vectorgrp {
           label Vectors open
-          xywh {15 325 315 155} color 75 labelfont 1 labelsize 12 labelcolor 146 deactivate
+          xywh {15 325 315 155} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
             label Vectors

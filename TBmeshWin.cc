@@ -789,7 +789,7 @@ void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt,
   if ( fnt == NULL || !strlen(fnt) ) {
       
     // if available, go to the first Model Dir directory
-    char  cdir[8192] = {0}, *moddir=NULL;
+    char  *moddir=NULL;
     if( getenv("MESHALYZER_MODEL_DIR") ) {
       moddir = strdup( getenv("MESHALYZER_MODEL_DIR") );
       char *p = strchr( moddir, ':' );
@@ -1720,6 +1720,7 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   glDisable(GL_BLEND);
   glShadeModel(GL_SMOOTH);
+  glEnable( GL_LINE_SMOOTH );
   glEnable( GL_POLYGON_SMOOTH );
 
   bool showData=true;

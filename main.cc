@@ -19,7 +19,13 @@ static Controls *ctrl_ptr;
 static Meshwin  *win_ptr;
 
 sem_t *meshProcSem;               // global semaphore for temporal linking
-sem_t *linkingProcSem;  // global semaphore for process linking
+sem_t *linkingProcSem;            // global semaphore for process linking
+
+#define SET_HI( A, B ) \
+    if( win.trackballwin->model->number(B) ) \
+        control.A##hi->maximum( win.trackballwin->model->number(B)-1 ); \
+    else \
+        control.A##hi->deactivate();
 
 /** animate in response to a signal received: SIGUSR1 for forward, 
  *  SIGUSR2 for backward
@@ -264,11 +270,11 @@ main( int argc, char *argv[] )
   else
     win.trackballwin->read_model( win.winny, model_path.c_str(), no_elems );
 
-  control.tethi->maximum( win.trackballwin->model->numVol()-1 );
-  control.elehi->maximum( win.trackballwin->model->numVol()-1 );
-  control.cabhi->maximum( win.trackballwin->model->_cable->num()-1 );
-  control.verthi->maximum(win.trackballwin->model->pt.num()-1 );
-  control.cnnxhi->maximum(win.trackballwin->model->_cnnx->num()-1 );
+  SET_HI( tet,  VolEle  );
+  SET_HI( ele,  SurfEle );
+  SET_HI( cab,  Cable   );
+  SET_HI( vert, Vertex  );
+  SET_HI( cnnx, Cnnx    );
 
   ProgInfo info;
   read_version_info( info.infotxt );

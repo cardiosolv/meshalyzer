@@ -157,7 +157,7 @@ class SurfaceElement : public MultiPoint
 {
   public:
     SurfaceElement(PPoint *p, int n):MultiPoint(p,n,n),_nrml(NULL) {}
-    virtual ~SurfaceElement(){ if ( _nrml!=NULL ) delete[] _nrml; }
+    virtual ~SurfaceElement(){if(_nrml) delete[] _nrml;if(_ptnrml)delete[] _ptnrml;}
 
     virtual void     compute_normals( int, int )=0;
     const   void     nrml( GLfloat *n ){ _nrml=n; };
