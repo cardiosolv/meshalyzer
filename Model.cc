@@ -1424,6 +1424,30 @@ int Model::localElemnum( int gele, int& surf )
 
 
 
+/** compute tyhe global element number from the local
+ *
+ * \param surf surface containing the element
+ * \param lnum local element number
+ *
+ * \return the local element number in the surface,-1 if not in range
+ */
+int Model::globalElemnum( int surf, int lnum )
+{
+  if( !surf && !lnum ) 
+    return 0;
+
+  if( surf<0 || surf>=_surface.size() )
+    return -1;
+
+  int gnum = 0; 
+  for( int i=0; i<surf; i++ )
+    gnum += _surface[i]->num();
+
+  return gnum+lnum;
+}
+
+
+
 /** delete a surface
  *
  *  \param s the number of the surface to delete

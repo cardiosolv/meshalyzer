@@ -70,7 +70,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1078 140 350 650} type Double box UP_BOX
+      xywh {1539 100 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -719,7 +719,7 @@ op->win->show();}
       } {
         Fl_Group hilightgrp {
           label Highlight open
-          xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
+          xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -763,7 +763,7 @@ vertvalout->value(mwtb->vertex_val(int(o->value())));}
             xywh {100 315 85 25}
           }
           Fl_Choice attachtype {
-            label attached selected
+            label attached
             tooltip {draw which objects associated with vertex} xywh {95 435 90 25} down_box BORDER_BOX align 2 when 1
           } {
             MenuItem {} {
@@ -917,7 +917,7 @@ mwtb->redraw();}
         }
         Fl_Group surfgrp {
           label Surface
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
             label visible
@@ -981,11 +981,20 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
               label really
               callback {vector<int> lst;
 surfselected(lst);
-for( int i=lst.size()-1; i>=0; i-- )
+int hsurf;
+int lnum = mwtb->model->localElemnum( elehi->value(), hsurf );
+for( int i=lst.size()-1; i>=0; i-- ){
+  if( lst[i]==hsurf )
+    lnum = hsurf = 0;
+  if( lst[i]<hsurf )
+    hsurf--;
   mwtb->model->surfKill( lst[i] );
+}
+elehi->value( mwtb->model->globalElemnum(hsurf,lnum) );
+elehi->do_callback();
 refresh_surflist();
 if( !mwtb->model->number(SurfEle) )
-  elehi->deactivate();}
+  elehi->deactivate();} selected
               xywh {0 0 30 20}
             }
           }

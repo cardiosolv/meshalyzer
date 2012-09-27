@@ -77,7 +77,8 @@ class Model
     int              _numVol;
     int               numSurf(void){return _surface.size();}
     int              _numReg;
-    int               localElemnum(int, int& );
+    int               localElemnum(int, int&);
+    int               globalElemnum(int, int);
     MultiPoint*      _elems;
   private:
     RRegion**        _region;
