@@ -22,8 +22,6 @@ struct Face {
 
 int intcmp( const void *a, const void *b ){ return *(int *)a-*(int *)b; }
 
-int Surfaces :: nGlobEle = 0;
-
 /** compare 2 faces for sorting */
 bool cmpface( const Face *A, const Face *B)
 {
@@ -524,7 +522,6 @@ int Model::add_surface_from_elem( const char *fn )
   gzFileBuffer file2(in);
 
   gzgets(in,buff,bufsize);      //throw away first line
-  int globele = 0;              //global element index number
   while( file2.gets(buff,bufsize) !=Z_NULL ) {
 	char etype[10],reg[10];
 	int  idat[4];
@@ -932,15 +929,6 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
            pt.pt()[hilight[Vertex]*3+1], pt.pt()[hilight[Vertex]*3+2]);
   hinfo->add( txt );
 
-  for( int s=0; s<numSurf(); s++ ) {
-    vector<int> &ge =  _surface[s]->_globele;
-    if( binary_search(ge.begin(), ge.end(), hilight[Vertex]) ){
-      sprintf(txt, "in surface: %d", s );
-      hinfo->add( txt );
-      break;
-    }
-  }
- 
   if ( _cable->num() ) {
     const int* cab=_cable->obj();
     for ( int cabnum=0; cabnum<_cable->num();cabnum++ )
@@ -983,13 +971,14 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
   if ( numSurf() ) {
     sprintf( txt, "Attached elements:" );
     hinfo->add( txt );
+    int nglob=0;
     for ( int i=0; i<numSurf(); i++ ) {
       vector<SurfaceElement*> ele=surface(i)->ele();
       for ( int j=0; j<surface(i)->num(); j++ ) {
         const int* nl = ele[j]->obj();
         for ( int k=0; k<ele[j]->ptsPerObj(); k++ ) {
           if ( nl[k]==hilight[Vertex] ) {
-            sprintf( txt, "\t%6d", surface(i)->_globele[j] );
+            sprintf( txt, "\t%6d", nglob+j );
             if ( j==hilight[SurfEle] )
               sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
             hinfo->add( txt );
@@ -998,6 +987,7 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
           }
         }
       }
+      nglob += surface(i)->num();
     }
     if ( ts != NULL ) {
       free(ts);
@@ -1422,14 +1412,14 @@ bool Model::add_elements(hid_t hdf_file)
  */
 int Model::localElemnum( int gele, int& surf )
 {
-  for ( surf=0; surf<_surface.size(); surf++ ) {
-    vector<int> ge = _surface[surf]->_globele;
-    vector<int>::iterator p=lower_bound(ge.begin(),ge.end(),gele);
-    if( p != ge.end() )
-        return distance( ge.begin(), p );
-  }
+  if( gele<0 )
+    return -1;
 
-  return -1;
+  surf=0; 
+  while( surf<_surface.size() && _surface[surf]->num()<=gele ) 
+    gele -= _surface[surf++]->num();
+
+  return surf==_surface.size() ? -1 : gele;
 }
 
 
