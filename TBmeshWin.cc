@@ -1011,7 +1011,7 @@ void TBmeshWin :: hiliteinfo()
 }
 
 
-// when something is click in the hilight info window, determine if it is a new element
+// when something is clicked in the hilight info window, determine if it is a new object
 // to be highlighted
 void
 TBmeshWin :: select_hi( int n )

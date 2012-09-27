@@ -920,65 +920,6 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
   hinfo->clear();
   char* txt  = new char[256];
   char* ts   = NULL;
-
-  // Volume ELements
-  if ( _numVol ) {
-    int hivol=hilight[VolEle];
-    sprintf( txt, "@b@C%6dVolume Element: %d of %d", FL_RED, hivol, _numVol );
-    hinfo->add( txt );
-    hinfo->add( "nodes:\t" );
-    const int* tet=_vol[hivol]->obj();
-    for ( int i=0; i<_vol[hivol]->ptsPerObj(); i++ ) {
-      if ( data != NULL )
-        sprintf(txt, "%6d -> %f", tet[i], data[tet[i]] );
-      else
-        sprintf( txt, "%6d", tet[i] );
-      if ( tet[i]==hilight[Vertex] )
-        sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-      hinfo->add( txt );
-    }
-  }
-  hinfo->add("");
-  if ( ts != NULL ) {
-    free(ts);
-    ts=NULL;
-  }
-
-  // SurfEles
-  int elesurf, lele;
-  if ( numSurf() ) {
-    lele = localElemnum( hilight[SurfEle], elesurf );
-    sprintf(txt, "@b@C%6dSurface Element: %d of %d (local %d of %d)",
-            FL_BLUE, hilight[SurfEle], number(SurfEle),
-            lele, surface(elesurf)->num());
-    hinfo->add( txt );
-    hinfo->add( "nodes:\t" );
-    for ( int i=0; i<surface(elesurf)->ele(lele)->ptsPerObj(); i++ ) {
-      int node=surface(elesurf)->ele(lele)->obj()[i];
-      if ( data != NULL )
-        sprintf( txt,"\t%6d -> %f", node, data[node] );
-      else
-        sprintf( txt, "\t%6d", node );
-      if ( node==hilight[Vertex] )
-        sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-      hinfo->add( txt );
-    }
-    if ( ts != NULL ) {
-      free(ts);
-      ts=NULL;
-    }
-    //normal
-    const GLfloat* n=surface(elesurf)->ele(lele)->nrml();
-    if ( n != NULL ) {
-      hinfo->add( "normal:\t" );
-      sprintf( txt, "(%f, %f, %f)", n[0], n[1], n[2] );
-      hinfo->add( txt );
-    }
-    sprintf( txt, "in surface %6d", elesurf );
-    hinfo->add( txt );
-    hinfo->add( "" );
-  }
-
   // Vertex info
   sprintf(txt, "@b@C%6dVertex: %d of %d", FL_GREEN, hilight[Vertex],
           pt.num() );
@@ -1111,6 +1052,65 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
       ts=NULL;
     }
   }
+
+  // Volume ELements
+  if ( _numVol ) {
+    int hivol=hilight[VolEle];
+    sprintf( txt, "@b@C%6dVolume Element: %d of %d", FL_RED, hivol, _numVol );
+    hinfo->add( txt );
+    hinfo->add( "nodes:\t" );
+    const int* tet=_vol[hivol]->obj();
+    for ( int i=0; i<_vol[hivol]->ptsPerObj(); i++ ) {
+      if ( data != NULL )
+        sprintf(txt, "%6d -> %f", tet[i], data[tet[i]] );
+      else
+        sprintf( txt, "%6d", tet[i] );
+      if ( tet[i]==hilight[Vertex] )
+        sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
+      hinfo->add( txt );
+    }
+  }
+  hinfo->add("");
+  if ( ts != NULL ) {
+    free(ts);
+    ts=NULL;
+  }
+
+  // SurfEles
+  int elesurf, lele;
+  if ( numSurf() ) {
+    lele = localElemnum( hilight[SurfEle], elesurf );
+    sprintf(txt, "@b@C%6dSurface Element: %d of %d (%d of %d in %s)",
+            FL_BLUE, hilight[SurfEle], number(SurfEle),
+            lele, surface(elesurf)->num(), surface(elesurf)->label().c_str());
+    hinfo->add( txt );
+    hinfo->add( "nodes:\t" );
+    for ( int i=0; i<surface(elesurf)->ele(lele)->ptsPerObj(); i++ ) {
+      int node=surface(elesurf)->ele(lele)->obj()[i];
+      if ( data != NULL )
+        sprintf( txt,"\t%6d -> %f", node, data[node] );
+      else
+        sprintf( txt, "\t%6d", node );
+      if ( node==hilight[Vertex] )
+        sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
+      hinfo->add( txt );
+    }
+    if ( ts != NULL ) {
+      free(ts);
+      ts=NULL;
+    }
+    //normal
+    const GLfloat* n=surface(elesurf)->ele(lele)->nrml();
+    if ( n != NULL ) {
+      hinfo->add( "normal:\t" );
+      sprintf( txt, "(%f, %f, %f)", n[0], n[1], n[2] );
+      hinfo->add( txt );
+    }
+    sprintf( txt, "in surface %6d", elesurf );
+    hinfo->add( txt );
+    hinfo->add( "" );
+  }
+
   //Connections
   if ( _cnnx->num() ) {
     sprintf(txt, "@b@C%6dConnection: %d of %d", FL_MAGENTA, hilight[Cnnx],
