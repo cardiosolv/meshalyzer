@@ -6,6 +6,7 @@ FLTK_INC      := $(shell fltk-config --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-gl --ldflags)
 COMMON_INC    := -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX  -fopenmp
 
+HDF5=1
 ifdef HDF5
 LIB_CH5       := (HDF5_ROOT)/lib/libch5.a
 LIB_HDF5      := -lch5 -lhdf5 -lhdf5_hl 

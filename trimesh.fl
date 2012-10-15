@@ -29,7 +29,7 @@ decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();c
 decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {private local
 } 
 
-decl {\#define TEST_MENUVAR(A,B,C) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();continue;}} {private local
+decl {\#define TEST_MENUVAR(A,B,C,D) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();if(A->callback())A->do_callback(D);continue;}} {private local
 } 
 
 decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {private local
@@ -70,15 +70,15 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1539 100 350 650} type Double box UP_BOX
+      xywh {972 341 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
       Fl_Menu_Bar mainbar {open
-        xywh {0 -1 350 30} labelcolor 1
+        xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -442,12 +442,14 @@ mwtb->redraw();}
           }
           MenuItem revdraworder {
             label {Reverse draw order}
-            callback {mwtb->revdraworder( (bool)(o->mvalue()->value()) );}
+            user_data revdraworder
+            callback {mwtb->revdraworder(((Fl_Menu_Item*)v)->checked());}
             xywh {0 0 100 20} type Toggle
           }
           MenuItem norot {
             label {No rotation}
-            callback {mwtb->norot((bool)(o->mvalue()->value()));}
+            user_data norot
+            callback {mwtb->norot(((Fl_Menu_Item*)v)->checked());}
             xywh {0 0 30 20} type Toggle
           }
           MenuItem {} {
@@ -500,6 +502,7 @@ s->window->show();}
             }
             MenuItem transBgd {
               label {Transparent Bgd}
+              user_data transBgd
               callback {mwtb->transBgd( transBgd->value() );}
               xywh {0 0 30 20} type Toggle value 1
             }
@@ -569,50 +572,73 @@ mainbar->redraw();}
           xywh {0 0 30 20}
         }
       }
-      Fl_Choice datachc {
-        label {Data on}
-        tooltip {use data to color which elements} xywh {75 50 110 25} down_box BORDER_BOX
-        code0 {o->value(4);}
+      Fl_Menu_Button datadest {
+        label {Data on:} open selected
+        xywh {10 45 170 30} color 26
       } {
-        MenuItem {} {
+        MenuItem vertdisp {
           label Vertices
-          callback {mwtb->datify(Vertex);}
-          xywh {5 5 100 20}
+          user_data vertdisp
+          callback {if(((Fl_Menu_Item*)v)->checked()) mwtb->datify(Vertex);
+else mwtb->undatify(Vertex);}
+          xywh {0 0 30 20} type Toggle
         }
-        MenuItem {} {
+        MenuItem cabledisp {
           label Cables
-          callback {mwtb->datify(Cable);}
-          xywh {5 5 100 20}
+          user_data cabledisp
+          callback {if(((Fl_Menu_Item*)v)->checked()) mwtb->datify(Cable);
+else mwtb->undatify(Cable);}
+          xywh {0 0 30 20} type Toggle
+        }
+        MenuItem cnnxdisp {
+          label Cnnx
+          user_data cnnxdisp
+          callback {if(((Fl_Menu_Item*)v)->checked()) mwtb->datify(Cnnx);
+else mwtb->undatify(Cnnx);}
+          xywh {0 0 30 20} type Toggle
+        }
+        MenuItem surfedgedisp {
+          label {Surface edges}
+          user_data surfedgedisp
+          callback {if(((Fl_Menu_Item*)v)->checked() ) mwtb->datify(SurfEle);
+else mwtb->undatify(SurfEle);}
+          xywh {0 0 30 20} type Toggle
+        }
+        MenuItem surfdisp {
+          label {Surface Elements}
+          user_data surfdisp
+          callback {if(((Fl_Menu_Item*)v)->checked() ) mwtb->datify(Surface);
+else mwtb->undatify(Surface);}
+          xywh {0 0 30 20} type Toggle value 1
+        }
+        MenuItem voldisp {
+          label {Volume Elements}
+          user_data voldisp
+          callback {if(((Fl_Menu_Item*)v)->checked() ) mwtb->datify(VolEle);
+else mwtb->undatify(VolEle);}
+          xywh {0 0 30 20} type Toggle
         }
         MenuItem {} {
-          label Connections
-          callback {mwtb->datify(Cnnx);}
-          xywh {15 15 100 20}
+          label ALL
+          callback {mwtb->datify(All);
+vertdisp->check();
+cabledisp->check();
+cnnxdisp->check();
+surfedgedisp->check();
+surfdisp->check();
+voldisp->check();}
+          xywh {0 0 30 20}
         }
         MenuItem {} {
-          label {Surface Edges}
-          callback {mwtb->datify(SurfEle);}
-          xywh {5 5 100 20}
-        }
-        MenuItem {} {
-          label Surfaces
-          callback {mwtb->datify(Surface);}
-          xywh {5 5 100 20}
-        }
-        MenuItem {} {
-          label Tetrahedra
-          callback {mwtb->datify(VolEle);}
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label Nothing
-          callback {mwtb->datify(Nothing);}
-          xywh {0 0 100 20}
-        }
-        MenuItem {} {
-          label All
-          callback {mwtb->datify(All);}
-          xywh {0 0 100 20}
+          label NONE
+          callback {mwtb->undatify(All);
+vertdisp->uncheck();
+cabledisp->uncheck();
+cnnxdisp->uncheck();
+surfedgedisp->uncheck();
+surfdisp->uncheck();
+voldisp->uncheck();}
+          xywh {0 0 30 20}
         }
       }
       Fl_Light_Button draw_axes {
@@ -635,7 +661,7 @@ mainbar->redraw();}
           xywh {195 55 90 25} type Radio down_box DIAMOND_DOWN_BOX value 1
         }
         Fl_Check_Button {} {
-          label {Tetrahedral Mesh}
+          label {Volume Mesh}
           callback {mwtb->dispmode(asTetMesh);}
           xywh {195 80 140 25} type Radio down_box DIAMOND_DOWN_BOX
         }
@@ -917,7 +943,7 @@ mwtb->redraw();}
         }
         Fl_Group surfgrp {
           label Surface
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label visible
@@ -994,7 +1020,7 @@ elehi->value( mwtb->model->globalElemnum(hsurf,lnum) );
 elehi->do_callback();
 refresh_surflist();
 if( !mwtb->model->number(SurfEle) )
-  elehi->deactivate();} selected
+  elehi->deactivate();}
               xywh {0 0 30 20}
             }
           }
@@ -1135,7 +1161,7 @@ mwtb->redraw();}
         }
         Fl_Group auxgridgrp {
           label {Aux Grid} open
-          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
+          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
         } {
           Fl_Light_Button auxgriddispbut {
             label On
@@ -1677,7 +1703,12 @@ mwtb->dataopac->save(mshzf);
 
 SAVE_WIDGET(mshzf,read_recalibrate);
 SAVE_WIDGET(mshzf,revdraworder);
-SAVE_WIDGET(mshzf,datachc);
+SAVE_WIDGET(mshzf,vertdisp);
+SAVE_WIDGET(mshzf,cabledisp);
+SAVE_WIDGET(mshzf,cnnxdisp);
+SAVE_WIDGET(mshzf,surfedgedisp);
+SAVE_WIDGET(mshzf,surfdisp);
+SAVE_WIDGET(mshzf,voldisp);
 SAVE_WIDGET(mshzf,draw_axes);
 //region group
 SAVE_WIDGET(mshzf,vertbut);
@@ -1970,9 +2001,14 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     mwtb->stride( Cnnx, cxs );
     continue;
   } 
-  TEST_MENUVAR( read_recalibrate, var, val )  
-  TEST_MENUVAR( revdraworder, var, val )  
-  TEST_CHOICE( datachc, var, int(val) )  
+  TEST_MENUVAR( read_recalibrate, var, val, mainbar )  
+  TEST_MENUVAR( revdraworder, var, val, mainbar )  
+  TEST_MENUVAR( vertdisp, var, val, datadest )
+  TEST_MENUVAR( cabledisp, var, val, datadest )
+  TEST_MENUVAR( cnnxdisp, var, val, datadest )
+  TEST_MENUVAR( surfedgedisp, var, val, datadest )
+  TEST_MENUVAR( surfdisp, var, val, datadest )
+  TEST_MENUVAR( voldisp, var, val, datadest )
   TEST_VAR( draw_axes, var, int(val) )  
   TEST_VAR( vertbut, var, int(val) )  
   TEST_VAR( cabbut, var, int(val) )  

@@ -26,6 +26,16 @@
 #include <hdf5.h>
 #endif
 
+
+// for displaying data
+const unsigned int Vertex_flg=1;
+const unsigned int Cable_flg=2;
+const unsigned int Cnnx_flg=4;
+const unsigned int SurfEdge_flg=8;
+const unsigned int Surface_flg=16;
+const unsigned int VolEle_flg=32;
+const unsigned int ObjFlg[] = { Vertex_flg, Cable_flg, Cnnx_flg, SurfEdge_flg, Surface_flg, VolEle_flg };
+
 class Sequence;
 class HiLiteInfoWin;
 class Controls;
@@ -66,8 +76,9 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     inline bool visibility( int s ){return model->visibility(s);}
     void opacity( int s, float opac );
     inline GLfloat opacity( int s ){return model->opacity(s);}
-    inline Object_t datify(){ return datadst; }
-    inline void datify( Object_t obj ){ datadst=obj; redraw(); }
+    inline unsigned int datify(){ return datadst; }
+    inline void datify( Object_t obj ){ if(obj==All)datadst=(1<<maxobject)-1;else datadst |= ObjFlg[obj]; redraw(); }
+    inline void undatify( Object_t obj ){if(obj==All)datadst=0;else datadst&=~ObjFlg[obj];redraw();}
     Colourscale *cs;
     int add_surface( const char * );   	// add a surface
     void get_data( const char *, Myslider* mslider=NULL );	// get data file
@@ -141,7 +152,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     int        hilight[maxobject];	// which object to highlight
     bool	   hilighton;			// whether to highlight
     Display_t  disp;					// type of display
-    Object_t   datadst;				// which object gets data coloured
+    unsigned int   datadst;				// which object gets data coloured
     GLfloat    tet_color[4], hitet_color[4], hiele_color[4],
     hicable_color[4], hicnnx_color[4], hipt_color[4], bc[4],
     hiptobj_color[4];

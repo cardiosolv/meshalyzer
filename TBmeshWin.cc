@@ -21,6 +21,7 @@
 
 unsigned int TBmeshWin::MAX_MESSAGES_READ = 100;
 
+
 const int   NUM_CP = 6;
 const GLenum CLIP_PLANE[] =
   {
@@ -186,7 +187,7 @@ void TBmeshWin::highlight( Object_t obj, int a )
 
 TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     : Fl_Gl_Tb_Window(x, y, w, h, l), vecdata( NULL ), hilighton(false),
-    autocol(false), have_data(NoData), datadst(Surface), vert_asc_obj(SurfEle),
+    autocol(false), have_data(NoData), datadst(ObjFlg[Surface]), vert_asc_obj(SurfEle),
     fill_assc_obj(false), fill_hitet(false), revDrawOrder(false), tm(0),
     frame_skip(0), frame_delay(0.01), lightson(true), auxGrid(NULL),
     cs( new Colourscale( 64 ) ), renderMode(GL_RENDER),
@@ -322,7 +323,7 @@ void TBmeshWin :: draw()
 
     glLineWidth(0.5);
     glColor3fv( tet_color );
-    const bool datcolor = (datadst == VolEle) && have_data!=NoData;
+    const bool datcolor = datadst&VolEle_flg && have_data!=NoData;
 
     for ( int r=0; r<model->_numReg; r++ ) {
 
@@ -505,7 +506,7 @@ void TBmeshWin::draw_iso_surfaces()
 }
 
 
-// draw surfaces
+// draw filled surface elements
 void TBmeshWin::draw_surfaces(Surfaces* sf)
 {
   int stride = 1;
@@ -518,7 +519,7 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   //glEnable(GL_BLEND);
   bool showData=true;
-  if ( (datadst!=Surface && datadst!=All) || have_data==NoData )
+  if ( !(datadst&Surface_flg) || have_data==NoData )
     showData = false;
 
   if (  dataopac->dop[Surface].on() ||
@@ -535,7 +536,7 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
 }
 
 
-// draw triangular elements
+// draw surface element outlines
 void TBmeshWin::draw_elements(Surfaces* sf)
 {
   glPushAttrib(GL_POLYGON_BIT);
@@ -543,7 +544,7 @@ void TBmeshWin::draw_elements(Surfaces* sf)
   glLineWidth(2.);
 
   bool datacol=true;
-  if ( (datadst!=SurfEle && datadst!=All) || have_data==NoData )
+  if ( !(datadst&SurfEdge_flg) || have_data==NoData )
     datacol = false;
 
   if ( renderMode == GL_RENDER )
@@ -563,7 +564,7 @@ void TBmeshWin::draw_cables(RRegion* sf)
     model->_cable->threeD( sf->threeD(Cable) );
     if ( dataopac->dop[Cable].on() ) translucency(true);
     model->_cable->draw( 0, model->_cable->num()-1, sf->get_color(Cable),
-                         cs, (datadst==Cable||datadst==All)?data:NULL,
+                         cs, datadst&Cable_flg?data:NULL,
                          model->stride(Cable), dataopac->dop+Cable );
     if ( dataopac->dop[Cable].on() ) translucency(false);
     glPopAttrib();
@@ -581,7 +582,7 @@ void TBmeshWin::draw_cnnx(RRegion* sf)
     model->_cnnx->threeD( sf->threeD(Cnnx) );
     glColor4fv( sf->get_color( Cnnx ) );
     model->_cnnx->draw( 0, model->_cnnx->num()-1, sf->get_color(Cnnx),
-                        cs, (datadst==All|datadst==Cnnx)?data:NULL, 
+                        cs, datadst&Cnnx_flg?data:NULL, 
                         model->stride(Cnnx), dataopac->dop+Cnnx       );
     glPopAttrib();
   } else
@@ -601,7 +602,7 @@ void TBmeshWin::draw_vertices(RRegion* reg)
     model->pt.threeD( reg->threeD(Vertex) );
     if ( dataopac->dop[Vertex].on() ) translucency(true);
     model->pt.draw( 0, model->pt.num()-1, reg->get_color(Vertex),
-                    cs, (datadst==All||datadst==Vertex)?data:NULL,
+                    cs, datadst&Vertex_flg?data:NULL,
                     model->stride(Vertex), dataopac->dop+Vertex );
     if ( dataopac->dop[Vertex].on() ) translucency(false);
     glPopAttrib();
@@ -1724,7 +1725,7 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   glEnable( GL_POLYGON_SMOOTH );
 
   bool showData=true;
-  if ( (datadst!=Surface && datadst!=All) || have_data==NoData )
+  if ( !(datadst&Surface_flg) || have_data==NoData )
     showData = false;
 
   if ( dataopac->dop[Surface].on() ) translucency(true);

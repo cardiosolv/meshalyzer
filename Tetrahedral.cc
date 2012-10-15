@@ -61,7 +61,7 @@ void Tetrahedral::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
         continue;
 
       const GLfloat* a =  _pt->pt(an=_node[p]);
-      const GLfloat* b =  _pt->pt(dn=_node[p+1]);
+      const GLfloat* b =  _pt->pt(bn=_node[p+1]);
       const GLfloat* c =  _pt->pt(cn=_node[p+2]);
       const GLfloat* d =  _pt->pt(dn=_node[p+3]);
 
