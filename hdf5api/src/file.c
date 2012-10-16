@@ -10,7 +10,15 @@
 * \sa ch5_close
 */
 int ch5_open(const char *path, hid_t *file_id) {
-  hid_t id = H5Fopen(path, H5F_ACC_RDWR, H5P_DEFAULT);
+  hid_t plist = H5P_DEFAULT;
+#ifdef HAVE_MPIIO
+  hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, MPIO_INFO_NULL);
+#endif
+  hid_t id = H5Fopen(path, H5F_ACC_RDWR, plist);
+#ifdef HAVE_MPIIO
+  H5Pclose(plist_id);
+#endif
   if (id < 0) return 1;
   *file_id = id;
   return 0;
@@ -27,7 +35,15 @@ int ch5_open(const char *path, hid_t *file_id) {
 * \sa ch5_close
 */
 int ch5_create(const char *path, hid_t *file_id) {
-  hid_t id = H5Fcreate(path, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  hid_t plist = H5P_DEFAULT;
+#ifdef HAVE_MPIIO
+  hid_t plist_id = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, MPIO_INFO_NULL);
+#endif
+  hid_t id = H5Fcreate(path, H5F_ACC_TRUNC, H5P_DEFAULT, plist);
+#ifdef HAVE_MPIIO
+  H5Pclose(plist_id);
+#endif
   if (id < 0) return 1;
   *file_id = id;
   return 0;
