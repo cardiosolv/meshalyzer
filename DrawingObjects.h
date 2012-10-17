@@ -156,7 +156,7 @@ class ContCable : public MultiPoint
 class SurfaceElement : public MultiPoint
 {
   public:
-    SurfaceElement(PPoint *p, int n):MultiPoint(p,n,n),_nrml(NULL) {}
+    SurfaceElement(PPoint *p, int n):MultiPoint(p,n,n),_nrml(NULL),_ptnrml(NULL) {}
     virtual ~SurfaceElement(){if(_nrml) delete[] _nrml;if(_ptnrml)delete[] _ptnrml;}
 
     virtual void     compute_normals( int, int )=0;
