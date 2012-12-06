@@ -288,7 +288,7 @@ add_nodal_igb( hid_t h5out, const char *fn, const char* label,
 
 /** write data from an ASCII data file into the HDF5 file
  * 
- * \param h5out  HDF% file
+ * \param h5out  HDF5 file
  * \param fn     filename
  * \param argc
  * \param argv

@@ -382,7 +382,7 @@ private:
  */
 AuxGrid::AuxGrid( const char *fn )
   : _display(true), _hilight(false), _hiVert(0), _plottable(false),
-    _indexer(NULL),_timeplot(NULL)
+    _indexer(NULL),_timeplot(NULL),_clip(false)
 {
   if( strstr( fn, ".pts_t" ) )
     _indexer = new AuxGridIndexer(fn);
@@ -441,6 +441,13 @@ AuxGrid :: draw( int t )
     optimize_cs(t);
   }
 
+  GLboolean cpv[6];
+  if( !_clip )
+    for( int i=0; i<6; i++ ) {
+      glGetBooleanv( GL_CLIP_PLANE0+i, cpv+i );
+      glDisable( GL_CLIP_PLANE0+i );
+    }
+
   if( _show[Vertex] ) {
     m->pt.draw( 0, m->pt.num()-1, color(Vertex), &cs, 
      (_indexer->_data && _datafied[Vertex]) ? _indexer->_data : NULL, 1, NULL );
@@ -493,6 +500,11 @@ AuxGrid :: draw( int t )
     
     glPopAttrib();
   } 
+
+  if( !_clip ) 
+    for( int i=0; i<6; i++ ) 
+      if( cpv[i] )
+        glEnable( GL_CLIP_PLANE0+i );
 }
 
 /** destructor */

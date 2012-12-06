@@ -32,6 +32,7 @@ class AuxGrid {
         PlotWin*     _timeplot;
         int          _sz_ts;        //!< size of time series
         double*      _time_series;
+        bool         _clip;         // is is clipped?
 
     public:
         AuxGrid( const char *fn );
@@ -60,6 +61,7 @@ class AuxGrid {
         bool     plottable(){return _plottable;}
         bool     data();
         int      num_vert();
+        void     clip( bool b ){ _clip=b; }
 };
 
 #endif
