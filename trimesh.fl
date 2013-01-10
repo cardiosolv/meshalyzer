@@ -70,7 +70,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {738 264 350 650} type Double box UP_BOX
+      xywh {1548 22 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -615,7 +615,7 @@ else mwtb->undatify(Surface);}
           label {Volume Elements}
           user_data voldisp
           callback {if(((Fl_Menu_Item*)v)->checked() ) mwtb->datify(VolEle);
-else mwtb->undatify(VolEle);}
+else mwtb->undatify(VolEle);} selected
           xywh {0 0 30 20} type Toggle
         }
         MenuItem {} {
@@ -744,7 +744,7 @@ op->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open selected
+          label Highlight open
           xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -770,8 +770,7 @@ op->win->show();}
           }
           Fl_Value_Input verthi {
             label {Vertex:}
-            callback {mwtb->highlight(Vertex,int(o->value()));
-vertvalout->value(mwtb->vertex_val(int(o->value())));}
+            callback {mwtb->highlight(Vertex,int(o->value()));}
             xywh {100 405 85 25} step 1
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
@@ -789,13 +788,18 @@ vertvalout->value(mwtb->vertex_val(int(o->value())));}
             xywh {100 315 85 25}
           }
           Fl_Choice attachtype {
-            label attached
+            label attached open
             tooltip {draw which objects associated with vertex} xywh {95 435 90 25} down_box BORDER_BOX align 2 when 1
           } {
             MenuItem {} {
               label {surf eles}
               callback {mwtb->assc_obj(SurfEle);}
               xywh {5 5 100 20}
+            }
+            MenuItem {} {
+              label {filled Surfs}
+              callback {mwtb->assc_obj(SurfEle,true);}
+              xywh {0 0 36 20}
             }
             MenuItem {} {
               label Vols

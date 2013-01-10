@@ -180,15 +180,17 @@ void TBmeshWin::highlight( Object_t obj, int a )
   hilight[obj] = a;
   redraw();
   if ( hinfo->window->visible() ) hiliteinfo();
-  if ( obj == Vertex && timeplotter->window->shown() ) timeplot();
-  if ( obj == Vertex && have_data != NoData) contwin->vertvalout->value( data[a] );
+  if ( obj == Vertex ) {
+    if( timeplotter->window->shown() ) timeplot();
+    if( have_data != NoData) contwin->vertvalout->value( data[a] );
+  }
 }
 
 
 TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     : Fl_Gl_Tb_Window(x, y, w, h, l), vecdata( NULL ), hilighton(false),
     autocol(false), have_data(NoData), datadst(ObjFlg[Surface]), vert_asc_obj(SurfEle),
-    fill_assc_obj(false), fill_hitet(false), revDrawOrder(false), tm(0),
+    fill_assc_obj(true), fill_hitet(false), revDrawOrder(false), tm(0),
     frame_skip(0), frame_delay(0.01), lightson(true), auxGrid(NULL),
     cs( new Colourscale( 64 ) ), renderMode(GL_RENDER),
     hinfo(new HiLiteInfoWin(this)), dataopac(new DataOpacity( this )),
@@ -428,15 +430,24 @@ void TBmeshWin :: draw()
           }
       glDisable(GL_POLYGON_OFFSET_FILL );
 
-    } else if ( model->numSurf() &&
+    } else if ( model->numSurf() && vert_asc_obj != Nothing &&
                 (!model->numVol() || vert_asc_obj==SurfEle) ) {
       //draw elements associated with highlighted node
       for ( int s=0; s<model->numSurf(); s++ ) {
         vector<SurfaceElement*>ele = model->surface(s)->ele();
-        for ( int i=0; i<model->surface(s)->num(); i++ )
+        for ( int i=0; i<model->surface(s)->num(); i++ ) {
           for ( int j=0; j<ele[i]->ptsPerObj(); j++ )
-            if ( ele[i]->obj()[j] == hilight[Vertex] )
+            if ( ele[i]->obj()[j] == hilight[Vertex] ) {
+              if ( fill_assc_obj ) {
+                glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+                GLfloat col[4] = { 1, 0, 1, 1 };
+                ele[i]->draw( 0, col );
+                glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+                glEnable(GL_POLYGON_OFFSET_FILL );
+              }
               ele[i]->draw( 0, hiptobj_color );
+            }
+        }
       }
       glEnd();
     }
@@ -1012,8 +1023,11 @@ void TBmeshWin :: hiliteinfo()
 }
 
 
-// when something is clicked in the hilight info window, determine if it is a new object
-// to be highlighted
+/** when something is clicked in the hilight info window, determine if it is a new object to 
+ *  be highlighted
+ *
+ *  \param n number of selected line in window
+ */
 void
 TBmeshWin :: select_hi( int n )
 {
@@ -1053,16 +1067,9 @@ TBmeshWin :: select_hi( int n )
   int ho;
   if ( i>1 &&
        ( sscanf( txt, "%d", &ho )==1 || sscanf( txt, "%*s %*s %d", &ho)==1 ) ) {
-    hilight[objtype] = ho;
     int lineno = hinfo->topline();
-    hiliteinfo();
+    highlight(objtype, ho );
     hinfo->topline( lineno );
-    contwin->verthi->value(hilight[Vertex]);
-    contwin->tethi->value(hilight[VolEle]);
-    contwin->elehi->value(hilight[SurfEle]);
-    contwin->cnnxhi->value(hilight[Cnnx]);
-    contwin->cabhi->value(hilight[Cable]);
-    redraw();
   }
 }
 
