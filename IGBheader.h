@@ -15,10 +15,10 @@
 #define	    NUL		0
 #define	    INCONNU	0
 
-#define      IGB_BIG_ENDIAN		666666666
-#define      IGB_LITTLE_ENDIAN	777777777
-#define	     N_SYSTEMES	2
-#define SLEN 41
+#define     IGB_BIG_ENDIAN		666666666
+#define     IGB_LITTLE_ENDIAN	777777777
+#define	    N_SYSTEMES	2
+
 
 /* ------------------------ TYPES definition ------------------------------ */
 #define	    IGB_BYTE      1  /* -- byte ----------------------------------- */
@@ -35,12 +35,13 @@
 #define	    IGB_LIST	  12 /* -- List   --------------------------------- */
 #define	    IGB_INT	      13 /* -- integer -------------------------------- */
 #define	    IGB_UINT	  14 /* -- unsigned integer------------------------ */
-#define     IGB_VEC3_f    15 /* -- 3 X float ------------------------------ */
-#define     IGB_VEC3_d    16 /* -- 3 X double ----------------------------- */
-#define     IGB_VEC4_f    17 /* -- 4 X float ------------------------------ */
-#define     IGB_VEC4_d    18 /* -- 4 X double ----------------------------- */
+#define	    IGB_USHORT	  15 /* -- unsigned short integer------------------ */
+#define     IGB_VEC3_f    16 /* -- 3 X float ------------------------------ */
+#define     IGB_VEC3_d    17 /* -- 3 X double ----------------------------- */
+#define     IGB_VEC4_f    18 /* -- 4 X float ------------------------------ */
+#define     IGB_VEC4_d    19 /* -- 4 X double ----------------------------- */
 #define	    IGB_MIN_TYPE	  1
-#define	    IGB_MAX_TYPE	 18
+#define	    IGB_MAX_TYPE	 19
 
 #define Byte hByte
 
@@ -56,6 +57,7 @@
 #define ERR_UNDEFINED_X_Y_TYPE 5
 #define ERR_SIZE_REDEFINED     6 
 #define ERR_SIZE_NOT_DEFINED   7
+#define WARN_DIM_INCONSISTENT  256
 
 /*
     Definition des types List, bytes, Char, Double, complex d_complex
@@ -82,6 +84,7 @@ typedef     long		Long;
 typedef     int			Int;
 typedef     unsigned int        UInt;
 typedef     short		Short;
+typedef     unsigned short		UShort;
 typedef     int			BooleaN;
 typedef     int			Flag;
 typedef     char		*RDir;
@@ -130,7 +133,7 @@ typedef union rgba {
 /* -------------- Definition du type des variables globales de header.c - */
 
 #ifndef	HEADER_GLOBALS
-extern	int		 	   Header_Quiet;
+extern	bool     	   Header_Quiet;
 extern	const char    *Header_Type[IGB_MAX_TYPE+1];
 extern	unsigned short Data_Size[IGB_MAX_TYPE+1];
 extern	const char	  *Header_Systeme[N_SYSTEMES];
@@ -165,12 +168,12 @@ class IGBheader
     float  v_inc_x, v_inc_y, v_inc_z, v_inc_t ; //!< distance entre pixels -
     float  v_dim_x, v_dim_y, v_dim_z, v_dim_t ; //!< dimension totale -------
     float *v_vect_z ;           //!< coord z de chaque tranche -----
-    char   v_unites_x[SLEN], v_unites_y[SLEN], v_unites_z[SLEN], v_unites_t[SLEN];
+    char   v_unites_x[41], v_unites_y[41], v_unites_z[41], v_unites_t[41] ;
     //!< unites de mesure --------------
-    char   v_unites[SLEN] ;     //!< unites de mesure pour les valeurs des pixels -----------
+    char   v_unites[41] ;       //!< unites de mesure pour les valeurs des pixels -----------
     float  v_facteur, v_zero ;  //!< facteur d'echelle et valeur du zero -
-    char   v_struct_desc[SLEN] ;//!< description de la structure ---
-    char   v_aut_name[SLEN] ;   //!< nom de l'auteur ---------------
+    char   v_struct_desc[41] ;  //!< description de la structure ---
+    char   v_aut_name[41] ;     //!< nom de l'auteur ---------------
     char** v_comment ;          //!< commentaires ------------------
     void*  v_transparent;		//!< transparent value for data
     int    puts_fcn(void *, char *);
@@ -202,7 +205,7 @@ class IGBheader
     IGBheader( gzFile a = NULL );
     ~IGBheader();
     int   write();
-    int   read();
+    int   read( bool quiet=false );
     void  fileptr( gzFile f );
     void  fileptr( FILE* f );
     void* fileptr(void){ return file; }
@@ -265,7 +268,7 @@ class IGBheader
     inline float org_t(void){ return v_org_t; }
     inline float org_t( bool &set ){ set=bool_org_t; return v_org_t; }
   inline void org_t( float a ){ v_org_t = a;  bool_org_t = true;}
-    inline void inc_x( float a ){ v_inc_x = a;  bool_inc_x = true;}
+    inline float inc_x( float a ){ v_inc_x = a;  bool_inc_x = true;}
     inline float inc_x( bool &set ){ set=bool_inc_x; return v_inc_x; }
   inline float inc_x(void){ return v_inc_x; }
     inline void inc_y( float a ){ v_inc_y = a;  bool_inc_y = true;}
@@ -298,25 +301,25 @@ class IGBheader
     inline void vect_z( float* a ){ v_vect_z = a; bool_vect_z = true; }
     inline float* vect_z( bool &set ){ set=bool_vect_z; return v_vect_z; }
   inline float* vect_z(void){ return v_vect_z; }
-    inline void unites_x( char* a ){ strncpy(v_unites_x, a, SLEN); bool_unites_x = true; }
+    inline void unites_x( char* a ){ strcpy(v_unites_x, a); bool_unites_x = true; }
     inline char* unites_x( bool &set ){ set=bool_unites_x; return v_unites_x; }
   inline char* unites_x(void){ return v_unites_x; }
-    inline void unites_y( char* a ){ strncpy(v_unites_y, a,SLEN); bool_unites_y = true;}
+    inline void unites_y( char* a ){ strcpy(v_unites_y, a); bool_unites_y = true;}
     inline char* unites_y( bool &set ){ set=bool_unites_y; return v_unites_y; }
   inline char* unites_y(void){ return v_unites_y; }
-    inline void unites_z( char* a ){ strncpy(v_unites_z,a,SLEN); bool_unites_z = true; }
+    inline void unites_z( char* a ){ strcpy(v_unites_z,a); bool_unites_z = true; }
     inline char* unites_z( bool &set ){ set=bool_unites_z; return v_unites_z; }
   inline char* unites_z(void){ return v_unites_z; }
-    inline void unites_t( char* a ){ strncpy(v_unites_t, a, SLEN); bool_unites_t = true; }
+    inline void unites_t( char* a ){ strcpy(v_unites_t, a); bool_unites_t = true; }
     inline char* unites_t( bool &set ){ set=bool_unites_t; return v_unites_t; }
   inline char* unites_t(void){ return v_unites_t; }
-    inline void unites( char* a ){ strncpy(v_unites, a, SLEN); bool_unites = true; }
+    inline void unites( char* a ){ strcpy(v_unites, a); bool_unites = true; }
     inline char* unites( bool &set ){ set=bool_unites; return v_unites; }
   inline char* unites(void){ return v_unites; }
-    inline void struct_desc( char* a ){ strncpy(v_struct_desc, a, SLEN); bool_struct_desc = true; }
+    inline void struct_desc( char* a ){ strcpy(v_struct_desc, a); bool_struct_desc = true; }
     inline char* struct_desc( bool &set ){ set=bool_struct_desc; return v_struct_desc; }
   inline char* struct_desc(void){ return v_struct_desc; }
-    inline void aut_name( char* a ){ strncpy(v_aut_name, a, SLEN); bool_aut_name = true; }
+    inline void aut_name( char* a ){ strcpy(v_aut_name, a); bool_aut_name = true; }
     inline char* aut_name( bool &set ){ set=bool_aut_name; return v_aut_name; }
   inline char* aut_name(void){ return v_aut_name; }
     inline void  transparent( void* a ){ v_transparent=a; bool_transparent = true; }
@@ -332,7 +335,7 @@ class IGBheader
  * \param dp    data buffer
  * \param numt  \#time slices
  * \param h     IGB header
- * \param buf   temporary storage for a slice
+ * \param buf   optionally allocated temp buffer
  *
  * \return number of elements read
  */
@@ -348,7 +351,7 @@ read_IGB_data( T* dp, int numt, IGBheader* h, char *buf )
     alloc_buf = true;
   }
   
-  int numread = gzread( (gzFile)h->fileptr(), buf, slicesize )/h->data_size();
+  int numread = gzread( (gzFile)(h->fileptr()), buf, slicesize )/h->data_size();
   if ( numread == Z_NULL ) return 0;
   if ( h->systeme() != h->endian() ) h->swab(buf, numread);
 
@@ -373,7 +376,7 @@ read_IGB_data( T* dp, int numt, IGBheader* h, char *buf )
 
 /** convert the IGB data to the proper type
  *
- * \param type  type of IGB data
+ * \param h     IGB header
  * \param buf   raw IGB data
  * \param a     index of datum
  */
@@ -410,6 +413,9 @@ T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
       break;
     case IGB_UINT:
       datum = ((unsigned int *)buf)[a];
+      break;
+    case IGB_USHORT:
+      datum = ((unsigned short *)buf)[a];
       break;
     default:
       memset(&datum,0,sizeof(datum));

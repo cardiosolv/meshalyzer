@@ -70,11 +70,11 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1548 22 350 650} type Double box UP_BOX
+      xywh {1564 110 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -574,7 +574,7 @@ mainbar->redraw();}
       }
       Fl_Menu_Button datadest {
         label {Data on:} open
-        xywh {10 45 170 30} color 26
+        xywh {10 50 170 30} color 26
       } {
         MenuItem vertdisp {
           label Vertices
@@ -615,7 +615,7 @@ else mwtb->undatify(Surface);}
           label {Volume Elements}
           user_data voldisp
           callback {if(((Fl_Menu_Item*)v)->checked() ) mwtb->datify(VolEle);
-else mwtb->undatify(VolEle);} selected
+else mwtb->undatify(VolEle);}
           xywh {0 0 30 20} type Toggle
         }
         MenuItem {} {
@@ -644,12 +644,12 @@ voldisp->uncheck();}
       Fl_Light_Button draw_axes {
         label Axes
         callback {mwtb->redraw();}
-        tooltip {toggle axs display} xywh {10 85 80 25}
+        tooltip {toggle axs display} xywh {10 85 65 25}
       }
       Fl_Button {} {
         label {Voxele  colour}
         callback {pickcolor(VolEle, "Voxele colour");}
-        xywh {95 85 85 25} labelsize 13
+        xywh {80 85 100 25} labelsize 13
       }
       Fl_Group {} {
         label {Display as:}
@@ -725,7 +725,7 @@ delete[] selreg;}
           xywh {25 130 120 125}
         }
         Fl_Button {} {
-          label {invert select}
+          label invert
           callback {for( int i=0; i<=reglist->nitems(); i++ )
   reglist->checked( i, !reglist->checked(i) );}
           xywh {250 240 80 20} color 0 labelcolor 49
@@ -745,7 +745,7 @@ op->win->show();}
       } {
         Fl_Group hilightgrp {
           label Highlight open
-          xywh {10 305 330 180} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -789,30 +789,30 @@ op->win->show();}
           }
           Fl_Choice attachtype {
             label attached open
-            tooltip {draw which objects associated with vertex} xywh {95 435 90 25} down_box BORDER_BOX align 2 when 1
+            tooltip {draw which objects associated with vertex} xywh {190 435 140 25} down_box BORDER_BOX align 2 when 1
           } {
             MenuItem {} {
-              label {surf eles}
+              label {Filled Surf eles}
+              callback {mwtb->assc_obj(SurfEle,true);} selected
+              xywh {0 0 36 20}
+            }
+            MenuItem {} {
+              label {Surf ele outline}
               callback {mwtb->assc_obj(SurfEle);}
               xywh {5 5 100 20}
             }
             MenuItem {} {
-              label {filled Surfs}
-              callback {mwtb->assc_obj(SurfEle,true);}
-              xywh {0 0 36 20}
-            }
-            MenuItem {} {
-              label Vols
+              label {Vol eles}
               callback {mwtb->assc_obj(VolEle);}
               xywh {5 5 100 20}
             }
             MenuItem {} {
-              label {filled Vols}
+              label {Filled Vol eles}
               callback {mwtb->assc_obj(VolEle, 1 );}
               xywh {5 5 100 20}
             }
             MenuItem {} {
-              label nothing
+              label {-}
               callback {mwtb->assc_obj(Nothing);}
               xywh {5 5 100 20}
             }
@@ -851,16 +851,16 @@ mwtb->redraw();}
             label {Pick Vertex}
             callback {o->color(128);
 mwtb->select_vertex();}
-            tooltip {select a vertex with mouse} xywh {20 435 70 30} color 131 labelsize 12
+            tooltip {select a vertex with mouse} xywh {15 435 80 25} color 131 labelsize 12
           }
           Fl_Button {} {
-            label {plot time series}
+            label {Time series}
             callback {mwtb->timeplot();}
-            xywh {190 435 105 30} color 124
+            xywh {100 435 85 25} color 124
           }
         }
         Fl_Group lightgrp {
-          label Lights
+          label Lights open
           xywh {10 295 330 185} color 188 labelfont 1 labelsize 12 labelcolor 188 hide
         } {
           Fl_Value_Slider lightx {
@@ -946,7 +946,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface
+          label Surface open
           xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
@@ -982,17 +982,21 @@ mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
           }
           Fl_Check_Browser surflist {
             label {apply to}
-            xywh {20 320 110 150} type Multi align 5
+            xywh {20 320 110 160} type Multi align 5
           }
-          Fl_Button {} {
-            label {select all}
-            callback {surflist->check_all();
+          Fl_Group {} {
+            label Select open
+            xywh {140 445 185 35} box ENGRAVED_FRAME labelsize 13
+          } {
+            Fl_Button {} {
+              label all
+              callback {surflist->check_all();
 update_surfGUI(0);}
-            xywh {140 445 85 25}
-          }
-          Fl_Button {} {
-            label {invert select}
-            callback {bool done=false;
+              xywh {145 450 55 25}
+            }
+            Fl_Button {} {
+              label invert
+              callback {bool done=false;
 
 for( int i=1; i<=surflist->nitems(); i++ ) {
     if( !done && !surflist->checked(i) ) {
@@ -1001,7 +1005,21 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
     }
     surflist->checked(i, !surflist->checked(i));
 }}
-            xywh {235 445 85 25} color 0 labelfont 1 labelsize 12 labelcolor 49
+              xywh {205 450 55 25} color 0 labelfont 1 labelsize 12 labelcolor 49
+            }
+            Fl_Button {} {
+              label shown
+              callback {bool done=false;
+
+for( int i=1; i<=surflist->nitems(); i++ ) {
+    if( !done && mwtb->model->surface(i-1)->visible() ) {
+      done = true;
+      update_surfGUI(i-1);
+    }
+    surflist->checked(i,mwtb->model->surface(i-1)->visible());
+}}
+              xywh {265 450 55 25} color 4 labelfont 1 labelsize 12 labelcolor 49
+            }
           }
           Fl_Menu_Button {} {
             label delete open
@@ -1030,7 +1048,7 @@ if( !mwtb->model->number(SurfEle) )
           }
         }
         Fl_Group vectorgrp {
-          label Vectors open
+          label Vectors
           xywh {15 325 315 155} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
@@ -1164,7 +1182,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid} open
+          label {Aux Grid}
           xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
@@ -1562,13 +1580,13 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 520 45 15} labelsize 10 align 16
         }
       }
-      Fl_Group animate_group {open
+      Fl_Group animate_group {
         xywh {10 555 330 85} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
           label time
           callback {mwtb->set_time(int(o->value()));}
-          tooltip {time displayed} xywh {15 570 220 25} align 1
+          tooltip {time displayed} xywh {15 570 220 25} box UP_BOX align 1
           code0 {\#include "Myslider.h"}
           class Myslider
         }
@@ -1624,7 +1642,7 @@ for( int i=0; i<reglist->nitems(); i++ )
    }
 delete[] sel;} {}
   }
-  Function {update_surfGUI( int s )} {return_type void
+  Function {update_surfGUI( int s )} {open return_type void
   } {
     code {if( !mwtb->model->numSurf() ) return;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
@@ -2156,7 +2174,8 @@ for( int i=1; i<=surflist->nitems(); i++ )
   if( surflist->checked(i) )
     lst.push_back(i-1);} {}
   }
-  Function {refresh_surflist()} {} {
+  Function {refresh_surflist()} {open
+  } {
     code {surflist->clear(); 
 for( int s=0; s<mwtb->model->numSurf(); s++ ) {
     surflist->add(mwtb->model->surface(s)->label().c_str(),1);
@@ -2165,8 +2184,7 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   mwtb->redraw();
   surflist->redraw();} {}
   }
-  Function {dispVertVal(double d)} {open
-  } {
+  Function {dispVertVal(double d)} {} {
     code {vertvalout->value(d);} {}
   }
 } 

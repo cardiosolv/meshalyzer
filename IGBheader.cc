@@ -215,13 +215,14 @@ HEX2:				3	-o-o-o-o-o-	-o---o---o---o---o---o
 
 int my_fputs( FILE *, char * );
 
-int  Header_Quiet = 0;
+bool Header_Quiet = 0;
 char Header_Message[256];
 
 const char    *Header_Type[] =
   {
     "", "byte", "char", "short", "long", "float", "double", "complex",
     "double_complex", "rgba", "structure", "pointer", "list","int","uint",
+    "ushort",
 	"vec3f","vec3d","vec4f","vec4d"
   };
 
@@ -234,6 +235,7 @@ unsigned short   Data_Size[] =
   {
     0, sizeof(Byte), sizeof(char), sizeof(short), sizeof(long), sizeof(float),
     sizeof(double), 0, 0, 0, 0, sizeof(void *), 0, sizeof(int), sizeof(UInt),
+    sizeof(unsigned short),
 	3*sizeof(float), 3*sizeof(double), 4*sizeof(float), 4*sizeof(double)
   };
 
@@ -254,7 +256,7 @@ const char
 
 static bool
 is_deprecated( char *s ) {
-  for( unsigned int i=0; i<sizeof(deprecated)/sizeof(deprecated[0]); i++ )
+  for( int i=0; i<sizeof(deprecated)/sizeof(deprecated[0]); i++ )
     if( !strcmp( s, deprecated[i] ) )
       return true;
   return false;
@@ -366,7 +368,7 @@ int IGBheader::write()
   }
 
   // we will now only allow writing of big or little endian */
-  //const char* systeme=(endian()==IGB_BIG_ENDIAN)?"big_endian":"little_endian";
+  const char* systeme=(endian()==IGB_BIG_ENDIAN)?"big_endian":"little_endian";
 
   char ligne[1024];
   if (bool_t) {
@@ -453,7 +455,7 @@ int IGBheader::write()
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
   } else if (bool_inc_t) {
-    sprintf(&items[n_items][0], "dim_t:%g ", v_inc_t);
+    sprintf(&items[n_items][0], "inc_t:%g ", v_inc_t);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
   }
@@ -553,7 +555,7 @@ int IGBheader::write()
     char *p=(char *)v_transparent, value[MAXL];
     int a;
     for ( a=0; a<Data_Size[v_type]; a++ )
-      sprintf( value+a*2, "%.2x", *(p++) );
+      sprintf( value+a*2, "%0.2x", *(p++) );
     value[2*Data_Size[v_type]] = '\0';
     sprintf(&items[n_items][0], "transparent:%s ", value );
     l_item[n_items] = strlen(&items[n_items][0]);
@@ -726,11 +728,13 @@ int IGBheader::write()
 
 /** read in a header 
  *
+ * \param quiet do not print warnings/errors
+ *
  * \return 0 if and only if all is o.k.
  *
  * \pre the file has been opened
  */
-int IGBheader::read()
+int IGBheader::read( bool quiet )
 {
   int   go=VRAI, nosup=VRAI;
   int   in, com=0;
@@ -739,13 +743,14 @@ int IGBheader::read()
   float v_fac_t;
   bool  bool_fac_t = false;
 
+  Header_Quiet = quiet;
 
   /* --- pour toutes les lignes de l'entete (def=8) ou jusqu'a un <FF> -- */
   for ( int s=8; (s>0 || nosup) && go; s-- ) {
 
     /* --- lit la ligne dans le fichier --- */
     int i = 0 ;
-    //int bytes_read = gztell(file);
+    int bytes_read = gztell((gzFile)file);
 
     while (1) {
 
@@ -803,7 +808,6 @@ int IGBheader::read()
     }
 
     /* --- ----- ----- ----- sauve les commentaires ----- ----- --- */
-    bool val_reached;
     for ( char* pt_1=str; *pt_1; pt_1++ ) {
 
       /* --- '*' ou '#' = commentaires ------> dans comment --- */
@@ -821,9 +825,9 @@ int IGBheader::read()
         break ;
       }
 
-      if( *pt_1 == ':' ) val_reached = true;
       /* --- convertit majuscule un minuscules --- */
-      if (!val_reached && isupper(*pt_1)) *pt_1 = tolower( *pt_1 ) ;
+      if (isupper(*pt_1)) *pt_1 = tolower( *pt_1 ) ;
+
     }
 
 
@@ -1021,7 +1025,8 @@ int IGBheader::read()
 
       } else {
         if( is_deprecated( pt_1 ) ){
-          fprintf(stderr,"\nATTENTION: mot-clef %s obsolete !\n", pt_1 ) ;
+          if (!Header_Quiet)
+            fprintf(stderr,"\nATTENTION: mot-clef %s obsolete !\n", pt_1 ) ;
           if( !strcmp( pt_1, "fac_t" ) ){
             v_fac_t = atof( pt_2 );
             bool_fac_t = VRAI;
@@ -1074,7 +1079,7 @@ int IGBheader::read()
         sprintf(Header_Message,
               "conflit entre x (%d) * inc_x (%.12g) = %.12g et dim_x (%.12g)\n",
                 v_x, v_inc_x, dim_x, v_dim_x) ;
-        statut = 1 ;
+        statut = WARN_DIM_INCONSISTENT ;
       }
     } else {
       v_inc_x = v_dim_x / v_x ;
@@ -1098,7 +1103,7 @@ int IGBheader::read()
         sprintf(Header_Message,
               "conflit entre y (%d) * inc_y (%.12g) = %.12g et dim_y (%.12g)\n",
                 v_y, v_inc_y, dim_y, v_dim_y) ;
-        statut = 1 ;
+        statut = WARN_DIM_INCONSISTENT ;
       }
     } else {
       v_inc_y = v_dim_y / v_y ;
@@ -1122,7 +1127,7 @@ int IGBheader::read()
         sprintf(Header_Message,
               "conflit entre z (%d) * inc_z (%.12g) = %.12g et dim_z (%.12g)\n",
                 v_z, v_inc_z, dim_z, v_dim_z) ;
-        statut = 1 ;
+        statut = WARN_DIM_INCONSISTENT ;
       }
     } else {
       v_inc_z = v_dim_z / v_z ;
@@ -1150,8 +1155,7 @@ int IGBheader::read()
         sprintf(Header_Message,
               "conflit entre t (%d) * inc_t (%.12g) = %.12g et dim_t (%.12g)\n",
                 v_t, v_inc_t, dim_t, v_dim_t) ;
-        v_dim_t = (v_t-1)*v_inc_t;
-        statut = 0 ;
+        statut = WARN_DIM_INCONSISTENT ;
       }
     } else {
       v_inc_t = v_dim_t / (v_t - 1) ;
