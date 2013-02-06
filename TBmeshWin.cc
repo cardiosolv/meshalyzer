@@ -1205,8 +1205,8 @@ TBmeshWin::illuminate( GLfloat max )
   const GLfloat am= contwin->ambientslide->value();
   GLfloat modamb[] = { am, am, am, 1. };
   glLightModelfv( GL_LIGHT_MODEL_AMBIENT, modamb );
-  glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, 1 );
-  //glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
+  glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, 0 );
+  glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
 
   // draw an arrow showing the light direction
   if ( contwin->showLightDir->value() == 1 ) {

@@ -174,8 +174,8 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   LOG_TIMER("Add Surface from Surf");
 
   //! \todo Figure out why we do this 
-  for( int s=0; s<numSurf(); s++ )
-    surface(s)->flip_norms();
+  //for( int s=0; s<numSurf(); s++ )
+    //surface(s)->flip_norms();
 
   find_max_dim_and_bounds();
 
