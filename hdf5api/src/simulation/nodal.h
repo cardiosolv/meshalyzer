@@ -46,6 +46,16 @@ int ch5s_nodal_free_grid_info(ch5s_nodal_grid *info);
 
 int ch5s_nodal_grid_count(hid_t hdf_file);
 
+int ch5s_nodal_partial_write(
+  hid_t hdf_file,
+  unsigned int grid_index,
+  unsigned int from_time,
+  unsigned int to_time,
+  unsigned int n0,
+  unsigned int n1,
+  float *in
+);
+
 int ch5s_nodal_write(
   hid_t hdf_file,
   unsigned int grid_index,
@@ -76,6 +86,8 @@ int _ch5s_nodal_read_write_general(
   unsigned int grid_index,
   unsigned int from_time,
   unsigned int to_time,
+  unsigned int n0,
+  unsigned int nnode,
   int rw_id,
   float *inout
 );

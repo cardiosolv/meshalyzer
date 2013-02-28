@@ -142,6 +142,43 @@ int ch5s_nodal_grid_count(hid_t hdf_file) {
 }
 
 /**
+* \brief Writes nodal data to a part of the grid over a time range
+*
+* Size for \p in is <tt>sizeof(float) * (to_time - from_time + 1) * n * w</tt>
+* and is a 3D array in the form:
+*
+* <tt>in[time(0..to_time-from_time)][node(0..n)][value(0..w-1)]</tt>
+*
+* Where \p n is the number of nodes represented in the grid and \w is the
+* number of values per node (3 for grids of type CH5_DYN_PTS and 1 for grids
+* of type CH5_SCALAR).
+*
+* \note \p in must be a contiguous set of memory, the format described here is
+*       for visualization only - the user is responsible for supplying the
+*       data using the correct offsets
+*
+* \param[in] hdf_file   The HDF file reference id
+* \param[in] grid_index The index of the nodal grid to write to
+* \param[in] from_time  The time index to begin writing at (inclusive)
+* \param[in] to_time    The time index to end writing at (inclusive)
+* \param[in] n0         The nodal index to begin writing at (inclusive)
+* \param[in] nnode      The number of nodes to write
+* \param[in] in         The nodal data to be written (see function description
+*                       for expected format)
+* \returns Status code
+* \retval 0 Success
+* \retval 1 Failure
+*/
+int ch5s_nodal_partial_write(hid_t hdf_file, unsigned int grid_index,
+  unsigned int from_time, unsigned int to_time, unsigned int n0,
+  unsigned int nnode, float *in)
+{
+  return _ch5s_nodal_read_write_general(hdf_file, grid_index, from_time,
+    to_time, n0, nnode, CH5_WRITE, in);
+}
+
+
+/**
 * \brief Writes nodal data to a grid over a time range
 *
 * Size for \p in is <tt>sizeof(float) * (to_time - from_time + 1) * n * w</tt>
@@ -170,8 +207,12 @@ int ch5s_nodal_grid_count(hid_t hdf_file) {
 int ch5s_nodal_write(hid_t hdf_file, unsigned int grid_index,
   unsigned int from_time, unsigned int to_time, float *in)
 {
+  ch5s_nodal_grid info;
+  ch5s_nodal_grid_info(hdf_file, grid_index, &info);
+  ch5s_nodal_free_grid_info(&info);/* don't need the strings anyway */
+
   return _ch5s_nodal_read_write_general(hdf_file, grid_index, from_time,
-    to_time, CH5_WRITE, in);
+    to_time, 0, info.num_nodes, CH5_WRITE, in);
 }
 
 /**
@@ -203,9 +244,14 @@ int ch5s_nodal_write(hid_t hdf_file, unsigned int grid_index,
 int ch5s_nodal_read(hid_t hdf_file, unsigned int grid_index,
   unsigned int from_time, unsigned int to_time, float *out)
 {
+  ch5s_nodal_grid info;
+  ch5s_nodal_grid_info(hdf_file, grid_index, &info);
+  ch5s_nodal_free_grid_info(&info);/* don't need the strings anyway */
+
   return _ch5s_nodal_read_write_general(hdf_file, grid_index, from_time,
-    to_time, CH5_READ, out);
+    to_time, 0, info.num_nodes, CH5_READ, out);
 }
+
 
 /**
 * \brief Reads nodal data for a single node spanning the duration of the grid
@@ -284,7 +330,7 @@ int ch5s_nodal_read_time_series(hid_t hdf_file, unsigned int grid_index,
 /// @cond INTERNAL
 
 int _ch5s_nodal_read_write_general(hid_t hdf_file, unsigned int grid_index,
-  unsigned int from_time, unsigned int to_time, int rw_id, float *inout)
+  unsigned int from_time, unsigned int to_time, unsigned int n0, unsigned int nnode, int rw_id, float *inout)
 {
   if (rw_id != CH5_READ && rw_id != CH5_WRITE) return 1;
   if (from_time > to_time)                     return 1;
@@ -313,8 +359,8 @@ int _ch5s_nodal_read_write_general(hid_t hdf_file, unsigned int grid_index,
   
   hid_t space_id = H5Dget_space(grid_id);
   herr_t status = H5Sselect_hyperslab(space_id, H5S_SELECT_SET,
-    (hsize_t[3]){ from_time,           0,              0          }, NULL,
-    (hsize_t[3]){ to_time-from_time+1, info.num_nodes, node_width }, NULL);
+    (hsize_t[3]){ from_time,              n0,          0 }, NULL,
+    (hsize_t[3]){ to_time-from_time+1, nnode, node_width }, NULL);
   if (status < 0) {
     H5Sclose(space_id);
     H5Dclose(grid_id);
@@ -322,7 +368,7 @@ int _ch5s_nodal_read_write_general(hid_t hdf_file, unsigned int grid_index,
   }
   
   hid_t memspace_id = H5Screate_simple(3,
-    (hsize_t[3]){ to_time-from_time+1, info.num_nodes, node_width }, NULL);
+    (hsize_t[3]){ to_time-from_time+1, nnode, node_width }, NULL);
     
   switch (rw_id) {
     case CH5_READ:
