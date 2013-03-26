@@ -248,7 +248,7 @@ void TBmeshWin :: draw()
     glPointSize( 10.0 );
     glLineWidth( 1. );
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-    //glPolygonOffset( -1, -1 );
+    glPolygonOffset( 2., 2. );
     glEnable( GL_DEPTH_TEST );
     glEnable(GL_NORMALIZE);
     if ( facetshading ) {			// faster but no anti-aliasing
@@ -1731,6 +1731,10 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   glEnable( GL_LINE_SMOOTH );
   glEnable( GL_POLYGON_SMOOTH );
 
+  if( isosurfwin->isolineOn->value() )
+    glEnable(GL_POLYGON_OFFSET_FILL );
+
+
   bool showData=true;
   if ( !(datadst&Surface_flg) || have_data==NoData )
     showData = false;
@@ -1765,6 +1769,9 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   }
 
   if ( dataopac->dop[Surface].on() ) translucency(false);
+  if( isosurfwin->isolineOn->value() )
+    glDisable(GL_POLYGON_OFFSET_FILL );
+
   glPopAttrib();
 }
 
@@ -1841,20 +1848,27 @@ TBmeshWin::draw_iso_lines()
 
   glPushAttrib( GL_POLYGON_BIT );
 
-  //if( isc->islDirty() || tm!=isoline->tm() ){
+  if( isc->islDirty() || tm!=isoline->tm() ){
     delete isoline;
     isoline=new IsoLine( isc->isolineVal0->value(), isc->isolineVal1->value(),
-             isc->isoNumLines->value(), tm );
+            isc->isoNumLines->value(), tm );
     for ( int s=0; s<model->numSurf(); s++ ) 
-	  isoline->process( model->surface(s), data );
-    for( int i=0; i<NUM_CP; i++ )
-	  if( _cutsurface[i] != NULL ){
-	    isoline->process( _cutsurface[i], data );
-	}
-  //}
-
+      isoline->process( model->surface(s), data );
+  }
   isoline->color( isc->islColor() );
   isoline->draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
+  
+  // we need to turn off clipping whne we draw on the clipping plane or we will 
+  // get z-fighting 
+  for( int i=0; i<NUM_CP; i++ )
+    if( _cutsurface[i] != NULL ){
+      glDisable( CLIP_PLANE[i] );
+      IsoLine cutline( isc->isolineVal0->value(), isc->isolineVal1->value(),
+                       isc->isoNumLines->value(), tm );
+      cutline.process( _cutsurface[i], data );
+      cutline.draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
+      glEnable( CLIP_PLANE[i] );
+    }
 
   glPopAttrib( );
 }
