@@ -97,7 +97,7 @@ int ch5_text_free_info(ch5_text_file *info) {
 * \retval 0 Success
 * \retval 1 Failure
 */
-int ch5_text_append(hid_t hdf_file, unsigned int index, char *in) {
+int ch5_text_append(hid_t hdf_file, unsigned int index, const char *in) {
   if (in == NULL)     return 1;
   int len = strlen(in);
   if (len < 1) return 1;

@@ -9,9 +9,9 @@ IsoLine :: process( Surfaces *s, DATA_TYPE *dat )
     for( int j=0; j<s->num(); j++ ) {
       int npoly;
       MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly );
-      for( int j=0; j<npoly; j++ ) {
+      for( int k=0; k<npoly; k++ ) {
 		_val.push_back(val);
-        _polygon.push_back(lpoly[j]);
+        _polygon.push_back(lpoly[k]);
         num_lines++;
       }
     }
@@ -32,9 +32,9 @@ IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
         for ( int v=0; v<s->ele(j)->ptsPerObj(); v++ )
           idata[v] = s->interpolate( j, dat, v );
       int npoly;
-      MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly );
-      for( int j=0; j<npoly; j++ ) {
-        _polygon.push_back(lpoly[j]);
+      MultiPoint **lpoly = s->ele(j)->isosurf( idata, val, npoly );
+      for( int k=0; k<npoly; k++ ) {
+        _polygon.push_back(lpoly[k]);
 		_val.push_back(val);
         num_lines++;
       }

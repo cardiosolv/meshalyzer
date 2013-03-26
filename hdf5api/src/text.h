@@ -27,7 +27,7 @@ int ch5_text_free_info(ch5_text_file *info);
 int ch5_text_append(
   hid_t hdf_file,
   unsigned int file_index,
-  char *in
+  const char *in
 );
 
 int ch5_text_read(

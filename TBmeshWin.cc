@@ -1841,17 +1841,17 @@ TBmeshWin::draw_iso_lines()
 
   glPushAttrib( GL_POLYGON_BIT );
 
-  if( isc->islDirty() || tm!=isoline->tm() ){
+  //if( isc->islDirty() || tm!=isoline->tm() ){
     delete isoline;
     isoline=new IsoLine( isc->isolineVal0->value(), isc->isolineVal1->value(),
              isc->isoNumLines->value(), tm );
     for ( int s=0; s<model->numSurf(); s++ ) 
 	  isoline->process( model->surface(s), data );
-  }
-  for( int i=0; i<NUM_CP; i++ )
-	if( _cutsurface[i] != NULL ){
-	  isoline->process( _cutsurface[i], data );
+    for( int i=0; i<NUM_CP; i++ )
+	  if( _cutsurface[i] != NULL ){
+	    isoline->process( _cutsurface[i], data );
 	}
+  //}
 
   isoline->color( isc->islColor() );
   isoline->draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
