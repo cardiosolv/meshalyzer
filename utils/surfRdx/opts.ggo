@@ -1,0 +1,17 @@
+package "surfRdx"
+purpose "subsample a surface mesh"
+usage "surfRdx [OPTIONS] ... mesh"
+version "0.1"
+
+defmode "absolute"
+modeoption "numtri"  t "maximum number of triangles"       int optional mode="absolute"
+
+defmode "relative"
+modeoption "percent" p "percentage of triangles to retain" int optional mode="relative"
+
+text ""
+
+option "name"   n "output surface name"   string default="surface" optional
+option "pts"    P "output the point file" flag   off
+
+text ""

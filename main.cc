@@ -199,8 +199,9 @@ print_usage(void)
   cout << "meshalyzer [options] model_base[.] [file.dat] [file.xfrm] [file.mshz] [file.vpts]"<<endl;
   cout << "with options: " << endl;
   cout << "--iconifycontrols|-i  iconify controls on startup" << endl;
-  cout << "--no_elem|-n          do not read eleemnt info" << endl;
+  cout << "--no_elem|-n          do not read element info" << endl;
   cout << "--help|-h             print this message" << endl;
+  cout << "--thrdRdr|-t          force threaded data reading" << endl;
   cout << "--groupID=GID|-gGID   meshalyzer group" << endl;
   cout << "--PNG=file|-pfile     output as PNG to file and exit" << endl;
   exit(0);
@@ -213,6 +214,7 @@ static struct option longopts[] = {
   { "help"           , no_argument, NULL, 'h' },
   { "gpoupID"        , 1          , NULL, 'g' },
   { "PNGdump"        , 1          , NULL, 'p' },
+  { "thrdRdr"        , no_argument, NULL, 't' },
   { NULL             , 0          , NULL, 0   }
 };
 
@@ -225,10 +227,11 @@ main( int argc, char *argv[] )
 #endif
 
 
-  bool iconcontrols = false;
-  bool no_elems     = false;
-  char *PNGfile     = NULL;
-  const char *grpID = "0";
+  bool iconcontrols   = false;
+  bool no_elems       = false;
+  bool threadedReader = false;
+  char *PNGfile       = NULL;
+  const char *grpID   = "0";
 
   int ch;
   while( (ch=getopt_long(argc, argv, "inhg:", longopts, NULL)) != -1 )
@@ -247,6 +250,10 @@ main( int argc, char *argv[] )
 			break;
         case 'p':
             PNGfile = strdup(optarg);
+            cerr << "Womp womp wommp : not working yet! " << endl;
+            break;
+        case 't':
+            threadedReader = true;
             break;
 		default:
 			break;
@@ -301,7 +308,8 @@ main( int argc, char *argv[] )
   for ( int i=model_index+1; i<argc; i++ ) {
     if ( argv[i][0] == '-' ) 
       continue;
-    if ( strstr( argv[i], ".tri" ) != NULL ) {
+    if ( strstr( argv[i], ".tri" )  != NULL  ||
+         strstr( argv[i], ".surf" ) != NULL ) {
       if ( win.trackballwin->add_surface(argv[i])< 0 ) {
         string altdir = dir;
         altdir += argv[i];
