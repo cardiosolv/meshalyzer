@@ -1,6 +1,6 @@
 package "surfRdx"
 purpose "subsample a surface mesh"
-usage "surfRdx [OPTIONS] ... mesh"
+usage "surfRdx [OPTIONS] ... base_mesh_name"
 version "0.1"
 
 defmode "absolute"
@@ -13,5 +13,7 @@ text ""
 
 option "name"   n "output surface name"   string default="surface" optional
 option "pts"    P "output the point file" flag   off
+option "method" m "collapse method"       enum   values="shortest","melax","quadric","quadrictri","maxedgecost" optional  
+                                                 default="quadrictri"
 
 text ""

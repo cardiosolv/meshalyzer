@@ -52,13 +52,37 @@ dump_mesh( string name, PMesh &pmsh, Mesh &msh, bool pr_pts  )
 main( int argc, char *argv[] )
 {
   gengetopt_args_info args;
+  if( argc<2 ) {
+    cmdline_parser_print_help();
+    exit(0);
+  }
 
   // let's call our cmdline parser 
   if (cmdline_parser (argc, argv, &args) != 0)
     exit(1);
   
   Mesh   fine_mesh( args.inputs[0], true );
-  PMesh  pmesh( &fine_mesh, PMesh::QUADRICTRI );
+  
+  PMesh::EdgeCost ecost;
+  switch( args.method_arg ) {
+      case  method_arg_shortest:
+          ecost = PMesh::SHORTEST;
+          break;
+      case  method_arg_melax:
+          ecost = PMesh::MELAX;
+          break;
+      case  method_arg_quadric:
+          ecost = PMesh::QUADRIC;
+          break;
+      case  method_arg_quadrictri:
+          ecost = PMesh::QUADRICTRI;
+          break;
+      case  method_arg_maxedgecost:
+          ecost = PMesh::MAX_EDGECOST;
+          break;
+  }
+
+  PMesh  pmesh( &fine_mesh, ecost );
 
   int numTri = fine_mesh.getNumTriangles();
   if( args.percent_given ) {
