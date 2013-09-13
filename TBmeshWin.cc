@@ -2045,7 +2045,7 @@ TBmeshWin:: set_time(int a)
 int
 TBmeshWin :: read_dynamic_pts( const char *fn, Myslider *mslide )
 {
-  int retval = model->pt.dynamic( fn, numframes );
+  int retval = model->pt.dynamic( fn, numframes, false );
 
   if( retval == 2 ) {
     fl_alert( "Incompatible number of time frames\n" );
