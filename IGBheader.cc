@@ -262,9 +262,27 @@ is_deprecated( char *s ) {
   return false;
 }
 
-IGBheader::IGBheader( gzFile in )
+
+IGBheader::IGBheader( FILE *f, bool _read, bool quiet )
 {
-  file = in;
+  init();
+  fileptr(f);
+  if( _read ) 
+    read( quiet );
+}
+
+
+IGBheader::IGBheader( gzFile f, bool _read, bool quiet )
+{
+  init();
+  fileptr(f);
+  if( _read ) 
+    read( quiet );
+}
+
+
+void IGBheader::init(void)
+{
   v_x = v_y = v_type = 0 ;
   v_systeme = endian();
   v_comp = v_lut = v_num = v_bin = 0 ;
@@ -309,6 +327,7 @@ IGBheader::IGBheader( gzFile in )
   bool_comment = FAUX;
   bool_transparent = FAUX;
 }
+
 
 IGBheader::~IGBheader()
 {}

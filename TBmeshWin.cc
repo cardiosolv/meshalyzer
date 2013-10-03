@@ -1726,7 +1726,7 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
 
   glPushAttrib( GL_POLYGON_BIT );
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-  glDisable(GL_BLEND);
+  glEnable(GL_BLEND);
   glShadeModel(GL_SMOOTH);
   glEnable( GL_LINE_SMOOTH );
   glEnable( GL_POLYGON_SMOOTH );
@@ -1873,6 +1873,7 @@ TBmeshWin::draw_iso_lines()
   glPopAttrib( );
 }
 
+
 void TBmeshWin::CheckMessageQueue(){
   
   LinkMessage::CommandMsg msg;
@@ -1889,55 +1890,52 @@ void TBmeshWin::CheckMessageQueue(){
   }  
 }
 
+
 int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
 {
-	if (strcmp(msg.command, LinkMessage::LINK_COMMAND_LINK) == 0)
-	  {
-	    tmLink->link(msg.senderPid);
-	  }
-	else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_UNLINK) == 0)
-	  {
-	    tmLink->unlink(msg.senderPid);
-	  }
-	else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_VIEWPORT_SYNC) == 0)
-	  {
-	    // retrieve vals
-	    trackball.SetScale(msg.trackballState.scale);
-	    trackball.SetTranslation(msg.trackballState.trans.X(),
-				     msg.trackballState.trans.Y(),
-				     msg.trackballState.trans.Z());
-	    trackball.SetOrigin(msg.trackballState.origin.X(),
-				msg.trackballState.origin.Y(),
-				msg.trackballState.origin.Z());
+  if (strcmp(msg.command, LinkMessage::LINK_COMMAND_LINK) == 0) {
+    tmLink->link(msg.senderPid);
+  } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_UNLINK) == 0) {
+    tmLink->unlink(msg.senderPid);
+  } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_VIEWPORT_SYNC) == 0) {
+    // retrieve vals
+    trackball.SetScale(msg.trackballState.scale);
+    trackball.SetTranslation(msg.trackballState.trans.X(),
+            msg.trackballState.trans.Y(),
+            msg.trackballState.trans.Z());
+    trackball.SetOrigin(msg.trackballState.origin.X(),
+            msg.trackballState.origin.Y(),
+            msg.trackballState.origin.Z());
 
-	    trackball.qRot = msg.trackballState.qRot;
-	    trackball.qSpin = msg.trackballState.qSpin;
-	  
-	  
-	    // set the state
-	    redraw();
-	  }
-	else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_LINK_SYNC) == 0)
-	  {
-	    int newTm = msg.sliderTime;
-	    
-	    if (newTm > contwin->tmslider->maximum())
-	      {
-		newTm = contwin->tmslider->maximum();
-	      }
-	    else if (newTm < 0)
-	      {
-		newTm = 0;
-	      }
+    trackball.qRot = msg.trackballState.qRot;
+    trackball.qSpin = msg.trackballState.qSpin;
 
-	    // sync time
-	    contwin->tmslider->value(newTm);
-	    set_time(newTm);
-	  }
-	else
-	  {
-	    return -1;
-	  }
+    // set the state
+    redraw();
+  } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_LINK_SYNC) == 0) {
+    int newTm = msg.sliderTime;
+
+    if (newTm > contwin->tmslider->maximum()) {
+      newTm = contwin->tmslider->maximum();
+    } else if (newTm < 0) {
+      newTm = 0;
+    }
+
+    // sync time
+    contwin->tmslider->value(newTm);
+    set_time(newTm);
+  } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_COLOUR_SYNC) == 0) { 
+    cs->calibrate( msg.colourState.min, msg.colourState.max );
+    cs->size( msg.colourState.levels );
+    contwin->mincolval->value(cs->min());
+    contwin->maxcolval->value(cs->max());
+    contwin->numcolev->value(cs->size());
+    contwin->cstype->value( msg.colourState.scale );
+    contwin->cstype->mvalue()->do_callback(contwin->cstype);
+    redraw();
+  } else {
+    return -1;
+  }
 	return 0;
 }
 
@@ -1978,6 +1976,20 @@ void TBmeshWin::SendTimeSyncMessage()
   
   tmLink->SendMsgToAll(msgToSend);
 }
+
+void TBmeshWin::SendColourSyncMessage()
+{
+  LinkMessage::CommandMsg msgToSend;
+  strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_COLOUR_SYNC);
+
+  msgToSend.colourState.min    = cs->min();
+  msgToSend.colourState.max    = cs->max();
+  msgToSend.colourState.scale  = contwin->cstype->value();
+  msgToSend.colourState.levels = cs->size();
+  
+  tmLink->SendMsgToAll(msgToSend);
+}
+
 
 extern sem_t *meshProcSem;
 
@@ -2045,7 +2057,7 @@ TBmeshWin:: set_time(int a)
 int
 TBmeshWin :: read_dynamic_pts( const char *fn, Myslider *mslide )
 {
-  int retval = model->pt.dynamic( fn, numframes, false );
+  int retval = model->pt.dynamic( fn, numframes );
 
   if( retval == 2 ) {
     fl_alert( "Incompatible number of time frames\n" );

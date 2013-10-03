@@ -69,6 +69,7 @@ typedef	    struct List
   char    *items;
 }
 List;
+#ifndef PrMTYPES
 typedef	    unsigned char	byte;
 #ifndef __GL_GL_H__
 typedef     unsigned char	Byte;
@@ -117,6 +118,7 @@ typedef struct d_complex
 }
 d_complex ;
 #define _COMPLEX_DEFINED
+#endif
 #endif
 typedef union rgba {
   unsigned	long    l;
@@ -200,9 +202,11 @@ class IGBheader
     bool bool_comment ;
     bool bool_transparent;
     char transstr[257];
+    void init(void);
 
   public:
-    IGBheader( gzFile a = NULL );
+    IGBheader( gzFile a = NULL, bool read=false, bool quiet=false );
+    IGBheader( FILE *f, bool read=false, bool quiet=false );
     ~IGBheader();
     int   write();
     int   read( bool quiet=false );

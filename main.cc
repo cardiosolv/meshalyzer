@@ -270,9 +270,9 @@ main( int argc, char *argv[] )
 
   string model_path = find_model_dir( model_index<argc?argv[model_index]:"" );
 
-  if (  model_path.rfind(".cg_in" ) == model_path.length()-6 )
+  if ( model_path.length()>5 && model_path.rfind(".cg_in" ) == model_path.length()-6 )
     process_cg_format( argv[1], &win, &control, no_elems );
-  else if ( model_path.rfind(".modH5" ) == model_path.length()-6)
+  else if ( model_path.length()>5 && model_path.rfind(".modH5" ) == model_path.length()-6)
     process_h5_format(argv[1], &win, &control, no_elems);
   else
     win.trackballwin->read_model( win.winny, model_path.c_str(), no_elems );

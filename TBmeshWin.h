@@ -143,6 +143,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     int       ProcessLinkMessage(const LinkMessage::CommandMsg& msg);
     void      SendViewportSyncMessage();
     void      SendTimeSyncMessage();
+    void      SendColourSyncMessage();
     int       read_dynamic_pts( const char *, Myslider * );
     bool      compat_tm( int t ){ return (t==1 || max_time()==0 || max_time()==t-1); }
     void      forceThreadData(bool a){forcedThreaded=a;}

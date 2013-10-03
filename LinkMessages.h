@@ -3,6 +3,7 @@
 
 #include <Quaternion.h>
 #include <Vector3D.h>
+#include "Colourscale.h"
 
 namespace LinkMessage {
   
@@ -21,12 +22,18 @@ namespace LinkMessage {
       Quaternion qRot;
     } trackballState;
     
+    struct ColourScaleState {
+      float     min, max;
+      int       scale;
+      int       levels;
+    } colourState;
   };
 
   const char* const LINK_COMMAND_LINK = "link";
   const char* const LINK_COMMAND_UNLINK = "unlink";
   const char* const LINK_COMMAND_VIEWPORT_SYNC = "viewport sync";
   const char* const LINK_COMMAND_LINK_SYNC = "link sync";
+  const char* const LINK_COMMAND_COLOUR_SYNC = "color scale sync";
 
 }
 
