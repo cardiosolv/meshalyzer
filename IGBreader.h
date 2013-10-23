@@ -17,6 +17,7 @@ class IGBreader : public DataReader<T>
     virtual void find_maxtm();
     float        dt(void){return head->inc_t();}
     float        org_t(void){return head->org_t();}
+    IGBheader *  header(){ return head; }
 
   private:
     using DataReader<T>::  mthread;

@@ -121,7 +121,7 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
 {
   bool            IGBdata;
   int             j = 0;
-  IGBheader*      head;
+  IGBheader       head;
   gzFile          in;
   string          fname=fn,
                         scanner;
@@ -164,15 +164,13 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
   else exit(1);
 
   if ( ftype == FTIGB ) {
-    head = new IGBheader( in );
-    head->read();
-    if ( head->x()*head->y()*head->z() != slice_size ) {
-      delete head;
+    head = IGBheader( in, true );
+    if ( head.slice_sz() != slice_size ) {
       maxtm = -1;
-      throw(1);
+      throw PointMismatch(slice_size,head.slice_sz());
     }
-    _dt = head->inc_t();
-    _t0 = head->org_t();
+    _dt = head.inc_t();
+    _t0 = head.org_t();
   } else if ( ftype == FTfileSeqCG ) {
     CG_file_list( CGfiles, fn );
     CGp = CGfiles.begin();
@@ -219,7 +217,7 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
         }
         break;
       case FTIGB:
-        i = read_IGB_data( data+maxtm*slice_size+base1, 1, head );
+        i = read_IGB_data( data+maxtm*slice_size+base1, 1, &head );
         if ( base1 ) {
           data[maxtm*slice_size] = data[maxtm*slice_size+1];
           i++;
@@ -248,7 +246,7 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
       gzclose( in );
       break;
     }
-    if ( ftype==FTIGB && maxtm==head->t() )
+    if ( ftype==FTIGB && maxtm==head.t() )
       break;
 
   } while (1);
@@ -257,7 +255,6 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
 
   if ( maxtm == -1 ) {
     free( data );
-    if (ftype == FTIGB)  delete head;
     if (ftype == FTfileSeqCG ) CGfiles.~map();
     throw( 1 );
   }

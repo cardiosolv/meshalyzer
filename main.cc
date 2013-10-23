@@ -302,7 +302,8 @@ main( int argc, char *argv[] )
     control.restore_state( defstate.c_str() );
 
   //if( !PNGfile )
-    win.winny->show();
+  win.winny->show();
+  win.trackballwin->forceThreadData( threadedReader );
 
   // deal with command line files specified
   for ( int i=model_index+1; i<argc; i++ ) {

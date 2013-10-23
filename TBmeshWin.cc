@@ -951,7 +951,14 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
       default:
         throw 1;
     }
-  } catch (...) {
+  } 
+  catch ( PointMismatch pm ) {
+    char alstr[1024];
+    sprintf( alstr, "%s\nPoints number mismatch: expected %d but got %d", fn, pm.expected, pm.got );  
+    fl_alert( "%s",alstr );
+    return;
+  }
+  catch (...) {
     string alstr = "Unable to open data file: ";
     alstr += fn;
     fl_alert( "%s",alstr.c_str() );

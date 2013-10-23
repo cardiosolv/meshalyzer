@@ -210,7 +210,15 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz, bool tm_anal ):
   ////////////////////////////////////////////////////////////////////////////
   switch ( mthread->ftype ) {
       case FTIGB:
-          sabs->datareader   = new IGBreader<T>(mthread, sabs, maxmin);
+          {
+            IGBreader<T> *igbread = new IGBreader<T>(mthread, sabs, maxmin);
+            if( igbread->header()->slice_sz() != slsz ) {
+              int got = igbread->header()->slice_sz();
+              delete igbread;
+              throw PointMismatch( slsz, got );
+            }
+            sabs->datareader   = igbread;
+          }
           if( tm_anal ) {
             slocal->datareader = new IGBreader<T>(mthread, slocal, maxmin);
             stmsr->datareader  = new IGBreader<T>(mthread, stmsr, maxmin);
@@ -222,7 +230,15 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz, bool tm_anal ):
           _t0 = ((IGBreader<T>*)(slocal->datareader))->org_t();
           break;
       case FTDynPt:
-          sabs->datareader   = new IGBreader<T>(mthread, sabs, maxmin);
+          {
+            IGBreader<T> *igbread = new IGBreader<T>(mthread, sabs, maxmin);
+            if( igbread->header()->slice_sz() != slsz ) {
+              int got = igbread->header()->slice_sz();
+              delete igbread;
+              throw PointMismatch( slsz, got );
+            }
+            sabs->datareader   = igbread;
+          }
           for ( int k=0; k<THREADS; k++ )
             sthread[k].datareader = new IGBreader<T>( mthread,
                     sthread+k, maxmin);
