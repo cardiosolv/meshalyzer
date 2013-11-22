@@ -217,7 +217,7 @@ DataAllInMem<T>::DataAllInMem( const char *fn, int slsz, bool base1 )
         }
         break;
       case FTIGB:
-        i = read_IGB_data( data+maxtm*slice_size+base1, 1, &head );
+        i = head.read_data( data+maxtm*slice_size+base1*head.num_components(), 1 );
         if ( base1 ) {
           data[maxtm*slice_size] = data[maxtm*slice_size+1];
           i++;

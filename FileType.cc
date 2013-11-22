@@ -193,8 +193,7 @@ long getNumberTimes( const char* fn )
         fname += ".gz";
         in=gzopen( fname.c_str(), "r");
       }
-      IGBheader head(in);
-      head.read();
+      IGBheader head(in,true);
       gzclose( in );
       return head.t();
   }

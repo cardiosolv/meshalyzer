@@ -226,7 +226,7 @@ PPoint :: add( GLfloat *p, int n )
 int
 PPoint :: dynamic( const char *fn, int ntm )
 {
-  ThreadedData<float>* newDynPt = new ThreadedData<float>( fn, _n, false );
+  ThreadedData<float>* newDynPt = new ThreadedData<float>( fn, _n, false, 3 );
 
   if( ntm==1 || ntm==0 || ( newDynPt->max_tm()+1==ntm ) ) {
     delete _dynPt;

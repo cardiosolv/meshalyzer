@@ -226,9 +226,11 @@ const char    *Header_Type[] =
 	"vec3f","vec3d","vec4f","vec4d"
   };
 
+
+/** list of deprecated keywords */
 const char  *deprecated[] = {
-  "fac_x", "fac_y", "fac_z", "fac_t" 
-};
+    "fac_x", "fac_y", "fac_z", "fac_t" 
+  };
 
 //* size of the stored data, not the variable type
 unsigned short   Data_Size[] =
@@ -238,6 +240,14 @@ unsigned short   Data_Size[] =
     sizeof(unsigned short),
 	3*sizeof(float), 3*sizeof(double), 4*sizeof(float), 4*sizeof(double)
   };
+
+
+/** the number of components for each data type */
+int Num_Components[] = 
+  { 
+    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 3, 3, 4, 4
+  };
+
 
 long	unsigned
 Header_Systeme_No[] =
@@ -277,7 +287,8 @@ IGBheader::IGBheader( gzFile f, bool _read, bool quiet )
   init();
   fileptr(f);
   if( _read ) 
-    read( quiet );
+    if( read( quiet ) )
+      throw 1;
 }
 
 
@@ -327,7 +338,6 @@ void IGBheader::init(void)
   bool_comment = FAUX;
   bool_transparent = FAUX;
 }
-
 
 IGBheader::~IGBheader()
 {}
@@ -1321,25 +1331,16 @@ void IGBheader :: swab( void *data, int nd )
     return;
 
   unsigned char *bp = (unsigned char *)data;
-  int ds = data_size();
+  int ds = data_size()/num_components();
 
   if ( nd<0 ) nd = v_x*v_y*v_z*v_t;
 
-  // if vector data, treat as a longer scalar vector
-  if( v_type == IGB_VEC3_f || v_type == IGB_VEC3_d  ){
-	nd *= 3;
-	ds /= 3;
-  }
-  if( v_type == IGB_VEC4_f || v_type == IGB_VEC4_d  ) {
-	nd *= 4;
-	ds /= 3;
-  }
-
+  nd *= num_components();
 
   switch ( ds ) {
     case 2:
       for ( int i=0; i<nd; i++ ) {
-        tmpb = bp[0];
+        unsigned char tmpb = bp[0];
         bp[0] = bp[1];
         bp[1] = tmpb;
         bp += data_size();
@@ -1347,7 +1348,7 @@ void IGBheader :: swab( void *data, int nd )
       break;
     case 4:
       for ( int i=0; i<nd; i++ ) {
-        tmpb = bp[0];
+        unsigned char tmpb = bp[0];
         bp[0] = bp[3];
         bp[3] = tmpb;
         tmpb = bp[1];
@@ -1358,7 +1359,7 @@ void IGBheader :: swab( void *data, int nd )
       break;
     case 8:
       for ( int i=0; i<nd; i++ ) {
-        tmpb = bp[0];
+        unsigned char tmpb = bp[0];
         bp[0] = bp[7];
         bp[7] = tmpb;
         tmpb = bp[1];

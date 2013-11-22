@@ -69,7 +69,6 @@ typedef	    struct List
   char    *items;
 }
 List;
-#ifndef PrMTYPES
 typedef	    unsigned char	byte;
 #ifndef __GL_GL_H__
 typedef     unsigned char	Byte;
@@ -85,7 +84,6 @@ typedef     long		Long;
 typedef     int			Int;
 typedef     unsigned int        UInt;
 typedef     short		Short;
-typedef     unsigned short		UShort;
 typedef     int			BooleaN;
 typedef     int			Flag;
 typedef     char		*RDir;
@@ -119,7 +117,6 @@ typedef struct d_complex
 d_complex ;
 #define _COMPLEX_DEFINED
 #endif
-#endif
 typedef union rgba {
   unsigned	long    l;
   byte		b[4];
@@ -138,6 +135,7 @@ typedef union rgba {
 extern	bool     	   Header_Quiet;
 extern	const char    *Header_Type[IGB_MAX_TYPE+1];
 extern	unsigned short Data_Size[IGB_MAX_TYPE+1];
+extern	int            Num_Components[IGB_MAX_TYPE+1];
 extern	const char	  *Header_Systeme[N_SYSTEMES];
 extern  unsigned long  Header_Systeme_No[N_SYSTEMES];
 extern	char		   Header_Message[256];
@@ -305,73 +303,72 @@ class IGBheader
     inline void vect_z( float* a ){ v_vect_z = a; bool_vect_z = true; }
     inline float* vect_z( bool &set ){ set=bool_vect_z; return v_vect_z; }
   inline float* vect_z(void){ return v_vect_z; }
-    inline void unites_x( char* a ){ strcpy(v_unites_x, a); bool_unites_x = true; }
+    inline void unites_x( const char* a ){ strcpy(v_unites_x, a); bool_unites_x = true; }
     inline char* unites_x( bool &set ){ set=bool_unites_x; return v_unites_x; }
   inline char* unites_x(void){ return v_unites_x; }
-    inline void unites_y( char* a ){ strcpy(v_unites_y, a); bool_unites_y = true;}
+    inline void unites_y( const char* a ){ strcpy(v_unites_y, a); bool_unites_y = true;}
     inline char* unites_y( bool &set ){ set=bool_unites_y; return v_unites_y; }
   inline char* unites_y(void){ return v_unites_y; }
-    inline void unites_z( char* a ){ strcpy(v_unites_z,a); bool_unites_z = true; }
+    inline void unites_z( const char* a ){ strcpy(v_unites_z,a); bool_unites_z = true; }
     inline char* unites_z( bool &set ){ set=bool_unites_z; return v_unites_z; }
   inline char* unites_z(void){ return v_unites_z; }
-    inline void unites_t( char* a ){ strcpy(v_unites_t, a); bool_unites_t = true; }
+    inline void unites_t( const char* a ){ strcpy(v_unites_t, a); bool_unites_t = true; }
     inline char* unites_t( bool &set ){ set=bool_unites_t; return v_unites_t; }
   inline char* unites_t(void){ return v_unites_t; }
-    inline void unites( char* a ){ strcpy(v_unites, a); bool_unites = true; }
+    inline void unites( const char* a ){ strcpy(v_unites, a); bool_unites = true; }
     inline char* unites( bool &set ){ set=bool_unites; return v_unites; }
   inline char* unites(void){ return v_unites; }
-    inline void struct_desc( char* a ){ strcpy(v_struct_desc, a); bool_struct_desc = true; }
+    inline void struct_desc( const char* a ){ strcpy(v_struct_desc, a); bool_struct_desc = true; }
     inline char* struct_desc( bool &set ){ set=bool_struct_desc; return v_struct_desc; }
   inline char* struct_desc(void){ return v_struct_desc; }
-    inline void aut_name( char* a ){ strcpy(v_aut_name, a); bool_aut_name = true; }
+    inline void aut_name( const char* a ){ strcpy(v_aut_name, a); bool_aut_name = true; }
     inline char* aut_name( bool &set ){ set=bool_aut_name; return v_aut_name; }
   inline char* aut_name(void){ return v_aut_name; }
     inline void  transparent( void* a ){ v_transparent=a; bool_transparent = true; }
     inline void* transparent( bool &set ){ set=bool_transparent; return v_transparent; }
   inline void* transparent(void){ return v_transparent; }
     inline char* transparentstr(void){ return transstr; }
+    int  num_components(){ return Num_Components[v_type]; }
     int  endian();
+    template<class T> int read_data( T* dp, int numt=1, char *buf=NULL );
+    template<class T> void to_bin( void *buf, T d );
+    template<class T> T convert_buffer_datum( void *buf, int a );
 };
 
 
-/** read in raw data and convert to proper value of proper type
+/** read in a number of time slices 
  *
- * \param dp    data buffer
- * \param numt  \#time slices
- * \param h     IGB header
- * \param buf   optionally allocated temp buffer
+ * \param dp[out] values read
+ * \param numt    number of time slices
+ * \param buf     temporary buffer of raw data
  *
- * \return number of elements read
+ * \pre    \p dp must be allocated
+ * \post   \dp will be filled
+ * \return the number of items read
  */
-template <class T>
+template<class T>
 int
-read_IGB_data( T* dp, int numt, IGBheader* h, char *buf )
+IGBheader::read_data( T* dp, int numt, char *buf )
 {
-  int    slicesize = h->data_size()*h->x()*h->y()*h->z()*numt;
-  
+  int    slicesize = data_size()*slice_sz()*numt;
   bool   alloc_buf = false;
   if ( buf==NULL ) {
     buf = new char[slicesize];
     alloc_buf = true;
   }
   
-  int numread = gzread( (gzFile)(h->fileptr()), buf, slicesize )/h->data_size();
-  if ( numread == Z_NULL ) return 0;
-  if ( h->systeme() != h->endian() ) h->swab(buf, numread);
+  int numread;
+  if( gzipping ) 
+    numread = gzread( (gzFile)(file), buf, slicesize )/data_size();
+  else
+    numread = fread(  buf, slice_sz()*numt, data_size(), (FILE *)(file) );
 
-  int numprimitive = numread; // adjust vector types
-  switch( h->type() ) {
-	  case IGB_VEC3_f:
-	  case IGB_VEC3_d:
-		  numprimitive *= 3;
-		  break;
-	  case IGB_VEC4_f:
-	  case IGB_VEC4_d:
-		  numprimitive *= 4;
-		  break;
-  }
+  if ( systeme() != endian() ) swab(buf, numread);
+
+  int numprimitive = numread*num_components(); // adjust vector types
+
   for ( int a=0; a<numprimitive; a++ )
-    dp[a] = IGB_convert_buffer_datum<T>( h, buf, a );
+    dp[a] = convert_buffer_datum<T>( buf, a );
   
   if ( alloc_buf ) delete[] buf;
   return numread;
@@ -385,11 +382,11 @@ read_IGB_data( T* dp, int numt, IGBheader* h, char *buf )
  * \param a     index of datum
  */
 template<class T>
-T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
+T IGBheader::convert_buffer_datum( void *buf, int a )
 {
   T  datum;
 
-  switch ( h->type() ) {
+  switch ( type() ) {
     case IGB_BYTE:
       datum = ((unsigned char *)buf)[a];
       break;
@@ -424,8 +421,86 @@ T IGB_convert_buffer_datum( IGBheader *h, void *buf, int a )
     default:
       memset(&datum,0,sizeof(datum));
   }
-  return datum=h->from_raw(datum);
+  return datum=from_raw(datum);
 }
 
+/** convert the data to the binary representation
+ *
+ * \param h     IGB header
+ * \param buf   place to put raw binary IGB data
+ * \param d     datum
+ */
+template<class T>
+void 
+IGBheader::to_bin( void *buf, T d )
+{
+  double datum=to_raw(d);
+  switch ( type() ) {
+      case IGB_BYTE:
+          {
+            unsigned char a0 = (unsigned char)d;
+            memcpy( buf, &a0, data_size() );
+          }
+          break;
+      case IGB_CHAR:
+          {
+            signed char a1 = (signed char)d;
+            memcpy( buf, &a1, data_size() );
+          }
+          break;
+      case IGB_SHORT:
+          {
+            short a2 = (short )d;
+            memcpy( buf, &a2, data_size() );
+          }
+          break;
+      case IGB_LONG:
+          {
+            long a3 = (long)d;
+            memcpy( buf, &a3, data_size() );
+          }
+          break;
+      case IGB_FLOAT:
+          {
+            float a4 = (float )d;
+            memcpy( buf, &a4, data_size() );
+          }
+          break;
+      case IGB_VEC3_f:
+      case IGB_VEC4_f:
+          assert(0);
+          break;
+      case IGB_DOUBLE:
+          {
+            double a5 = d;
+            memcpy( buf, &a5, data_size() );
+          }
+          break;
+      case IGB_VEC3_d:
+      case IGB_VEC4_d:
+          assert(0);
+          break;
+      case IGB_INT:
+          {
+            int a6 = (int)d;
+            memcpy( buf, &a6, data_size() );
+          }
+          break;
+      case IGB_UINT:
+          {
+            unsigned int a7 = (unsigned int)d;
+            memcpy( buf, &a7, data_size() );
+          }
+          break;
+      case IGB_USHORT:
+          {
+            unsigned short a8 = (unsigned short)d;
+            memcpy( buf, &a8, data_size() );
+          }
+          break;
+      default:
+          assert(0);
+  }
+}
 
 #endif	//IGBheader_h

@@ -17,21 +17,21 @@ const float REL_MIN_VEC_SIZE = 100.;
 template< class S>
 void read_IGB_vec_data( S* vdata, S* sdata, IGBheader& h )
 {
-  int nf = 3+(sdata!=NULL);
   S* vd=NULL;
   
-  if( nf==4 ) vd = new S[h.slice_sz()*nf];
+  if( h.num_components() == 4 )
+    vd = new S[h.slice_sz()*h.num_components()];
 
   int nread;
 
   for( int i=0; i<h.t(); i++ ){
-	if( nf==3 ) 
-	  nread = read_IGB_data( vdata+i*nf*h.slice_sz(), 1, &h );
+	if( !vd ) 
+	  nread = h.read_data( vdata+i*h.num_components()*h.slice_sz() );
 	else {
-	  nread = read_IGB_data( vd, 1, &h );
+	  nread = h.read_data( vd );
 	  for( int j=0; j<h.slice_sz(); j++ ) {
 		for( int k=0; k<3; k++ )
-		  vdata[3*j+k+i*h.slice_sz()] = vd[j*4+k];
+		  vdata[3*j+k+i*h.slice_sz()*3] = vd[j*4+k];
 		sdata[j+i*h.slice_sz()] = vd[j*4+3];
 	  }
 	}

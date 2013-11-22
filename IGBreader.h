@@ -47,8 +47,7 @@ IGBreader<T>::IGBreader( Master<T>* _mthread, Slave<T>* _sthread,
   }
 
   // Assign head, slsz and buf if it is an IGB file
-  head = new IGBheader( in );
-  head->read();
+  head = new IGBheader( in, true );
   slsz = head->data_size()*head->x()*head->y()*head->z();
   buf = new char[slsz];
   data = sthread->data;
@@ -76,7 +75,7 @@ void IGBreader<T>::reader()
   seekbyte += 1024;
 
   gzseek( in, seekbyte, SEEK_SET );
-  read_IGB_data(data, 1, head, buf);
+  head->read_data(data, 1, buf);
 
   sthread->data = data;
   sthread->v_bit = true;
@@ -98,7 +97,7 @@ void IGBreader<T>::local_maxmin()
 
     //int numread = gzread( head->fileptr(), buf, slsz );
     //read_IGB_data(data, head, numread);
-    read_IGB_data(data, 1, head, buf);
+    head->read_data(data, 1, buf);
 
     maxmin_ptr->lmin[i] = data[0];
     maxmin_ptr->lmax[i] = data[0];
@@ -124,7 +123,7 @@ void IGBreader<T>::tmsr()
   for ( int i=0; i<=mthread->maxtm; i++ ) {
     gzread( (gzFile)head->fileptr(), buf, head->data_size() );
     if ( head->endian() != head->systeme() ) head->swab( buf, 1 );
-    sthread->data[i] = IGB_convert_buffer_datum<T>( head, buf, 0 );
+    sthread->data[i] = head->convert_buffer_datum<T>( buf, 0 );
     if ( i<mthread->maxtm )
       gzseek( (gzFile)head->fileptr(), slsz-head->data_size(), SEEK_CUR );
   }

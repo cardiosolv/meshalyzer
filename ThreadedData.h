@@ -135,7 +135,7 @@ class ThreadedData : public DataClass<T>
     using DataClass<T> :: _dt;
     using DataClass<T> :: _t0;
   public:
-    ThreadedData( const char *fn, int slsz, bool tm_anal=true );
+    ThreadedData( const char *fn, int slsz, bool tm_anal=true, int dof=1 );
     ~ThreadedData( );
     static    void*   ThreadCaller( void* _sthread );  //!< read in a time slice
     static    void*   minimax( void* _sthread );       //!< read max & min times
@@ -167,7 +167,7 @@ class ThreadedData : public DataClass<T>
  * \param tm_anal do min/max analysis of time series?
  */
 template<class T>
-ThreadedData<T>::ThreadedData( const char *fn, int slsz, bool tm_anal ):
+ThreadedData<T>::ThreadedData( const char *fn, int slsz, bool tm_anal, int dof ):
     mthread( new Master<T>(fn,slsz)),incrementation(1),element(0)
 {
 
@@ -190,13 +190,13 @@ ThreadedData<T>::ThreadedData( const char *fn, int slsz, bool tm_anal ):
   // Allocation of slaves
   sthread = new Slave<T>[THREADS];
   for ( int k=0; k<THREADS; k++ )
-    sthread[k].master( mthread, mthread->slsz );
+    sthread[k].master( mthread, mthread->slsz*dof );
 
   Slave<T>* sabs   = new Slave<T>( mthread );
   Slave<T>* slocal = NULL;
   if( tm_anal ) {
     stmsr  = new Slave<T>( mthread );
-    slocal = new Slave<T>( mthread, mthread->slsz );
+    slocal = new Slave<T>( mthread, mthread->slsz*dof );
   }
 
 ///////////////////////////////////////////////////////////////////////////////
