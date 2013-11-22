@@ -2070,14 +2070,21 @@ TBmeshWin:: set_time(int a)
 int
 TBmeshWin :: read_dynamic_pts( const char *fn, Myslider *mslide )
 {
-  int retval = model->pt.dynamic( fn, numframes );
-
-  if( retval == 2 ) {
-    fl_alert( "Incompatible number of time frames\n" );
+  try {
+    model->pt.dynamic( fn, numframes );
+  }
+  catch( FrameMismatch fm ) {
+    char s[1024];
+    sprintf( s,  "Incompatible number of time frames. Expected %d but got %d\n", fm.expected, fm.got );
+    fl_alert( s );
     return 1;
   }
-  if( retval )
-    return 1;
+  catch( PointMismatch pm ) {
+    char s[1024];
+    sprintf( s,  "Incompatible number of points. Expected %d but got %d\n", pm.expected, pm.got );
+    fl_alert( s );
+    return 2;
+  }
 
   model->pt.time(tm);
   mslide->maximum( max_time() );

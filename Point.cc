@@ -222,26 +222,18 @@ PPoint :: add( GLfloat *p, int n )
  *  \param ntm the number of times currently loaded
  *
  *  \retval 0 success
- *  \retval 1 invalid file
- *  \retval 2 incompatible number of points
  */
 int
 PPoint :: dynamic( const char *fn, int ntm )
 {
-  ThreadedData<float>* newDynPt;
+  ThreadedData<float>* newDynPt = new ThreadedData<float>( fn, _n, false );
 
-  try{ 
-    newDynPt = new ThreadedData<float>( fn, _n*3, false );
-  }
-  catch(...) {
-    return 1;
-  }
   if( ntm==1 || ntm==0 || ( newDynPt->max_tm()+1==ntm ) ) {
     delete _dynPt;
     _dynPt = newDynPt; 
     return 0;
-  } else
-    return 2;
+  } else 
+    throw FrameMismatch( ntm, newDynPt->max_tm()+1 );
 }
 
 

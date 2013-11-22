@@ -16,6 +16,13 @@ fileType FileTypeFinder ( const char *fn );
 void CG_file_list( map<int,string>&filelist, const char *fn );
 int  parse_HDF5_grid( const char *fn, string& type, unsigned int& index );
 
+class FrameMismatch
+{
+    public:
+        int expected, got;
+        FrameMismatch( int a, int b ){expected=a;got=b;}
+};
+
 class PointMismatch
 {
     public:
