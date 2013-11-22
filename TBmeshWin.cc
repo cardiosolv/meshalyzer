@@ -952,6 +952,12 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
         throw 1;
     }
   } 
+  catch( CompressedFileExc cf ) {
+    string alstr = "Please uncompress data file: ";
+    alstr += cf.file;
+    fl_alert( "%s",alstr.c_str() );
+    return;
+  }
   catch ( PointMismatch pm ) {
     char alstr[1024];
     sprintf( alstr, "%s\nPoints number mismatch: expected %d but got %d", fn, pm.expected, pm.got );  

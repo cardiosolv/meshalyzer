@@ -3,6 +3,15 @@
 
 #define BLOCK_SLSZ 20              //!< Number of intermediary slice pointers
 
+#include <string>
+class CompressedFileExc
+{
+    public:
+        string file;
+        CompressedFileExc( string a ){file=a;}
+};
+
+
 /** virtual class for threaded data reading
 
 */

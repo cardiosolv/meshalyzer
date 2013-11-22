@@ -137,8 +137,7 @@ template <class T>
 void IGBreader<T>::find_maxtm()
 {
   if ( mthread->fname.rfind(".gz") == mthread->fname.size()-3 ) {
-    cerr << "\nPlease uncompress IGB files\n\n";
-    throw(1);
+    throw CompressedFileExc( mthread->fname );
   }
   struct stat result;
   stat( mthread->fname.c_str(), &result );
@@ -147,7 +146,7 @@ void IGBreader<T>::find_maxtm()
   if ( mthread->maxtm <= 0 ) {
     free( data );
     if ( mthread->ftype == FTIGB ) delete head;
-    throw( 1 );
+    throw 1;
   }
 }
 
