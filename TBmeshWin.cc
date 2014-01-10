@@ -1054,21 +1054,28 @@ TBmeshWin :: select_hi( int n )
 
   int i=n;
   Object_t objtype;
+  MyValueInput *obin;
+
   while ( i>=1 )
     if ( strstr(  hinfo->text(i), "node" ) ) {
       objtype=Vertex;
+      obin = contwin->verthi;
       break;
     } else if ( strstr(  hinfo->text(i), "element" ) ) {
       objtype=SurfEle;
+      obin = contwin->elehi;
       break;
     } else if ( strstr(  hinfo->text(i), "volume" ) ) {
       objtype=VolEle;
+      obin = contwin->tethi;
       break;
     } else if ( strstr(  hinfo->text(i), "cable" ) ) {
       objtype=Cable;
+      obin = contwin->cabhi;
       break;
     } else if ( strstr(  hinfo->text(i), "connection" ) ) {
       objtype=Cnnx;
+      obin = contwin->cnnxhi;
       break;
     } else if ( strstr(  hinfo->text(i), "surf" ) ) {
       objtype=Surface;
@@ -1081,6 +1088,7 @@ TBmeshWin :: select_hi( int n )
   if ( i>1 &&
        ( sscanf( txt, "%d", &ho )==1 || sscanf( txt, "%*s %*s %d", &ho)==1 ) ) {
     int lineno = hinfo->topline();
+    obin->value(ho);
     highlight(objtype, ho );
     hinfo->topline( lineno );
   }

@@ -219,6 +219,7 @@ static struct option longopts[] = {
 };
 
 
+int
 main( int argc, char *argv[] )
 {
   Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);

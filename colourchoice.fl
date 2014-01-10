@@ -2,18 +2,20 @@
 version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include <FL/gl.h>} {public
+decl {\#include <FL/gl.h>} {public local
 } 
 
-decl {\#include "TBmeshWin.h"} {public
+decl {\#include "TBmeshWin.h"} {public local
 } 
 
-decl {\#include "Surfaces.h"} {public
+decl {\#include "Surfaces.h"} {public local
 } 
 
-decl {\#include "AuxGrid.h"} {} 
+decl {\#include "AuxGrid.h"} {private local
+} 
 
-decl {\#include <string>} {} 
+decl {\#include <string>} {private local
+} 
 
 class colourChoice {open
 } {
@@ -42,7 +44,7 @@ for( int r=0; r<numreg; r++ )
   if( sc[r] )
     tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
 tbmw->redraw();
-window->~Fl_Window();}
+window->~Fl_Double_Window();}
         xywh {125 225 90 30}
       }
       Fl_Button apbut {
@@ -71,11 +73,16 @@ opacity->value( col[3] );} {}
   } {
     code {delete[] sc;} {}
   }
-  decl {GLfloat *col;} {}
-  decl {int numreg;} {}
-  decl {Object_t obj;} {}
-  decl {TBmeshWin *tbmw;} {}
-  decl {bool *sc} {}
+  decl {GLfloat *col;} {private local
+  }
+  decl {int numreg;} {private local
+  }
+  decl {Object_t obj;} {private local
+  }
+  decl {TBmeshWin *tbmw;} {private local
+  }
+  decl {bool *sc} {private local
+  }
 } 
 
 class AuxColourChoice {open
@@ -103,7 +110,7 @@ col[2] = rgb_choice->b();
 col[3] = opacity->value();
 tbmw->auxGrid->color( obj, col );
 tbmw->redraw();
-window->~Fl_Window();}
+window->~Fl_Double_Window();} selected
         xywh {125 225 90 30}
       }
       Fl_Button apbut {
@@ -126,10 +133,12 @@ opacity->value( col[3] );
 string title=objnames[obj];
 title += " color";
 window->label( title.c_str() );
-window->show();} {selected
-    }
+window->show();} {}
   }
-  decl {GLfloat *col;} {}
-  decl {Object_t obj;} {}
-  decl {TBmeshWin *tbmw;} {}
+  decl {GLfloat *col;} {private local
+  }
+  decl {Object_t obj;} {private local
+  }
+  decl {TBmeshWin *tbmw;} {private local
+  }
 } 
