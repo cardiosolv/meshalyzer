@@ -143,6 +143,7 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   LOG_TIMER_RESET;
   _cnnx   = new Connection( &pt );
   _cnnx->read( fn );
+  add_cnnx_from_elem( fn );
   LOG_TIMER("Read Connections");
   
   _cable  = new ContCable( &pt );
@@ -460,6 +461,45 @@ void Model::determine_regions()
       }
     }
   }
+}
+
+
+/** add surface by selecting 2D elements from .elem file
+ *
+ *  A surface will be created for each different region specified.
+ *  Also, all elements withoyut a region specified will form a surface.
+ *
+ *  \param base model name
+ */
+int Model::add_cnnx_from_elem( string fname )
+{
+  /* determine file name */
+  gzFile in;
+  if ( (in=gzopen( (fname+="elem").c_str(), "r" )) == NULL )
+    if ((in=gzopen( (fname+=".gz").c_str(), "r" )) == NULL ) {
+      return -1;
+    }
+
+  // Count the number of surface elements in each surface
+  char buff[bufsize];
+  gzgets(in,buff,bufsize);           // throw away first line
+
+  gzFileBuffer file(in);
+  int numcx=0, *cnnx=NULL;
+  while ( file.gets(buff,bufsize) != Z_NULL ) {
+	char etype[10],reg[10];
+	if( !strncmp(buff,"Ln",2) ) {
+      if( !(numcx%10000) )
+        cnnx = (int *)realloc( cnnx, (numcx/10000+1)*2*sizeof(int) );
+	  if(sscanf( buff,"%s %d %d %s", etype, cnnx+2*numcx, cnnx+2*numcx+1, reg)<5 )
+		strcpy(reg,"EMPTY");
+	} else
+	  continue;  //ignore volume elements
+  }
+  _cnnx->add( numcx, cnnx );
+  free( cnnx );
+
+  return numcx;
 }
 
 

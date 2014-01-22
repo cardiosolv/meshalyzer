@@ -32,6 +32,7 @@ class Model
     int          add_surface_from_tri( const char * );
     int          add_surface_from_surf( const char * );
     int          add_region_surfaces( void );
+    int          add_cnnx_from_elem( string );
     inline int   reg_first( int s, Object_t t ){return _region[s]->first(t); }
     Surfaces* surface(int s){ return _surface[s]; }
 	void      surfKill( int s );
