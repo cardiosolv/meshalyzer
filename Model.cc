@@ -75,6 +75,25 @@ get_line( gzFile in )
 }
 
 
+/** format string for hilight window output 
+ *
+ * \param i  index
+ * \param hi is this a hilighted index
+ *
+ * \return a pointer to a constant string
+ */
+char * const
+format_hilite( int i, bool hi ) 
+{
+  static char txt[256];
+  if( !hi )
+    sprintf( txt, "\t%6d", i );
+  else
+    sprintf( txt,"@B%d\t%6d", FL_GRAY, i);
+  return txt;
+}
+
+
 /** return a new unique region label
  */
 int Model::new_region_label()
@@ -956,9 +975,11 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
 {
   hinfo->clear();
   char* txt  = new char[256];
-  char* ts   = NULL;
+
+  /////////////////////////////
   // Vertex info
-  sprintf(txt, "@b@C%6dVertex: %d of %d", FL_GREEN, hilight[Vertex],
+  set<int> att_nodes;        	// list nodes in attached elements
+  sprintf(txt, "@b@C%6dVertex: %d of %d", FL_DARK_GREEN, hilight[Vertex],
           pt.num() );
   hinfo->add( txt );
   if ( data != NULL ) {
@@ -975,42 +996,22 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
       if (cab[cabnum]<=hilight[Vertex] && cab[cabnum+1]>=hilight[Vertex]) {
         sprintf(txt, "in cable: %d", cabnum );
         hinfo->add( txt );
-        break;
+        if( hilight[Vertex]>cab[cabnum] ) att_nodes.insert(hilight[Vertex]-1);
+        if( hilight[Vertex]<cab[cabnum+1]-1 ) att_nodes.insert(hilight[Vertex]+1);
       }
   }
   if ( _cnnx->num() ) {
-    int cnum;
-    for ( cnum=0; cnum<_cnnx->num();cnum++ ) {
+    hinfo->add( "Attached connections:" );
+    for ( int cnum=0; cnum<_cnnx->num();cnum++ ) {
       const int* conn = _cnnx->obj(cnum);
       if ( conn[0]==hilight[Vertex] || conn[1]==hilight[Vertex] ) {
-        sprintf(txt, "in connection: %d", cnum );
-        hinfo->add( txt );
-        break;
+        hinfo->add( format_hilite(cnum,cnum==hilight[Cnnx]) );
+        att_nodes.insert(conn[conn[0]==hilight[Vertex]?1:0] );
       }
-    }
-  }
-
-  set<int> att_nodes;	// list nodes in attached tri's and tet's
-
-  if ( _cable->num() ) {
-    sprintf( txt, "Attached cables:" );
-    hinfo->add( txt );
-    const int* cab = _cable->obj();
-    for ( int i=0; i<_cable->num(); i++ )
-      if ( cab[i]<=hilight[Vertex] && cab[i+1]>hilight[Vertex]) {
-        sprintf( txt, "\t%6d", i );
-        if ( i==hilight[Cable] )
-          sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-        hinfo->add( txt );
-      }
-    if ( ts != NULL ) {
-      free(ts);
-      ts=NULL;
     }
   }
   if ( numSurf() ) {
-    sprintf( txt, "Attached elements:" );
-    hinfo->add( txt );
+    hinfo->add( "Attached elements:" );
     int nglob=0;
     for ( int i=0; i<numSurf(); i++ ) {
       vector<SurfaceElement*> ele=surface(i)->ele();
@@ -1018,69 +1019,48 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
         const int* nl = ele[j]->obj();
         for ( int k=0; k<ele[j]->ptsPerObj(); k++ ) {
           if ( nl[k]==hilight[Vertex] ) {
-            sprintf( txt, "\t%6d", nglob+j );
-            if ( j==hilight[SurfEle] )
-              sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-            hinfo->add( txt );
+            hinfo->add( format_hilite(j,j==hilight[SurfEle]) );
             for ( int m=0; m<ele[j]->ptsPerObj(); m++ )
-              if ( nl[m]!=hilight[Vertex] ) att_nodes.insert(nl[m]);
+              att_nodes.insert(nl[m]);
+            break;
           }
         }
       }
       nglob += surface(i)->num();
     }
-    if ( ts != NULL ) {
-      free(ts);
-      ts=NULL;
-    }
   }
   if ( _numVol ) {
-    sprintf( txt, "Attached volume elements:" );
-    hinfo->add( txt );
+    hinfo->add( "Attached volume elements:" );
     for ( int i=0; i<_numVol; i++ ) {
       const int* tet=_vol[i]->obj();
       for ( int j=0; j<_vol[i]->ptsPerObj(); j++ )
         if ( tet[j]==hilight[Vertex] ) {
-          sprintf( txt, "\t%d", i );
-          if ( tet[j]==hilight[VolEle] )
-            sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-          hinfo->add( txt );
+          hinfo->add( format_hilite(i,i==hilight[VolEle]) );
           for ( int k=0; k<_vol[i]->ptsPerObj(); k++ ) {
-            if ( tet[k]!=hilight[Vertex] ) att_nodes.insert(tet[k]);
+            att_nodes.insert(tet[k]);
           }
         }
     }
-    if ( ts != NULL ) {
-      free(ts);
-      ts=NULL;
-    }
   }
-  sprintf( txt, "Attached nodes:" );
-  hinfo->add( txt );
+  hinfo->add( "Attached nodes:" );
+  att_nodes.erase(hilight[Vertex]);
   for ( set<int>::iterator p=att_nodes.begin(); p!=att_nodes.end(); p++ ) {
       sprintf( txt, "\t%d", *p );
       hinfo->add( txt );
     }
   hinfo->add( "" );
+  //End vertex info
+  ///////////////////////////////////
+ 
   //Cables
   if ( _cable->num() ) {
     sprintf(txt, "@b@C%6dCable: %d of %d", FL_CYAN, hilight[Cable],
             _cable->num() );
     hinfo->add( txt );
     hinfo->add( "nodes:" );
-    sprintf( txt, "\t%6d", *(_cable->obj(hilight[Cable])) );
-    if ( _cable->obj(hilight[Cable])[0]==hilight[Vertex] )
-      sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-    hinfo->add( txt );
-    sprintf( txt, "\t%6d", *(_cable->obj(hilight[Cable]+1))-1 );
-    if ( _cable->obj(hilight[Cable]+1)[0]-1==hilight[Vertex] )
-      sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-    hinfo->add( txt );
+    hinfo->add( format_hilite( *(_cable->obj(hilight[Cable])), _cable->obj(hilight[Cable])[0]==hilight[Vertex]) );
+    hinfo->add( format_hilite( *(_cable->obj(hilight[Cable]+1))-1,  _cable->obj(hilight[Cable]+1)[0]-1==hilight[Vertex]));
     hinfo->add( "" );
-    if ( ts != NULL ) {
-      free(ts);
-      ts=NULL;
-    }
   }
 
   // Volume ELements
@@ -1091,20 +1071,13 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
     hinfo->add( "nodes:\t" );
     const int* tet=_vol[hivol]->obj();
     for ( int i=0; i<_vol[hivol]->ptsPerObj(); i++ ) {
+      char *line = format_hilite( tet[i], tet[i]==hilight[Vertex] ); 
       if ( data != NULL )
-        sprintf(txt, "%6d -> %f", tet[i], data[tet[i]] );
-      else
-        sprintf( txt, "%6d", tet[i] );
-      if ( tet[i]==hilight[Vertex] )
-        sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-      hinfo->add( txt );
+        sprintf(line+strlen(line), " -> %f", data[tet[i]] );
+      hinfo->add( line );
     }
   }
   hinfo->add("");
-  if ( ts != NULL ) {
-    free(ts);
-    ts=NULL;
-  }
 
   // SurfEles
   int elesurf, lele;
@@ -1117,17 +1090,10 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
     hinfo->add( "nodes:\t" );
     for ( int i=0; i<surface(elesurf)->ele(lele)->ptsPerObj(); i++ ) {
       int node=surface(elesurf)->ele(lele)->obj()[i];
+      char *line = format_hilite( node, node==hilight[Vertex] ); 
       if ( data != NULL )
-        sprintf( txt,"\t%6d -> %f", node, data[node] );
-      else
-        sprintf( txt, "\t%6d", node );
-      if ( node==hilight[Vertex] )
-        sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-      hinfo->add( txt );
-    }
-    if ( ts != NULL ) {
-      free(ts);
-      ts=NULL;
+        sprintf(line+strlen(line), " -> %f", data[node] );
+      hinfo->add( line );
     }
     //normal
     const GLfloat* n=surface(elesurf)->ele(lele)->nrml();
@@ -1147,19 +1113,11 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
             _cnnx->num() );
     hinfo->add( txt );
     hinfo->add( "nodes:\t" );
-    sprintf( txt, "\t%6d", _cnnx->obj(hilight[Cnnx])[0] );
-    if ( _cnnx->obj(hilight[Cnnx])[0] ==hilight[Vertex] )
-      sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-    hinfo->add( txt );
-    sprintf( txt, "\t%6d", _cnnx->obj(hilight[Cnnx])[1] );
-    if ( _cnnx->obj(hilight[Cnnx])[1]==hilight[Vertex] )
-      sprintf( txt,"@B%d%s", FL_GRAY, ts=strdup(txt) );
-    hinfo->add( txt );
-    hinfo->add("");
-    if ( ts != NULL ) {
-      free(ts);
-      ts=NULL;
+    for( int i=0; i<2; i++ ) {
+      hinfo->add(format_hilite(_cnnx->obj(hilight[Cnnx])[i],
+                         _cnnx->obj(hilight[Cnnx])[i]==hilight[Vertex]));
     }
+    hinfo->add("");
   }
   hinfo->window->show();
 }
