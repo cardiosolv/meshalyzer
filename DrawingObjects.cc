@@ -60,14 +60,17 @@ void DrawingObj :: translucency( bool b )
  * \param base basename of file
  * \param ext  extension for type of file without a .
  *
+ * \note directories are ignored
+ *
  * \return a pointer to the open file
  */
 gzFile openFile( const char *base, const char* ext )
 {
-  gzFile in;
-  string fn = base;
+  gzFile      in;
+  string      fn   = base;
+  struct stat finfo;
 
-  if ( (in=gzopen( fn.c_str(), "r" )) == NULL ) {
+  if ( stat(fn.c_str(),&finfo) || S_ISDIR(finfo.st_mode) ) {
     fn += ".gz";
     if ( (in=gzopen( fn.c_str(), "r")) == NULL ) {
       fn  = base;
