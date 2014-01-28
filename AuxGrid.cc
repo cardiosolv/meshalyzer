@@ -377,10 +377,11 @@ private:
 /** constructor 
  *
  * \param fn        base file name
+ * \param ag        auxilliary grid from which settings are copied
  *
  * \throw 1 if any error in input
  */
-AuxGrid::AuxGrid( const char *fn )
+AuxGrid::AuxGrid( const char *fn, AuxGrid *ag )
   : _display(true), _hilight(false), _hiVert(0), _plottable(false),
     _indexer(NULL),_timeplot(NULL),_clip(false)
 {
@@ -391,13 +392,33 @@ AuxGrid::AuxGrid( const char *fn )
   else
     throw 1;
 
-  for (int i=0; i<sizeof(*_3D); i++)
-    _3D[i] = true;
+  if( ag ){
+    _hilight = ag->_hilight;
+    _hiVert  = ag->_hiVert;
+    _clip    = ag->_clip;
+    _display = ag->_display;
+  }
 
   for( int i=0; i<maxobject; i++ ) {
-    _show[i]     = true;
-    _datafied[i] = false;
-    _color[i][3] = 1;
+    if( ag ) {
+      _show[i]     = ag->_show[i]; 
+      _datafied[i] = ag->_datafied[i]; 
+      _size[i]     = ag->_size[i];
+      _3D[i]       = ag->_3D[i];
+      for( int j=0; j<4; j++ )
+        _color[i][j] = ag->_color[i][j];
+    } else {
+      _show[i]     = true;
+      _datafied[i] = false;
+      _color[i][3] = 1;
+      _3D[i]       = true;
+    }
+  }
+  if( !ag ) {
+      size(Vertex, 50);
+      size(Cnnx, 100);
+      size(SurfEle, 50);
+      size(VolEle, 50);
   }
 
   _plottable = _indexer->plottable();
@@ -408,8 +429,6 @@ AuxGrid::AuxGrid( const char *fn )
     _timeplot->set_data( 0, _sz_ts, _time_series, 0 );
   }
 
-  threeD( Cnnx, true );
-  threeD( Vertex, true );
   if( _indexer )
     _indexer->GetModel(0);
 

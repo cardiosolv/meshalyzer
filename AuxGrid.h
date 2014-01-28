@@ -35,7 +35,7 @@ class AuxGrid {
         bool         _clip;         // is is clipped?
 
     public:
-        AuxGrid( const char *fn );
+        AuxGrid( const char *fn, AuxGrid *ag=NULL );
         virtual ~AuxGrid();
 
         Colourscale cs;
