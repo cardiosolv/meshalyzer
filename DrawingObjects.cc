@@ -89,7 +89,9 @@ gzFile openFile( const char *base, const char* ext )
         }
       }
     }
-  }
+  } else
+    in = gzopen( fn.c_str(), "r");
+
   return in;
 }
 
