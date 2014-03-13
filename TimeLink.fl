@@ -43,7 +43,7 @@ decl {using namespace std;} {public global
 
 class TimeLink {open
 } {
-  Function {TimeLink( set<int>& lnks ):linkages_(lnks),msqId_(0),MSQ_KEY_PATH("/home")} {open selected
+  Function {TimeLink( set<int>& lnks ):linkages_(lnks),msqId_(0),MSQ_KEY_PATH("/home")} {open
   } {
     Fl_Window window {
       label TimeLink
@@ -89,7 +89,7 @@ class TimeLink {open
   Function {list_mesh_pids()} {
     comment {list running meshalyzer PIDs which are not linked} open
   } {
-    code {const char *cmd = "ps -a | grep meshalyzer";
+    code {const char *cmd = "ps -a -o pid,args | grep '[0-9]\\\\+ meshalyzer'";
 
 FILE *in = popen( cmd, "r" );
 
@@ -105,7 +105,8 @@ while( fgets( procline, 1024, in ) != NULL ) {
   }
 }
 
-pclose( in );} {}
+pclose( in );} {selected
+    }
   }
   Function {link()} {
     comment {Link the selected meshalyzer PIDs
