@@ -74,8 +74,8 @@ As well, all the structures formed by those vertices are part of the
 region.
 Vertices may belong to more than one region,
 and there is at least one region in a grid.
-If one is not specified, all structures belong to the default region.
-If there is a element direction file (\texttt{.ttlon} file), and no 
+If a region is not specified, all structures belong to the default region.
+If there is a element direction file (\texttt{.lon} file), and no 
 volume elements are tagged, elements with no direction will be region~0, 
 and other elements will be region~1.
 
@@ -93,7 +93,7 @@ and model structures is described in the Fig.~\ref{fig:UML}.
 \label{fig:UML}
 \end{figure}
 
-All files (except IGB described below) are text files.
+All files (except IGB described below) are ASCII files.
 They may be \emph{gzipped} 
 in which case ``.gz'' should be appended to the extensions given below.
 Note that files are scanned line by line 
@@ -130,9 +130,10 @@ first_vertex_in_third_cable
 .
 .
 .
-first_point_in_last_cable
+first_vertex_in_last_cable
 one_past_last_point_in_last_cable
 \end{verbatim}
+where the point indices are specified.
 A cable will contain all points from the first specified in the cable until the
 point before the first of the next cable.
 \subsection{Connections}
@@ -148,31 +149,30 @@ vertex#1 vertex#2
 .
 vertex#1 vertex#2
 \end{verbatim}
-
+where,again, the base-0 vertex indices are used and 
 \subsection{Surface Elements}
 
 \label{sec:surffile}
-These files are a subset of the more general volume elements
-with the suffix ``.surf''.
-They may define several surfaces in one file.
+These files have the suffix ``.surf'' and
+may define several surfaces in one file.
 Any 2-dimensional element can be specified.
-labels are any sequence of characters not including white space.
+Labels are any sequence of characters not including white space.
 The file has the following format:
 \begin{verbatim}
-number_elements_in_surface0 label_for_surface0
+number_elements_in_surface0 label_for_surface0 [label]
 Tr vertex0 vertex1 vertex2 float
 Qd vertex0 vertex1 vertex2 vertex3 float
 .
 .
 .
 Qd vertex0 vertex1 vertex2 vertex3 float
-number_eleemnts_in_surface1 label_for_surface1
+number_eleemnts_in_surface1 label_for_surface1 [label]
 Tr vertex0 vertex1 vertex2 float
 Tr vertex0 vertex1 vertex2 float
 .
 .
 .
-number_elements_in_surfaceN label_for_surfaceN
+number_elements_in_surfaceN label_for_surfaceN [label]
 Qd vertex0 vertex1 vertex2 vertex3 float
 Tr vertex0 vertex1 vertex2 float
 .
@@ -180,6 +180,7 @@ Tr vertex0 vertex1 vertex2 float
 .
 Tr vertex0 vertex1 vertex2 float
 \end{verbatim}
+where label is string without spaces which will be used to identify the surface in the list of surfaces.
 
 \subsubsection{Triangles}
 \label{sec:tris}
@@ -284,8 +285,9 @@ A data file typically has the extension ``.dat'' or ``.out'' but these extension
 are suggested and not required.
 The file simply contains lines with one entry per line, the data value for the
 vertex.
-\subsubsection{Time}
-Files with time dependent data are typically suffixed with ``.tdat'' but this is
+\subsubsection{Time Dependent}
+Files with time dependent data are typically suffixed with ``.tdat'' but this
+extension is
 not mandatory.
 The file format follows that of the Static case, but is repeated for every time
 instance.
@@ -317,7 +319,7 @@ The first block of key words need to be specified. The rest are optional.
 	                   float, double, int, uint, vec3f, vec4f,
 					   vec3d, vec4d\\ \hline
 	unites  & string & units of data \\
-	factuer & float & scaling factor for data \\
+	facteur & float & scaling factor for data \\
 	zero    & float & data zero: true value =
 	                            IGB\_data*\texttt{facteur}+\texttt{zero} \\
     org\_x  & float & lower right x coordinate       \\
@@ -340,12 +342,14 @@ The first block of key words need to be specified. The rest are optional.
 	aut\_name & string & author's name     \\
     transparent & hex & value for no data  
 \end{longtable}
+Note that for unstructured grids, $x$, $y$ and $z$ are meaningless. However, their product $xyz$ must equal the
+number of nodes in the model.
 
 \subsection{Vector Data}
-An auxiliary set of points on which to display vector/scalar data is 
+To display vector data, an auxiliary set of points must be 
 defined by a file with the ``.vpts'' suffix.
 It follows the same format as the vertex file.
-A file with the same base name but the extension ``.vec'' defines the 
+A file with the same base name but having the extension ``.vec'' defines the 
 vector and scalar data. It has the following format:
 \begin{verbatim}
 data.x data.y data.z [scalar_datum]
@@ -498,8 +502,21 @@ If no file is specified, a file input box will pop up.
 Note that for the ``pts'' file, the dot of the extension can be left in to facilitate
 using tab completion. 
 For example, if the vertices file was called \emph{model.pts},
-one could specify ``model.pts'', ``model.'', or ``model'' on the command line.
-This only applies to the vertices file.
+one could specify ``model.pts'', ``model.'', or ``model'' equally on the command line.
+This only applies to the vertex file.
+
+\subsection{Options}
+
+\begin{description}
+    \item[--help$|$-h] Display the usage message
+    \item[--iconifycontrols$|$-i]  iconify the control window on startup
+    \item[--groupID=GID$|$-gGID] Be part of this semaphore group for \meshal linking. See \S\ref{sec:link}.
+    \item[--noelem $|$ -n] Do not read in the element file. This will speed up reading in the model at the expense of
+        not being able to put data on the cutting planes.
+    \item[--thrdRdr$|$-t] Force threaded data reading. Even if one has enough memory to read in all the data at
+        once, it is probably just as fast to read it in on demand. Using this option will reduce start up time
+        and stop \meshal from using all the RAM..
+\end{description}
 
 \subsection{Environment variables}
 \meshal reads the following environment variables:
@@ -511,7 +528,7 @@ Also, when \meshal is invoked with no model file, the chooser will open in
 the first directory specified in the variable.
 \end{description}
 
-\section{GUI}
+\section{Graphical User Interface}
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=8cm]{controls}}
@@ -584,15 +601,15 @@ with the button turning red to indicate this.
 A vertex can then be selected by clicking on it.
 To properly pick a vertex, it is necessary to display vertices or 
 outlined surfaces.
-If you are having trouble selecting a vertex, turn off all unnecessary
+If you are having trouble selecting a vertex, display points, turn off all unnecessary
 surfaces and regions, and click right on top of it.
 In the event of nearby vertices, the one closest to the viewer's eye (minimum z
 window coordinate) will be selected.
 For each vertex, its associated scalar data value
 is displayed in the gold widget.
-You can choose to display the triangles in which the vertex is a node, or
+You can choose to display the surface elements that the vertex is part of, or
 the volume elements that it is part of.
-The volume elements can be drawn as wireframe or with filled sides.
+The elements can be drawn as wireframe or with filled sides.
 The inside surfaces of the sides (facing the node) 
 will be coloured pink while the outside will be gold.
 
@@ -686,6 +703,10 @@ Colour can be based on vector magnitude, scalar data or be constant.
 The constant value is selected by the ``colour'' button.
 Magnitude and scalar data are mapped to a selectable colour map as with
 vertex scalar data.
+To display a subset of the data, a stride may be chosen.
+Sometimes, especially with a regular grid is used, a constant stride will lead to aliasing effects. In this case,
+checking the ``stochastic'' button will add a random perturbation to the stride so that the model is
+irregularly sampled but on average, at the specified stride.
 
 \subsubsection{Auxiliary Grid}
 
@@ -798,6 +819,8 @@ For each clipping plane, several different modes are available:
 \centerline{\includegraphics[width=12cm]{clip}}
 \caption{Clipping plane dialogue.}
 \end{figure}
+At the bottom of the widget is a graphical interface for moving the clipping plane. 
+The desired plane must first be selected.
 
 \subsubsection{IsoSurfaces/IsoLines}
 
@@ -821,7 +844,7 @@ The thickness of the lines can also be controlled.
 \subsubsection{Single Images}
 Images can be saved in several formats under the ``Output'' menu.
 Make sure that the window is unobstructed.
-Formats that cab be selected include PNG and
+Formats that can be selected include PNG and
 high quality vector EPS and PDF images.
 With EPS and PDF, however, 
 transparency is not supported due to a limitation of
@@ -925,6 +948,7 @@ To reread the current data file, press ``r''.
 
 \section{Linking}
 
+\label{sec:link}
 Different \meshal instances can be linked together so that some operations are applied to all
 instances.
 To link instances of \meshal, click on ``File/Link'' which will open up a linking dialog 
@@ -935,12 +959,16 @@ all processes.
 
 Currently, linking supports the following operations:
 \begin{description}
-\item[Temporal changes] Increments or decrements in time will be transmitted to all instances
+\item[Temporal changes] Increments or decrements in time will be transmitted to all instances. 
+    This includes arrows and the animation button.
 \item[Temporal syncing] Clicking on the ``sync'' button (beside the animation pause button)
       will set all instances to the same time. This is also achieved by pressing ``t'' in the
       model window.
-\item[Viewport syncing] Clicking ``Image/Viewport Sync'' or pressing ``v'' in the model window 
+\item[Viewport syncing] Clicking ``Image/Sync/Viewport Sync'' or pressing ``v'' in the model window 
      will transmit the current orientation, scale, and translation to all other instances.
+ \item[Colour Scale] Clicking ``Image/Sync/Colour Scale Sync'', or pressing the sync button 
+     beside the colour bar 
+     will transmit the current colour map to all other instances.
 \end{description}
 
 \noindent
