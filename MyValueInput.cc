@@ -30,7 +30,8 @@ int MyValueInput :: handle( int event )
     v1 = increment(v1, dy*jump); 
     v1 = clamp(v1); 
     value(v1); 
-    return 1; 
+    do_callback();
+    return 1;
 
   }  else if ( event == FL_KEYBOARD ) {
 
@@ -42,20 +43,20 @@ int MyValueInput :: handle( int event )
     switch (Fl::event_key()) {
         case FL_Up:
             if ( value()+jump*step() <= maximum() ) {
-          value(increment(value(), jump));
-          do_callback();
-          return 1;
-        }
-        break;
-      case FL_Down:
-        if ( value()-jump*step() >= minimum() ) {
-          value(increment(value(), -jump ));
-          do_callback();
-          return 1;
-        }
-        break;
-      default:
-        return Fl_Value_Input::handle(event);
+              value(increment(value(), jump));
+              do_callback();
+              return 1;
+            }
+            break;
+        case FL_Down:
+            if ( value()-jump*step() >= minimum() ) {
+              value(increment(value(), -jump ));
+              do_callback();
+              return 1;
+            }
+            break;
+        default:
+            return Fl_Value_Input::handle(event);
     }
   }
   return Fl_Value_Input::handle(event);
