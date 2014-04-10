@@ -1049,6 +1049,20 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
       hinfo->add( txt );
     }
   hinfo->add( "" );
+  // data extrema
+  if( data )  {
+    hinfo->add( "Data Extrema" );
+    DATA_TYPE *mind = min_element( data, data+pt.num() ); 
+    sprintf( txt, "Minimum: %g @", *mind );
+    hinfo->add( txt );
+    hinfo->add( format_hilite( mind-data, mind-data==hilight[Vertex]) );
+    DATA_TYPE *maxd = max_element( data, data+pt.num() ); 
+    sprintf( txt, "Maximum: %g @", *maxd );
+    hinfo->add( txt );
+    hinfo->add( format_hilite( maxd-data, maxd-data==hilight[Vertex]) );
+    hinfo->add( "" );
+  }
+
   //End vertex info
   ///////////////////////////////////
  
@@ -1119,6 +1133,7 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
     }
     hinfo->add("");
   }
+
   hinfo->window->show();
 }
 

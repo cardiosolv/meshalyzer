@@ -953,21 +953,15 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
     }
   } 
   catch( CompressedFileExc cf ) {
-    string alstr = "Please uncompress data file: ";
-    alstr += cf.file;
-    fl_alert( "%s",alstr.c_str() );
+    fl_alert( "Please uncompress data file: %s", cf.file.c_str() );
     return;
   }
   catch ( PointMismatch pm ) {
-    char alstr[1024];
-    sprintf( alstr, "%s\nPoints number mismatch: expected %d but got %d", fn, pm.expected, pm.got );  
-    fl_alert( "%s",alstr );
+    fl_alert( "%s\nPoints number mismatch: expected %d but got %d", fn, pm.expected, pm.got );  
     return;
   }
   catch (...) {
-    string alstr = "Unable to open data file: ";
-    alstr += fn;
-    fl_alert( "%s",alstr.c_str() );
+    fl_alert("Unable to open data file: %s", fn );
     return;
   }
 
@@ -1032,7 +1026,7 @@ void TBmeshWin :: randomize_color( Object_t obj )
 
 void TBmeshWin :: hiliteinfo()
 {
-  model->hilight_info( hinfo, hilight );
+  model->hilight_info( hinfo, hilight, data );
 }
 
 
@@ -1626,7 +1620,7 @@ void TBmeshWin::record_events( char* fn )
   }
   ostringstream msg;
   msg << num << " frames output";
-  fl_alert( "%s", msg.str().c_str() );
+  fl_alert( msg.str().c_str() );
 }
 
 
@@ -2082,15 +2076,11 @@ TBmeshWin :: read_dynamic_pts( const char *fn, Myslider *mslide )
     model->pt.dynamic( fn, numframes );
   }
   catch( FrameMismatch fm ) {
-    char s[1024];
-    sprintf( s,  "Incompatible number of time frames. Expected %d but got %d\n", fm.expected, fm.got );
-    fl_alert( s );
+    fl_alert( "Incompatible number of time frames. Expected %d but got %d\n", fm.expected, fm.got );
     return 1;
   }
   catch( PointMismatch pm ) {
-    char s[1024];
-    sprintf( s,  "Incompatible number of points. Expected %d but got %d\n", pm.expected, pm.got );
-    fl_alert( s );
+    fl_alert( "Incompatible number of points. Expected %d but got %d\n", pm.expected, pm.got );
     return 2;
   }
 
