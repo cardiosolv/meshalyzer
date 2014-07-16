@@ -2,16 +2,9 @@ cmake_minimum_required(VERSION 2.6)
 
 PROJECT(meshalyzer)
 
-set(FLTK_SKIP_FLUID, ON)
-set(FLTK_SKIP_FORMS, ON)
-set(FLTK_SKIP_IMAGES, ON)
-include(FindFLTK)
-if (FLTK_FOUND)
-  include_directories(${FLTK_INCLUDE_DIR})
-  link_libraries(${FLTK_LIBRARIES})
-else (FLTK_FOUND)
-  message(FATAL_ERROR "Couldn't find FLTK 1")
-endif (FLTK_FOUND)
+find_package(FLTK REQUIRED NO_MODULE)
+include(${FLTK_USE_FILE})
+link_libraries(fltk_SHARED fltk_images_SHARED fltk_gl_SHARED)
 
 include(FindZLIB)
 if (ZLIB_FOUND)
@@ -59,8 +52,12 @@ endif (NOT USE_GLFRAMEBUFFERS)
 add_definitions(
 -DOBJ_CLASS
 -D_REENTRANT
--DNOMINMAX 
+-DNOMINMAX
 )
+
+add_definitions(-fopenmp)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fopenmp")
+
 include_directories(.)
 
 fltk_wrap_ui(meshalyzer 
@@ -121,9 +118,10 @@ Orienter.cc
 
 install(TARGETS meshalyzer RUNTIME DESTINATION bin)
 
+
 set(CPACK_PACKAGE_VERSION_MAJOR 0)
 set(CPACK_PACKAGE_VERSION_MINOR 0)
-set(CPACK_PACKAGE_VERSION_PATCH r3045)
+set(CPACK_PACKAGE_VERSION_PATCH r3675)
 set(CPACK_PACKAGE_VENDOR cardiosolv)
 set(CPACK_STRIP_FILES ON)
 
@@ -137,16 +135,16 @@ For more information, go to http://cardiosolv.com
 ")
 
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Robert Blake <rblake@cardiosolv.com>")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfltk1.1 (>=1.1.10), libfltk1.1 (>= 1.1.10), zlib1g, libglu1-mesa")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfltk1.3 (>=1.3.0), zlib1g, libglu1-mesa")
 set(CPACK_DEBIAN_PACKAGE_SECTION "science")
 
 set(RPM_DISTRIBUTION "centos" CACHE STRING "Linux distribution for RPM, either centos, opensuse, or fedora")
 if (RPM_DISTRIBUTION STREQUAL "centos")
-  set(CPACK_RPM_PACKAGE_REQUIRES "fltk >= 1.1.7, zlib, freeglut, libpng")
+  set(CPACK_RPM_PACKAGE_REQUIRES "fltk >= 1.3, zlib, freeglut, libpng")
 elseif(RPM_DISTRIBUTION STREQUAL "opensuse")
-  set(CPACK_RPM_PACKAGE_REQUIRES "libfltk1 >= 1.1.9, zlib, freeglut, libpng14-14")
+  set(CPACK_RPM_PACKAGE_REQUIRES "libfltk1 >= 1.3, zlib, freeglut, libpng14-14")
 elseif(RPM_DISTRIBUTION STREQUAL "fedora")
-  set(CPACK_RPM_PACKAGE_REQUIRES "fltk >= 1.1.10, zlib, freeglut, libpng >= 1.2.44")
+  set(CPACK_RPM_PACKAGE_REQUIRES "fltk >= 1.3, zlib, freeglut, libpng >= 1.2.44")
 else(RPM_DISTRIBUTION STREQUAL "centos")
   message(SEND_ERROR "Invalid RPM distribution")
 endif(RPM_DISTRIBUTION STREQUAL "centos")
