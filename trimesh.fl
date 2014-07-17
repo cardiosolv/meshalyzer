@@ -70,15 +70,15 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1568 132 350 650} type Double box UP_BOX
+      xywh {870 22 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open selected
+      Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File
+          label File open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -105,30 +105,7 @@ int ns = mwtb->model->numSurf();
 for( int i=ns-nsa; i<ns; i++ )  
   surflist->add( mwtb->model->surface(i)->label().c_str(),1);
 surflist->redraw();
-char *fn;
-string surffn=mwtb->model->file();
-surffn += "surf";
-if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str() )){
-  fl_cursor(FL_CURSOR_WAIT );
-  ofstream outf(fn);
-  for( int i=ns-nsa; i<ns; i++ ) {
-    SurfaceElement *e;
-    outf << mwtb->model->surface(i)->num() << endl;
-    for( int j=0; j<mwtb->model->surface(i)->num();j++ ) {
-      e = mwtb->model->element(i,j);
-      const int* n=e->obj();
-      if( e->ptsPerObj()==3 ) 
-        outf << "Tr";
-      else
-        outf << "Qd";
-      for( int k=0; k< e->ptsPerObj(); k++ )
-        outf << " " << n[k];
-      outf << endl;
-    }
-  }
-  fl_cursor(FL_CURSOR_DEFAULT);
-  mwtb->redraw();
-}}
+write_surfaces(ns-nsa);}
             xywh {0 0 30 20} divider
           }
           MenuItem {} {
@@ -227,7 +204,7 @@ mwtb->tmLink->window->show();}
           }
         }
         Submenu imgmenu {
-          label Image open
+          label Image
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -453,7 +430,7 @@ mwtb->redraw();}
             xywh {0 0 30 20} type Toggle
           }
           Submenu {} {
-            label Sync open
+            label Sync
             xywh {0 0 70 20}
           } {
             MenuItem {} {
@@ -750,12 +727,12 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
           label Highlight open
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -957,38 +934,38 @@ mwtb->redraw();}
         }
         Fl_Group surfgrp {
           label Surface open
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
-            label visible
+            label Visible
             callback {vector<int>lst;
 surfselected(lst);
 mwtb->surfVis(lst,static_cast<bool>(o->value()));}
-            xywh {140 395 85 30} value 1 selection_color 2 align 16
+            xywh {140 395 55 30} value 1 selection_color 2 labelsize 12
           }
           Fl_Light_Button surfoutlinebut {
             label Outline
             callback {vector<int>lst;
 surfselected(lst);
 mwtb->surfOutline(lst,static_cast<bool>(o->value()));}
-            xywh {140 315 85 30}
+            xywh {140 315 90 30}
           }
           Fl_Light_Button surffillbut {
             label Filled
             callback {vector<int> lst;
 surfselected(lst);
 mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
-            xywh {235 315 85 30} value 1
+            xywh {240 315 90 30} value 1
           }
           Fl_Button {} {
             label {Outline colour}
             callback {pick_surf_color( SurfEle, "Outline Colour" );}
-            xywh {140 355 85 30} labelsize 12
+            xywh {140 355 90 30} labelsize 12
           }
           Fl_Button {} {
             label {Fill colour}
             callback {pick_surf_color( Surface, "Surface colour" );}
-            xywh {235 355 85 30} labelsize 12
+            xywh {240 355 90 30} labelsize 12
           }
           Fl_Check_Browser surflist {
             label {apply to}
@@ -1032,8 +1009,8 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
             }
           }
           Fl_Menu_Button {} {
-            label delete open
-            xywh {235 395 85 30} box GTK_UP_BOX color 88
+            label Delete open
+            xywh {265 395 65 30} box GTK_UP_BOX color 88 labelsize 12 align 20
           } {
             MenuItem {} {
               label really
@@ -1055,6 +1032,30 @@ if( !mwtb->model->number(SurfEle) )
   elehi->deactivate();}
               xywh {0 0 30 20}
             }
+          }
+          Fl_Button {} {
+            label Rename
+            callback {string oldlabel;
+int sel;
+
+for( int i=0; i<surflist->nitems(); i++ )
+  if(surflist->checked(i+1)) {
+    oldlabel = mwtb->model->surface(i)->label();
+    sel = i;
+    break;
+  }
+
+const char* surfname=fl_input("Enter surface name",oldlabel.c_str());
+if( !surfname ) return;
+
+mwtb->model->surface(sel)->label(surfname);
+  
+refresh_surflist(0);
+
+surflist->set_checked(sel+1);
+
+write_surfaces(0);}
+            xywh {200 395 60 30} labelsize 12
           }
         }
         Fl_Group vectorgrp {
@@ -1656,7 +1657,7 @@ for( int i=0; i<reglist->nitems(); i++ )
    }
 delete[] sel;} {}
   }
-  Function {update_surfGUI( int s )} {open return_type void
+  Function {update_surfGUI( int s )} {return_type void
   } {
     code {if( !mwtb->model->numSurf() ) return;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
@@ -2188,11 +2189,10 @@ for( int i=1; i<=surflist->nitems(); i++ )
   if( surflist->checked(i) )
     lst.push_back(i-1);} {}
   }
-  Function {refresh_surflist()} {open
-  } {
+  Function {refresh_surflist(int state=1)} {} {
     code {surflist->clear(); 
 for( int s=0; s<mwtb->model->numSurf(); s++ ) {
-    surflist->add(mwtb->model->surface(s)->label().c_str(),1);
+    surflist->add(mwtb->model->surface(s)->label().c_str(),state);
   }
   elehi->maximum(mwtb->model->number(SurfEle)-1);
   mwtb->redraw();
@@ -2200,6 +2200,35 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   }
   Function {dispVertVal(double d)} {} {
     code {vertvalout->value(d);} {}
+  }
+  Function {write_surfaces(int start )} {open
+  } {
+    code {char *fn;
+string surffn=mwtb->model->file();
+surffn += "surf";
+if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str() )){
+  fl_cursor(FL_CURSOR_WAIT );
+  ofstream outf(fn);
+  for( int i=start; i<mwtb->model->numSurf(); i++ ) {
+    SurfaceElement *e;
+    outf << mwtb->model->surface(i)->num() << "  ";
+    outf << mwtb->model->surface(i)->label() << endl;
+    for( int j=0; j<mwtb->model->surface(i)->num();j++ ) {
+      e = mwtb->model->element(i,j);
+      const int* n=e->obj();
+      if( e->ptsPerObj()==3 ) 
+        outf << "Tr";
+      else
+        outf << "Qd";
+      for( int k=0; k< e->ptsPerObj(); k++ )
+        outf << " " << n[k];
+      outf << endl;
+    }
+  }
+  fl_cursor(FL_CURSOR_DEFAULT);
+  mwtb->redraw();
+}} {selected
+    }
   }
 } 
 

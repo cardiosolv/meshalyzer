@@ -612,6 +612,8 @@ int Model::add_surface_from_elem( const char *fn )
  *
  *  We do this by adding the faces of all elements into a tree and removing a face if
  *  it appears twice
+ *
+ *  \return number of new surfaces
  */
 int Model::add_region_surfaces()
 {
