@@ -731,8 +731,8 @@ op->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          label Highlight open selected
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -934,7 +934,7 @@ mwtb->redraw();}
         }
         Fl_Group surfgrp {
           label Surface open
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label Visible
@@ -2227,8 +2227,7 @@ if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str()
   }
   fl_cursor(FL_CURSOR_DEFAULT);
   mwtb->redraw();
-}} {selected
-    }
+}} {}
   }
 } 
 

@@ -48,7 +48,10 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
   PNGwrite* pngimg = new PNGwrite( out );
   pngimg->size( w, h );
   pngimg->depth( 8*sizeof(GLubyte) );
-  pngimg->colour_type( PNG_COLOR_TYPE_RGB_ALPHA );
+  if( tbwm->transBgd() )
+    pngimg->colour_type( PNG_COLOR_TYPE_RGB_ALPHA );
+  else
+    pngimg->colour_type( PNG_COLOR_TYPE_RGB );
 
 #ifndef ONSCREEN_DUMP
   if( oldw==-1 || oldw!=w || oldh!=h ) {
@@ -106,8 +109,13 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 #endif
 
   glReadBuffer(GL_BACK);
-  glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid *)buffer);
-  pngimg->write( buffer );
+  if( tbwm->transBgd() )
+    glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid *)buffer);
+  else
+    glReadPixels(0,0,w,h,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid *)buffer);
+  int align;
+  glGetIntegerv(GL_PACK_ALIGNMENT, &align);
+  pngimg->write( buffer, align );
   delete pngimg;
 
 #ifdef ONSCREEN_DUMP

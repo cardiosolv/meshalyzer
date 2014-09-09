@@ -138,6 +138,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     TimeLink *tmLink;
     void      signal_links( int );
     void      transBgd( bool a ){ bgd_trans=a;valid(0); }
+    bool      transBgd( ){ return bgd_trans; }
     void      norot(bool a){_norot=a;}
     void      CheckMessageQueue();
     int       ProcessLinkMessage(const LinkMessage::CommandMsg& msg);

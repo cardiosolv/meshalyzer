@@ -24,7 +24,7 @@ class PNGwrite
   public:
     PNGwrite( FILE * );
     ~PNGwrite( void );
-    int write( void * );
+    int write( void *, int );
     inline void size( int w, int h){ width=w;height=h; }
     inline void depth( int d ){ colour_depth = d; }
     inline void colour_type( int c ){ ctype=c; }

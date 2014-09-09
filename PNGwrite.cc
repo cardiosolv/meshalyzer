@@ -27,7 +27,13 @@ PNGwrite :: PNGwrite( FILE *out )
 PNGwrite :: ~PNGwrite( void )
 {}
 
-int PNGwrite :: write( void *data )
+
+/** write the frame buffer to a PNG file
+ *
+ * \param data  the buffer contents
+ * \param align data alignment for each row
+ */
+int PNGwrite :: write( void *data, int align )
 {
   setjmp(png_jmpbuf(png_ptr));
   png_set_IHDR( png_ptr, info_ptr, width, height, colour_depth, ctype,
@@ -49,9 +55,12 @@ int PNGwrite :: write( void *data )
     compsperpixel = 3;
   else if ( ctype == PNG_COLOR_TYPE_RGB_ALPHA )
     compsperpixel = 4;
-  //flip vertically
-  for ( png_uint_32 k = 0; k < height; k++)
-    row_pointers[height-1-k] = (png_byte *)data + compsperpixel*k*width*colour_depth/8;
+  //flip vertically and make sure rows are aligned
+  int pixel_data = compsperpixel*width*colour_depth/8;
+  int pad = (align - (pixel_data%align))%align; 
+  for ( png_uint_32 k = 0; k < height; k++) {
+    row_pointers[height-1-k] = (png_byte *)data + (pixel_data+pad)*k;
+  }
   png_write_image(png_ptr, row_pointers);
   png_write_end(png_ptr, info_ptr);
   png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
