@@ -491,11 +491,7 @@ vector data grid could only be read if it had 1 or 100 frames of data.
 \section{Invocation}
 The program is run by typing
 \begin{verbatim}
-meshalyzer [pts [vpts] [dat|tdat|igb] [mshz] [tri ...] [pts_t] [dynpt]]
-\end{verbatim}
-or
-\begin{verbatim}
-meshalyzer cg_in
+meshalyzer [otps] [pts [vpts] [dat|tdat|igb] [mshz] [tri ...] [pts_t] [dynpt]]
 \end{verbatim}
 where the extensions of the required file types are given.
 If no file is specified, a file input box will pop up.
@@ -508,15 +504,21 @@ This only applies to the vertex file.
 \subsection{Options}
 
 \begin{description}
-    \item[--help$|$-h] Display the usage message
-    \item[--iconifycontrols$|$-i]  iconify the control window on startup
-    \item[--groupID=GID$|$-gGID] Be part of this semaphore group for \meshal linking. See \S\ref{sec:link}.
-    \item[--noelem $|$ -n] Do not read in the element file. This will speed up reading in the model at the expense of
+    \item[--help] Display the usage message
+    \item[--iconifycontrols]  iconify the control window on startup
+    \item[--groupID=GID] Be part of this semaphore group for \meshal linking. See \S\ref{sec:link}.
+    \item[--noelem] Do not read in the element file. This will speed up reading in the model at the expense of
         not being able to put data on the cutting planes.
-    \item[--thrdRdr$|$-t] Force threaded data reading. Even if one has enough memory to read in all the data at
+    \item[--thrdRdr] Force threaded data reading. Even if one has enough memory to read in all the data at
         once, it is probably just as fast to read it in on demand. Using this option will reduce start up time
-        and stop \meshal from using all the RAM..
+        and stop \meshal from using all the RAM.
+    \item[--PNGfile] Output file name for PNG files or output directory name for PNG sequences
+    \item[--frame] first frame for PNG output (-1=do not set)
+    \item[--numframe] number of frames to output to PNG images (default=1)
 \end{description}
+
+Note that only enough characters to uniquely identify the option need be used.
+See the Offscreen Rendering section\ref{sec:offscreen} for a complete description of how to use PNG related options.
 
 \subsection{Environment variables}
 \meshal reads the following environment variables:
@@ -983,5 +985,46 @@ SIGUSR2 & go backwards by the frame increment \\ \hline
 
 If you wish to have different masters controlling different groups of slaves, you need
 to specify a groupID on the command line for each group. The default is ``0''. 
+
+\section{Offscreen Rendering}
+\label{sec:offscreen}
+Output PNG files may be written noninteractively. To do so, the \texttt{PNGfile} option must be specified. 
+If one output frame is specified by setting \texttt{numframes} to 1, then \texttt{PNGfile}
+is the output file name with ``.png'' appended
+automatically if it is not specified. For more than 1 frame, \texttt{PNGfile} is a directory name, which will be created if
+necessary, and the output files will have the names \texttt{frameXXXXX.png} where XXXXX is the frame number padded on the
+left with zeros, eg., frame 8 would be ``frame00008.png''. Directory names will have ``.png'' stripped if detected on
+the end. 
+By default, the initial frame is not set, i.e., it will be that of a state file if one is read, or 0 if one is not
+specified . 
+
+The simplest way to use offscreen rendering is to set up meshalyzer in a suitable state and then save it. The model,
+data and state files are specified as normal on the command line and the additional PNG related options added.
+A simple example might be something like
+\begin{verbatim}
+meshalyzer --PNGfile=movie --numfr=10 --frame=5 myopurk.
+        Vm.igb state.mshz
+\end{verbatim}
+which would produce 10 PNGs in the movie directory by putting the data in Vm.igb on the myopurk model and use the
+setting in state.mshz. 
+
+There are two version of \meshal for offscreen rendering. There is no differences in running the code but it is a
+question of environment and speed.
+
+\subsection{OSMesa}
+OSmesa (http://www.mesa3d.org/osmesa.html) is an offscreen rendering library which performs all of its operations in
+software. This has the advantage that it can be used even if a window server is not running. This library must be
+available on the system. However, since it does not take advantage of the graphics hardware, rendering is considerably
+slower. This executable must be explicitly compiled by
+\begin{verbatim}
+make mesalyzer
+\end{verbatim}
+with the resultant executable called \texttt{mesalyzer}. It cannot be used to display a window on the screen.
+
+\subsection{GLUT rendering}
+The GLUT library (http://www.opengl.org/resources/libraries/glut/) can be used to create an OpenGL context which then
+allows offscreen rendering to use the graphics card. This is compiled into the default version of \meshal. It renders
+very quickly but only if a windowing system is available. A small window with no content will be created that is a
+byproduct of establishing a connection with the windowing system.
 
 \end{document}

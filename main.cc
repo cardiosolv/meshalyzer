@@ -1,4 +1,4 @@
-#include <GLee.h>
+//#include <GLee.h>
 #include "trimesh.h"
 #include "isosurf.h"
 #include <string>
@@ -10,13 +10,21 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
 #ifdef USE_HDF5
 #include <hdf5.h>
 #include <ch5/ch5.h>
 #endif
 
+#ifndef OSMESA
+#include <GL/glut.h>
+#endif
+
 static Controls *ctrl_ptr;
 static Meshwin  *win_ptr;
+
+void write_frame( string fname, int w, int h, TBmeshWin *tbwm );
 
 sem_t *meshProcSem;               // global semaphore for temporal linking
 sem_t *linkingProcSem;            // global semaphore for process linking
@@ -86,6 +94,64 @@ read_version_info( Fl_Text_Display *txt )
     txt->insert( line.c_str() );
     txt->insert( "\n" );
   }
+}
+
+
+/** output a sequence of PNG images offscreen
+ *
+ * \param filename file or directory (numf>1) name
+ * \param f0       first frame number, -1->do not use it
+ * \param numf     number of frames
+ * \param tbwm     rendering window
+ * \param size     image width/height
+*/
+void
+os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size )
+{
+#ifndef OSMESA
+  int   argc = 1;
+  char *argv = strdup("-iconic");
+  glutInit(&argc, &argv);
+  glutInitWindowSize(1,1);
+  glutCreateWindow("Take it eaz");
+#endif
+
+  tbwm->resize(0,0,size,size);
+
+  // determine first and last frame numbers
+  if( f0<0 )
+    f0 = tbwm->time();
+  int f1 = f0 + numf - 1;
+
+  // output the sequence into a directory
+  if( filename.length()>4 && (filename.substr(filename.length()-4)==".png") )
+    filename.erase(filename.length()-4);
+  if( numf>1 ) {
+    if( mkdir( filename.c_str(), 0744 )==-1 && errno!=EEXIST ) {
+      cerr << "Exiting: Cannot create directory "<<filename<<endl;
+      exit(1);
+    }
+  } else {
+    filename += ".png";
+  }
+  
+  tbwm->transBgd(false);
+
+  while( f0<=f1 && tbwm->set_time( f0 ) ){
+    string fname = filename;
+    if( numf>1 ) {
+      char strnum[8];
+      sprintf( strnum, "/frame%05d.png", f0 );
+      fname += strnum;
+    }
+    write_frame( fname.c_str(), size, size, tbwm );
+    f0++;
+  }
+
+  if( f0<=f1 ) 
+    cerr << "Warning: "<< f1-f0+1 << " frames of " << numf << " requested not written" << endl; 
+
+  exit(0);
 }
 
 
@@ -203,7 +269,9 @@ print_usage(void)
   cout << "--help|-h             print this message" << endl;
   cout << "--thrdRdr|-t          force threaded data reading" << endl;
   cout << "--groupID=GID|-gGID   meshalyzer group" << endl;
-  cout << "--PNG=file|-pfile     output as PNG to file and exit" << endl;
+  cout << "--PNGfile=file        output PNGs and exit" << endl;
+  cout << "--frame=file          first frame for PNG dump (-1=do not set)" << endl;
+  cout << "--numframe=num        number of frames to output (default=1)" << endl;
   exit(0);
 }
 
@@ -213,7 +281,10 @@ static struct option longopts[] = {
   { "no_elem"        , no_argument, NULL, 'n' },
   { "help"           , no_argument, NULL, 'h' },
   { "gpoupID"        , 1          , NULL, 'g' },
-  { "PNGdump"        , 1          , NULL, 'p' },
+  { "PNGfile"        , 1          , NULL, 'P' },
+  { "frame"          , 1          , NULL, 'f' },
+  { "numframe"       , 1          , NULL, 'N' },
+  { "size"           , 1          , NULL, 's' },
   { "thrdRdr"        , no_argument, NULL, 't' },
   { NULL             , 0          , NULL, 0   }
 };
@@ -232,7 +303,10 @@ main( int argc, char *argv[] )
   bool no_elems       = false;
   bool threadedReader = false;
   char *PNGfile       = NULL;
+  int   pngsize        = 512;
   const char *grpID   = "0";
+  int frame0   = -1,
+      numframe =  1;
 
   int ch;
   while( (ch=getopt_long(argc, argv, "inhg:", longopts, NULL)) != -1 )
@@ -249,16 +323,28 @@ main( int argc, char *argv[] )
 		case 'h':
 			print_usage();
 			break;
-        case 'p':
+        case 'P':
             PNGfile = strdup(optarg);
-            cerr << "Womp womp wommp : not working yet! " << endl;
             break;
+		case 'N':
+			numframe = atoi(optarg);
+			break;
+		case 'f':
+			frame0 = atoi(optarg);
+			break;
         case 't':
             threadedReader = true;
             break;
+        case 's':
+            pngsize = atoi(optarg);
+			break;
+        case '?':
+            cerr << "Unrecognized option --- bailing" << endl;
+            exit(1);
 		default:
 			break;
 	}
+  
 
   Controls control;
   ctrl_ptr = &control;
@@ -302,8 +388,8 @@ main( int argc, char *argv[] )
   if( !stat( defstate.c_str(), &buf) )
     control.restore_state( defstate.c_str() );
 
-  //if( !PNGfile )
-  win.winny->show();
+  if( !PNGfile )
+    win.winny->show();
   win.trackballwin->forceThreadData( threadedReader );
 
   // deal with command line files specified
@@ -385,15 +471,9 @@ main( int argc, char *argv[] )
     cerr << "Message Queue inter-process communication not possible"
 	 << endl;
 
-  void write_frame( string fname, int w, int h, TBmeshWin *tbwm );
-  if( PNGfile ) {
-    //Fl::wait();
-    GLeeInit();
-    GLeeForceLink("GL_EXT_framebuffer_object");
-    write_frame( PNGfile, 455, 455, win.trackballwin );
-    //write_frame( PNGfile, 455, 455, win.trackballwin );
-    exit(0);
-  }
+  // just output images, no interaction
+  if( PNGfile ) 
+    os_png_seq( PNGfile, frame0, numframe, win.trackballwin, pngsize );
 
   Fl::run();
 

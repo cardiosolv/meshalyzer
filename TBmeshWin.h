@@ -103,7 +103,8 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void revdraworder( bool a ){ revDrawOrder=a; redraw(); }
     void animate_delay(float a){ frame_delay = a; }
     void animate_skip( int a, void * );
-    void set_time(int a);
+    bool set_time(int a);
+    int  time(){return tm;}
     void autocolour( bool a ){autocol = a;}
     void lights( bool a ){lightson = a;redraw();}
     friend void animate_cb( void *v );
