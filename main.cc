@@ -272,6 +272,7 @@ print_usage(void)
   cout << "--PNGfile=file        output PNGs and exit" << endl;
   cout << "--frame=file          first frame for PNG dump (-1=do not set)" << endl;
   cout << "--numframe=num        number of frames to output (default=1)" << endl;
+  cout << "--size=num            output size of PNG in pixels (default=512)" << endl;
   exit(0);
 }
 
