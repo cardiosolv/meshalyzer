@@ -490,8 +490,8 @@ s->window->show();}
             MenuItem transBgd {
               label {Transparent Bgd}
               user_data transBgd
-              callback {mwtb->transBgd( transBgd->value() );}
-              xywh {0 0 30 20} type Toggle value 1
+              callback {mwtb->transBgd( transBgd->value() );} selected
+              xywh {0 0 30 20} type Toggle
             }
           }
           MenuItem {} {
@@ -731,7 +731,7 @@ op->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open selected
+          label Highlight open
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1746,6 +1746,8 @@ mwtb->dataopac->save(mshzf);
 
 SAVE_WIDGET(mshzf,read_recalibrate);
 SAVE_WIDGET(mshzf,revdraworder);
+SAVE_WIDGET(mshzf,norot);
+SAVE_WIDGET(mshzf,transBgd);
 SAVE_WIDGET(mshzf,vertdisp);
 SAVE_WIDGET(mshzf,cabledisp);
 SAVE_WIDGET(mshzf,cnnxdisp);
@@ -2046,6 +2048,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   } 
   TEST_MENUVAR( read_recalibrate, var, val, mainbar )  
   TEST_MENUVAR( revdraworder, var, val, mainbar )  
+  TEST_MENUVAR( norot, var, val, mainbar )  
+  TEST_MENUVAR( transBgd, var, val, mainbar )  
   TEST_MENUVAR( vertdisp, var, val, datadest )
   TEST_MENUVAR( cabledisp, var, val, datadest )
   TEST_MENUVAR( cnnxdisp, var, val, datadest )

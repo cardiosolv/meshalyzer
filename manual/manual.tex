@@ -503,6 +503,7 @@ This only applies to the vertex file.
 
 \subsection{Options}
 
+\label{sec:options}
 \begin{description}
     \item[--help] Display the usage message
     \item[--iconifycontrols]  iconify the control window on startup
@@ -989,18 +990,18 @@ to specify a groupID on the command line for each group. The default is ``0''.
 
 \section{Offscreen Rendering}
 \label{sec:offscreen}
-Output PNG files may be written noninteractively. To do so, the \texttt{PNGfile} option must be specified. 
+Output PNG files may be written noninteractively. To do so, the \texttt{PNGfile} option (\S\ref{sec:options}) must be specified. 
 If one output frame is specified by setting \texttt{numframes} to 1, then \texttt{PNGfile}
 is the output file name with ``.png'' appended
 automatically if it is not specified. For more than 1 frame, \texttt{PNGfile} is a directory name, which will be created if
 necessary, and the output files will have the names \texttt{frameXXXXX.png} where XXXXX is the frame number padded on the
 left with zeros, eg., frame 8 would be ``frame00008.png''. Directory names will have ``.png'' stripped if detected on
 the end. 
-By default, the initial frame is not set, i.e., it will be that of a state file if one is read, or 0 if one is not
-specified . 
+By default, the initial frame is not set, i.e., it will be that of a state file if one is read, or 0 if a state file is not
+specified. 
 
 The simplest way to use offscreen rendering is to set up meshalyzer in a suitable state and then save it. The model,
-data and state files are specified as normal on the command line and the additional PNG related options added.
+data and state files are then specified as normal on the command line and the additional PNG related options added.
 A simple example might be something like
 \begin{verbatim}
 meshalyzer --PNGfile=movie --numfr=10 --frame=5 myopurk.
@@ -1009,11 +1010,11 @@ meshalyzer --PNGfile=movie --numfr=10 --frame=5 myopurk.
 which would produce 10 PNGs in the movie directory by putting the data in Vm.igb on the myopurk model and use the
 setting in state.mshz. 
 
-There are two version of \meshal for offscreen rendering. There is no differences in running the code but it is a
+There are two version of \meshal for offscreen rendering. There are no differences in running the code but it is a
 question of environment and speed.
 
 \subsection{OSMesa}
-OSmesa (http://www.mesa3d.org/osmesa.html) is an offscreen rendering library which performs all of its operations in
+OSMesa (http://www.mesa3d.org/osmesa.html) is an offscreen rendering library which performs all of its operations in
 software. This has the advantage that it can be used even if a window server is not running. This library must be
 available on the system. However, since it does not take advantage of the graphics hardware, rendering is considerably
 slower. This executable must be explicitly compiled by

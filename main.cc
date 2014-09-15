@@ -113,20 +113,21 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size )
   char *argv = strdup("-iconic");
   glutInit(&argc, &argv);
   glutInitWindowSize(1,1);
-  glutCreateWindow("Take it eaz");
+  glutCreateWindow("Take it eaze");
 #endif
-
-  tbwm->resize(0,0,size,size);
 
   // determine first and last frame numbers
   if( f0<0 )
     f0 = tbwm->time();
   int f1 = f0 + numf - 1;
 
-  // output the sequence into a directory
+  // strip ".png" from file name if present
   if( filename.length()>4 && (filename.substr(filename.length()-4)==".png") )
     filename.erase(filename.length()-4);
+  
+  // output sequence into a directory and frame to a file
   if( numf>1 ) {
+    tbwm->transBgd(false);
     if( mkdir( filename.c_str(), 0744 )==-1 && errno!=EEXIST ) {
       cerr << "Exiting: Cannot create directory "<<filename<<endl;
       exit(1);
@@ -135,7 +136,7 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size )
     filename += ".png";
   }
   
-  tbwm->transBgd(false);
+  tbwm->resize(0,0,size,size);
 
   while( f0<=f1 && tbwm->set_time( f0 ) ){
     string fname = filename;
@@ -148,6 +149,7 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size )
     f0++;
   }
 
+  // check if all frames output
   if( f0<=f1 ) 
     cerr << "Warning: "<< f1-f0+1 << " frames of " << numf << " requested not written" << endl; 
 

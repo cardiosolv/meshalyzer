@@ -39,22 +39,26 @@ void translucency( bool b );
 int intcomp( const void *a, const void *b );
 
 
-/* dump the frame buffer into a file */
+/* dump the frame buffer into a file 
+ *
+ * \param fname
+ * \param w
+ * \param h
+ * \param tbwm
+ */
 void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 {
 #ifdef ONSCREEN_DUMP
   GLubyte* buffer = new GLubyte[4*w*h];
 #else
-
   static GLubyte*      buffer;
   static int oldw=-1, oldh;
 #ifdef OSMESA
   static OSMesaContext	ctx;
 #else
   static GLuint fb, color_rb, depth_rb, textureId;
-#endif
-
-#endif
+#endif //OSMESA
+#endif //ONSCREEN_DUMP
 
   FILE *out = fopen( fname.c_str(), "w" );
   PNGwrite* pngimg = new PNGwrite( out );
@@ -67,7 +71,7 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 
 #ifndef ONSCREEN_DUMP
  
-  if( oldw==-1 || oldw!=w || oldh!=h ) {
+  if( oldw==-1 || oldw!=w || oldh!=h ) {   // resize 
     
     if( oldw != -1 ) {  // not first time, destroy old buffers/contexts
 #ifdef OSMESA
@@ -77,7 +81,7 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
       glDeleteRenderbuffersEXT(1, &color_rb);
       glDeleteRenderbuffersEXT(1, &depth_rb);
       glDeleteFramebuffersEXT(1, &fb);
-#endif
+#endif // OSMESA
     }
 	
     oldw = w;
@@ -91,8 +95,8 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
       cout << "Failed OSMesaMakeCurrent" << endl;
       exit(1);
     }
-#else
-
+#else 
+    // create new frame buffer object
     buffer = new GLubyte[w*h*4];
 
     glGenFramebuffersEXT(1, &fb);
@@ -136,7 +140,7 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 
   tbwm->invalidate();
   tbwm->draw();
-#endif  //ONSCREEN_DUMP
+#endif // ONSCREEN_DUMP
 
   glReadBuffer(GL_BACK);
   if( tbwm->transBgd() )
@@ -154,11 +158,10 @@ void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
 
 #ifdef OSMESA
 #else
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); 
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // restore the display
 #endif //OSMESA
 
 #endif //ONSCREEN_DUMP
-
 }
 
 
@@ -244,7 +247,7 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     disp(asSurface),data(NULL),facetshading(false),numframes(0),
     headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] ),
     iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL),
-    bgd_trans(true),_norot(false),forcedThreaded(false)
+    bgd_trans(false),_norot(false),forcedThreaded(false)
 {
   model = new Model();
   memset( hilight, 0, sizeof(int)*maxobject );
