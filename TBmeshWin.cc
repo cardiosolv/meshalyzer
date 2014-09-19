@@ -1,4 +1,3 @@
-#include <GLee.h>
 #include "trimesh.h"
 #include <signal.h>
 #include <FL/Fl_File_Chooser.H>
@@ -10,20 +9,14 @@
 #  include <GL/glext.h>
 #endif
 #include "gl2ps.h"
-#include "PNGwrite.h"
 #ifdef USE_HDF5
 #include <ch5/ch5.h>
 #endif
-
-//#define OSMESA
-#ifdef OSMESA
-#include <GL/osmesa.h>
-#endif 
+#include "Frame.h"
 
 #define HITBUFSIZE   10000
 #define OPAQUE_LIMIT 0.95       //!< consider opaque if alpha level above this
 #define MAX_SURFELE_REALTIME 400000 //!< max \#ele's to draw while moving
-#define COUT_ERROR(A) if(gle==A)cout<<#A<<endl;
 
 unsigned int TBmeshWin::MAX_MESSAGES_READ = 100;
 
@@ -37,132 +30,6 @@ const GLenum CLIP_PLANE[] =
 
 void translucency( bool b );
 int intcomp( const void *a, const void *b );
-
-
-/* dump the frame buffer into a file 
- *
- * \param fname
- * \param w
- * \param h
- * \param tbwm
- */
-void write_frame( string fname, int w, int h, TBmeshWin *tbwm )
-{
-#ifdef ONSCREEN_DUMP
-  GLubyte* buffer = new GLubyte[4*w*h];
-#else
-  static GLubyte*      buffer;
-  static int oldw=-1, oldh;
-#ifdef OSMESA
-  static OSMesaContext	ctx;
-#else
-  static GLuint fb, color_rb, depth_rb, textureId;
-#endif //OSMESA
-#endif //ONSCREEN_DUMP
-
-  FILE *out = fopen( fname.c_str(), "w" );
-  PNGwrite* pngimg = new PNGwrite( out );
-  pngimg->size( w, h );
-  pngimg->depth( 8*sizeof(GLubyte) );
-  if( tbwm->transBgd() )
-    pngimg->colour_type( PNG_COLOR_TYPE_RGB_ALPHA );
-  else
-    pngimg->colour_type( PNG_COLOR_TYPE_RGB );
-
-#ifndef ONSCREEN_DUMP
- 
-  if( oldw==-1 || oldw!=w || oldh!=h ) {   // resize 
-    
-    if( oldw != -1 ) {  // not first time, destroy old buffers/contexts
-#ifdef OSMESA
-      OSMesaDestroyContext( ctx );
-#else
-      delete[] buffer;
-      glDeleteRenderbuffersEXT(1, &color_rb);
-      glDeleteRenderbuffersEXT(1, &depth_rb);
-      glDeleteFramebuffersEXT(1, &fb);
-#endif // OSMESA
-    }
-	
-    oldw = w;
-    oldh = h;
-
-#ifdef OSMESA
-    ctx = OSMesaCreateContext(OSMESA_RGBA, NULL);
-    buffer = new GLubyte[w*h*4];
-
-    if (!OSMesaMakeCurrent(ctx, buffer, GL_UNSIGNED_BYTE, w, h)) {
-      cout << "Failed OSMesaMakeCurrent" << endl;
-      exit(1);
-    }
-#else 
-    // create new frame buffer object
-    buffer = new GLubyte[w*h*4];
-
-    glGenFramebuffersEXT(1, &fb);
-
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-    glGenRenderbuffersEXT(1, &color_rb);
-    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, color_rb);
-    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA8, w, h );
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, 
-            GL_RENDERBUFFER_EXT, color_rb);
-
-    glGenRenderbuffersEXT(1, &depth_rb);
-    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb);
-    glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, w, h );
-    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT,
-            GL_RENDERBUFFER_EXT, depth_rb);
-
-    GLenum gle=glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    COUT_ERROR(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT);
-    COUT_ERROR(GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT);
-    COUT_ERROR(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT);
-    COUT_ERROR(GL_FRAMEBUFFER_UNSUPPORTED_EXT);
-    COUT_ERROR(GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT);
-    COUT_ERROR(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER_EXT);
-    COUT_ERROR(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER_EXT);
-    COUT_ERROR(GL_FRAMEBUFFER_UNDEFINED);
-    COUT_ERROR(GL_FRAMEBUFFER_UNSUPPORTED);
-    COUT_ERROR(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE);
-
-    if( gle!=GL_FRAMEBUFFER_COMPLETE ) {
-      cout << "aborting:" << gle << endl;
-      return;
-    }
-#endif //OSMESA
-  }
-
-#ifdef OSMESA
-#else
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fb);
-#endif //OSMESA
-
-  tbwm->invalidate();
-  tbwm->draw();
-#endif // ONSCREEN_DUMP
-
-  glReadBuffer(GL_BACK);
-  if( tbwm->transBgd() )
-    glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,(GLvoid *)buffer);
-  else
-    glReadPixels(0,0,w,h,GL_RGB,GL_UNSIGNED_BYTE,(GLvoid *)buffer);
-  int align;
-  glGetIntegerv(GL_PACK_ALIGNMENT, &align);
-  pngimg->write( buffer, align );
-  delete pngimg;
-
-#ifdef ONSCREEN_DUMP
-  delete[] buffer;
-#else
-
-#ifdef OSMESA
-#else
-  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); // restore the display
-#endif //OSMESA
-
-#endif //ONSCREEN_DUMP
-}
 
 
 int intcomp( const void *a, const void *b )
@@ -1161,6 +1028,7 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
   int update_period = 5;	// number of frames after which to update progress
   int last_update=tm-update_period-10;
   int frameskip=int(contwin->frameskip->value());
+  Frame frame( this );
   for ( ; tm<=stop; tm+=frameskip ) {
 
     if( model->pt.num_tm() ) model->pt.time(tm);//dynamic points
@@ -1185,7 +1053,7 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
     redraw();
     Fl::check();
     Fl::flush();
-    write_frame( foutname, w(), h(), this );
+    frame.dump( w(), h(), foutname );
   }
   if ( sequence ) 
     seqwidget->movieprog->label("100%");
@@ -1652,6 +1520,7 @@ void TBmeshWin::record_events( char* fn )
   unsigned long old_framenum=framenum;
   int           num=0;
 
+  Frame frame( this );
   while ( recording ) {
     Fl::wait();						 // process events one at a time
     if ( old_framenum != framenum ) { // see if the draw routine has been called
@@ -1662,7 +1531,7 @@ void TBmeshWin::record_events( char* fn )
       char fnum[32];
       sprintf( fnum, "%05d", num++ );
       fname = fname + fnum + ".png";
-      write_frame( fname, w(), h(), this );
+      frame.dump( w(), h(), fname );
     }
   }
   ostringstream msg;

@@ -12,6 +12,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <errno.h>
+#include "Frame.h"
+#include <unistd.h>
 #ifdef USE_HDF5
 #include <hdf5.h>
 #include <ch5/ch5.h>
@@ -24,7 +26,6 @@
 static Controls *ctrl_ptr;
 static Meshwin  *win_ptr;
 
-void write_frame( string fname, int w, int h, TBmeshWin *tbwm );
 
 sem_t *meshProcSem;               // global semaphore for temporal linking
 sem_t *linkingProcSem;            // global semaphore for process linking
@@ -34,6 +35,7 @@ sem_t *linkingProcSem;            // global semaphore for process linking
         control.A##hi->maximum( win.trackballwin->model->number(B)-1 ); \
     else \
         control.A##hi->deactivate();
+
 
 /** animate in response to a signal received: SIGUSR1 for forward, 
  *  SIGUSR2 for backward
@@ -106,9 +108,10 @@ read_version_info( Fl_Text_Display *txt )
  * \param size     image width/height
 */
 void
-os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size )
+os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int nproc )
 {
 #ifndef OSMESA
+  // need to create an OpenGL context
   int   argc = 1;
   char *argv = strdup("-iconic");
   glutInit(&argc, &argv);
@@ -119,39 +122,67 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size )
   // determine first and last frame numbers
   if( f0<0 )
     f0 = tbwm->time();
-  int f1 = f0 + numf - 1;
+  int f1 = f0+numf-1;
 
   // strip ".png" from file name if present
   if( filename.length()>4 && (filename.substr(filename.length()-4)==".png") )
     filename.erase(filename.length()-4);
   
-  // output sequence into a directory and frame to a file
+  // output sequence into a directory which we may need to create
   if( numf>1 ) {
     tbwm->transBgd(false);
     if( mkdir( filename.c_str(), 0744 )==-1 && errno!=EEXIST ) {
       cerr << "Exiting: Cannot create directory "<<filename<<endl;
       exit(1);
     }
-  } else {
-    filename += ".png";
+    filename += "/frame"; // base name for images
   }
   
   tbwm->resize(0,0,size,size);
+  Frame frame( tbwm );
 
-  while( f0<=f1 && tbwm->set_time( f0 ) ){
-    string fname = filename;
-    if( numf>1 ) {
-      char strnum[8];
-      sprintf( strnum, "/frame%05d.png", f0 );
-      fname += strnum;
+  if( numf==1 ) {
+    frame.write( size, size, filename, f0 );
+  } else {
+#ifdef OSMESA
+    // create 2 semaphores needed for interprocess communication
+    stringstream nw_name("/nw_");
+    nw_name << getpid();
+    stringstream fini_name("/fini_");
+    fini_name << getpid();
+    sem_t *finished = sem_open( fini_name.str().c_str(), O_CREAT, S_IRWXU, 0 );
+    sem_t *nw_cnt   = sem_open( nw_name.str().c_str(), O_CREAT, S_IRWXU, 0 );
+
+    // fork since it is too difficult to copy tbwm with all of its dynamic allocations
+    for( int i=1; i<nproc;i++ ) {
+      if( !fork() ) { 
+        f0 += i;
+        break;
+      }
     }
-    write_frame( fname.c_str(), size, size, tbwm );
-    f0++;
-  }
+    
+    int nw = frame.write( size, size, filename, f0, f1, nproc );
+    for( int a=0; a<nw; a++ )
+      sem_post( nw_cnt );
+    sem_post( finished );
+    
+    // wait for everyone to finish and count the number of frames written
+    int nfin;
+    sem_getvalue( finished, &nfin );
+    if( nfin==nproc ) {
+      sem_getvalue( nw_cnt, &nw );
+      if( nw != numf )
+        cerr << "\nOnly " << nw << " of " << numf << " frames written\n" << endl;
+      sem_unlink(nw_name.str().c_str() );
+      sem_unlink(fini_name.str().c_str() );
+    }
 
-  // check if all frames output
-  if( f0<=f1 ) 
-    cerr << "Warning: "<< f1-f0+1 << " frames of " << numf << " requested not written" << endl; 
+#else
+    int nw = frame.write( size, size, filename, f0, f1 );
+    if( nw != numf ) 
+      cerr << "Only " << nw << " of " << numf << " frames written" << endl;
+#endif
+  }
 
   exit(0);
 }
@@ -275,6 +306,7 @@ print_usage(void)
   cout << "--frame=file          first frame for PNG dump (-1=do not set)" << endl;
   cout << "--numframe=num        number of frames to output (default=1)" << endl;
   cout << "--size=num            output size of PNG in pixels (default=512)" << endl;
+  cout << "--nproc=num           #parallel procs for PNG sequences" << endl;
   exit(0);
 }
 
@@ -283,12 +315,13 @@ static struct option longopts[] = {
   { "iconifycontrols", no_argument, NULL, 'i' },
   { "no_elem"        , no_argument, NULL, 'n' },
   { "help"           , no_argument, NULL, 'h' },
+  { "thrdRdr"        , no_argument, NULL, 't' },
   { "gpoupID"        , 1          , NULL, 'g' },
   { "PNGfile"        , 1          , NULL, 'P' },
   { "frame"          , 1          , NULL, 'f' },
   { "numframe"       , 1          , NULL, 'N' },
   { "size"           , 1          , NULL, 's' },
-  { "thrdRdr"        , no_argument, NULL, 't' },
+  { "nproc"          , 1          , NULL, 'p' },
   { NULL             , 0          , NULL, 0   }
 };
 
@@ -301,7 +334,6 @@ main( int argc, char *argv[] )
   H5Eset_auto1(NULL, NULL);// silence HDF errors
 #endif
 
-
   bool iconcontrols   = false;
   bool no_elems       = false;
   bool threadedReader = false;
@@ -310,6 +342,7 @@ main( int argc, char *argv[] )
   const char *grpID   = "0";
   int frame0   = -1,
       numframe =  1;
+  int nproc    =  1;
 
   int ch;
   while( (ch=getopt_long(argc, argv, "inhg:", longopts, NULL)) != -1 )
@@ -334,6 +367,9 @@ main( int argc, char *argv[] )
 			break;
 		case 'f':
 			frame0 = atoi(optarg);
+			break;
+		case 'p':
+			nproc = atoi(optarg);
 			break;
         case 't':
             threadedReader = true;
@@ -473,10 +509,11 @@ main( int argc, char *argv[] )
   if (linkingProcSem == SEM_FAILED)
     cerr << "Message Queue inter-process communication not possible"
 	 << endl;
+    
 
   // just output images, no interaction
   if( PNGfile ) 
-    os_png_seq( PNGfile, frame0, numframe, win.trackballwin, pngsize );
+    os_png_seq( PNGfile, frame0, numframe, win.trackballwin, pngsize, nproc );
 
   Fl::run();
 

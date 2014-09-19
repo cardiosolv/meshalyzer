@@ -34,7 +34,7 @@ OBJS = $(FLTK_SOURCES:.fl=.o)\
 	$(patsubst %.C,%.o,$(wildcard *.C))
 
 #the files in OS_files contain OSMESA dependent clauses
-OS_files= main.o TBmeshWin.o
+OS_files= main.o Frame.o
 OS_OBJS=$(filter-out $(OS_files),$(OBJS)) $(OS_files:.o=_os.o)
 
 all: meshalyzer
