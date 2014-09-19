@@ -325,11 +325,12 @@ private:
       for (int frame = 0; frame < frames; frame++) {
         vecpos.push_back(gztell(infile));
 
+        int lines = get_num(infile);
+
         // skip lines of frame
         if (frame >= 50)
-          std::cerr << frame << std::endl;
+          std::cerr << frame << " --- "  << lines << std::endl;
 
-        int lines = get_num(infile);
         for (int line = 0; line < lines; line++) {
           get_line(infile);
         }

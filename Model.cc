@@ -581,6 +581,10 @@ int Model::add_surface_from_elem( const char *fn )
   gzFileBuffer file2(in);
 
   gzgets(in,buff,bufsize);      //throw away first line
+  /*
+   * note that we flip the node order to get the proper normal 
+   * \todo Should not be this way!
+   */
   while( file2.gets(buff,bufsize) !=Z_NULL ) {
 	char etype[10],reg[10];
 	int  idat[4];

@@ -183,7 +183,7 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
       cerr << "Only " << nw << " of " << numf << " frames written" << endl;
 #endif
   }
-
+  // check if we wrote all the frames
   exit(0);
 }
 

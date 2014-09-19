@@ -54,17 +54,15 @@ fileType FileTypeFinder ( const char *fn )
     if( in == NULL ) 
       throw(1);
 
-    IGBheader* head = new IGBheader( in );
-    int res = head->read();
-
-    gzclose( in );
-
-    if ( res ) {
+    IGBheader* head;
+    try {
+      head = new IGBheader( in, true );
+    } catch(...) {
+      gzclose( in );
       return FTascii;
-    } else {
-      delete head;
-      return FTIGB;
     }
+
+    return FTIGB;
 
   } else if ( strstr( fn, ".dynpt" ) != NULL ) {
 
