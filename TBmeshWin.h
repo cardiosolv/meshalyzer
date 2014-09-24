@@ -148,6 +148,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      SendColourSyncMessage();
     int       read_dynamic_pts( const char *, Myslider * );
     bool      compat_tm( int t ){ return (t==1 || max_time()==0 || max_time()==t-1); }
+    int       max_time( GridType g=NoDataGrid );
     void      forceThreadData(bool a){forcedThreaded=a;}
     friend class Controls;
     friend class HDF5DataBrowser;
@@ -206,7 +207,6 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     bool       _norot;              //!< allow rotations
     float      _dt;                 //!< increment between time slices
     void       set_windows( Fl_Window*, const char * );
-    int       max_time( GridType g=NoDataGrid );
     bool      forcedThreaded;        // force threaded reading of data
     // constants
     static unsigned int MAX_MESSAGES_READ;

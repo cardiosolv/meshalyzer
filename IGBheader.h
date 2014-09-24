@@ -211,6 +211,7 @@ class IGBheader
     void  fileptr( gzFile f );
     void  fileptr( FILE* f );
     void* fileptr(void){ return file; }
+    void  close(void){if(gzipping)gzclose((gzFile)file);else fclose((FILE*)file);}
     void  swab( void *, int nd=-1 );
     inline double from_raw( double a ){ return a/v_facteur+v_zero; }
     inline double to_raw( double a ){ return (a-v_zero)*v_facteur; }

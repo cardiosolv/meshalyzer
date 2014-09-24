@@ -10,7 +10,6 @@
 \usepackage{amsthm}
 \usepackage{longtable}
 \usepackage{array}
-
 \usepackage{overcite}                                 % superscript notation of references
 
 \usepackage[pdftex]{graphicx}                  % Grafikpaket für Bilder laden
@@ -50,6 +49,20 @@ It is an ever changing and ongoing project that has been in development since 20
 Certain file schemes and names may bear a vague resemblance to those used by
 \emph{Cool Graphics}, a program developed by Jamey Eason, but it's only because he
 thought too loudly when he was beside me in the office.
+
+\subsection{System requirements}
+To compile the code, the following software components are needed. Most should be
+automatically installed or available via your local package mananger.
+\begin{description} \itemsep1pt \parskip0pt \parsep0pt
+  \item[C++ compiler] gcc will probably work best since it is the choice of development.
+  \item[FLTK 1.3] This is the widget set responsible for all the windows. It is recommended to 
+    download this from \texttt{www.fltk.org} and compile it yourself.
+  \item[GLUT] This is needed for offscreen rendering on a graphics card.
+  \item[OSMesa] Required for offscreen rendering in software.
+  \item[libpng] Needed for producing PNG format files.
+  \item[HDF5] This is optional software and not very well developed at this point.
+  \item[doxygen] This is only needed for developers wanting to browse the source.
+\end{description}
 
 \section{Input Files}
 
@@ -515,7 +528,7 @@ This only applies to the vertex file.
         and stop \meshal from using all the RAM.
     \item[--PNGfile] Output file name for PNG files or output directory name for PNG sequences
     \item[--frame] first frame for PNG output (-1=do not set)
-    \item[--numframe] number of frames to output to PNG images (default=1)
+    \item[--numframe] number of frames to output to PNG images (default=1,-1=all)
     \item[--size] width (and height) of PNG in pixels (default=512)
 \end{description}
 
@@ -611,6 +624,8 @@ If you are having trouble selecting a vertex, display points, turn off all unnec
 surfaces and regions, and click right on top of it.
 In the event of nearby vertices, the one closest to the viewer's eye (minimum z
 window coordinate) will be selected.
+Note that the value of the highlighted node can be changed by using the mouse wheel (ctrl and alt increase the 
+rate of change) or by holding mouse buttons and dragging (the particular button determines the rate of change).
 For each vertex, its associated scalar data value
 is displayed in the gold widget.
 You can choose to display the surface elements that the vertex is part of, or
@@ -1000,7 +1015,8 @@ the end.
 By default, the initial frame is not set, i.e., it will be that of a state file if one is read, or 0 if a state file is not
 specified. 
 
-The simplest way to use offscreen rendering is to set up meshalyzer in a suitable state and then save it. The model,
+The simplest way to use offscreen rendering is to interactively 
+set up meshalyzer in a suitable state and then save it. The model,
 data and state files are then specified as normal on the command line and the additional PNG related options added.
 A simple example might be something like
 \begin{verbatim}
@@ -1008,7 +1024,7 @@ meshalyzer --PNGfile=movie --numfr=10 --frame=5 myopurk.
         Vm.igb state.mshz
 \end{verbatim}
 which would produce 10 PNGs in the movie directory by putting the data in Vm.igb on the myopurk model and use the
-setting in state.mshz. 
+settings in state.mshz. 
 
 There are two version of \meshal for offscreen rendering. There are no differences in running the code but it is a
 question of environment and speed.
@@ -1022,6 +1038,14 @@ slower. This executable must be explicitly compiled by
 make mesalyzer
 \end{verbatim}
 with the resultant executable called \texttt{mesalyzer}. It cannot be used to display a window on the screen.
+The executable still expects an available Xserver but does not actually use it. If you are running on a headless system
+(or having display troubles), you can try running a virtual X server with the command \texttt{Xvfb}.
+Below is an example with a bash shell.
+\begin{verbatim}
+Xfvb :1 &
+export DISPLAY=:1
+mesalyzer ....
+\end{verbatim}
 
 \subsection{GLUT rendering}
 The GLUT library (http://www.opengl.org/resources/libraries/glut/) can be used to create an OpenGL context which then

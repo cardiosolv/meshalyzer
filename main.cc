@@ -122,6 +122,8 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
   // determine first and last frame numbers
   if( f0<0 )
     f0 = tbwm->time();
+  if( numf==-1 )
+    numf = tbwm->max_time()-f0+1;
   int f1 = f0+numf-1;
 
   // strip ".png" from file name if present

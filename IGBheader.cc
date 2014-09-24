@@ -5,6 +5,7 @@
 #include<iostream>
 #include "IGBheader.h"
 #include <assert.h>
+#include <math.h>
 
 using namespace std;
 
@@ -273,12 +274,21 @@ is_deprecated( char *s ) {
 }
 
 
+#define MAKE_CONSISTENT( D ) \
+  if( bool_dim_##D && bool_inc_##D && bool_##D ) \
+    if(  v_dim_##D != v_inc_##D * (v_##D-1) ) { \
+      fprintf( stderr, "Adjusting dim_%s to make dimensions consistent\n", #D ); \
+      v_dim_##D = v_inc_##D * (v_##D-1);\
+    }
+
+
 IGBheader::IGBheader( FILE *f, bool _read, bool quiet )
 {
   init();
   fileptr(f);
   if( _read ) 
-    read( quiet );
+    if( read( quiet ) )
+      throw 1;
 }
 
 
@@ -396,6 +406,11 @@ int IGBheader::write()
     return (0);
   }
 
+  MAKE_CONSISTENT( x );
+  MAKE_CONSISTENT( y );
+  MAKE_CONSISTENT( z );
+  MAKE_CONSISTENT( t );
+
   // we will now only allow writing of big or little endian */
   const char* systeme=(endian()==IGB_BIG_ENDIAN)?"big_endian":"little_endian";
 
@@ -456,7 +471,8 @@ int IGBheader::write()
     sprintf(&items[n_items][0], "dim_x:%g ", v_dim_x);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
-  } else if (bool_inc_x) {
+  } 
+  if (bool_inc_x) {
     sprintf(&items[n_items][0], "dim_x:%g ", v_inc_x);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
@@ -465,7 +481,8 @@ int IGBheader::write()
     sprintf(&items[n_items][0], "dim_y:%g ", v_dim_y);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
-  } else if (bool_inc_y) {
+  } 
+  if (bool_inc_y) {
     sprintf(&items[n_items][0], "dim_y:%g ", v_inc_y);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
@@ -474,7 +491,8 @@ int IGBheader::write()
     sprintf(&items[n_items][0], "dim_z:%g ", v_dim_z);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
-  } else if (bool_inc_z) {
+  } 
+  if (bool_inc_z) {
     sprintf(&items[n_items][0], "dim_z:%g ", v_inc_z);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
@@ -483,7 +501,8 @@ int IGBheader::write()
     sprintf(&items[n_items][0], "dim_t:%g ", v_dim_t);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
-  } else if (bool_inc_t) {
+  } 
+  if (bool_inc_t) {
     sprintf(&items[n_items][0], "inc_t:%g ", v_inc_t);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
@@ -780,6 +799,8 @@ int IGBheader::read( bool quiet )
     /* --- lit la ligne dans le fichier --- */
     int i = 0 ;
     int bytes_read = gztell((gzFile)file);
+    if( bytes_read<0 )
+      return 2;
 
     while (1) {
 
@@ -1174,7 +1195,7 @@ int IGBheader::read( bool quiet )
   if ( bool_dim_t )
     if ( bool_inc_t ) {
       float dim_t = v_inc_t * (v_t-1) ;
-      if ( dim_t != v_dim_t ) {
+      if ( fabs(dim_t - v_dim_t) > v_inc_t ) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
