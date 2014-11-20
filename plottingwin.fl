@@ -44,12 +44,12 @@ class PlotWin {open
       label {Time plot}
       user_data this
       callback {this->window->hide();} open
-      xywh {539 100 525 195} type Double box UP_BOX resizable
+      xywh {1319 344 525 195} type Double box UP_BOX resizable
       code0 {\#include <cstring>}
       code1 {\#include <string>}
       code2 {using namespace std;} visible
     } {
-      Fl_Box graph {selected
+      Fl_Box graph {
         xywh {5 5 515 165} resizable
         code0 {\#include "Graph.h"}
         class Graph
@@ -95,11 +95,13 @@ tm = 0;
 datasize = -1;
 rotated = false;
 window->label(strdup(title.c_str()));
-window->user_data(this);} {}
+window->user_data(this);} {selected
+    }
   }
   decl {~PlotWin()} {public local
   }
-  Function {autoscale(int a)} {} {
+  Function {autoscale(int a)} {open
+  } {
     code {graph->autoscale(a);} {}
   }
 } 

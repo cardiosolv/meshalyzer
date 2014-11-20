@@ -72,7 +72,7 @@ class Graph : public Fl_Widget
      * \param dc number of dynamic curves
      */
     Graph(int X,int Y,int W,int H) : Fl_Widget(X,Y,W,H),
-            v_autoscale(true), numset(0){} 
+            v_autoscale(true), zero_yaxis(false),numset(0){} 
     int  set_2d_data(const double *, const double *, int n, int c, int id=-1 );
     void reset_view( void );
     void range( double &, double &, double &, double& );
@@ -87,6 +87,7 @@ class Graph : public Fl_Widget
     void rotate();
     int  id( int a ){ if(a<numset)return _id[a]; }
     void num_dynamic( int a ){ num_dyn=a; }
+    void toggle_zero_yaxis(){ zero_yaxis=!zero_yaxis;}
   private:
     const double *xv[max_num_sets], *yv[max_num_sets];
     double  x0, x1, y0, y1;					// data range being plotted
@@ -99,6 +100,7 @@ class Graph : public Fl_Widget
     void    make_labels(void);
     bool    v_autoscale;				    // autoscale with set change
     int     num_dyn;                        //!< \# non-static curves 
+    bool    zero_yaxis;
 };
 
 #endif

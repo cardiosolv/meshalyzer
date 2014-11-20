@@ -59,6 +59,15 @@ void reset_cb( Fl_Widget *w, void *p )
   ((Graph *)w)->reset_view();
 }
 
+
+void
+zero_yaxis_cb( Fl_Widget *w, void *p )
+{
+  Graph* g = (Graph *)w;
+  g->toggle_zero_yaxis();
+  g->redraw();
+}
+
 const int button_height=25;
 
 void
@@ -96,7 +105,8 @@ clear_curves_cb( Fl_Widget *w )
 
 
 Fl_Menu_Item graph_pop_menu[] = {
-  { "reset view", 'r', (Fl_Callback *)reset_cb, 0, 0, 0, 0, 14, 56 },
+  { "reset view",  'r', (Fl_Callback *)reset_cb, 0, 0, 0, 0, 14, 56 },
+  { "zero Y-axis", 'z', (Fl_Callback *)zero_yaxis_cb, 0, 0, 0, 0, 14, 56 },
   { "X range", 'x',  (Fl_Callback *)xrange_cb, 0, 0, 0, 0, 14, 56  },
   { "Y range", 'y',  (Fl_Callback *)yrange_cb, 0, 0, 0, 0, 14, 56  },
   { "toggle button display", 'b',  (Fl_Callback *)but_disp_toggle_cb, 0, 0, 0, 0, 14, 56  },
@@ -194,15 +204,23 @@ void Graph :: draw()
       fl_vertex( xv[i][j], yv[i][j] );
     fl_end_line();
   }
+  // drax zero Y axis
+  if( zero_yaxis ) {
+    fl_color(FL_BLACK );
+    fl_begin_line();
+      fl_vertex( xmin, 0 );
+      fl_vertex( xmax, 0 );
+    fl_end_line();
+  }
   fl_pop_clip();
-  // draw frame
   fl_color(FL_BLACK );
+  // draw frame
   fl_begin_line();
-  fl_vertex( x0, y0 );
-  fl_vertex( x1, y0 );
-  fl_vertex( x1, y1 );
-  fl_vertex( x0, y1 );
-  fl_vertex( x0, y0 );
+    fl_vertex( x0, y0 );
+    fl_vertex( x1, y0 );
+    fl_vertex( x1, y1 );
+    fl_vertex( x0, y1 );
+    fl_vertex( x0, y0 );
   fl_end_line();
   // draw labels
   fl_font( FL_HELVETICA, 10 );
@@ -217,23 +235,23 @@ void Graph :: draw()
              int(l_marg*w()), 0, (Fl_Align)(FL_ALIGN_RIGHT) );
     // botom x tics
     fl_begin_line();
-    fl_vertex( x0+(x1-x0)*i/nlm1, y0 );
-    fl_vertex( x0+(x1-x0)*i/nlm1, y0+(y1-y0)*tic_length );
+      fl_vertex( x0+(x1-x0)*i/nlm1, y0 );
+      fl_vertex( x0+(x1-x0)*i/nlm1, y0+(y1-y0)*tic_length );
     fl_end_line();
     // top x tics
     fl_begin_line();
-    fl_vertex( x0+(x1-x0)*i/nlm1, y0+(y1-y0) );
-    fl_vertex( x0+(x1-x0)*i/nlm1, y0+(y1-y0)*(1.-tic_length) );
+      fl_vertex( x0+(x1-x0)*i/nlm1, y0+(y1-y0) );
+      fl_vertex( x0+(x1-x0)*i/nlm1, y0+(y1-y0)*(1.-tic_length) );
     fl_end_line();
     // left y tics
     fl_begin_line();
-    fl_vertex( x0, y0+(y1-y0)*i/nlm1 );
-    fl_vertex( x0+(x1-x0)*tic_length, y0+(y1-y0)*i/nlm1 );
+      fl_vertex( x0, y0+(y1-y0)*i/nlm1 );
+      fl_vertex( x0+(x1-x0)*tic_length, y0+(y1-y0)*i/nlm1 );
     fl_end_line();
     // right y tics
     fl_begin_line();
-    fl_vertex( x1, y0+(y1-y0)*i/nlm1 );
-    fl_vertex( x0+(x1-x0)*(1.-tic_length), y0+(y1-y0)*i/nlm1 );
+      fl_vertex( x1, y0+(y1-y0)*i/nlm1 );
+      fl_vertex( x0+(x1-x0)*(1.-tic_length), y0+(y1-y0)*i/nlm1 );
     fl_end_line();
   }
   fl_pop_matrix();
