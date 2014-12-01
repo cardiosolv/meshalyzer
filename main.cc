@@ -192,7 +192,6 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
       cerr << "Only " << nw << " of " << numf << " frames written" << endl;
 #endif
   }
-  // check if we wrote all the frames
   exit(0);
 }
 
@@ -527,7 +526,6 @@ main( int argc, char *argv[] )
   if (linkingProcSem == SEM_FAILED)
     cerr << "Message Queue inter-process communication not possible"
 	 << endl;
-    
 
   // just output images, no interaction
   if( PNGfile ) 

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <algorithm>
 
 char *get_line(gzFile);
 
@@ -57,8 +58,6 @@ public:
     ch5s_aux_grid info;
     ch5s_aux_grid_info( _hin, _indx, &info );
     _max_frame = info.time_steps;
-    ch5s_aux_free_grid_info( &info );
-#else
     assert(0);
 #endif
   }
@@ -142,9 +141,11 @@ public:
 
     _pts_in  = index(_vec_pts_pos,  base.c_str(), ".pts_t");
     _elem_in = index(_vec_elem_pos, base.c_str(), ".elem_t",
-                                                    (int) _vec_pts_pos.size());
-    _dat_in  = index(_vec_dat_pos,  base.c_str(), ".dat_t",
-                                                    (int) _vec_pts_pos.size());
+                                       _vec_pts_pos.size() );
+    _max_tm = max( _vec_pts_pos.size(), _vec_elem_pos.size() );
+    _dat_in  = index(_vec_dat_pos,  base.c_str(), ".dat_t", _max_tm );
+
+    _max_tm = max( _vec_dat_pos.size(), _max_tm )-1;
 
     if (!_pts_in) {
       std::cerr << "Failed to open .pts_t file" << std::endl;
@@ -188,7 +189,7 @@ public:
     }
  
     // ensure the frame requested is valid
-    if (frame >= _vec_pts_pos.size()) {
+    if (frame > _max_tm) {
       std::cerr << "GetModel() request to invalid frame number" << std::endl;
       throw 3;
     }
@@ -234,7 +235,7 @@ public:
    */
   int num_tm()
   {
-    return (int) _vec_pts_pos.size();
+    return _max_tm+1;
   }
 
   /** return true if all time instances have the same number of points
@@ -242,8 +243,6 @@ public:
   bool plottable()
   {
     if( !_dat_in ) return false;
-
-    if(_vec_pts_pos.size() == 1 ) return false;
 
     seek(0);
     int numpts = get_num(_pts_in);
@@ -291,18 +290,20 @@ private:
    * This function will clear the vector, get the number of frames stored in the file
    * and store the position in the file associated with the start of each frame for
    * later use. If the expected frame count is required and provided, then we will
-   * throw an exception if a different number of frames is encountered.
+   * throw an exception if a different number of frames is encountered. 
    * 
    * \param vecpos       vector of file positions to store when indexing
    * \param filename     without extention
    * \param extention    filename to attempt to index
    * \param match_frames number of frames we expect the file to have 
-   *                     (-1 if not required to match)
+   *                     (-1=if not required to match)
+   *
+   * \note 1 frame will always match any number of frames supplied
    *
    * \return open file handle or 0 if file could not be opened
    */
   gzFile index(std::vector<z_off_t> & vecpos, char const * filename, 
-                                         char const * extention, int match_frames = -1)
+                       char const * extention, int match_frames = -1)
   {
     try {
       // clear vector of positions (indexes)
@@ -315,7 +316,7 @@ private:
       int frames = get_num(infile);
 
       // validate the number of frames
-      if ((match_frames != -1) && (match_frames != frames )) {
+      if((match_frames!=-1) && (match_frames!=frames && frames!=1 && match_frames!=1)) {
         std::cerr << "incorrect number of timepoints in " << extention << 
             " file" << std::endl;
         throw 1;
@@ -350,18 +351,27 @@ private:
    */
   void seek(int frame)
   {
-    gzseek(_pts_in, _vec_pts_pos[frame], SEEK_SET);
+    if( _vec_pts_pos.size() > 1 )
+      gzseek(_pts_in, _vec_pts_pos[frame], SEEK_SET);
+    else
+      gzseek(_pts_in, _vec_pts_pos[0], SEEK_SET);
 
     if (_elem_in) {
-      gzseek(_elem_in, _vec_elem_pos[frame], SEEK_SET);
+      if( _vec_elem_pos.size() > 1 )
+        gzseek(_elem_in, _vec_elem_pos[frame], SEEK_SET);
+      else
+        gzseek(_elem_in, _vec_elem_pos[0], SEEK_SET);
     }
 
     if (_dat_in) {
-      gzseek(_dat_in, _vec_dat_pos[frame], SEEK_SET);
+      if( _vec_dat_pos.size() > 1 )
+        gzseek(_dat_in, _vec_dat_pos[frame], SEEK_SET);
+      else
+        gzseek(_dat_in, _vec_dat_pos[0], SEEK_SET);
     }
   }
 
-
+  long unsigned int _max_tm;            //!< maximum time
   gzFile _pts_in;                       //!< points backing file
   gzFile _elem_in;                      //!< element backing file
   gzFile _dat_in;                       //!< data backing file
@@ -427,7 +437,7 @@ AuxGrid::AuxGrid( const char *fn, AuxGrid *ag )
   if( _plottable ){
     _timeplot = new PlotWin("Aux Time Series");
     _sz_ts = _indexer->time_series(0,_time_series);
-    _timeplot->set_data( 0, _sz_ts, _time_series, 0 );
+    _timeplot->set_data( _sz_ts, 0, _time_series, 0 );
   }
 
   if( _indexer )
@@ -580,7 +590,7 @@ void AuxGrid::plot(int tm)
     return;
   _sz_ts = _indexer->time_series( _hiVert, _time_series );
   _timeplot->window->show();
-  _timeplot->set_data( _hiVert, _sz_ts, _time_series, tm );
+  _timeplot->set_data( _sz_ts, _hiVert, _time_series, tm );
   _timeplot->window->redraw();
 } 
 
@@ -614,7 +624,7 @@ bool AuxGrid :: highlight_vertex( int n, float &val, bool update_plot )
     val = _indexer->_data[n];
     if( update_plot && _plottable && _timeplot->window->shown() ) {
       _sz_ts = _indexer->time_series( _hiVert, _time_series );
-      _timeplot->set_data( _hiVert, _sz_ts, _time_series, 0 );
+      _timeplot->set_data( _sz_ts, _hiVert, _time_series, 0 );
     }
     return true;
   }
