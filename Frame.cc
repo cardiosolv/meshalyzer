@@ -63,6 +63,7 @@ Frame :: write( int w, int h, string fname, int f0, int f1, int stride )
 
   int numout=0;
   for( int f=f0; f<=f1; f+=stride) {
+    printf("proc starting at %d outputting time %d\n", f0, f);
     if( !_tbwm->set_time(f) )
       break;
     string file=fname;
@@ -72,6 +73,7 @@ Frame :: write( int w, int h, string fname, int f0, int f1, int stride )
     dump( w, h, file );
     numout++;
   }
+    printf("proc starting at %d returning %d\n", f0, numout);
   return  numout;
 }
 

@@ -37,6 +37,13 @@ sem_t *linkingProcSem;            // global semaphore for process linking
         control.A##hi->deactivate();
 
 
+/** do clean up if ctrl+C pressed
+ */
+void do_cleanup( int sig, siginfo_t *si, void *v )
+{
+}
+
+
 /** animate in response to a signal received: SIGUSR1 for forward, 
  *  SIGUSR2 for backward
  *
@@ -208,7 +215,10 @@ find_model_dir( string fn )
   if( ifstream((fn+".pts.gz").c_str()) ) return fn;
   if( fn.at(0) == '/' ) return "";
 
-  char *path_var = strdup(getenv("MESHALYZER_MODEL_DIR"));
+  char *path_var = NULL;
+  char *mod_dir_env = getenv("MESHALYZER_MODEL_DIR");
+  if( mod_dir_env ) 
+    path_var = strdup(mod_dir_env);
   char *ptr = strtok( path_var, ":" );
   while( ptr ) {
     string filename = ptr;
@@ -499,10 +509,16 @@ main( int argc, char *argv[] )
   sigLinkAct.sa_sigaction = process_linkage_signal;
   sigLinkAct.sa_flags = SA_SIGINFO;
   sigfillset( &sigLinkAct.sa_mask );
+  // clean up if killed
+  struct sigaction sigCleanup;
+  sigCleanup.sa_sigaction = do_cleanup;
+  sigCleanup.sa_flags = SA_SIGINFO;
+  sigfillset( &sigCleanup.sa_mask );
 
-  sigaction( SIGUSR1, &sigact, NULL );
-  sigaction( SIGUSR2, &sigact, NULL );
+  sigaction( SIGUSR1, &sigact,     NULL );
+  sigaction( SIGUSR2, &sigact,     NULL );
   sigaction( SIGALRM, &sigLinkAct, NULL );
+  sigaction( SIGINT,  &sigCleanup, NULL );
 
   // set up named semphore for linkingProcSem
   string linkageStr = "/linkage";
