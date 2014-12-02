@@ -328,10 +328,6 @@ private:
 
         int lines = get_num(infile);
 
-        // skip lines of frame
-        if (frame >= 50)
-          std::cerr << frame << " --- "  << lines << std::endl;
-
         for (int line = 0; line < lines; line++) {
           get_line(infile);
         }
@@ -351,6 +347,11 @@ private:
    */
   void seek(int frame)
   {
+    if( frame>_max_tm ) {
+      cerr << "illegal frame specified!" << endl;
+      throw 3;
+    }
+
     if( _vec_pts_pos.size() > 1 )
       gzseek(_pts_in, _vec_pts_pos[frame], SEEK_SET);
     else

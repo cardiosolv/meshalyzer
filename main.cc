@@ -19,7 +19,11 @@
 #include <ch5/ch5.h>
 #endif
 
-#ifndef OSMESA
+#ifdef OSMESA
+#include <sys/mman.h>
+
+pid_t  master;
+#else
 #include <GL/glut.h>
 #endif
 
@@ -41,6 +45,15 @@ sem_t *linkingProcSem;            // global semaphore for process linking
  */
 void do_cleanup( int sig, siginfo_t *si, void *v )
 {
+#ifndef OSMESA
+    stringstream nw_name("/nw_");
+    nw_name << getpid();
+    stringstream fini_name("/fini_");
+    fini_name << getpid();
+    sem_unlink( fini_name.str().c_str() );
+    sem_unlink( nw_name.str().c_str() );
+#endif
+  exit(0);
 }
 
 
@@ -154,13 +167,19 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
     frame.write( size, size, filename, f0 );
   } else {
 #ifdef OSMESA
-    // create 2 semaphores needed for interprocess communication
-    stringstream nw_name("/nw_");
-    nw_name << getpid();
-    stringstream fini_name("/fini_");
-    fini_name << getpid();
+    // create 2 semaphores and shared memory needed for interprocess communication
+    stringstream nw_name("/nw");
+    master = getpid();
+    nw_name << master;
+    sem_t *nw_cnt   = sem_open( nw_name.str().c_str(), O_CREAT, S_IRWXU, 1 );
+    stringstream fini_name("/fini");
+    fini_name << master;
     sem_t *finished = sem_open( fini_name.str().c_str(), O_CREAT, S_IRWXU, 0 );
-    sem_t *nw_cnt   = sem_open( nw_name.str().c_str(), O_CREAT, S_IRWXU, 0 );
+    stringstream cnt_name("/cnt");
+    cnt_name << master;
+    int shm = shm_open(cnt_name.str().c_str(), O_CREAT|O_RDWR, 0666);
+    ftruncate(shm, sizeof(int));
+    int *nwr = (int*)mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED, shm, 0 ); 
 
     // fork since it is too difficult to copy tbwm with all of its dynamic allocations
     for( int i=1; i<nproc;i++ ) {
@@ -171,20 +190,21 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
     }
     
     int nw = frame.write( size, size, filename, f0, f1, nproc );
-    for( int a=0; a<nw; a++ )
-      sem_post( nw_cnt );
-    sem_post( finished );
-    
+
+    sem_wait( nw_cnt );
+    *nwr = *nwr + nw;
     // wait for everyone to finish and count the number of frames written
+    sem_post( finished );
     int nfin;
     sem_getvalue( finished, &nfin );
     if( nfin==nproc ) {
-      sem_getvalue( nw_cnt, &nw );
-      if( nw != numf )
-        cerr << "\nOnly " << nw << " of " << numf << " frames written\n" << endl;
+      if( *nwr != numf )
+        cerr << "\nOnly " << *nwr << " of " << numf << " frames written\n" << endl;
       sem_unlink(nw_name.str().c_str() );
       sem_unlink(fini_name.str().c_str() );
+      shm_unlink(cnt_name.str().c_str() );
     }
+    sem_post( nw_cnt );
 
 #else
     int nw = frame.write( size, size, filename, f0, f1 );
