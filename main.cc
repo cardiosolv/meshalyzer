@@ -198,8 +198,7 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
     int nfin;
     sem_getvalue( finished, &nfin );
     if( nfin==nproc ) {
-      if( *nwr != numf )
-        cerr << "\nOnly " << *nwr << " of " << numf << " frames written\n" << endl;
+      cerr << "Wrote " << *nwr << " frames\n" << endl;
       sem_unlink(nw_name.str().c_str() );
       sem_unlink(fini_name.str().c_str() );
       shm_unlink(cnt_name.str().c_str() );
@@ -537,7 +536,6 @@ main( int argc, char *argv[] )
   sigaction( SIGUSR1, &sigact,     NULL );
   sigaction( SIGUSR2, &sigact,     NULL );
   sigaction( SIGALRM, &sigLinkAct, NULL );
-  sigaction( SIGINT,  &sigCleanup, NULL );
 
   // set up named semphore for linkingProcSem
   string linkageStr = "/linkage";
