@@ -643,8 +643,12 @@ int TBmeshWin::handle( int event )
         return 1;
         break;
       case 'r':
+        fl_cursor( FL_CURSOR_WAIT );
+        Fl::check();
         get_data( dataBuffer->file().c_str(), contwin->tmslider );
         if ( timeplotter->window->shown() ) timeplot();
+        fl_cursor( FL_CURSOR_DEFAULT );
+        Fl::check();
         return 1;
         break;
       case 'c':
@@ -909,7 +913,7 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
   }
 
   if ( contwin->read_recalibrate->value() )
-    cs->calibrate( dataBuffer->min(tm), dataBuffer->max(tm) );
+    optimize_cs();
 
   string fname = fn;
   string::size_type i0 = fname.rfind("/");
@@ -1009,10 +1013,11 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
   int stop;
   if ( sequence ) {
     Fl::flush();
-    seqwidget->movieprog->minimum( tm );
-    seqwidget->movieprog->maximum( stop-1 );
-    seqwidget->movieprog->value( tm );
-    //seqwidget->movieprog->label( "0%" );
+    //seqwidget->movieprog->minimum( (float)tm );
+    //seqwidget->movieprog->maximum( (float)(stop-1.) );
+    seqwidget->movieprog->minimum( 0 );
+    seqwidget->movieprog->maximum( 1. );
+    seqwidget->movieprog->value( 0 );
     seqwidget->movieprog->redraw();
     seqwidget->window->label(fn);
     seqwidget->window->show();
@@ -1043,16 +1048,13 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
       foutname = foutname + number + ".png";
 
       if ( tm-last_update>update_period ) {
-        seqwidget->movieprog->value((float)tm);
+        seqwidget->movieprog->value( (float)(tm-start)/(stop-1.));
         sprintf( number, "%.0f%%", 100.*(tm-start+1)/(stop-start+1) );
         seqwidget->movieprog->label(number);
-        seqwidget->movieprog->redraw();
+        Fl::check();
         last_update = tm;
       }
     }
-    redraw();
-    Fl::check();
-    Fl::flush();
     frame.dump( w(), h(), foutname );
   }
   if ( sequence ) 
