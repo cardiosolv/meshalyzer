@@ -1013,8 +1013,6 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
   int stop;
   if ( sequence ) {
     Fl::flush();
-    //seqwidget->movieprog->minimum( (float)tm );
-    //seqwidget->movieprog->maximum( (float)(stop-1.) );
     seqwidget->movieprog->minimum( 0 );
     seqwidget->movieprog->maximum( 1. );
     seqwidget->movieprog->value( 0 );
@@ -1057,8 +1055,11 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
     }
     frame.dump( w(), h(), foutname );
   }
-  if ( sequence ) 
+  if ( sequence ) {
     seqwidget->movieprog->label("100%");
+    seqwidget->movieprog->value(1.);
+    Fl::check();
+  }
   tm= start;
   if( model->pt.num_tm() ) model->pt.time(tm);//dynamic points
   redraw();
