@@ -16,9 +16,15 @@ LIB_CH5       :=
 LIB_HDF5      := 
 endif
 
-COMMON_LIBS    = -lpng -lpthread -lm -lz $(LIB_HDF5) 
+ifeq ($(HOSTMACHINE), Darwin)
+  GLUT_LIB = -framework GLUT 
+else
+  GLUT_LIB = -lglut
+endif
 
-LIBS     = -L$(HDF5API_ROOT)/lib  -lglut $(FLTK_LD_FLAGS) $(COMMON_LIBS)
+COMMON_LIBS  = $(GLUT_LIB) $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5) 
+
+LIBS     =  -L$(HDF5API_ROOT)/lib   $(FLTK_LD_FLAGS) $(COMMON_LIBS)
 LDFLAGS  =  -fopenmp
 CXXFLAGS =  -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
 

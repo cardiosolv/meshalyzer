@@ -24,7 +24,13 @@
 
 pid_t  master;
 #else
+
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
 #include <GL/glut.h>
+#endif
+
 #endif
 
 static Controls *ctrl_ptr;
