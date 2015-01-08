@@ -21,16 +21,9 @@
 
 #ifdef OSMESA
 #include <sys/mman.h>
-
 pid_t  master;
 #else
-
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
-
+#include <FL/glut.H>
 #endif
 
 static Controls *ctrl_ptr;
