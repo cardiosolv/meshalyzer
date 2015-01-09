@@ -16,13 +16,9 @@ char *get_line(gzFile);
 int get_num( gzFile in )
 {
   int number;
-  //if( !sscanf( get_line(in), "%d", &number ) )
-  //  throw 1;
 
   char *p = get_line(in);
-  if (p)
-    number = atoi(p);
-  else
+  if( !p || !sscanf( p, "%d", &number ) )
     throw;
 
   return number;
@@ -151,7 +147,12 @@ public:
       std::cerr << "Failed to open .pts_t file" << std::endl;
       throw 2;
     }
-    base.clear();
+    int mm = mismatch();
+    if( mm ) {
+      std::cerr << "Number of data and points do not match for time "<<mm-1<<" in auxiliary grid" << std::endl;
+      throw 3;
+    }
+    seek(0);
   }
 
   /** destructor
@@ -275,7 +276,10 @@ public:
       gzseek(_dat_in, _vec_dat_pos[i], SEEK_SET);
       // add 1 to the loop to read the number of vertices in the frame
       for( int j=0; j<v+1; j++ )
-        get_line(_dat_in);
+        if( !get_line(_dat_in) )   {
+          cerr << "Error looking in auxilliary data file at time "<< i << " for node " << j-1 << endl;
+          exit(1);
+        }
       d[i] = strtod( get_line(_dat_in), NULL );
     }
     gzseek( _dat_in, place, SEEK_SET );
@@ -339,6 +343,23 @@ private:
     catch(...) {
       return 0;
     }
+  }
+
+  /** verify that the number of points matches the nmber of data points for all times
+   *
+   * \returns 0 if things jive, o.w, 1 more than the offending time
+   */
+  int mismatch()
+  {
+    if( !_dat_in )
+      return 0;
+
+    for( int t=0; t<=_max_tm; t++ ){
+      seek( t );
+      if( get_num(_dat_in) != get_num(_pts_in) )
+        return t+1;
+    }
+    return 0;
   }
 
   /** set all files to position in file relating to frame
