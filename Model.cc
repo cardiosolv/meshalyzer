@@ -50,14 +50,14 @@ make_face( Face *f, int n, int* orig )
 
 /** read in a line from a file, ignoring lines beginning with "#"
  *
- * \warning (GD) lines are limited to 1024 bytes.
+ * \warning (GD) lines are limited to 2048 bytes.
  * \warning not threadsafe
  * \return pointer to a static buffer
  */
 char *
 get_line( gzFile in )
 {
-  const int bufsize=1024;
+  const int bufsize=2048;
   static char buf[bufsize];
   char *retval;
   do {

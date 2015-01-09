@@ -74,7 +74,7 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {open selected
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -100,11 +100,15 @@ if( fn != NULL ) {
           }
           MenuItem {} {
             label {Compute surfaces}
-            callback {int nsa=mwtb->model->add_region_surfaces();
+            callback {fl_cursor( FL_CURSOR_WAIT ); 
+Fl::check();
+int nsa=mwtb->model->add_region_surfaces();
 int ns = mwtb->model->numSurf();
 for( int i=ns-nsa; i<ns; i++ )  
   surflist->add( mwtb->model->surface(i)->label().c_str(),1);
 surflist->redraw();
+fl_cursor( FL_CURSOR_DEFAULT );
+Fl::check();
 write_surfaces(ns-nsa);}
             xywh {0 0 30 20} divider
           }
@@ -2191,8 +2195,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {selected
-    }
+mwtb->lights(illBut->value());} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
