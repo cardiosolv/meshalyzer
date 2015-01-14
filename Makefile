@@ -22,7 +22,7 @@ else
   GLUT_LIB = -lglut
 endif
 
-COMMON_LIBS  = $(GLUT_LIB) $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5) 
+COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5) 
 
 LIBS     =  -L$(HDF5API_ROOT)/lib   $(FLTK_LD_FLAGS) $(COMMON_LIBS)
 LDFLAGS  =  -fopenmp
@@ -46,7 +46,7 @@ OS_OBJS=$(filter-out $(OS_files),$(OBJS)) $(OS_files:.o=_os.o)
 all: meshalyzer
 
 meshalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OBJS) $(LIB_CH5)
-	$(CXX) $(LDFLAGS) -o meshalyzer $(sort $(OBJS)) $(LIBS)
+	$(CXX) $(LDFLAGS) -o meshalyzer $(sort $(OBJS)) $(GLUT_LIB) $(LIBS)
 	fltk-config --post meshalyzer
 
 mesalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OS_OBJS) $(LIB_CH5)
