@@ -114,7 +114,7 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     disp(asSurface),data(NULL),facetshading(false),numframes(0),
     headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] ),
     iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL),
-    bgd_trans(false),_norot(false),forcedThreaded(false)
+    bgd_trans(false),_norot(false),forcedThreaded(false),_branch_cut(false)
 {
   model = new Model();
   memset( hilight, 0, sizeof(int)*maxobject );
@@ -162,6 +162,7 @@ void TBmeshWin :: draw()
     glPointSize( 10.0 );
     glLineWidth( 1. );
     glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    glPolygonMode( GL_FRONT, GL_LINE );
     glPolygonOffset( 2., 2. );
     glEnable( GL_DEPTH_TEST );
     glEnable(GL_NORMALIZE);
@@ -177,7 +178,7 @@ void TBmeshWin :: draw()
       glShadeModel(GL_SMOOTH);
     }
     glDepthFunc( GL_LEQUAL );
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glViewport(0,0,w(),h());
     glClearColor( bc[0], bc[1], bc[2], bgd_trans?0:1 );
@@ -1786,6 +1787,8 @@ TBmeshWin::draw_iso_lines()
     delete isoline;
     isoline=new IsoLine( isc->isolineVal0->value(), isc->isolineVal1->value(),
             isc->isoNumLines->value(), tm );
+    if( _branch_cut ) 
+      isoline->branch( true, _branch_range[0], _branch_range[1] );
     for ( int s=0; s<model->numSurf(); s++ ) 
       isoline->process( model->surface(s), data );
   }
@@ -2014,4 +2017,26 @@ TBmeshWin :: read_dynamic_pts( const char *fn, Myslider *mslide )
   mslide->redraw();
 
   return 0;
+}
+
+
+/** manage branch cuts 
+ *
+ * \param min
+ * \param max
+ * \param tol
+ */
+void
+TBmeshWin :: branch_cut(double min, double max, float tol)
+{
+  if( min != 0. && max != 0. ){
+    _branch_cut = true; 
+    _branch_range[0] = min;
+    _branch_range[1] = max;
+  } else
+    _branch_cut = false; 
+
+  isosurfwin->islDirty(true);
+
+  redraw();
 }

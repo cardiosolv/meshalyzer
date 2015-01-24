@@ -150,6 +150,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     bool      compat_tm( int t ){ return (t==1 || max_time()==0 || max_time()==t-1); }
     int       max_time( GridType g=NoDataGrid );
     void      forceThreadData(bool a){forcedThreaded=a;}
+    void      branch_cut(double,double,float);
     friend class Controls;
     friend class HDF5DataBrowser;
 
@@ -210,6 +211,8 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     bool      forcedThreaded;        // force threaded reading of data
     // constants
     static unsigned int MAX_MESSAGES_READ;
+    bool   _branch_cut;
+    double _branch_range[2];
 };
 
 #include "DataOpacity.h"

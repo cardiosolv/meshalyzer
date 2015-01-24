@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0302 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -70,15 +70,15 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1115 22 350 650} type Double box UP_BOX
+      xywh {1115 66 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open selected
+      Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -378,7 +378,7 @@ mwtb->redraw();}
             }
           }
           Submenu {} {
-            label {Randomly colour}
+            label {Randomly colour} open
             xywh {0 0 100 20}
           } {
             MenuItem {} {
@@ -456,7 +456,7 @@ mwtb->redraw();}
           }
         }
         Submenu {} {
-          label Data
+          label Data open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -474,9 +474,39 @@ mwtb->redraw();}
             callback {mwtb->isosurfwin->isowin->show();}
             xywh {0 0 31 20}
           }
+          Submenu {} {
+            label {Branch cut} open selected
+            tooltip {Do not interpolqte betzeen li,its} xywh {0 0 70 20}
+          } {
+            MenuItem {} {
+              label None
+              callback {mwtb->branch_cut(0,0,0);}
+              xywh {0 0 34 20} type Radio value 1
+            }
+            MenuItem {} {
+              label {[-1,1)}
+              callback {mwtb->branch_cut(-1,1,0.2);}
+              xywh {0 0 34 20} type Radio
+            }
+            MenuItem {} {
+              label {[0,1)}
+              callback {mwtb->branch_cut(0,1,0.2);}
+              xywh {0 0 34 20} type Radio
+            }
+            MenuItem {} {
+              label {[-pi,pi)}
+              callback {mwtb->branch_cut(-M_PI,M_PI,.2);}
+              xywh {0 0 34 20} type Radio
+            }
+            MenuItem {} {
+              label {[0,2pi)}
+              callback {mwtb->branch_cut(0,2*M_PI,.2);}
+              xywh {0 0 34 20} type Radio
+            }
+          }
         }
         Submenu outmenu {
-          label Output
+          label Output open
           xywh {0 0 100 20}
         } {
           Submenu {} {
@@ -737,7 +767,7 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
@@ -1525,7 +1555,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {open
+      Fl_Group colorscalegrp {
         xywh {10 490 330 60} box ENGRAVED_BOX
       } {
         Fl_Button {} {
