@@ -26,6 +26,9 @@ decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {priva
 decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {private local
 } 
 
+decl {\#define TEST_RADIO(A,B,C,D) if(!strcmp(\#A,B)){if(C){A->setonly();A->do_callback(D);}continue;}} {private local
+}
+
 decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {private local
 } 
 
@@ -70,7 +73,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1115 66 350 650} type Double box UP_BOX
+      xywh {860 23 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -474,31 +477,31 @@ mwtb->redraw();}
             callback {mwtb->isosurfwin->isowin->show();}
             xywh {0 0 31 20}
           }
-          Submenu {} {
+          Submenu brcut {
             label {Branch cut} open selected
-            tooltip {Do not interpolqte betzeen li,its} xywh {0 0 70 20}
+            tooltip {Do not interpolqte betzeen limits} xywh {0 0 70 20}
           } {
-            MenuItem {} {
+            MenuItem brcutNone {
               label None
               callback {mwtb->branch_cut(0,0,0);}
               xywh {0 0 34 20} type Radio value 1
             }
-            MenuItem {} {
+            MenuItem brcutPM1 {
               label {[-1,1)}
               callback {mwtb->branch_cut(-1,1,0.2);}
               xywh {0 0 34 20} type Radio
             }
-            MenuItem {} {
+            MenuItem brcut01 {
               label {[0,1)}
               callback {mwtb->branch_cut(0,1,0.2);}
               xywh {0 0 34 20} type Radio
             }
-            MenuItem {} {
+            MenuItem brcutPMpi {
               label {[-pi,pi)}
               callback {mwtb->branch_cut(-M_PI,M_PI,.2);}
               xywh {0 0 34 20} type Radio
             }
-            MenuItem {} {
+            MenuItem brcut02pi {
               label {[0,2pi)}
               callback {mwtb->branch_cut(0,2*M_PI,.2);}
               xywh {0 0 34 20} type Radio
@@ -1789,6 +1792,11 @@ SAVE_WIDGET(mshzf,read_recalibrate);
 SAVE_WIDGET(mshzf,revdraworder);
 SAVE_WIDGET(mshzf,norot);
 SAVE_WIDGET(mshzf,transBgd);
+SAVE_WIDGET(mshzf,brcutNone);
+SAVE_WIDGET(mshzf,brcutPM1);
+SAVE_WIDGET(mshzf,brcut01);
+SAVE_WIDGET(mshzf,brcutPMpi);
+SAVE_WIDGET(mshzf,brcut02pi);
 SAVE_WIDGET(mshzf,vertdisp);
 SAVE_WIDGET(mshzf,cabledisp);
 SAVE_WIDGET(mshzf,cnnxdisp);
@@ -2098,6 +2106,11 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_MENUVAR( surfedgedisp, var, val, datadest )
   TEST_MENUVAR( surfdisp, var, val, datadest )
   TEST_MENUVAR( voldisp, var, val, datadest )
+  TEST_RADIO( brcutNone, var, int(val), mainbar )
+  TEST_RADIO( brcutPM1, var, int(val), mainbar )
+  TEST_RADIO( brcut01, var, int(val), mainbar )
+  TEST_RADIO( brcutPMpi, var, int(val), mainbar )
+  TEST_RADIO( brcut02pi, var, int(val), mainbar )
   TEST_VAR( draw_axes, var, int(val) )  
   TEST_VAR( vertbut, var, int(val) )  
   TEST_VAR( cabbut, var, int(val) )  

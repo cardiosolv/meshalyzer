@@ -34,6 +34,8 @@ class Surfaces
     void   label( string s ){ _label=s; }
     string label( void ) { return _label; }
     void   flip_norms();
+    void   correct_branch_elements( GLdouble *, DATA_TYPE *, 
+                          Colourscale *, int, dataOpac * );
   protected:
     PPoint   *_p;
     GLfloat  _fillcolor[4];

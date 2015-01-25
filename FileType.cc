@@ -98,7 +98,7 @@ fileType FileTypeFinder ( const char *fn )
 
     const char* tpos = strrchr( fn, 't' ); // look for last "t" in the file name
 
-    if ( tpos ==  NULL ) // no "t" found, therefore not CG file sequence
+    if ( !tpos || tpos==fn+strlen(fn)-1  ) // no "t" found, therefore not CG file sequence
       return FTascii;
 
     // make sure all remaining characters are numbers

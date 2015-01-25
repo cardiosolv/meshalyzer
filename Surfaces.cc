@@ -106,6 +106,38 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
     _ele[i]->draw( 0, 0, fill, cs, dat, stride, dataopac, ptnrml );
 }
 
+/** redraw elements through which the branch cut passes with flat shading 
+ *
+ * \param range  range of cut
+ * \param data   data to display
+ * \param cs     colour scale
+ * \param stride output stride
+ * \param opac   data opacity    
+ */
+void 
+Surfaces ::correct_branch_elements( GLdouble *range, DATA_TYPE *data,
+                         Colourscale *cs, int stride, dataOpac *opac )
+{
+#define BRANCH_TOL  0.2
+  bool cross_branch( DATA_TYPE *d, int n, double min, double max, double tol );
+
+  int shade;
+  glGetIntegerv(GL_SHADE_MODEL, &shade );
+  glShadeModel( GL_FLAT );
+
+  DATA_TYPE d[MAX_NUM_SURF_NODES*2];
+  for ( int i=0; i<_ele.size(); i+=stride ) {
+    const int *n = _ele[i]->obj();
+    for( int j=0; j<_ele[i]->ptsPerObj(); j++ )
+      d[j] = data[n[j]];
+    if( cross_branch( d, _ele[i]->ptsPerObj(), range[0], range[1], BRANCH_TOL ) )
+      _ele[i]->draw( i, i, _fillcolor, cs, data, stride, opac, _vertnorm );
+  }
+
+  glShadeModel( shade );
+}
+
+
 
 /** register the vertices
  *

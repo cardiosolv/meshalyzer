@@ -13,26 +13,17 @@
 bool
 cross_branch( DATA_TYPE *d, int n, double min, double max, double tol )
 {
-  double mid = (min+max)/2.;
-
-  bool  above = false,
-        below = false;
   float mine=d[0], maxe=d[0];
+
   for( int i=0; i<n; i++ ) {
-    if( d[i] > mid ) {
-      above = true;
-      if( d[i] > maxe )
+    if( d[i] > maxe ) 
         maxe = d[i];
-    }
-    if( d[i] < mid ) {
-      below = true;
-      if( d[i] < mine )
+
+    if( d[i] < mine ) 
         mine = d[i];
-    }
   }
-  if( above && below ) 
-    if( maxe-mine > tol*(max-min) )
-      return true;
+  if( maxe-mine > (1.-tol)*(max-min) )
+    return true;
 
   return false;
 }
@@ -42,7 +33,6 @@ int
 IsoLine :: process( Surfaces *s, DATA_TYPE *dat )
 {
   int num_lines=0;
-  DATA_TYPE *edat = NULL;
 
   for( int i=0; i<_nl; i++ ){
     double val = _nl==1? _v0: _v0 + i*(_v1-_v0)/(float)(_nl-1.);
@@ -51,7 +41,7 @@ IsoLine :: process( Surfaces *s, DATA_TYPE *dat )
       MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly );
       if( npoly && _branch ) {
         const int*nodes= s->ele(j)->obj();
-        edat = (DATA_TYPE *)realloc(edat, sizeof(DATA_TYPE)*s->ele(j)->ptsPerObj() );
+        DATA_TYPE edat[MAX_NUM_SURF_NODES];
         for( int i=0; i< s->ele(j)->ptsPerObj(); i++ ){
           edat[i] = dat[nodes[i]];
         }
@@ -65,7 +55,6 @@ IsoLine :: process( Surfaces *s, DATA_TYPE *dat )
       }
     }
   }
-  free(edat);
   return num_lines;
 }
 

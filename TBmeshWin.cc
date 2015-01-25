@@ -60,7 +60,6 @@ void animate_cb( void *v )
 }
 
 
-
 // determine the action if the play button is pressed on the control widget
 void
 TBmeshWin::animate_skip( int fs, void *ctrl )
@@ -455,6 +454,13 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
   sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride, 
  		dataopac->dop+Surface, 
 		facetshading?NULL:model->vertex_normals(sf) );
+
+#if 0
+  int shade_model;
+  glGetIntegerv( GL_SHADE_MODEL, &shade_model );
+  if( _branch_cut && showData && shade_model==GL_SMOOTH )
+    sf->correct_branch_elements( _branch_range, data, cs, stride, dataopac->dop+Surface );
+#endif
 
   if ( dataopac->dop[Surface].on() ) translucency(false);
   glPopAttrib();
@@ -2029,7 +2035,7 @@ TBmeshWin :: read_dynamic_pts( const char *fn, Myslider *mslide )
 void
 TBmeshWin :: branch_cut(double min, double max, float tol)
 {
-  if( min != 0. && max != 0. ){
+  if( min != 0. || max != 0. ){
     _branch_cut = true; 
     _branch_range[0] = min;
     _branch_range[1] = max;
