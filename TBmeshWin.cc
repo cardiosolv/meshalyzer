@@ -177,7 +177,7 @@ void TBmeshWin :: draw()
       glShadeModel(GL_SMOOTH);
     }
     glDepthFunc( GL_LEQUAL );
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glViewport(0,0,w(),h());
     glClearColor( bc[0], bc[1], bc[2], bgd_trans?0:1 );
@@ -1665,10 +1665,12 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   GLfloat elecol[]  = {1,0,0,1};
   GLfloat linecol[] = {0,0,0,1};
 
-  glPushAttrib( GL_POLYGON_BIT );
+  glPushAttrib( GL_POLYGON_BIT|GL_COLOR_BUFFER_BIT );
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   glEnable(GL_BLEND);
   glShadeModel(GL_SMOOTH);
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFunc(GL_ONE, GL_ZERO);
   glEnable( GL_LINE_SMOOTH );
   glEnable( GL_POLYGON_SMOOTH );
 
