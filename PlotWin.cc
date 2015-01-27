@@ -75,6 +75,7 @@ void PlotWin :: set_data( int id, int n, float *d, int t, float dt, float torg,
 
 PlotWin :: ~PlotWin ()
 {
+  delete window;
   delete[] xv;
   delete[] data;
 
