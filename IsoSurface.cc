@@ -4,6 +4,8 @@
 // project
 #include "IsoSurface.h"
 
+#define BRANCH_TOL 0.2
+
 /** constructor
  *
  * \param m      model
@@ -13,15 +15,31 @@
  * \param t      time
  */
 IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v, 
-		       vector<bool>&member, int t)
+		       vector<bool>&member, int t, double *branch )
   :_vertnorm(NULL),_vert(NULL),_val(v),_tm(t)
 {
+  double brmin = branch ? branch[0]+BRANCH_TOL*(branch[1]-branch[0]) : 0;
+  double brmax = branch ? branch[1]-BRANCH_TOL*(branch[1]-branch[0]) : 0;
+
 #pragma omp parallel for schedule(dynamic,100)
   for( int i=0; i<m->numVol(); i++ ) {
     if( member[i] ) {
+
+      // ignore elements crossing the branch cut
+      if( branch ) {
+        const int* nodes= m->_vol[i]->obj();
+        bool low=false, high=false;
+        for( int n=0; n<m->_vol[i]->ptsPerObj(); n++ ) {
+          if( dat[nodes[n]] <= brmin ) low=true;
+          if( dat[nodes[n]] >= brmax ) high=true;
+        }
+        if( low && high ) 
+          continue;
+      }
+
       int npoly;
       MultiPoint **lpoly = m->_vol[i]->isosurf( dat, _val, npoly );
-	  
+
       if (lpoly != NULL){
         for( int j=0; j<npoly; j++ )
         {

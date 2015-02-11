@@ -7,7 +7,7 @@
 
 class IsoSurface {
     public:
-        IsoSurface( Model *, DATA_TYPE *, double, vector<bool>&, int );
+        IsoSurface( Model *, DATA_TYPE *, double, vector<bool>&, int, double *branch=NULL  );
         ~IsoSurface();
         void draw();
         GLfloat *color(){ return colour; }

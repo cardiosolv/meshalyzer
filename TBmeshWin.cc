@@ -419,7 +419,7 @@ void TBmeshWin::draw_iso_surfaces()
 	}
 	if( reg->_iso0==NULL ) 
 	  reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
-			  reg->ele_membership(), tm );
+			  reg->ele_membership(), tm, _branch_cut?_branch_range:NULL );
 	reg->_iso0->color( isosurfwin->issColor(0) );
 
     translucency( reg->_iso0->color()[3]<OPAQUE_LIMIT );
@@ -2045,6 +2045,7 @@ TBmeshWin :: branch_cut(double min, double max, float tol)
     _branch_cut = false; 
 
   isosurfwin->islDirty(true);
+  isosurfwin->issDirty(true);
 
   redraw();
 }

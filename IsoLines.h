@@ -6,6 +6,8 @@
 #include "CutSurfaces.h"
 #include <vector>
 
+#define BRANCH_TOL 0.2
+
 class IsoLine {
     public:
         IsoLine( double v0, double v1, int n, int t ):_v0(v0),_v1(v1),_nl(n),
@@ -20,7 +22,7 @@ class IsoLine {
         int tm(){ return _t;  }
         void draw( Colourscale *, GLfloat );
 		void color( const GLfloat* c ){memcpy(_color,c,4*sizeof(GLfloat));}
-        void branch( bool b, double min=0, double max=0, double tol=0.2 )
+        void branch( bool b, double min=0, double max=0, double tol=BRANCH_TOL )
           {_branch=b;_branch_range[0]=min;_branch_range[1]=max;_branch_tol=tol; }
     private:
         vector<MultiPoint *>  _polygon;
