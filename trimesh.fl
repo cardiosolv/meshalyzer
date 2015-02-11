@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
+version 1.0300 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -27,7 +27,7 @@ decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();c
 } 
 
 decl {\#define TEST_RADIO(A,B,C,D) if(!strcmp(\#A,B)){if(C){A->setonly();A->do_callback(D);}continue;}} {private local
-}
+} 
 
 decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {private local
 } 
@@ -73,11 +73,11 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {860 23 350 650} type Double box UP_BOX
+      xywh {1313 22 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -459,7 +459,7 @@ mwtb->redraw();}
           }
         }
         Submenu {} {
-          label Data open
+          label Data
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -478,7 +478,7 @@ mwtb->redraw();}
             xywh {0 0 31 20}
           }
           Submenu brcut {
-            label {Branch cut} open selected
+            label {Branch cut}
             tooltip {Do not interpolqte betzeen limits} xywh {0 0 70 20}
           } {
             MenuItem brcutNone {
@@ -509,7 +509,7 @@ mwtb->redraw();}
           }
         }
         Submenu outmenu {
-          label Output open
+          label Output
           xywh {0 0 100 20}
         } {
           Submenu {} {
@@ -770,11 +770,11 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open
+          label Highlight
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -890,7 +890,7 @@ mwtb->select_vertex();}
           }
         }
         Fl_Group lightgrp {
-          label Lights open
+          label Lights
           xywh {10 295 330 185} color 188 labelfont 1 labelsize 12 labelcolor 188 hide
         } {
           Fl_Value_Slider lightx {
@@ -976,7 +976,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface open
+          label Surface
           xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
@@ -1236,7 +1236,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid}
+          label {Aux Grid} open
           xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
@@ -1319,7 +1319,7 @@ mwtb->redraw();}
             tooltip {autoscale every timestep} xywh {290 345 40 20} labelsize 10 align 16
           }
           Fl_Group {} {
-            label Vertex
+            label Vertex open
             xywh {65 375 255 30} labelsize 12 align 4
           } {
             Fl_Button auxptcolor {
@@ -1367,7 +1367,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Lines
+            label Lines open
             xywh {65 405 255 25} labelsize 12 align 4
           } {
             Fl_Button auxlinecolor {
@@ -1415,7 +1415,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Surface
+            label Surface open
             xywh {65 430 265 20} labelsize 12 align 4
           } {
             Fl_Button auxsurfcolor {
@@ -1463,7 +1463,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label VoxEle
+            label VoxEle open
             xywh {65 454 245 22} labelsize 12 align 4
           } {
             Fl_Button auxvolcolor {
@@ -1486,7 +1486,7 @@ mwtb->redraw();}
             }
             Fl_Choice auxvolstyle {open
               xywh {260 455 50 20} down_box BORDER_BOX align 8
-              code0 {o->value(2);}
+              code0 {o->value(1);}
             } {
               MenuItem {} {
                 label Off
@@ -1773,8 +1773,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2199,18 +2198,17 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 	IGNORE_VAR( auxvolstyle, var );
   }
   if( !strcmp( var, "AUX_GRID_COLOURS" ) ) {
-    mshzf.getline( var, 1024 );
     if( mwtb->auxGrid ) {
       float c[4];
-      int nread;
-      sscanf( var, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
+      mshzf >> c[0] >> c[1] >> c[2] >> c[3];
       mwtb->auxGrid->color( Vertex, c );
-      sscanf( var+nread, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
+      mshzf >> c[0] >> c[1] >> c[2] >> c[3];
       mwtb->auxGrid->color( Cnnx, c );
-      sscanf( var+nread, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
+      mshzf >> c[0] >> c[1] >> c[2] >> c[3];
       mwtb->auxGrid->color( SurfEle, c );
-      sscanf( var+nread, "%f %f %f %f%n", c, c+1, c+2, c+3, &nread );
+      mshzf >> c[0] >> c[1] >> c[2] >> c[3];
       mwtb->auxGrid->color( VolEle, c );
+      mshzf.getline( buf,BUFLEN );
     }
     continue;
   }
@@ -2238,7 +2236,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {}
+mwtb->lights(illBut->value());} {selected
+    }
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
@@ -2258,8 +2257,7 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   Function {dispVertVal(double d)} {} {
     code {vertvalout->value(d);} {}
   }
-  Function {write_surfaces(int start )} {open
-  } {
+  Function {write_surfaces(int start )} {} {
     code {char *fn;
 string surffn=mwtb->model->file();
 surffn += "surf";

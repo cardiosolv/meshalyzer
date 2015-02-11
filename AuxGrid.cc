@@ -4,6 +4,11 @@
 #include <vector>
 #include <algorithm>
 
+static GLfloat defPtColor[]   = {    0,    0,     0, 1};
+static GLfloat defLineColor[] = {    0, 0.05, 0.883, 1}; 
+static GLfloat defSurfColor[] = {   1.,  0.5,     0, 1};
+static GLfloat defVolColor[]  = {0.141, 0.83, 0.618, 1};
+
 char *get_line(gzFile);
 
 /** reads in an integer from a file throws exception on error
@@ -416,7 +421,7 @@ private:
  */
 AuxGrid::AuxGrid( const char *fn, AuxGrid *ag )
   : _display(true), _hilight(false), _hiVert(0), _plottable(false),
-    _indexer(NULL),_timeplot(NULL),_clip(false)
+    _indexer(NULL),_timeplot(NULL),_clip(false),_surf_fill(true),_vol_fill(false)
 {
   if( strstr( fn, ".pts_t" ) )
     _indexer = new AuxGridIndexer(fn);
@@ -445,13 +450,17 @@ AuxGrid::AuxGrid( const char *fn, AuxGrid *ag )
       _datafied[i] = false;
       _color[i][3] = 1;
       _3D[i]       = true;
+      color( Vertex,  defPtColor );
+      color( Cnnx,    defLineColor );
+      color( SurfEle, defSurfColor );
+      color( VolEle,  defVolColor );
     }
   }
   if( !ag ) {
-      size(Vertex, 50);
-      size(Cnnx, 100);
-      size(SurfEle, 50);
-      size(VolEle, 50);
+      size(Vertex,  50);
+      size(Cnnx,   100);
+      size(SurfEle, 10);
+      size(VolEle,  10);
   }
 
   _plottable = _indexer->plottable();
