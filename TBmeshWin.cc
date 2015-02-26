@@ -1701,7 +1701,14 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
         DATA_TYPE idata[_cutsurface[i]->ele(e)->ptsPerObj()];
         if ( showData && cplane->datafied(i) ) {
           for ( int v=0; v<_cutsurface[i]->ele(e)->ptsPerObj(); v++ ) {
-            idata[v] = _cutsurface[i]->interpolate( e, data, v );
+            if( _branch_cut )
+                idata[v] = _cutsurface[i]->interpolate( e, data, v, _branch_range );
+            else
+                idata[v] = _cutsurface[i]->interpolate( e, data, v );
+          }
+          if( _branch_cut ) {
+            int over=0, under = 0;
+
           }
         }
         _cutsurface[i]->ele(e)->draw( 0, 0, elecol, cs, showData?idata:NULL,

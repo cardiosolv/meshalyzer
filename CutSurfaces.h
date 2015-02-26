@@ -25,6 +25,10 @@ class CutSurfaces : public Surfaces
     {
       return _interp[e][p].interpolate( d );
     }
+    DATA_TYPE  interpolate( int e, DATA_TYPE *d, int p, double *bc )
+    {
+      return _interp[e][p].interpolate( d, bc );
+    }
     GLfloat* norm( int e ){ return _norm+3*e; }
   protected:
     GLfloat      **_ptarr;
