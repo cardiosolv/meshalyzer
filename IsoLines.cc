@@ -59,7 +59,6 @@ IsoLine :: process( Surfaces *s, DATA_TYPE *dat )
 }
 
 
-#if 0
 int 
 IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
 {
@@ -72,17 +71,16 @@ IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
     for( int j=0; j<s->num(); j++ ) {
 
       DATA_TYPE idata[s->ele(j)->ptsPerObj()];
-        for ( int v=0; v<s->ele(j)->ptsPerObj(); v++ )
-          idata[v] = s->interpolate( j, dat, v );
+      for ( int v=0; v<s->ele(j)->ptsPerObj(); v++ ) {
+        if( _branch )
+            idata[v] = s->interpolate( j, dat, v, _branch_range );
+        else
+            idata[v] = s->interpolate( j, dat, v );
+      }
       int npoly;
       MultiPoint **lpoly = s->ele(j)->isosurf( idata, val, npoly );
-      if( npoly && _branch ) {
-        const int*nodes= s->ele(j)->obj();
-        edat = (DATA_TYPE *)realloc(edat, sizeof(DATA_TYPE)*s->ele(j)->ptsPerObj() );
-        for( int i=0; i< s->ele(j)->ptsPerObj(); i++ ){
-          edat[i] = dat[nodes[i]];
-        }
-        if(cross_branch(edat,s->ele(j)->ptsPerObj(), _branch_range[0], _branch_range[1], _branch_tol))
+      if( !npoly ||
+          (_branch && cross_branch(idata,s->ele(j)->ptsPerObj(), _branch_range[0], _branch_range[1], _branch_tol)) )
           continue;
       for( int k=0; k<npoly; k++ ) {
         _polygon.push_back(lpoly[k]);
@@ -93,7 +91,6 @@ IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
   }
   return num_lines;
 }
-#endif
 
 IsoLine::~IsoLine()
 {

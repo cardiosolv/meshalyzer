@@ -15,7 +15,7 @@ class IsoLine {
                                 {_color[0]=_color[1]=_color[2]=0;_color[3]=1.;}
         ~IsoLine();
         int process( Surfaces *, DATA_TYPE * );
-        //int process( CutSurfaces *, DATA_TYPE * );
+        int process( CutSurfaces *, DATA_TYPE * );
         int nl(){ return _nl; }
         int v0(){ return _v0; }
         int v1(){ return _v1; }
@@ -23,7 +23,9 @@ class IsoLine {
         void draw( Colourscale *, GLfloat );
 		void color( const GLfloat* c ){memcpy(_color,c,4*sizeof(GLfloat));}
         void branch( bool b, double min=0, double max=0, double tol=BRANCH_TOL )
-          {_branch=b;_branch_range[0]=min;_branch_range[1]=max;_branch_tol=tol; }
+          {_branch=b;if(b){_branch_range[0]=min;_branch_range[1]=max;_branch_tol=tol;} }
+        bool branch(){return _branch;}
+        double *branch_range(){ return _branch?_branch_range:NULL; }
     private:
         vector<MultiPoint *>  _polygon;
         vector<float>         _val;

@@ -1702,13 +1702,9 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
         if ( showData && cplane->datafied(i) ) {
           for ( int v=0; v<_cutsurface[i]->ele(e)->ptsPerObj(); v++ ) {
             if( _branch_cut )
-                idata[v] = _cutsurface[i]->interpolate( e, data, v, _branch_range );
+              idata[v] = _cutsurface[i]->interpolate( e, data, v, _branch_range );
             else
-                idata[v] = _cutsurface[i]->interpolate( e, data, v );
-          }
-          if( _branch_cut ) {
-            int over=0, under = 0;
-
+              idata[v] = _cutsurface[i]->interpolate( e, data, v );
           }
         }
         _cutsurface[i]->ele(e)->draw( 0, 0, elecol, cs, showData?idata:NULL,
@@ -1810,13 +1806,14 @@ TBmeshWin::draw_iso_lines()
   isoline->color( isc->islColor() );
   isoline->draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
   
-  // we need to turn off clipping whne we draw on the clipping plane or we will 
+  // we need to turn off clipping when we draw on the clipping plane or we will 
   // get z-fighting 
   for( int i=0; i<NUM_CP; i++ )
     if( _cutsurface[i] != NULL ){
       glDisable( CLIP_PLANE[i] );
       IsoLine cutline( isc->isolineVal0->value(), isc->isolineVal1->value(),
                        isc->isoNumLines->value(), tm );
+      cutline.branch( _branch_cut, _branch_range[0], _branch_range[1] );
       cutline.process( _cutsurface[i], data );
       cutline.draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
       glEnable( CLIP_PLANE[i] );
