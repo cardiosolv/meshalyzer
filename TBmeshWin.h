@@ -153,6 +153,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      branch_cut(double,double,float);
     friend class Controls;
     friend class HDF5DataBrowser;
+    friend class Frame;
 
   private:
     int        hilight[maxobject];	// which object to highlight

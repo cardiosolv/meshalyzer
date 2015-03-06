@@ -1060,6 +1060,7 @@ void TBmeshWin::output_png( const char* fn, Sequence *seqwidget )
         last_update = tm;
       }
     }
+    
     frame.dump( w(), h(), foutname );
   }
   if ( sequence ) {

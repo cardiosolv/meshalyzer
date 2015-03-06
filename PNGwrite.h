@@ -18,6 +18,10 @@
 */
 #include <png.h>
 #include <stdio.h>
+#include <string>
+#include <cstring>
+
+using namespace std;
 
 class PNGwrite
 {
@@ -30,6 +34,7 @@ class PNGwrite
     inline void colour_type( int c ){ ctype=c; }
     inline void interlace( int i ){ interlace_type=i; }
     inline void palette( png_colorp p ){ cpalette=p; }
+    void  description( string d, string c );
   private:
     png_structp png_ptr;
     png_infop   info_ptr;

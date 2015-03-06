@@ -1,4 +1,5 @@
 #include "PNGwrite.h"
+#include <stdlib.h>
 
 PNGwrite :: PNGwrite( FILE *out )
 {
@@ -36,6 +37,7 @@ PNGwrite :: ~PNGwrite( void )
 int PNGwrite :: write( void *data, int align )
 {
   setjmp(png_jmpbuf(png_ptr));
+
   png_set_IHDR( png_ptr, info_ptr, width, height, colour_depth, ctype,
                 interlace_type, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
 
@@ -67,4 +69,31 @@ int PNGwrite :: write( void *data, int align )
   fclose( fp );
   return 1;
 }
+
+void
+PNGwrite :: description( string datafile, string colour_range ) 
+{
+  png_text tptr[3];
+
+  for( int i=0; i<3; i++ ) {
+    tptr[i].compression = PNG_TEXT_COMPRESSION_NONE;
+  }
+
+  tptr[1].key         = "Description";
+  char *a             = strdup(colour_range.c_str());
+  tptr[1].text        = a;
+  
+  tptr[0].key         = "Software";
+  tptr[0].text        = "meshalyzer";
+  
+  tptr[2].key         = "Data file";
+  char *b             = strdup(datafile.c_str());
+  tptr[2].text        = b;
+  
+  png_set_text(png_ptr, info_ptr, tptr, datafile.length()?3:1 );
+  
+  free(a) ;
+  free(b) ;
+} 
+
 
