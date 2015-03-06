@@ -112,14 +112,15 @@ Frame :: dump( int w, int h, string fname )
   pngimg->size( w, h );
   pngimg->depth( 8*sizeof(GLubyte) );
 
-  string datafile;
-  char cscale[1024];
+  char *datafile=NULL, cscale[1024];
   if( _tbwm->dataBuffer ) {
-    datafile= _tbwm->dataBuffer->file();
+    datafile = realpath( _tbwm->dataBuffer->file().c_str(), NULL );
     sprintf( cscale, "data range = [%f, %f], %d levels", _tbwm->cs->min(), _tbwm->cs->max(), _tbwm->cs->size() );
   }  
 
   pngimg->description( datafile, cscale );
+
+  if( datafile ) free(datafile );
 
   if( _tbwm->transBgd() )
     pngimg->colour_type( PNG_COLOR_TYPE_RGB_ALPHA );
