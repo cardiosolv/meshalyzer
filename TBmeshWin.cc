@@ -406,28 +406,50 @@ void TBmeshWin :: draw()
 // draw_iso_surfaces()
 void TBmeshWin::draw_iso_surfaces()
 {
-  if( have_data == NoData || !isosurfwin->isoOn0->value() ) return;
+  if( have_data == NoData ) return;
 
-  bool dirty =  isosurfwin->issDirty();
+  if( isosurfwin->isoOn0->value() ) {
+    bool dirty =  isosurfwin->issDirty(0);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    for ( int s=0; s<model->_numReg; s++ ) {
+      RRegion *reg = model->region(s);
+      if( reg->_iso0 && ( dirty || reg->_iso0->tm() != tm) ){
+        delete iso0;
+        reg->_iso0 = NULL;
+      }
+      if( reg->_iso0==NULL ) 
+        reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
+                reg->ele_membership(), tm, _branch_cut?_branch_range:NULL );
+      reg->_iso0->color( isosurfwin->issColor(0) );
+      translucency( reg->_iso0->color()[3]<OPAQUE_LIMIT );
+      reg->_iso0->draw();
+    } 
+  }
+
+  if( !isosurfwin->isoOn1->value() ) return;
+
+  bool dirty =  isosurfwin->issDirty(1);
   glPushAttrib(GL_ALL_ATTRIB_BITS);
 
   for ( int s=0; s<model->_numReg; s++ ) {
     RRegion *reg = model->region(s);
-	if( reg->_iso0 && ( dirty || reg->_iso0->tm() != tm) ){
-	  delete iso0;
-	  reg->_iso0 = NULL;
+	if( reg->_iso1 && ( dirty || reg->_iso1->tm() != tm) ){
+	  delete iso1;
+	  reg->_iso1 = NULL;
 	}
-	if( reg->_iso0==NULL ) 
-	  reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
+	if( reg->_iso1==NULL ) 
+	  reg->_iso1 = new IsoSurface( model, data, isosurfwin->isoval1->value(),
 			  reg->ele_membership(), tm, _branch_cut?_branch_range:NULL );
-	reg->_iso0->color( isosurfwin->issColor(0) );
+	reg->_iso1->color( isosurfwin->issColor(1) );
 
-    translucency( reg->_iso0->color()[3]<OPAQUE_LIMIT );
+    translucency( reg->_iso1->color()[3]<OPAQUE_LIMIT );
 
-	reg->_iso0->draw();
+	reg->_iso1->draw();
   } 
 
   glPopAttrib();
+ glPopAttrib();
 }
 
 

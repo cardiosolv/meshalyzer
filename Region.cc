@@ -12,6 +12,7 @@ void RRegion:: initialize( int n, int nvol, int l )
   is_visible = true;
   _label = l;
   _iso0 = NULL;
+  _iso1 = NULL;
   set_color( Vertex, 0., 1., 0. );
   set_color( Cable, 0., 0., 1. );
   set_color( Cnnx, 1., 0., 1. );

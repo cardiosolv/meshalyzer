@@ -34,6 +34,7 @@ class RRegion
     bool threeD(Object_t t){ return _3D[t]; }
     void threeD(Object_t t, int a){ _3D[t]=a; }
     IsoSurface* _iso0;
+    IsoSurface* _iso1;
   private:
     GLfloat color[maxobject+2][4];
     int     startind[maxobject+2];

@@ -11,88 +11,87 @@ decl {\#include <FL/gl.h>} {public global
 decl {\#include <FL/Fl_Color_Chooser.H>} {private global
 } 
 
-class IsosurfControl {} {
+class IsosurfControl {open
+} {
   decl {friend class TBmeshWin;} {private local
   }
   Function {IsosurfControl(TBmeshWin *tb)} {open
   } {
     Fl_Window isowin {open
-      xywh {970 213 305 295} type Double hide
+      xywh {1372 157 305 410} type Double visible
     } {
       Fl_Group {} {
         label {Isosurface 0} open
-        xywh {7 12 290 115} box UP_BOX labeltype EMBOSSED_LABEL align 17
+        xywh {7 8 290 115} box UP_BOX labeltype EMBOSSED_LABEL align 17
       } {
         Fl_Button isocol0 {
           label colour
-          callback {double r=_color0[0], g=_color0[1], b=_color0[2];
+          callback {double r=_color[0][0], g=_color[0][1], b=_color[0][2];
 if(fl_color_chooser( "Isosurface 0",r,g,b ) ){
-  _color0[0] = r;
-  _color0[1] = g;
-  _color0[2] = b;
+  issColor(0,r,g,b,opacity0->value());
   if( isoOn0->value() )
     mwtb->redraw();
 }}
-          xywh {232 86 55 29}
+          xywh {232 82 55 29}
         }
         Fl_Light_Button isoOn0 {
           label on
           callback {mwtb->redraw();}
-          xywh {25 44 45 28}
+          xywh {25 40 45 28}
         }
         Fl_Value_Input isoval0 {
           label {value:}
-          callback {_issDirty = true;
+          callback {_issDirty[0] = true;
 if( isoOn0->value() )
   mwtb->redraw();}
-          xywh {177 44 70 28} when 8
+          xywh {177 40 70 28} when 8
         }
         Fl_Value_Slider opacity0 {
           label {Opacity:}
           callback {if( isoOn0->value() )
   mwtb->redraw();}
-          xywh {77 87 145 25} type Horizontal align 4 value 1 textsize 14
+          xywh {77 83 145 25} type Horizontal align 4 value 1 textsize 14
         }
       }
       Fl_Group {} {
         label Isolines open
-        xywh {10 135 290 150} box UP_BOX labeltype EMBOSSED_LABEL labelsize 16 align 17
+        xywh {9 251 290 150} box UP_BOX labeltype EMBOSSED_LABEL labelsize 16 align 17
       } {
         Fl_Light_Button isolineOn {
           label on
           callback {mwtb->redraw();}
-          xywh {25 165 65 30}
+          xywh {24 281 65 30}
         }
         Fl_Value_Input isolineVal0 {
           label {start value:}
           callback {_islDirty = true;
 isoinc->value((isolineVal1->value()-isolineVal0->value())/(float)(isoNumLines->value()-1.));
 if( isolineOn->value() ) mwtb->redraw();}
-          xywh {225 161 60 29} when 4
+          xywh {224 277 60 29} when 4
         }
         Fl_Value_Input isolineVal1 {
           label {end value:}
           callback {_islDirty = true;
 isoinc->value((isolineVal1->value()-isolineVal0->value())/(isoNumLines->value()-1.));
 if( isolineOn->value() ) mwtb->redraw();}
-          xywh {225 191 60 29} when 4
+          xywh {224 307 60 29} when 4
         }
         Fl_Spinner isoNumLines {
           label {\#lines:}
           callback {_islDirty = true;
 isoinc->value((isolineVal1->value()-isolineVal0->value())/(isoNumLines->value()-1.));
 if( isolineOn->value() ) mwtb->redraw();}
-          xywh {225 221 60 24}
+          xywh {224 337 60 24}
         }
         Fl_Spinner isolineThick {
           label thickness
           callback {if( isolineOn->value() ) mwtb->redraw();}
-          xywh {25 251 60 24} align 5 minimum 0
+          xywh {24 367 60 24} align 5 minimum 0
         }
         Fl_Light_Button islDatify {
           label datified
           callback {if( isolineOn->value() ) mwtb->redraw();}
-          xywh {25 200 65 30}
+          xywh {24 316 65 30}
         }
         Fl_Button islcol {
           label colour
@@ -103,25 +102,62 @@ if(fl_color_chooser( "Isoline",r,g,b ) ){
   _islColor[2] = b;
   if( isolineOn->value() ) mwtb->redraw();
 }}
-          xywh {95 200 50 30}
+          xywh {94 316 50 30}
         }
         Fl_Value_Output isoinc {
           label {increment:}
-          tooltip {increment between isolines} xywh {200 248 87 27} color 3 selection_color 17
+          tooltip {increment between isolines} xywh {199 364 87 27} color 3 selection_color 17
+        }
+      }
+      Fl_Group {} {
+        label {Isosurface 1} open
+        xywh {7 130 290 115} box UP_BOX labeltype EMBOSSED_LABEL align 17
+      } {
+        Fl_Button isocol1 {
+          label colour
+          callback {double r=_color[1][0], g=_color[1][1], b=_color[1][2];
+if(fl_color_chooser( "Isosurface 1",r,g,b ) ){
+  issColor( 1, r, g, b, opacity1->value() );
+  if( isoOn1->value() )
+    mwtb->redraw();
+}}
+          xywh {230 204 55 29}
+        }
+        Fl_Light_Button isoOn1 {
+          label on
+          callback {mwtb->redraw();}
+          xywh {25 162 45 28}
+        }
+        Fl_Value_Input isoval1 {
+          label {value:}
+          callback {_issDirty[1] = true;
+if( isoOn1->value() )
+  mwtb->redraw();}
+          xywh {177 162 70 28} when 8
+        }
+        Fl_Value_Slider opacity1 {
+          label {Opacity:}
+          callback {if( isoOn1->value() )
+  mwtb->redraw();}
+          xywh {77 205 145 25} type Horizontal align 4 value 1 textsize 14
         }
       }
     }
     code {mwtb = tb;
-_color0[0] = _color0[3] = 1.;
-_color0[1] = _color0[2] = 0;
+_color[0][0] = _color[0][3] = 1.;
+_color[0][1] = _color[0][2] = 0;
+_color[1][0] = _color[1][2]  = 0;
+_color[1][1] = 0.8;
+_color[1][3] = 1.;
 _islDirty = true;
 _islColor[0] = _islColor[1] = _islColor[2] = 0;
 _islColor[3] = 1.;
-_issDirty = true;} {}
+_issDirty[0] = true;
+_issDirty[1] = true;} {}
   }
   decl {TBmeshWin* mwtb;} {private local
   }
-  decl {GLfloat _color0[4];} {private local
+  decl {GLfloat _color[2][4];} {private local
   }
   decl {GLfloat _islColor[4];} {private local
   }
@@ -131,23 +167,23 @@ _issDirty = true;} {}
   }
   decl {bool _islDirty;} {private local
   }
-  decl {bool _issDirty;} {private local
+  decl {bool _issDirty[2];} {private local
   }
-  Function {issColor(int s)} {return_type {const GLfloat*}
+  Function {issColor(int s)} {open return_type {const GLfloat*}
   } {
-    code {if( s==0 ) {
-  _color0[3] = opacity0->value();
-  return _color0;
-}} {}
+    code {if( s==0 )
+  _color[s][3] = opacity0->value();
+else if( s== 1 )
+  _color[s][3] = opacity1->value();
+return _color[s];} {selected
+    }
   }
-  Function {issColor(int s,float r, float g, float b, float a)} {return_type void
+  Function {issColor(int s,float r, float g, float b, float a)} {open return_type void
   } {
-    code {if( s==0 ) {
-  _color0[0] = r;
-  _color0[1] = g;
-  _color0[2] = b;
-  _color0[3] = a;
-}} {}
+    code {_color[s][0] = r;
+_color[s][1] = g;
+_color[s][2] = b;
+_color[s][3] = a;} {}
   }
   Function {islDirty(bool b=false)} {return_type bool
   } {
@@ -155,12 +191,11 @@ _issDirty = true;} {}
 _islDirty = b;
 return od;} {}
   }
-  Function {issDirty(bool b=false)} {return_type bool
+  Function {issDirty(int s, bool b=false)} {open return_type bool
   } {
-    code {bool od = _issDirty;
-_issDirty = b;
-return od;} {selected
-    }
+    code {bool od = _issDirty[s];
+_issDirty[s]=b;
+return od;} {}
   }
   Function {islThickness()} {return_type GLfloat
   } {
