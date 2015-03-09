@@ -775,7 +775,7 @@ op->win->show();}
       } {
         Fl_Group hilightgrp {
           label Highlight
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -976,8 +976,8 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
+          label Surface open
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
             label Visible
@@ -1943,8 +1943,15 @@ SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineOn );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoOn0 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoval0 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->opacity0 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoOn1 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoval1 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->opacity1 );
+
 mshzf << "ISOSURF_COLOUR 0 = ";
 save_colour( mshzf, mwtb->isosurfwin->issColor(0) );
+mshzf << endl;
+mshzf << "ISOSURF_COLOUR 1 = ";
+save_colour( mshzf, mwtb->isosurfwin->issColor(1) );
 mshzf << endl;} {}
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
@@ -1954,7 +1961,7 @@ ofs << col[3];} {}
   Function {pick_surf_color(Object_t ot, const char *winlab)} {} {
     code {int msz = surflist->nitems();
 
-if( !msz ) return;
+if( !msz || !surflist->nchecked()) return;
 
 bool* cs = new bool[msz];
 GLfloat *col;
@@ -2227,8 +2234,9 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     continue;
   }
   if( !strcmp( var, "ISOSURF_COLOUR" ) ){
-    sscanf( buf, "%*s %*d = %f %f %f %f", &r, &g, &b, &a );
-    mwtb->isosurfwin->issColor(int(val),r,g,b,a);
+    int s;
+    sscanf( buf, "%*s %d = %f %f %f %f", &s, &r, &g, &b, &a );
+    mwtb->isosurfwin->issColor(s,r,g,b,a);
     continue;
   }
   
