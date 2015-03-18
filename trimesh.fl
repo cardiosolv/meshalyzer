@@ -73,11 +73,11 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1313 22 350 650} type Double box UP_BOX
+      xywh {1643 36 350 650} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -509,7 +509,7 @@ mwtb->redraw();}
           }
         }
         Submenu outmenu {
-          label Output
+          label Output open
           xywh {0 0 100 20}
         } {
           Submenu {} {
@@ -550,6 +550,13 @@ mwtb->output_pdf( fn,true );}
 if( fn==NULL) return;
 mwtb->output_pdf( fn, false );}
             xywh {5 5 100 20}
+          }
+          MenuItem {} {
+            label {Colour Bar}
+            callback {char *fn = fl_file_chooser("colour bar image", "*.png", "colour_bar.png" );
+if( fn!=NULL)
+mwtb->cs->output_png(fn);} selected
+            xywh {0 0 34 20}
           }
           MenuItem {} {
             label {Visible vertices}
@@ -770,12 +777,12 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
           label Highlight
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -976,8 +983,8 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface open
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90
+          label Surface
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label Visible
@@ -1236,7 +1243,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid} open
+          label {Aux Grid}
           xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
@@ -2244,8 +2251,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {selected
-    }
+mwtb->lights(illBut->value());} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();

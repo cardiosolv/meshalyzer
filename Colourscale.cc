@@ -37,7 +37,7 @@ void Colourscale :: scale( CScale_t cs )
         cmap[i][0] = cmap[i][1] = cmap[i][2] = ((float)i)/ispan;
       break;
     case CS_HOT:
-      intrvl = ispan/3.;
+      intrvl = roundf(ispan/3.);
       for ( i=0; i<intrvl; i++ ) {
         cmap[i][0] = (float)(i)/(intrvl-1);
         cmap[i][1] = cmap[i][2] = 0;
@@ -50,7 +50,7 @@ void Colourscale :: scale( CScale_t cs )
       for ( ; i<n; i++ ) {
         cmap[i][0] = 1;
         cmap[i][1] = 1;
-        cmap[i][2] = (float)(i-2*intrvl)/(intrvl-1);
+        cmap[i][2] = (float)(i-2*intrvl)/(n-2*intrvl-1);
       }
       break;
     case CS_RAINBOW:
@@ -255,4 +255,29 @@ GLfloat* Colourscale :: colorvec( double val )
   if ( indx<0 ) indx = 0;
   else if ( indx>=n ) indx = n-1;
   return cmap[indx];
+}
+
+
+void
+Colourscale :: output_png( const char *filename )
+{
+  PNGwrite cbar( fopen(filename,"w") );
+  int y        = 128;
+  int colwidth = 1024/n;
+  int x        = colwidth*n;
+  cbar.size( x, y );
+  unsigned char buffer[x*y*3];
+  for( int line = 0; line<y; line++ ){
+    for( int i=0; i<n; i++ ) {
+      unsigned char r=lroundf(cmap[i][0]*255);
+      unsigned char g=lroundf(cmap[i][1]*255);
+      unsigned char b=lroundf(cmap[i][2]*255);
+      for( int j=0; j<colwidth; j++ ) {
+        buffer[(i*colwidth+j+line*x)*3]   = r;
+        buffer[(i*colwidth+j+line*x)*3+1] = g;
+        buffer[(i*colwidth+j+line*x)*3+2] = b;
+      }
+    }
+  }
+  cbar.write( buffer, 1 );
 }

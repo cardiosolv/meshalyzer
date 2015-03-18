@@ -16,6 +16,9 @@
     along with flounder; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#ifndef PNGWRITE_INC
+#define PNGWRITE_INC
+
 #include <png.h>
 #include <stdio.h>
 #include <string>
@@ -46,4 +49,4 @@ class PNGwrite
     int interlace_type;
     int colour_depth;
 };
-
+#endif
