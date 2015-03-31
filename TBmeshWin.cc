@@ -659,7 +659,7 @@ int TBmeshWin::handle( int event )
         return 1;
         break;
       case 'o':
-        get_data( dataBuffer->file().c_str(), contwin->tmslider );
+        //get_data( dataBuffer->file().c_str(), contwin->tmslider );
         optimize_cs();
         contwin->mincolval->value(cs->min());
         contwin->maxcolval->value(cs->max());
@@ -941,8 +941,11 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
     mslide->redraw();
   }
 
-  if ( contwin->read_recalibrate->value() )
+  if ( contwin->read_recalibrate->value() ) {
     optimize_cs();
+    contwin->mincolval->value(cs->min());
+    contwin->maxcolval->value(cs->max());
+  }
 
   string fname = fn;
   string::size_type i0 = fname.rfind("/");
