@@ -8,12 +8,7 @@
 #define VECDATA_H
 
 #include "Colourscale.h"
-
-#ifdef __APPLE__
-#include <OpenGL/glu.h>
-#else
-#include <GL/glu.h>
-#endif
+#include <FL/glu.h>
 
 #ifdef USE_HDF5
 #include "ch5/ch5.h"
@@ -22,7 +17,7 @@
 enum DataType {Vector,Scalar,FixedVCdata};
 
 void draw_arrow( GLUquadricObj* quado,
-                 GLfloat stick, GLfloat head, GLfloat stick_rad, GLfloat head_rad );
+                 GLfloat stick, GLfloat head, GLfloat stick_rad, GLfloat head_rad, bool draw_head=true );
 
 class VecData
 {
@@ -43,6 +38,7 @@ class VecData
     void         optimize_cs();
     void         stride( int a ){ _stride=a; }
     void         stoch_stride( bool a ){ _stoch = a; }
+    void         heads( bool b ){ _draw_heads=b; }
     Colourscale *cs;			// colour scale for display
     VecData&     operator=(const VecData*);
   private:
@@ -64,6 +60,7 @@ class VecData
     int      _last_tm;      // last time drawn
     int      _stride;
     bool     _stoch;        // true for stochastic stride
+    bool     _draw_heads;   // draw arrow heads
 #ifdef USE_HDF5
     void     read_vec_HDF5( const char *);
 #endif

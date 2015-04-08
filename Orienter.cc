@@ -1,8 +1,5 @@
 #include "Orienter.h"
 
-void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
-                                         GLfloat stick_rad, GLfloat head_rad );
-
 Orienter::Orienter(int x, int y, int w, int h, const char *l )
     : Fl_Gl_Tb_Window(x, y, w, h, l),_cp(2),_dl(0)
 {

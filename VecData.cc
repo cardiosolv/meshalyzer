@@ -76,9 +76,11 @@ VecData::operator=( const VecData* v )
    \param head_rad   radius of base
 */
 void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
-		                         GLfloat stick_rad, GLfloat head_rad )
+		               GLfloat stick_rad, GLfloat head_rad, bool draw_head )
 {
   gluCylinder( quado, stick_rad, stick_rad, stick, 10, 2 );
+  if( !draw_head )
+    return;
   glTranslatef( 0, 0, stick );
   gluDisk( quado, stick_rad, head_rad, 2, 4 );
   gluCylinder( quado, head_rad, 0, head, 10, 2 );
@@ -88,7 +90,7 @@ void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
 VecData::VecData(const char* vptfile):_length(1),maxmag(0.),_stride(1),
     numpt(0),numtm(0),pts(NULL),vdata(NULL),sdata(NULL),_disp(true),
     _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0),
-    _stoch(false)
+    _stoch(false),_draw_heads(true)
 {
   _colour[1] = _colour[2] = 0.;
   _colour[0] = _colour[3] = 1.;
@@ -365,7 +367,7 @@ VecData::draw(int tm, float maxdim)
     // determine rotation axis
     cross( vdp+i, zaxis, rotvect );
     glRotatef( angle, rotvect[0], rotvect[1], rotvect[2] );
-    draw_arrow( quado, size, size, size/10., size/5. );
+    draw_arrow( quado, size, size, size/10., size/5., _draw_heads );
     glPopMatrix();
   }
   glPopAttrib();
