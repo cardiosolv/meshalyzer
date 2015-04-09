@@ -63,6 +63,14 @@ VecData::operator=( const VecData* v )
   _colour_det = v->_colour_det;
   autocal     = v->autocal;
   _stoch      = v->_stoch;
+  _draw_heads = v->_draw_heads;
+
+  if( !sdata ) {
+    if( _length_det == Scalar ) 
+      _length_det = Vector;
+    if( _colour_det == Scalar ) 
+      _colour_det = Vector;
+  }
 
   return *this;
 }

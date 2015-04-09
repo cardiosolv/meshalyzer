@@ -30,10 +30,12 @@ class VecData
     float        length() const { return _length; }
     void         colourize();
     GLfloat*     colour(){ return _colour; }
-    bool         display(bool a) {_disp = a; }
+    void         display(bool a) {_disp = a; }
     void         length_det( DataType dt ){if(dt!=Scalar||sdata)_length_det=dt;}
+    DataType     length_det(void ){return _length_det;}
     void         colour_det( DataType dt ){if(dt!=Scalar||sdata)
 	                                          {_colour_det=dt; optimize_cs();} }
+    DataType     colour_det(void ){return _colour_det;}
     void         auto_cs(bool a){ autocal=a; }
     void         optimize_cs();
     void         stride( int a ){ _stride=a; }
@@ -41,6 +43,7 @@ class VecData
     void         heads( bool b ){ _draw_heads=b; }
     Colourscale *cs;			// colour scale for display
     VecData&     operator=(const VecData*);
+    bool         have_scalar(){ return sdata; }
   private:
     int      numpt;			// number of spatial points
     int      numtm;			// number of time instances

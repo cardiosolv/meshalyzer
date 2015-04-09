@@ -73,7 +73,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1137 128 350 645} type Double box UP_BOX
+      xywh {1148 255 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -478,7 +478,7 @@ mwtb->redraw();}
             xywh {0 0 31 20}
           }
           Submenu brcut {
-            label {Branch cut}
+            label {Branch cut} open
             tooltip {Do not interpolqte betzeen limits} xywh {0 0 70 20}
           } {
             MenuItem brcutNone {
@@ -509,7 +509,7 @@ mwtb->redraw();}
           }
         }
         Submenu outmenu {
-          label Output open
+          label Output
           xywh {0 0 100 20}
         } {
           Submenu {} {
@@ -1110,142 +1110,170 @@ write_surfaces(0);}
         }
         Fl_Group vectorgrp {
           label Vectors open
-          xywh {15 325 315 155} color 75 labelfont 1 labelsize 12 labelcolor 146 deactivate
+          xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 deactivate
         } {
           Fl_Light_Button veconbut {
             label Vectors
             callback {mwtb->vecdata->display(o->value());
 mwtb->redraw();}
-            tooltip {display vectors?} xywh {20 340 70 25} value 1
+            tooltip {display vectors?} xywh {20 325 75 25} value 1
           }
           Fl_Roller veclength {
-            label {Scale Arrows}
+            label {Arrow Size}
             callback {mwtb->vecdata->length(o->value());
 mwtb->redraw();}
-            tooltip {scale all vectors} xywh {100 340 150 25} type Horizontal labelsize 12 align 8 maximum 100 step 0.01 value 1
+            tooltip {scale all vectors} xywh {100 325 150 25} type Horizontal labelsize 12 labelcolor 7 align 8 maximum 100 step 0.01 value 1
           }
           Fl_Button veccolor {
             label colour
             callback {mwtb->vecdata->colourize();
 mwtb->redraw();}
-            tooltip {fixed colour} xywh {255 375 75 25}
-          }
-          Fl_Light_Button vecautocal {
-            label {auto cs}
-            callback {mwtb->vecdata->auto_cs(o->value());}
-            tooltip {calibrate every new time} xywh {20 410 80 30}
-          }
-          Fl_Choice veccstype {
-            label {colour scale}
-            xywh {220 410 110 30} down_box BORDER_BOX labelsize 10 align 2
-            code0 {\#include "Colourscale.h"}
-            code1 {o->value(1);}
-          } {
-            MenuItem {} {
-              callback {mwtb->vecdata->cs->scale(CS_RAINBOW);
-mwtb->redraw();}
-              image {rainbow.xpm} xywh {15 15 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->vecdata->cs->scale(CS_BL_RAINBOW);
-mwtb->redraw();}
-              image {blrainbow.xpm} xywh {15 15 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->vecdata->cs->scale(CS_HOT);
-mwtb->redraw();}
-              image {hot.xpm} xywh {15 15 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->vecdata->cs->scale(CS_COLD_HOT);
-mwtb->redraw();}
-              image {coldhot.xpm} xywh {15 15 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->vecdata->cs->scale(CS_GREY);
-mwtb->redraw();}
-              image {blwhite.xpm} xywh {15 15 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->vecdata->cs->scale(CS_CG);
-mwtb->redraw();}
-              image {cg.xpm} xywh {15 15 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->vecdata->cs->scale(CS_MATLAB);
-mwtb->redraw();}
-              image {matlab.xpm} xywh {15 15 100 20}
-            }
+            tooltip {fixed colour} xywh {245 360 75 25}
           }
           Fl_Menu_Button veclengthdeterm {
             label Length
-            tooltip {determinant of vector length} xywh {20 375 90 25}
+            tooltip {determinant of vector length} xywh {20 360 90 25}
           } {
-            MenuItem {} {
+            MenuItem veclenmag {
               label {Vector mag}
               callback {mwtb->vecdata->length_det(Vector);
 mwtb->redraw();}
-              xywh {5 5 100 20}
+              xywh {5 5 100 20} type Radio value 1
             }
-            MenuItem {} {
+            MenuItem veclenscalar {
               label Scalar
               callback {mwtb->vecdata->length_det(Scalar);
 mwtb->redraw();}
-              xywh {5 5 100 20}
+              xywh {5 5 100 20} type Radio
             }
-            MenuItem {} {
+            MenuItem veclenfix {
               label Fixed
               callback {mwtb->vecdata->length_det(FixedVCdata);
 mwtb->redraw();}
-              xywh {5 5 100 20}
+              xywh {5 5 100 20} type Radio
             }
           }
           Fl_Menu_Button veccoldeterm {
             label Colour
-            tooltip {determinant of vector colour} xywh {140 375 90 25}
+            tooltip {determinant of vector colour} xywh {130 360 90 25}
           } {
-            MenuItem {} {
+            MenuItem veccolmag {
               label {Vector mag}
               callback {mwtb->vecdata->colour_det(Vector);
+veccolgroup->activate();
+veccolor->deactivate();
+veccolmin->value(mwtb->vecdata->cs->min());
+veccolmax->value(mwtb->vecdata->cs->max());
 mwtb->redraw();}
-              xywh {15 15 100 20}
+              xywh {15 15 100 20} type Radio value 1
             }
-            MenuItem {} {
+            MenuItem veccolscalar {
               label Scalar
               callback {mwtb->vecdata->colour_det(Scalar);
+veccolgroup->activate();
+veccolor->deactivate();
+veccolmin->value(mwtb->vecdata->cs->min());
+veccolmax->value(mwtb->vecdata->cs->max());
 mwtb->redraw();}
-              xywh {15 15 100 20}
+              xywh {15 15 100 20} type Radio
             }
-            MenuItem {} {
+            MenuItem veccolfix {
               label Fixed
               callback {mwtb->vecdata->colour_det(FixedVCdata);
+veccolgroup->deactivate();
+veccolor->activate();
 mwtb->redraw();}
-              xywh {15 15 100 20}
+              xywh {15 15 100 20} type Radio
             }
           }
-          Fl_Button {} {
-            label optimal
-            callback {mwtb->vecdata->optimize_cs();
-mwtb->redraw();}
-            tooltip {calibrate for current time} xywh {120 410 75 30} box ROUND_UP_BOX labelsize 10
-          }
           Fl_Value_Input vecstride {
-            label {stride:}
+            label stride
             callback {mwtb->vecdata->stride(o->value());
 mwtb->redraw();}
-            xywh {70 451 35 24} when 8 minimum 1 maximum 100000 step 1 value 1
+            xywh {25 441 35 24} labelcolor 7 align 2 when 8 minimum 1 maximum 100000 step 1 value 1
           }
           Fl_Check_Button vecstoch {
             label Stochastic
             callback {mwtb->vecdata->stoch_stride(o->value());
 mwtb->redraw();}
-            xywh {115 450 70 25} down_box DOWN_BOX
+            xywh {95 435 75 25} down_box DOWN_BOX labelcolor 7
           }
           Fl_Check_Button vecheads {
             label Heads
             callback {mwtb->vecdata->heads(o->value());
 mwtb->redraw();}
-            xywh {220 455 70 15} down_box DOWN_BOX value 1
+            xywh {95 465 90 15} down_box DOWN_BOX value 1 labelcolor 7
+          }
+          Fl_Group veccolgroup {open
+            xywh {20 390 305 100} labelfont 1
+          } {
+            Fl_Value_Input veccolmin {
+              label {min:}
+              callback {mwtb->vecdata->cs->calibrate(o->value(),mwtb->vecdata->cs->max());
+mwtb->redraw();}
+              xywh {245 438 80 22} labelsize 12 labelcolor 7 when 8 textsize 12
+            }
+            Fl_Value_Input veccolmax {
+              label {max:}
+              callback {mwtb->vecdata->cs->calibrate(mwtb->vecdata->cs->min(),o->value());
+mwtb->redraw();}
+              xywh {245 463 80 22} labelsize 12 labelcolor 7 when 8 textsize 12
+            }
+            Fl_Choice veccstype {
+              label {colour scale}
+              xywh {215 395 110 30} down_box BORDER_BOX labelsize 10 labelcolor 7 align 2
+              code0 {\#include "Colourscale.h"}
+              code1 {o->value(1);}
+            } {
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_RAINBOW);
+mwtb->redraw();}
+                image {rainbow.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_BL_RAINBOW);
+mwtb->redraw();}
+                image {blrainbow.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_HOT);
+mwtb->redraw();}
+                image {hot.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_COLD_HOT);
+mwtb->redraw();}
+                image {coldhot.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_GREY);
+mwtb->redraw();}
+                image {blwhite.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_CG);
+mwtb->redraw();}
+                image {cg.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_MATLAB);
+mwtb->redraw();}
+                image {matlab.xpm} xywh {20 20 100 20}
+              }
+            }
+            Fl_Button {} {
+              label optimal
+              callback {mwtb->vecdata->optimize_cs();
+veccolmin->value(mwtb->vecdata->cs->min());
+veccolmax->value(mwtb->vecdata->cs->max());
+mwtb->redraw();} selected
+              tooltip {calibrate for current time} xywh {125 395 75 30} box ROUND_UP_BOX labelsize 12
+            }
+            Fl_Light_Button vecautocal {
+              label {auto cs}
+              callback {mwtb->vecdata->auto_cs(o->value());}
+              tooltip {calibrate every new time} xywh {20 400 80 25}
+            }
           }
         }
         Fl_Group auxgridgrp {
@@ -1845,6 +1873,12 @@ SAVE_WIDGET(mshzf,vecautocal);
 SAVE_WIDGET(mshzf,vecstride);
 SAVE_WIDGET(mshzf,vecstoch);
 SAVE_WIDGET(mshzf,vecheads);
+SAVE_WIDGET(mshzf,veclenmag);
+SAVE_WIDGET(mshzf,veclenscalar);
+SAVE_WIDGET(mshzf,veclenfix);
+SAVE_WIDGET(mshzf,veccolmag);
+SAVE_WIDGET(mshzf,veccolscalar);
+SAVE_WIDGET(mshzf,veccolfix);
 //light tab
 SAVE_WIDGET(mshzf,lightx);
 SAVE_WIDGET(mshzf,lighty);
@@ -2152,15 +2186,26 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     TEST_VAR( vecstride, var, int(val) ) 
     TEST_VAR( vecstoch, var, int(val) )
     TEST_VAR( vecheads, var, int(val) ) 
-    
-  } else {
+    TEST_RADIO( veclenmag,    var, int(val), veclengthdeterm ) 
+    TEST_RADIO( veclenscalar, var, int(val), veclengthdeterm ) 
+    TEST_RADIO( veclenfix,    var, int(val), veclengthdeterm ) 
+    TEST_RADIO( veccolmag,    var, int(val), veccoldeterm ) 
+    TEST_RADIO( veccolscalar, var, int(val), veccoldeterm ) 
+    TEST_RADIO( veccolfix,    var, int(val), veccoldeterm ) 
+ } else {
     IGNORE_VAR( veccstype, var )
     IGNORE_VAR( veconbut, var ) 
     IGNORE_VAR( veclength, var ) 
     IGNORE_VAR( vecautocal, var ) 
     IGNORE_VAR( vecstride, var ) 
     IGNORE_VAR( vecstoch, var ) 
-    IGNORE_VAR( vecheads, var )
+    IGNORE_VAR( vecheads, var ) 
+    IGNORE_VAR( veclenmag, var ) 
+    IGNORE_VAR( veclenscalar, var )
+    IGNORE_VAR( veclenfix, var )
+    IGNORE_VAR( veccolmag, var ) 
+    IGNORE_VAR( veccolscalar, var )
+    IGNORE_VAR( veccolfix, var )
   }
   TEST_VAR( lightx, var, val ) 
   TEST_VAR( lighty, var, val ) 
@@ -2266,8 +2311,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {selected
-    }
+mwtb->lights(illBut->value());} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
@@ -2312,6 +2356,37 @@ if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str()
   }
   fl_cursor(FL_CURSOR_DEFAULT);
   mwtb->redraw();
+}} {}
+  }
+  Function {update_vecdata(VecData *vd)} {open
+  } {
+    code {if( vd->length_det()==Vector ) {
+  veclenmag->setonly();
+  veclenmag->do_callback(veclengthdeterm);
+} else if( vd->length_det()==Scalar ) {
+  veclenscalar->setonly();
+  veclenscalar->do_callback(veclengthdeterm);
+} else {
+  veclenfix->setonly();
+  veclenfix->do_callback(veclengthdeterm);
+} 
+if( vd->colour_det()==Vector ) {
+  veccolmag->setonly();
+  veccolmag->do_callback(veccoldeterm);
+} else if( vd->colour_det()==Scalar ) {
+  veccolscalar->setonly();
+  veccolscalar->do_callback(veccoldeterm);
+} else {
+  veccolfix->setonly();
+  veccolfix->do_callback(veccoldeterm);
+} 
+
+if( vd->have_scalar() ) {
+  veccolscalar->activate();
+  veclenscalar->activate();
+} else { 
+   veccolscalar->deactivate();
+   veclenscalar->deactivate();
 }} {}
   }
 } 

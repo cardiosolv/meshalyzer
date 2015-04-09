@@ -1249,6 +1249,7 @@ TBmeshWin::getVecData( void *vp, const char* vptfile )
 
   vecdata = newvd;
   ((Myslider *)vp)->maximum( max_time() );
+  contwin->update_vecdata( vecdata );
   contwin->window->redraw();
   redraw();
   return 0;
