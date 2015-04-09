@@ -1110,7 +1110,7 @@ write_surfaces(0);}
         }
         Fl_Group vectorgrp {
           label Vectors open
-          xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 deactivate
+          xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
             label Vectors
@@ -1266,7 +1266,7 @@ mwtb->redraw();}
               callback {mwtb->vecdata->optimize_cs();
 veccolmin->value(mwtb->vecdata->cs->min());
 veccolmax->value(mwtb->vecdata->cs->max());
-mwtb->redraw();} selected
+mwtb->redraw();}
               tooltip {calibrate for current time} xywh {125 395 75 30} box ROUND_UP_BOX labelsize 12
             }
             Fl_Light_Button vecautocal {
@@ -1277,8 +1277,8 @@ mwtb->redraw();} selected
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid}
-          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
+          label {Aux Grid} selected
+          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
         } {
           Fl_Light_Button auxgriddispbut {
             label On
@@ -1879,6 +1879,13 @@ SAVE_WIDGET(mshzf,veclenfix);
 SAVE_WIDGET(mshzf,veccolmag);
 SAVE_WIDGET(mshzf,veccolscalar);
 SAVE_WIDGET(mshzf,veccolfix);
+SAVE_WIDGET(mshzf,veccolmin);
+SAVE_WIDGET(mshzf,veccolmax);
+if(mwtb->vecdata){
+   mshzf << "VEC_FIXED_COLOR = ";
+   save_colour( mshzf, mwtb->vecdata->colour() );
+   mshzf << endl;
+}
 //light tab
 SAVE_WIDGET(mshzf,lightx);
 SAVE_WIDGET(mshzf,lighty);
@@ -2179,6 +2186,11 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( cabhi, var, int(val) ) 
   TEST_CHOICE( attachtype, var, int(val) ) 
   if( mwtb->vecdata != NULL ) {
+    if( !strcmp( var, "VEC_FIXED_COLOR" ) ) {
+      sscanf( buf, "%*s = %f %f %f %f", &r, &g, &b, &a );;
+      mwtb->vecdata->colour(r,g,b,a);;
+      continue;
+    } 
     TEST_CHOICE( veccstype, var, int(val) )
     TEST_VAR( veconbut, var, int(val) ) 
     TEST_VAR( veclength, var, val ) 
@@ -2186,6 +2198,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     TEST_VAR( vecstride, var, int(val) ) 
     TEST_VAR( vecstoch, var, int(val) )
     TEST_VAR( vecheads, var, int(val) ) 
+    TEST_VAR( veccolmin, var, val )
+    TEST_VAR( veccolmax, var, val )
     TEST_RADIO( veclenmag,    var, int(val), veclengthdeterm ) 
     TEST_RADIO( veclenscalar, var, int(val), veclengthdeterm ) 
     TEST_RADIO( veclenfix,    var, int(val), veclengthdeterm ) 
@@ -2193,6 +2207,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     TEST_RADIO( veccolscalar, var, int(val), veccoldeterm ) 
     TEST_RADIO( veccolfix,    var, int(val), veccoldeterm ) 
  } else {
+    IGNORE_VAR( VEC_FIXED_DATA, var )
     IGNORE_VAR( veccstype, var )
     IGNORE_VAR( veconbut, var ) 
     IGNORE_VAR( veclength, var ) 
@@ -2200,6 +2215,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     IGNORE_VAR( vecstride, var ) 
     IGNORE_VAR( vecstoch, var ) 
     IGNORE_VAR( vecheads, var ) 
+    IGNORE_VAR( veccolmin, var ) 
+    IGNORE_VAR( veccolmax, var ) 
     IGNORE_VAR( veclenmag, var ) 
     IGNORE_VAR( veclenscalar, var )
     IGNORE_VAR( veclenfix, var )

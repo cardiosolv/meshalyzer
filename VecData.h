@@ -30,6 +30,7 @@ class VecData
     float        length() const { return _length; }
     void         colourize();
     GLfloat*     colour(){ return _colour; }
+    void         colour(float r,float g, float b,float a ){_colour[0]=r;_colour[1]=g;_colour[2]=b;_colour[3]=a;}
     void         display(bool a) {_disp = a; }
     void         length_det( DataType dt ){if(dt!=Scalar||sdata)_length_det=dt;}
     DataType     length_det(void ){return _length_det;}
