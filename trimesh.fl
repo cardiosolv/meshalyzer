@@ -2,7 +2,7 @@
 version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "Surfaces.h"} {public local
+decl {\#include "Surfaces.h"} {selected public local
 } 
 
 decl {\#include <FL/gl.h>} {public local
@@ -36,6 +36,9 @@ decl {\#define TEST_MENUVAR(A,B,C,D) if(!strcmp(\#A,B)){if(C)A->set();else A->cl
 } 
 
 decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {private local
+} 
+
+decl {\#define MAX_INIT_VECS 200000} {private local
 } 
 
 decl {\#include "Model.h"} {public local
@@ -1277,7 +1280,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid} selected
+          label {Aux Grid}
           xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
         } {
           Fl_Light_Button auxgriddispbut {
@@ -2033,8 +2036,7 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
+  Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2404,6 +2406,12 @@ if( vd->have_scalar() ) {
 } else { 
    veccolscalar->deactivate();
    veclenscalar->deactivate();
+}
+
+if( vd->size()/int(vecstride->value())>MAX_INIT_VECS ) {
+  int stride = vd->size()/(MAX_INIT_VECS)+1;
+  vecstride->value(stride);
+  vd->stride(stride);
 }} {}
   }
 } 

@@ -64,6 +64,8 @@ VecData::operator=( const VecData* v )
   autocal     = v->autocal;
   _stoch      = v->_stoch;
   _draw_heads = v->_draw_heads;
+  _3D         = v->_3D;
+  memcpy( _colour, v->_colour, 4*sizeof(GLfloat) );
 
   if( !sdata ) {
     if( _length_det == Scalar ) 
@@ -98,7 +100,7 @@ void draw_arrow( GLUquadricObj* quado, GLfloat stick, GLfloat head,
 VecData::VecData(const char* vptfile):_length(1),maxmag(0.),_stride(1),
     numpt(0),numtm(0),pts(NULL),vdata(NULL),sdata(NULL),_disp(true),
     _length_det(Vector),_colour_det(Vector),autocal(false),_last_tm(0),
-    _stoch(false),_draw_heads(true)
+    _stoch(false),_draw_heads(true),_3D(true)
 {
   _colour[1] = _colour[2] = 0.;
   _colour[0] = _colour[3] = 1.;
@@ -288,7 +290,7 @@ VecData::read_vec_nonHDF5( const char *vptfile )
 VecData::~VecData()
 {
   if ( pts ) delete[] pts;
-if ( vdata != NULL ) {free( vdata ); vdata = NULL; }
+  if ( vdata != NULL ) {free( vdata ); vdata = NULL; }
   if ( sdata != NULL ) {free( sdata ); sdata = NULL; }
   gluDeleteQuadric( quado );
 }
@@ -330,9 +332,9 @@ VecData::draw(int tm, float maxdim)
   else if ( _length_det == Scalar && sdata != NULL )
     base_size /= scalar_max-scalar_min;
 
-  glPushAttrib( GL_POLYGON_BIT );
+  glPushAttrib( GL_POLYGON_BIT|GL_LINE_BIT );
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
+  
   if ( _colour_det == FixedVCdata  || sdata==NULL ) glColor3fv( _colour );
 
   // GLU objects are drawn starting at the origin and extending in the z direction
@@ -368,6 +370,7 @@ VecData::draw(int tm, float maxdim)
       cs->colourize( sdp[i/3] );
 
     // translate, rotate and draw
+    if( _3D ) {
     glPushMatrix();
     glTranslatef( pts[i], pts[i+1], pts[i+2] );
     // determine angle between z-axis and data vector
@@ -377,6 +380,15 @@ VecData::draw(int tm, float maxdim)
     glRotatef( angle, rotvect[0], rotvect[1], rotvect[2] );
     draw_arrow( quado, size, size, size/10., size/5., _draw_heads );
     glPopMatrix();
+    } else {
+      GLfloat vec[3]={vdp[i],vdp[i+1],vdp[i+2]};
+      scale(normalize(vec),size);
+      glLineWidth(size/20.);
+      glBegin(GL_LINES);
+        glVertex3f( pts[i], pts[i+1], pts[i+2] );
+        glVertex3f( pts[i]+vec[0], pts[i+1]+vec[1], pts[i+2]+vec[2] );
+      glEnd();
+    }
   }
   glPopAttrib();
 }

@@ -45,6 +45,7 @@ class VecData
     Colourscale *cs;			// colour scale for display
     VecData&     operator=(const VecData*);
     bool         have_scalar(){ return sdata; }
+    int          size(void){ return numpt; }
   private:
     int      numpt;			// number of spatial points
     int      numtm;			// number of time instances
@@ -64,6 +65,7 @@ class VecData
     int      _last_tm;      // last time drawn
     int      _stride;
     bool     _stoch;        // true for stochastic stride
+    bool     _3D;
     bool     _draw_heads;   // draw arrow heads
 #ifdef USE_HDF5
     void     read_vec_HDF5( const char *);

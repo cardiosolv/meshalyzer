@@ -35,7 +35,7 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
     }
     inline const float & operator [] (int index) const
     {
-      assert(index < 0 && index < 4);
+      assert(index >= 0 && index < 4);
 switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: return z;}
       ; return w;
     }
