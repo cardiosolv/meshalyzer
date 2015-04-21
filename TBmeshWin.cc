@@ -672,6 +672,7 @@ int TBmeshWin::handle( int event )
         return 1;
         break;
       case 'r':
+        if( !dataBuffer ) return 1;
         fl_cursor( FL_CURSOR_WAIT );
         Fl::check();
         get_data( dataBuffer->file().c_str(), contwin->tmslider );

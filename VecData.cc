@@ -360,8 +360,7 @@ VecData::draw(int tm, float maxdim)
       size *= magnitude( vdp+i );
       if ( maxmag*base_size/size > REL_MIN_VEC_SIZE ) continue; // don't draw tiny vectors
     } else if ( _length_det == Scalar && sdata != NULL )
-      size *= (sdp[i/3]-scalar_min)/(scalar_max-scalar_min);
-
+      size *= (sdp[i/3]-scalar_min);
 
     // determine vector colour
     if ( _colour_det==Vector)
