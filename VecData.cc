@@ -66,6 +66,7 @@ VecData::operator=( const VecData* v )
   _draw_heads = v->_draw_heads;
   _3D         = v->_3D;
   memcpy( _colour, v->_colour, 4*sizeof(GLfloat) );
+  cs->size(v->cs->size());
 
   if( !sdata ) {
     if( _length_det == Scalar ) 

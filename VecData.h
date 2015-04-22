@@ -54,6 +54,7 @@ class VecData
     float*   sdata;         // scalar data
     float    _length;		// length of vectors
     GLfloat  _colour[4];	// colour of vectors
+    int      _numcol;       // number of colours
     bool     _disp;		    // whether or not to draw
     float    maxmag;		// maximum magnitude of data
     bool     autocal;		// autocalibrate each time

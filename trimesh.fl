@@ -2,7 +2,7 @@
 version 1.0300 
 header_name {.h} 
 code_name {.cc}
-decl {\#include "Surfaces.h"} {selected public local
+decl {\#include "Surfaces.h"} {public local
 } 
 
 decl {\#include <FL/gl.h>} {public local
@@ -784,8 +784,8 @@ op->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          label Highlight selected
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -1119,23 +1119,23 @@ write_surfaces(0);}
             label Vectors
             callback {mwtb->vecdata->display(o->value());
 mwtb->redraw();}
-            tooltip {display vectors?} xywh {20 325 75 25} value 1
+            tooltip {display vectors?} xywh {20 315 75 25} value 1
           }
           Fl_Roller veclength {
             label {Arrow Size}
             callback {mwtb->vecdata->length(o->value());
 mwtb->redraw();}
-            tooltip {scale all vectors} xywh {100 325 150 25} type Horizontal labelsize 12 labelcolor 7 align 8 maximum 100 step 0.01 value 1
+            tooltip {scale all vectors} xywh {105 315 150 25} type Horizontal labelsize 12 labelcolor 7 align 8 maximum 100 step 0.01 value 1
           }
           Fl_Button veccolor {
-            label colour
+            label {static colour}
             callback {mwtb->vecdata->colourize();
 mwtb->redraw();}
-            tooltip {fixed colour} xywh {245 360 75 25}
+            tooltip {fixed colour} xywh {235 355 90 25} labelsize 12
           }
           Fl_Menu_Button veclengthdeterm {
-            label Length
-            tooltip {determinant of vector length} xywh {20 360 90 25}
+            label {Arrow Length}
+            tooltip {determinant of vector length} xywh {20 355 105 25} labelsize 12 align 20
           } {
             MenuItem veclenmag {
               label {Vector mag}
@@ -1157,8 +1157,8 @@ mwtb->redraw();}
             }
           }
           Fl_Menu_Button veccoldeterm {
-            label Colour
-            tooltip {determinant of vector colour} xywh {130 360 90 25}
+            label {Arrow Colour}
+            tooltip {determinant of vector colour} xywh {130 355 100 25} labelsize 12 align 20
           } {
             MenuItem veccolmag {
               label {Vector mag}
@@ -1193,19 +1193,19 @@ mwtb->redraw();}
             label stride
             callback {mwtb->vecdata->stride(o->value());
 mwtb->redraw();}
-            xywh {25 441 35 24} labelcolor 7 align 2 when 8 minimum 1 maximum 100000 step 1 value 1
+            xywh {65 431 35 24} labelcolor 7 when 8 minimum 1 maximum 100000 step 1 value 1
           }
           Fl_Check_Button vecstoch {
             label Stochastic
             callback {mwtb->vecdata->stoch_stride(o->value());
 mwtb->redraw();}
-            xywh {95 435 75 25} down_box DOWN_BOX labelcolor 7
+            xywh {20 460 75 25} down_box DOWN_BOX labelcolor 7
           }
           Fl_Check_Button vecheads {
             label Heads
             callback {mwtb->vecdata->heads(o->value());
 mwtb->redraw();}
-            xywh {95 465 90 15} down_box DOWN_BOX value 1 labelcolor 7
+            xywh {130 435 65 15} down_box DOWN_BOX value 1 labelcolor 7 align 24
           }
           Fl_Group veccolgroup {open
             xywh {20 390 305 100} labelfont 1
@@ -1224,7 +1224,7 @@ mwtb->redraw();}
             }
             Fl_Choice veccstype {
               label {colour scale}
-              xywh {215 395 110 30} down_box BORDER_BOX labelsize 10 labelcolor 7 align 2
+              xywh {215 390 110 30} down_box BORDER_BOX labelsize 10 labelcolor 7 align 2
               code0 {\#include "Colourscale.h"}
               code1 {o->value(1);}
             } {
@@ -1270,18 +1270,24 @@ mwtb->redraw();}
 veccolmin->value(mwtb->vecdata->cs->min());
 veccolmax->value(mwtb->vecdata->cs->max());
 mwtb->redraw();}
-              tooltip {calibrate for current time} xywh {125 395 75 30} box ROUND_UP_BOX labelsize 12
+              tooltip {calibrate for current time} xywh {125 390 75 30} box ROUND_UP_BOX labelsize 12
             }
             Fl_Light_Button vecautocal {
               label {auto cs}
               callback {mwtb->vecdata->auto_cs(o->value());}
-              tooltip {calibrate every new time} xywh {20 400 80 25}
+              tooltip {calibrate every new time} xywh {20 390 80 30} labelsize 12
             }
+          }
+          Fl_Value_Input vecnumcol {
+            label levels
+            callback {mwtb->vecdata->cs->size(o->value());
+mwtb->redraw();}
+            xywh {165 456 35 24} labelcolor 7 minimum 3 maximum 10000 step 1 value 64
           }
         }
         Fl_Group auxgridgrp {
           label {Aux Grid}
-          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
+          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
             label On
@@ -1817,8 +1823,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -1884,6 +1889,7 @@ SAVE_WIDGET(mshzf,veccolscalar);
 SAVE_WIDGET(mshzf,veccolfix);
 SAVE_WIDGET(mshzf,veccolmin);
 SAVE_WIDGET(mshzf,veccolmax);
+SAVE_WIDGET(mshzf,vecnumcol);
 if(mwtb->vecdata){
    mshzf << "VEC_FIXED_COLOR = ";
    save_colour( mshzf, mwtb->vecdata->colour() );
@@ -2036,7 +2042,8 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2202,6 +2209,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     TEST_VAR( vecheads, var, int(val) ) 
     TEST_VAR( veccolmin, var, val )
     TEST_VAR( veccolmax, var, val )
+    TEST_VAR( vecnumcol, var, int(val) ) 
     TEST_RADIO( veclenmag,    var, int(val), veclengthdeterm ) 
     TEST_RADIO( veclenscalar, var, int(val), veclengthdeterm ) 
     TEST_RADIO( veclenfix,    var, int(val), veclengthdeterm ) 
@@ -2225,6 +2233,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     IGNORE_VAR( veccolmag, var ) 
     IGNORE_VAR( veccolscalar, var )
     IGNORE_VAR( veccolfix, var )
+    IGNORE_VAR( vecnumcol, var )
   }
   TEST_VAR( lightx, var, val ) 
   TEST_VAR( lighty, var, val ) 
@@ -2377,8 +2386,7 @@ if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str()
   mwtb->redraw();
 }} {}
   }
-  Function {update_vecdata(VecData *vd)} {open
-  } {
+  Function {update_vecdata(VecData *vd)} {} {
     code {if( vd->length_det()==Vector ) {
   veclenmag->setonly();
   veclenmag->do_callback(veclengthdeterm);
