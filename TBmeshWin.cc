@@ -641,7 +641,7 @@ int TBmeshWin::handle( int event )
         newtm = int(contwin->tmslider->value()+
                     contwin->frameskip->value()*
                     ((Fl::event_state()&FL_SHIFT)?shift_time_scale:1));
-        if ( newtm <= contwin->tmslider->maximum() ) {
+        if ( newtm <= contwin->tmslider->maximum() && newtm>=0 ) {
           signal_links( 1 );
           set_time( newtm );
         }
@@ -651,7 +651,7 @@ int TBmeshWin::handle( int event )
         newtm = int(contwin->tmslider->value()-
                     contwin->frameskip->value()*
                     ((Fl::event_state()&FL_SHIFT)?shift_time_scale:1));
-        if ( newtm >= 0 ) {
+        if ( newtm <= contwin->tmslider->maximum() && newtm>=0 ) {
           signal_links( -1 );
           contwin->tmslider->redraw();
           set_time( newtm );
