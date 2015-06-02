@@ -9,6 +9,7 @@
 #include <cstring>
 #include <cctype>
 #include<assert.h>
+#include<float.h>
 
 #define NALLOC 100
 
@@ -205,6 +206,7 @@ class IGBheader
   public:
     IGBheader( gzFile a = NULL, bool read=false, bool quiet=false );
     IGBheader( FILE *f, bool read=false, bool quiet=false );
+    IGBheader( IGBheader *h ) { *this=*h; }
     ~IGBheader();
     int   write();
     int   read( bool quiet=false );
@@ -213,8 +215,8 @@ class IGBheader
     void* fileptr(void){ return file; }
     void  close(void){if(gzipping)gzclose((gzFile)file);else fclose((FILE*)file);}
     void  swab( void *, int nd=-1 );
-    inline double from_raw( double a ){ return a/v_facteur+v_zero; }
-    inline double to_raw( double a ){ return (a-v_zero)*v_facteur; }
+    inline double from_raw( double a ){ return a*v_facteur+v_zero; }
+    inline double to_raw( double a ){ return (a-v_zero)/v_facteur; }
 	inline int  slice_sz(){ return v_x*v_y*v_z; }
     void  comment( char* );
     inline char **comment(void){return v_comment;}
@@ -332,9 +334,44 @@ class IGBheader
     int  num_components(){ return Num_Components[v_type]; }
     int  endian();
     template<class T> int read_data( T* dp, int numt=1, char *buf=NULL );
+    template<class T> void write_data( T* dp, int numt=1, char *buf=NULL );
     template<class T> void to_bin( void *buf, T d );
     template<class T> T convert_buffer_datum( void *buf, int a );
 };
+
+
+/** write out a number of time slices 
+ *
+ * \param dp[out] buffer of data
+ * \param numt    number of time slices
+ * \param buf     temporary buffer of raw data
+ *
+ * \pre    \p dp must be allocated
+ * \post   \dp will be filled
+ * \return the number of items read
+ */
+template<class T>
+void
+IGBheader::write_data( T* dp, int numt, char *buf )
+{
+  int    slicesize = data_size()*slice_sz()*numt;
+  bool   alloc_buf = false;
+  if ( buf==NULL ) {
+    buf = new char[slicesize];
+    alloc_buf = true;
+  }
+  
+  int numprimitive = slice_sz()*num_components(); 
+  for ( int a=0; a<numprimitive; a++ ) 
+    to_bin<T>( buf+a*data_size(), dp[a] );
+
+  if( gzipping ) 
+    gzwrite( (gzFile)file, buf, slicesize );
+  else
+    fwrite( buf, 1, slicesize, (FILE*)file );
+
+  if ( alloc_buf ) delete[] buf;
+}
 
 
 /** read in a number of time slices 
@@ -425,6 +462,9 @@ T IGBheader::convert_buffer_datum( void *buf, int a )
   return datum=from_raw(datum);
 }
 
+
+#define CONVERT_TYPE(T,m,M) { if(datum<m)datum=m;else if(datum>M)datum=M; \
+                T a0 = (T)datum; *((T*)buf)=a0;}; 
 /** convert the data to the binary representation
  *
  * \param h     IGB header
@@ -438,66 +478,39 @@ IGBheader::to_bin( void *buf, T d )
   double datum=to_raw(d);
   switch ( type() ) {
       case IGB_BYTE:
-          {
-            unsigned char a0 = (unsigned char)d;
-            memcpy( buf, &a0, data_size() );
-          }
+          CONVERT_TYPE( unsigned char, 0, UCHAR_MAX )
           break;
       case IGB_CHAR:
-          {
-            signed char a1 = (signed char)d;
-            memcpy( buf, &a1, data_size() );
-          }
+          CONVERT_TYPE( char, CHAR_MIN, CHAR_MAX )
           break;
       case IGB_SHORT:
-          {
-            short a2 = (short )d;
-            memcpy( buf, &a2, data_size() );
-          }
+          CONVERT_TYPE( short, SHRT_MIN, SHRT_MAX )
           break;
       case IGB_LONG:
-          {
-            long a3 = (long)d;
-            memcpy( buf, &a3, data_size() );
-          }
+          CONVERT_TYPE( long, LONG_MIN, LONG_MAX )
           break;
       case IGB_FLOAT:
-          {
-            float a4 = (float )d;
-            memcpy( buf, &a4, data_size() );
-          }
+          CONVERT_TYPE( float, FLT_MIN, FLT_MAX )
           break;
       case IGB_VEC3_f:
       case IGB_VEC4_f:
           assert(0);
           break;
       case IGB_DOUBLE:
-          {
-            double a5 = d;
-            memcpy( buf, &a5, data_size() );
-          }
+          CONVERT_TYPE( double, DBL_MIN, DBL_MAX )
           break;
       case IGB_VEC3_d:
       case IGB_VEC4_d:
           assert(0);
           break;
       case IGB_INT:
-          {
-            int a6 = (int)d;
-            memcpy( buf, &a6, data_size() );
-          }
+          CONVERT_TYPE( int, INT_MIN, INT_MAX )
           break;
       case IGB_UINT:
-          {
-            unsigned int a7 = (unsigned int)d;
-            memcpy( buf, &a7, data_size() );
-          }
+          CONVERT_TYPE( unsigned int, 0, UINT_MAX )
           break;
       case IGB_USHORT:
-          {
-            unsigned short a8 = (unsigned short)d;
-            memcpy( buf, &a8, data_size() );
-          }
+          CONVERT_TYPE( unsigned short, 0, USHRT_MAX )
           break;
       default:
           assert(0);
