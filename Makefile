@@ -26,7 +26,7 @@ COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5)
 
 LIBS     =  -L$(HDF5API_ROOT)/lib   $(FLTK_LD_FLAGS) $(COMMON_LIBS)
 #LDFLAGS  =  -fopenmp
-CXXFLAGS =  -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
+CXXFLAGS =  -std=c++11 -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
 
 CPPFLAGS = $(CFLAGS) -g
 ifdef ENABLE_LOGGING

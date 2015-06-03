@@ -10,6 +10,7 @@
 #include <cctype>
 #include<assert.h>
 #include<float.h>
+#include "short_float.h"
 
 #define NALLOC 100
 
@@ -41,8 +42,9 @@
 #define     IGB_VEC3_d    17 /* -- 3 X double ----------------------------- */
 #define     IGB_VEC4_f    18 /* -- 4 X float ------------------------------ */
 #define     IGB_VEC4_d    19 /* -- 4 X double ----------------------------- */
-#define	    IGB_MIN_TYPE	  1
-#define	    IGB_MAX_TYPE	 19
+#define     IGB_HFLOAT    20 /* -- half float ----------------------------- */
+#define	    IGB_MIN_TYPE  1
+#define	    IGB_MAX_TYPE  20
 
 #define Byte hByte
 
@@ -99,7 +101,7 @@ struct S_Complex
 {
   Float	real, imag;
 };
-struct D_Complex
+struct D_Complex	
 {
   Double	real, imag;
 };
@@ -129,6 +131,8 @@ typedef union rgba {
 #define RGBA_BLEU  1
 #define RGBA_ALPHA 0
 
+#define HFLT_MIN -65504
+#define HFLT_MAX  65504
 
 /* -------------- Definition du type des variables globales de header.c - */
 
@@ -456,6 +460,9 @@ T IGBheader::convert_buffer_datum( void *buf, int a )
     case IGB_USHORT:
       datum = ((unsigned short *)buf)[a];
       break;
+    case IGB_HFLOAT:
+      datum = floatFromShort(((short_float *)buf)[a]);
+      break;
     default:
       memset(&datum,0,sizeof(datum));
   }
@@ -463,8 +470,8 @@ T IGBheader::convert_buffer_datum( void *buf, int a )
 }
 
 
-#define CONVERT_TYPE(T,m,M) { if(datum<m)datum=m;else if(datum>M)datum=M; \
-                T a0 = (T)datum; *((T*)buf)=a0;}; 
+#define CONVERT_TYPE(D,m,M,B) { if(datum<m)datum=m;else if(datum>M)datum=M; \
+                D a0 = (D)datum; *((D*)(B))=a0;}; 
 /** convert the data to the binary representation
  *
  * \param h     IGB header
@@ -478,39 +485,44 @@ IGBheader::to_bin( void *buf, T d )
   double datum=to_raw(d);
   switch ( type() ) {
       case IGB_BYTE:
-          CONVERT_TYPE( unsigned char, 0, UCHAR_MAX )
+          CONVERT_TYPE( unsigned char, 0, UCHAR_MAX, buf )
           break;
       case IGB_CHAR:
-          CONVERT_TYPE( char, CHAR_MIN, CHAR_MAX )
+          CONVERT_TYPE( char, CHAR_MIN, CHAR_MAX, buf )
           break;
       case IGB_SHORT:
-          CONVERT_TYPE( short, SHRT_MIN, SHRT_MAX )
+          CONVERT_TYPE( short, SHRT_MIN, SHRT_MAX, buf )
           break;
       case IGB_LONG:
-          CONVERT_TYPE( long, LONG_MIN, LONG_MAX )
+          CONVERT_TYPE( long, LONG_MIN, LONG_MAX, buf )
           break;
       case IGB_FLOAT:
-          CONVERT_TYPE( float, FLT_MIN, FLT_MAX )
+          CONVERT_TYPE( float, FLT_MIN, FLT_MAX, buf )
           break;
       case IGB_VEC3_f:
       case IGB_VEC4_f:
           assert(0);
           break;
       case IGB_DOUBLE:
-          CONVERT_TYPE( double, DBL_MIN, DBL_MAX )
+          CONVERT_TYPE( double, DBL_MIN, DBL_MAX, buf )
           break;
       case IGB_VEC3_d:
       case IGB_VEC4_d:
           assert(0);
           break;
       case IGB_INT:
-          CONVERT_TYPE( int, INT_MIN, INT_MAX )
+          CONVERT_TYPE( int, INT_MIN, INT_MAX, buf )
           break;
       case IGB_UINT:
-          CONVERT_TYPE( unsigned int, 0, UINT_MAX )
+          CONVERT_TYPE( unsigned int, 0, UINT_MAX, buf )
           break;
       case IGB_USHORT:
-          CONVERT_TYPE( unsigned short, 0, USHRT_MAX )
+          CONVERT_TYPE( unsigned short, 0, USHRT_MAX, buf )
+          break;
+      case IGB_HFLOAT:
+          float fdatum; 
+          CONVERT_TYPE( float, HFLT_MIN, HFLT_MAX, &fdatum )
+          *((short_float*)buf) = shortFromFloat(fdatum);
           break;
       default:
           assert(0);

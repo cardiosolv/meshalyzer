@@ -224,7 +224,7 @@ const char    *Header_Type[] =
     "", "byte", "char", "short", "long", "float", "double", "complex",
     "double_complex", "rgba", "structure", "pointer", "list","int","uint",
     "ushort",
-	"vec3f","vec3d","vec4f","vec4d"
+	"vec3f","vec3d","vec4f","vec4d","hfloat"
   };
 
 
@@ -238,15 +238,16 @@ unsigned short   Data_Size[] =
   {
     0, sizeof(Byte), sizeof(char), sizeof(short), sizeof(long), sizeof(float),
     sizeof(double), 0, 0, 0, 0, sizeof(void *), 0, sizeof(int), sizeof(UInt),
-    sizeof(unsigned short),
-	3*sizeof(float), 3*sizeof(double), 4*sizeof(float), 4*sizeof(double)
+    sizeof(unsigned short),	
+    3*sizeof(float), 3*sizeof(double), 4*sizeof(float), 4*sizeof(double),
+    sizeof(short_float)
   };
 
 
 /** the number of components for each data type */
 int Num_Components[] = 
   { 
-    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 3, 3, 4, 4
+    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 3, 3, 4, 4, 1
   };
 
 
@@ -1314,9 +1315,9 @@ void IGBheader::systeme( const char* s )
 void IGBheader::type( char *datatype )
 {
   int tn=IGB_MIN_TYPE;
-  while ( tn<IGB_MAX_TYPE && strcmp(Header_Type[tn],datatype) )
+  while ( tn<=IGB_MAX_TYPE && strcmp(Header_Type[tn],datatype) )
     tn++;
-  if ( tn<IGB_MAX_TYPE )
+  if ( tn<=IGB_MAX_TYPE )
     v_type = tn;
   else {
     cerr << "illegal data type specified for IGB header" << endl;
