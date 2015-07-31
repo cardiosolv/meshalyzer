@@ -1,5 +1,5 @@
 // shared
-#include <VecData.h>
+#include "VecData.h"
 
 // project
 #include "IsoSurface.h"

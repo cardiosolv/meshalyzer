@@ -6,6 +6,12 @@ FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)
 COMMON_INC    := -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX  #-fopenmp
 
+FLTK_SOURCES = $(wildcard *.fl)
+OBJS := $(FLTK_SOURCES:.fl=.o)\
+	$(patsubst %.cc,%.o,$(wildcard *.cc))\
+	$(patsubst %.c,%.o,$(wildcard *.c))\
+	$(patsubst %.C,%.o,$(wildcard *.C))
+
 #HDF5=1
 ifdef HDF5
 LIB_CH5       := (HDF5_ROOT)/lib/libch5.a
@@ -14,6 +20,7 @@ COMMON_INC    += -DUSE_HDF5
 else
 LIB_CH5       := 
 LIB_HDF5      := 
+OBJS          := $(OBJS:HDF5DataBrowser.o=)
 endif
 
 ifeq ($(HOSTMACHINE), Darwin)
@@ -32,12 +39,6 @@ CPPFLAGS = $(CFLAGS) -g
 ifdef ENABLE_LOGGING
 CPPFLAGS += -DLOGGING_ENABLED
 endif
-
-FLTK_SOURCES = $(wildcard *.fl)
-OBJS = $(FLTK_SOURCES:.fl=.o)\
-	$(patsubst %.cc,%.o,$(wildcard *.cc))\
-	$(patsubst %.c,%.o,$(wildcard *.c))\
-	$(patsubst %.C,%.o,$(wildcard *.C))
 
 #the files in OS_files contain OSMESA dependent clauses
 OS_files= main.o Frame.o

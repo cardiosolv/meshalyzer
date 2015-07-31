@@ -1148,8 +1148,9 @@ TBmeshWin::illuminate( GLfloat max )
   glEnable(GL_COLOR_MATERIAL);
 
   // Create a Directional Light Source
-  GLfloat dir[] = { contwin->lightx->value(),
-                    contwin->lighty->value(), contwin->lightz->value(), 0. };
+  GLfloat dir[] = { (GLfloat)contwin->lightx->value(),
+                    (GLfloat)contwin->lighty->value(), 
+                    (GLfloat)contwin->lightz->value(), 0. };
   normalize( dir );
   if ( headlamp_mode ) {
     glLightfv(GL_LIGHT2, GL_POSITION, dir);
@@ -1980,7 +1981,7 @@ TBmeshWin::signal_links( int dir )
   if( meshProcSem==SEM_FAILED ) return;
 
   // make sure we start at zero
-  int numsem;
+  int numsem=0;
   sem_getvalue( meshProcSem, &numsem );
   for( int i=0; i<numsem; i++ )
     sem_wait( meshProcSem ); 

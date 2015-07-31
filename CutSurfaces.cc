@@ -1,6 +1,6 @@
 #include "CutSurfaces.h"
 #include <string.h>
-#include <VecData.h>
+#include "VecData.h"
 #include <stdlib.h>
 
 const int ADD_INC = 1000;

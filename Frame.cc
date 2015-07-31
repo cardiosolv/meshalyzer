@@ -1,4 +1,4 @@
-#include <GLee.h>
+#include "GLee.h"
 #include "Frame.h"
 
 #ifdef OSMESA

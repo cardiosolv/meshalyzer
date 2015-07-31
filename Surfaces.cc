@@ -1,6 +1,6 @@
 #include "Surfaces.h"
 #include <string.h>
-#include <VecData.h>
+#include "VecData.h"
 
 Surfaces::Surfaces( PPoint *pl ) : _p(pl), is_visible(true),_filled(true),
     _outline(false),_vertnorm(NULL)
