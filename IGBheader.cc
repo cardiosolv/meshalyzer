@@ -1404,8 +1404,8 @@ void IGBheader :: swab( void *data, int nd )
 int IGBheader::endian()
 {
   float val=IGB_ENDIAN_VAL;
-  char   le_val[] = { IGB_LITTLE_END_REP },
-                    *pval   = (char *)(&val);
+  unsigned char   le_val[] = { IGB_LITTLE_END_REP },
+                    *pval   = (unsigned char *)(&val);
 
   assert( sizeof(float) == 4 );
 

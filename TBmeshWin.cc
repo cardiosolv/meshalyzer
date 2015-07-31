@@ -753,7 +753,7 @@ void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt,
     if( getenv("MESHALYZER_MODEL_DIR") ) {
       moddir = strdup( getenv("MESHALYZER_MODEL_DIR") );
       char *p = strchr( moddir, ':' );
-      if( p ) p = '\0';
+      if( p ) *p = '\0';
     }
     
     Fl_File_Chooser modchooser( moddir, "*.pts*", Fl_File_Chooser::SINGLE, "Pick one" ); 
