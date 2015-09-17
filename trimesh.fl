@@ -1265,6 +1265,36 @@ mwtb->redraw();}
 mwtb->redraw();}
                 image {matlab.xpm} xywh {20 20 100 20}
               }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_RGREY);
+                  mwtb->redraw();}
+                image {blred.xpm} xywh {20 20 100 20}
+            }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_GGREY);
+                  mwtb->redraw();}
+                image {blgreen.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_BGREY);
+                  mwtb->redraw();}
+                image {blblue.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_ACID);
+                  mwtb->redraw();}
+                image {acid_trip.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_P2G);
+                  mwtb->redraw();}
+                image {Pink2Green.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_VIRIDIS);
+                  mwtb->redraw();}
+                image {viridis.xpm} xywh {20 20 100 20}
+              }
             }
             Fl_Button {} {
               label optimal
@@ -1345,6 +1375,36 @@ mwtb->redraw();}
               callback {mwtb->auxGrid->cs.scale(CS_MATLAB);
 mwtb->redraw();}
               image {matlab.xpm} xywh {10 10 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_RGREY);
+                mwtb->redraw();}
+              image {blred.xpm} xywh {20 20 100 20}
+          }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_GGREY);
+                mwtb->redraw();}
+              image {blgreen.xpm} xywh {20 20 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_BGREY);
+                mwtb->redraw();}
+              image {blblue.xpm} xywh {20 20 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_ACID);
+                mwtb->redraw();}
+              image {acid_trip.xpm} xywh {20 20 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_P2G);
+                mwtb->redraw();}
+              image {Pink2Green.xpm} xywh {20 20 100 20}
+            }
+            MenuItem {} {
+              callback {mwtb->auxGrid->cs.scale(CS_VIRIDIS);
+                mwtb->redraw();}
+              image {viridis.xpm} xywh {20 20 100 20}
             }
           }
           Fl_Value_Input auxmincolval {
@@ -1660,6 +1720,36 @@ mwtb->redraw();}
             callback {mwtb->cs->scale(CS_MATLAB);
 mwtb->redraw();}
             image {matlab.xpm} xywh {0 0 100 20}
+          }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_RGREY);
+              mwtb->redraw();}
+            image {blred.xpm} xywh {20 20 100 20}
+        }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_GGREY);
+              mwtb->redraw();}
+            image {blgreen.xpm} xywh {20 20 100 20}
+          }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_BGREY);
+              mwtb->redraw();}
+            image {blblue.xpm} xywh {20 20 100 20}
+          }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_ACID);
+              mwtb->redraw();}
+            image {acid_trip.xpm} xywh {20 20 100 20}
+          }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_P2G);
+              mwtb->redraw();}
+            image {Pink2Green.xpm} xywh {20 20 100 20}
+          }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_VIRIDIS);
+              mwtb->redraw();}
+            image {viridis.xpm} xywh {20 20 100 20}
           }
         }
         Fl_Value_Input mincolval {
