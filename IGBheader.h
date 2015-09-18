@@ -8,8 +8,9 @@
 #include <zlib.h>
 #include <cstring>
 #include <cctype>
-#include<assert.h>
-#include<float.h>
+#include <assert.h>
+#include <float.h>
+#include <limits.h>
 #include "short_float.h"
 
 #define NALLOC 100
@@ -346,13 +347,9 @@ class IGBheader
 
 /** write out a number of time slices 
  *
- * \param dp[out] buffer of data
+ * \param dp[in] buffer of data
  * \param numt    number of time slices
  * \param buf     temporary buffer of raw data
- *
- * \pre    \p dp must be allocated
- * \post   \dp will be filled
- * \return the number of items read
  */
 template<class T>
 void
@@ -469,12 +466,17 @@ T IGBheader::convert_buffer_datum( void *buf, int a )
   return datum=from_raw(datum);
 }
 
-
+/** 
+ * \def CONVERT_TYPE(D,m,M,B) 
+ *      convert the value stored in variable \b datum to type \a D,
+ *      clipping it to the range [\a m, \a M] and store it in the location 
+ *      pointed to by \a B
+ */
 #define CONVERT_TYPE(D,m,M,B) { if(datum<m)datum=m;else if(datum>M)datum=M; \
                 D a0 = (D)datum; *((D*)(B))=a0;}; 
+
 /** convert the data to the binary representation
  *
- * \param h     IGB header
  * \param buf   place to put raw binary IGB data
  * \param d     datum
  */

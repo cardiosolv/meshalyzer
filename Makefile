@@ -6,8 +6,8 @@ FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)
 COMMON_INC    := -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX  #-fopenmp
 
-FLTK_SOURCES = $(wildcard *.fl)
-OBJS := $(FLTK_SOURCES:.fl=.o)\
+FLTK_SOURCES  := $(wildcard *.fl)
+OBJS = $(FLTK_SOURCES:.fl=.o)\
 	$(patsubst %.cc,%.o,$(wildcard *.cc))\
 	$(patsubst %.c,%.o,$(wildcard *.c))\
 	$(patsubst %.C,%.o,$(wildcard *.C))
@@ -19,7 +19,8 @@ LIB_HDF5      := -lch5 -lhdf5 -lhdf5_hl
 COMMON_INC    += -DUSE_HDF5
 else
 LIB_CH5       := 
-LIB_HDF5      := 
+LIB_HDF5      :=
+OBJS          := $(OBJS:HDF5DataBrowser.o= )
 OBJS          := $(OBJS:HDF5DataBrowser.o=)
 endif
 
@@ -29,11 +30,10 @@ else
   GLUT_LIB = -lglut
 endif
 
-COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5) 
-
-LIBS     =  -L$(HDF5API_ROOT)/lib   $(FLTK_LD_FLAGS) $(COMMON_LIBS)
-#LDFLAGS  =  -fopenmp
-CXXFLAGS =  -std=c++11 -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
+COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5)
+#LDFLAGS      = -fopenmp
+CXXFLAGS     = -std=c++11 -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
+LIBS         = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS) 
 
 CPPFLAGS = $(CFLAGS) -g
 ifdef ENABLE_LOGGING
