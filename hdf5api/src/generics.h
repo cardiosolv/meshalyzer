@@ -20,8 +20,7 @@ extern "C" {
 #define CH5_QUOTE(x) CH5_QUOTE_(x)
 
 #define SET_ATTR(grid, type, name, ptr) \
-result = ch5_gnrc_set_attr(grid, type,name, ptr); \
-if (result == 1) { \
+if( ch5_gnrc_set_attr(grid, type,name, ptr) == 1) {\
   H5Dclose(grid); \
   return -1; \
 }
@@ -105,7 +104,7 @@ hid_t ch5_gnrc_open_or_create_chunked_dset(
   int gzip_level
 );
 
-char* ch5_nchild_gen_name(const char *prefix, int n);
+char* ch5_nchild_gen_name(const char *prefix, int n, const char *);
 
 hid_t ch5_nchild_create_or_open_container(hid_t hdf_file, const char *name);
 

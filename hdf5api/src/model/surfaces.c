@@ -25,7 +25,7 @@ int ch5m_surf_create(hid_t file_id, char *in_name, int count, int max_width) {
   }
   
   int retval = -1;
-  char *dset_name = ch5_nchild_gen_name(CH5_SURF_CHILD_PREFIX, surf_count);
+  char *dset_name = ch5_nchild_gen_name(CH5_SURF_CHILD_PREFIX, surf_count, in_name);
   hid_t dset_id = ch5m_elem_create_or_open_dset(group_id, dset_name, count, max_width);
   if (dset_id >= 0) {
     if (in_name != NULL) ch5_gnrc_set_attr(dset_id, H5T_C_S1, CH5_SURF_NAME_ATTR, in_name);

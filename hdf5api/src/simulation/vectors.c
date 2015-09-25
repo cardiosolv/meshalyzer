@@ -65,7 +65,7 @@ int ch5s_vector_create_grid(hid_t hdf_file, unsigned int n, unsigned int t,
   if (container_id < 0) return -1;
   
   int grid_num = ch5_nchild_count_children(container_id);
-  char *gen_name = ch5_nchild_gen_name(CH5_VECS_GRID_NAME_PREFIX, grid_num);
+  char *gen_name = ch5_nchild_gen_name(CH5_VECS_GRID_NAME_PREFIX, grid_num, label);
   
   int vector_components = CH5_VECS_BASE_COMPONENTS;
   if (scalar_label != NULL) vector_components += 1;
@@ -98,14 +98,14 @@ int ch5s_vector_create_grid(hid_t hdf_file, unsigned int n, unsigned int t,
   }
   H5Dclose(vecs_dset_id);
   
-  int result;
-  SET_ATTR(grid_id, H5T_IEEE_F32LE, CH5_DELTA_T_ATTR, &time_delta);
-  SET_ATTR(grid_id, H5T_IEEE_F32LE, CH5_T0_ATTR, &t0);
-  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_LABEL_ATTR,      label,        (char*)label);
-  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_VECS_SCALAR_ATTR,     scalar_label, (char*)scalar_label);
-  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_TIME_UNITS_ATTR, time_units,   (char*)time_units);
-  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_UNITS_ATTR,      units,        (char*)units);
-  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_COMMENTS_ATTR,   comments,     (char*)comments);
+  SET_ATTR(grid_id, H5T_NATIVE_UINT32, CH5_T_ATTR,       (int[]){0} );
+  SET_ATTR(grid_id, H5T_IEEE_F32LE,    CH5_DELTA_T_ATTR, &time_delta);
+  SET_ATTR(grid_id, H5T_IEEE_F32LE,    CH5_T0_ATTR,      &t0        );
+  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_LABEL_ATTR,       label,        (char*)label       );
+  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_VECS_SCALAR_ATTR, scalar_label, (char*)scalar_label);
+  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_TIME_UNITS_ATTR,  time_units,   (char*)time_units  );
+  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_UNITS_ATTR,       units,        (char*)units       );
+  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_COMMENTS_ATTR,    comments,     (char*)comments    );
   
   H5Gclose(grid_id);
   
@@ -157,17 +157,18 @@ int ch5s_vector_grid_info(hid_t hdf_file, unsigned int grid_index,
     return 1;
   }
   
-  info->time_steps     = dims[0];
+  info->max_time_steps = dims[0];
   info->num_vectors    = dims[1];
   info->num_components = dims[2];
   
-  GET_ATTR(grid_id, H5T_NATIVE_FLOAT, CH5_DELTA_T_ATTR, &(info->time_delta));
-  GET_STRING_ATTR(grid_id, CH5_LABEL_ATTR,      &(info->label));
-  GET_STRING_ATTR(grid_id, CH5_VECS_SCALAR_ATTR,     &(info->scalar_label));
-  GET_STRING_ATTR(grid_id, CH5_TIME_UNITS_ATTR, &(info->time_units));
-  GET_STRING_ATTR(grid_id, CH5_T0_ATTR,         &(info->time_units));
-  GET_STRING_ATTR(grid_id, CH5_UNITS_ATTR,      &(info->units));
-  GET_STRING_ATTR(grid_id, CH5_COMMENTS_ATTR,   &(info->comments));
+  GET_ATTR( grid_id, H5T_NATIVE_UINT32, CH5_T_ATTR,       &(info->time_steps));
+  GET_ATTR( grid_id, H5T_NATIVE_FLOAT,  CH5_DELTA_T_ATTR, &(info->time_delta));
+  GET_STRING_ATTR(grid_id, CH5_LABEL_ATTR,       &(info->label));
+  GET_STRING_ATTR(grid_id, CH5_VECS_SCALAR_ATTR, &(info->scalar_label));
+  GET_STRING_ATTR(grid_id, CH5_TIME_UNITS_ATTR,  &(info->time_units));
+  GET_STRING_ATTR(grid_id, CH5_T0_ATTR,          &(info->time_units));
+  GET_STRING_ATTR(grid_id, CH5_UNITS_ATTR,       &(info->units));
+  GET_STRING_ATTR(grid_id, CH5_COMMENTS_ATTR,    &(info->comments));
   
   H5Gclose(grid_id);
   
@@ -246,7 +247,7 @@ int ch5s_vector_write_all(hid_t hdf_file, unsigned int grid_index, float *in) {
   hid_t grid_id;
   int result = (ch5_nchild_open_child(container_id, grid_index, &grid_id, NULL) == 0);
   H5Gclose(container_id);
-  if (result == 0) return 1;
+  if ( !result ) return 1;
   
   hid_t vecs_dset_id = H5Dopen(grid_id, CH5_VECS_VECTORS_NAME, H5P_DEFAULT);
   H5Gclose(grid_id);
@@ -255,9 +256,15 @@ int ch5s_vector_write_all(hid_t hdf_file, unsigned int grid_index, float *in) {
   herr_t status = H5Dwrite(vecs_dset_id, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL,
     H5P_DEFAULT, in);
   H5Dclose(vecs_dset_id);
-  
-  return (status < 0);
+
+  ch5s_vector_grid vg_info;
+  ch5s_vector_grid_info( hdf_file, grid_index, &vg_info );
+  SET_ATTR( grid_id, H5T_NATIVE_UINT32, CH5_T_ATTR, &vg_info.max_time_steps );
+  ch5s_vector_free_grid_info( &vg_info );
+
+  return status < 0;
 }
+
 
 /**
 * \brief Reads vector data from the grid over a given time span
@@ -365,10 +372,15 @@ int _ch5s_vector_read_write_general(hid_t hdf_file, unsigned int grid_index,
   ch5s_vector_grid_info(hdf_file, grid_index, &info);
   ch5s_vector_free_grid_info(&info);/* don't need the strings */
   
-  if ((from_time >= info.time_steps) || (to_time >= info.time_steps)) {
-    H5Dclose(vecs_dset_id);
-    return 1;
-  }
+  if( to_time >= info.time_steps ) {
+    if( rw_id==CH5_READ || to_time>=info.max_time_steps ) { 
+      H5Dclose(grid_id);
+      return 1;
+    } else {
+      unsigned int t = to_time+1;
+      SET_ATTR(grid_index, H5T_NATIVE_UINT32, CH5_T_ATTR, &t);
+    }
+  } 
   
   int count = to_time - from_time + 1;
   hid_t space_id = H5Dget_space(vecs_dset_id);
@@ -381,16 +393,22 @@ int _ch5s_vector_read_write_general(hid_t hdf_file, unsigned int grid_index,
     return 1;
   }
   
+  hid_t plist_id = H5P_DEFAULT;
+#ifdef HAVE_MPIIO
+  plist_id = H5Pcreate(H5P_DATASET_XFER);
+  H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_INDEPENDENT);
+#endif
+
   hid_t memspace_id = H5Screate_simple(3,
     (hsize_t[3]){ count, info.num_vectors, info.num_components }, NULL);
   
   switch (rw_id) {
     case CH5_READ:
-      result = H5Dread(vecs_dset_id, H5T_NATIVE_FLOAT, memspace_id, space_id, H5P_DEFAULT, inout);
+      result = H5Dread(vecs_dset_id, H5T_NATIVE_FLOAT, memspace_id, space_id, plist_id, inout);
       break;
     
     case CH5_WRITE:
-      result = H5Dwrite(vecs_dset_id, H5T_IEEE_F32LE, memspace_id, space_id, H5P_DEFAULT, inout);
+      result = H5Dwrite(vecs_dset_id, H5T_IEEE_F32LE, memspace_id, space_id, plist_id, inout);
       break;
   }
   

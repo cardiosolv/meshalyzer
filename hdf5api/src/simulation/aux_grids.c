@@ -3,6 +3,7 @@
 #include "../model/elements.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 /**
 * \brief Creates a new auiliary grid and returns it's index
@@ -24,18 +25,16 @@ int ch5s_aux_create_grid(hid_t hdf_file, float t0, float time_delta,
     CH5_AUX_GROUP_NAME);
   if (container_id < 0) return -1;
   
-  int grid_num   = ch5_nchild_count_children(container_id);
-  char *gen_name = ch5_nchild_gen_name(CH5_AUX_GRID_NAME_PREFIX, grid_num);
+  int   grid_num = ch5_nchild_count_children(container_id);
+  char *gen_name = ch5_nchild_gen_name(CH5_AUX_GRID_NAME_PREFIX, grid_num, label);
   
   hid_t grid_id = ch5_nchild_create_or_open_container(container_id, gen_name);
   H5Gclose(container_id);
-  free(gen_name);
   if (grid_id < 0) {
     H5Gclose(grid_id);
     return -1;
   }
   
-  int result;
   SET_ATTR(grid_id, H5T_IEEE_F32LE, CH5_DELTA_T_ATTR, &time_delta);
   SET_ATTR(grid_id, H5T_IEEE_F32LE, CH5_T0_ATTR, &t0);
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_LABEL_ATTR,      label,      (char*)label);
@@ -43,6 +42,7 @@ int ch5s_aux_create_grid(hid_t hdf_file, float t0, float time_delta,
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_UNITS_ATTR,      units,      (char*)units);
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_COMMENTS_ATTR,   comments,   (char*)comments);
   
+  free( gen_name );  
   H5Gclose(grid_id);
   
   return grid_num;
@@ -176,7 +176,7 @@ int ch5s_aux_write_next(hid_t hdf_file, unsigned int grid_index,
   if (status != 0) return 1;
   
   int count = ch5_nchild_count_children(grid_id);
-  char *time_name = ch5_nchild_gen_name(CH5_AUX_TIME_NAME_PREFIX, count);
+  char *time_name = ch5_nchild_gen_name(CH5_AUX_TIME_NAME_PREFIX, count, NULL);
   hid_t time_id = ch5_gnrc_open_or_create_group(grid_id, time_name);
   free(time_name);
   H5Gclose(grid_id);

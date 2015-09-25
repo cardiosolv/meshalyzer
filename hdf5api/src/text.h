@@ -33,7 +33,7 @@ int ch5_text_append(
 int ch5_text_read(
   hid_t hdf_file,
   unsigned int file_index,
-  char *out
+  char ***out
 );
 
 #if !defined(_CH5_H) && defined(__cplusplus)

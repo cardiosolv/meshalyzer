@@ -16,6 +16,7 @@ extern "C" {
 #define CH5_WRITE  2
 
 //Common attributes
+#define CH5_T_ATTR             "number instances"
 #define CH5_DELTA_T_ATTR       "time_delta"
 #define CH5_T0_ATTR            "time origin"
 #define CH5_LABEL_ATTR         "label"
@@ -99,6 +100,7 @@ typedef struct ch5m_pkje_cable ch5m_pkje_cable;
 */
 struct ch5s_vector_grid {
   unsigned int time_steps;     //!< Number of time steps in the grid
+  unsigned int max_time_steps; //!< Maximum number allocated Number of time steps in the grid
   float        time_delta;     //!< The change in time between time steps
   unsigned int num_vectors;    //!< The number of vectors represented in the grid
   unsigned int num_components; //!< The number of components in a vector (3 without scalar, 4 with scalar)
@@ -122,7 +124,8 @@ typedef enum ch5s_nodal_type ch5s_nodal_type;
 * \brief Describes a nodal grid and it's properties.
 */
 struct ch5s_nodal_grid {
-  unsigned int    time_steps;  //!< Number of time steps in the grid
+  unsigned int    time_steps;    //!< Number of time steps in the grid
+  unsigned int    max_time_steps; //!< Maximum number allocated Number of time steps in the grid
   float           time_delta;  //!< The change in time between time steps
   float           t0;          //!< initial time
   unsigned int    num_nodes;   //!< The number of nodes represented in the grid
@@ -181,8 +184,9 @@ typedef struct ch5s_aux_time_step ch5s_aux_time_step;
 * \brief Describes an individual text file.
 */
 struct ch5_text_file {
-  unsigned int size;   //!< The size of the file in number of chars/bytes
-  const char   *label; //!< An optional label describing/naming the file
+  unsigned int  size;    //!< The number of strings
+  unsigned int  storage; //!< The storage for the data
+  const char   *label;   //!< An optional label describing/naming the file
 };
 typedef struct ch5_text_file ch5_text_file;
 

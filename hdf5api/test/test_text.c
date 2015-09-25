@@ -46,7 +46,7 @@ int text_gets_info() {
     result = 0;
   }
   
-  ch5_text_file expcected_info = { 0, "Label" };
+  ch5_text_file expcected_info = { .size=0, .storage=0,.label="Label" };
   ch5_text_file read_info;
   int status = ch5_text_info(file, 0, &read_info);
   if (status != 0) {
@@ -152,25 +152,23 @@ int text_reads() {
     result = 0;
   }
   
-  char *read_back = (char*) malloc(sizeof(char) * (expected_len + 1));
-  /* intentionally set last char to a non-null value */
-  read_back[expected_len] = 99;
-  
-  status = ch5_text_read(file, index, read_back);
+  char **read_back; 
+  status = ch5_text_read(file, index, &read_back);
   if (status != 0) {
     fprintf(stderr, "Error in read function\n");
     result = 0;
   }
-  else if (strcmp(expected_text, read_back) != 0) {
-    fprintf(stderr, "Read-back mismatch, expected \"%s\" but got \"%s\"\n", expected_text, read_back);
-    result = 0;
-  }
-  if (read_back[expected_len] != '\0') {
-    fprintf(stderr, "Read-back error, expected last char to be \\0 but was %d\n", read_back[expected_len]);
+  else if (strcmp(expected_text, read_back[0]) != 0) {
+    fprintf(stderr, "Read-back mismatch, expected \"%s\" but got \"%s\"\n", expected_text, *read_back);
     result = 0;
   }
   
-  if (read_back != NULL) free(read_back);
+  if (read_back != NULL) {
+    char *ptr = read_back[0];
+    while( ptr ) 
+      free( ptr++ );
+    free(read_back);
+  }
   
   CLOSE_WRITE_TEST_FILE;
   

@@ -44,13 +44,13 @@ int s_noda_gets_info() {
   hid_t file = fixture_create_nodal_hdf_file();
   int result0, result1, free_results;
   
-  ch5s_nodal_grid expected_0 = { 3, 0.125, 3., 2, 1, CH5_SCALAR, "KGB", "seconds", "siemens", NULL };
+  ch5s_nodal_grid expected_0 = { 3, 3, 0.125, 3., 2, 1, CH5_SCALAR, "KGB", "seconds", "siemens", NULL };
   ch5s_nodal_grid info_0;
   result0 = (ch5s_nodal_grid_info(file, 0, &info_0) == 0);
   if (result0 == 0) fprintf(stderr, "Function failed on n=0\n");
   else if (_s_noda_compare_info(0, &expected_0, &info_0) == 0) result0 = 0;
   
-  ch5s_nodal_grid expected_1 = { 6, 0.5, 2., 4, 3, CH5_DYN_PTS, NULL, NULL, NULL, "Aerodynamique" };
+  ch5s_nodal_grid expected_1 = { 6, 6,.5, 2., 4, 3, CH5_DYN_PTS, NULL, NULL, NULL, "Aerodynamique" };
   ch5s_nodal_grid info_1;
   result1 = (ch5s_nodal_grid_info(file, 1, &info_1) == 0);
   if (result1 == 0) fprintf(stderr, "Function failed on n=1\n");

@@ -3,6 +3,7 @@
 #include "../types.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 /**
 * \brief Creates a new nodal grid
@@ -33,16 +34,15 @@ int ch5s_nodal_create_grid(hid_t hdf_file, unsigned int n, unsigned int t,
   if (container_id < 0) return -1;
   
   int grid_num = ch5_nchild_count_children(container_id);
-  char *gen_name = ch5_nchild_gen_name(CH5_NODA_GRID_NAME_PREFIX, grid_num);
+  char *gen_name = ch5_nchild_gen_name(CH5_NODA_GRID_NAME_PREFIX, grid_num, label);
   
   hid_t grid_id = ch5_gnrc_open_or_create_dset(container_id, gen_name,
     H5T_IEEE_F32LE, 3,
     (hsize_t[3]){ t, n, (type == CH5_SCALAR) ? CH5_NODA_SCALAR_NODE_WIDTH : CH5_NODA_DYNPTS_NODE_WIDTH });
-  free(gen_name);
   H5Gclose(container_id);
   if (grid_id < 0) return -1;
   
-  int result;
+  SET_ATTR(grid_id, H5T_NATIVE_UINT32, CH5_T_ATTR, (unsigned int[]){0} );
   SET_ATTR(grid_id, H5T_IEEE_F32LE, CH5_DELTA_T_ATTR, &time_delta);
   SET_ATTR(grid_id, H5T_IEEE_F32LE, CH5_T0_ATTR, &t0       );
   SET_ATTR(grid_id, H5T_STD_U32LE,  CH5_NODA_TYPE_ATTR,    &type);
@@ -50,6 +50,7 @@ int ch5s_nodal_create_grid(hid_t hdf_file, unsigned int n, unsigned int t,
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_TIME_UNITS_ATTR, time_units, (char*)time_units);
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_UNITS_ATTR,      label,      (char*)units);
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_COMMENTS_ATTR,   comments,   (char*)comments);
+  free( gen_name );
   
   H5Dclose(grid_id);
   
@@ -93,10 +94,11 @@ int ch5s_nodal_grid_info(hid_t hdf_file, unsigned int grid_index,
     return 1;
   }
   
-  info->time_steps = dims[0];
+  info->max_time_steps = dims[0];
   info->num_nodes  = dims[1];
   info->node_width = dims[2];
   
+  GET_ATTR(grid_id, H5T_NATIVE_UINT32, CH5_T_ATTR,   &(info->time_steps));
   GET_ATTR(grid_id, H5T_NATIVE_FLOAT, CH5_DELTA_T_ATTR,   &(info->time_delta));
   GET_ATTR(grid_id, H5T_NATIVE_FLOAT, CH5_T0_ATTR,        &(info->t0));
   GET_ATTR(grid_id, H5T_NATIVE_INT,   CH5_NODA_TYPE_ATTR, &(info->type));
@@ -275,8 +277,8 @@ int ch5s_nodal_read(hid_t hdf_file, unsigned int grid_index,
 * \param[out] out        A pointer to an array of floats of the size described
 *                        in the function description
 * \returns Status code
-* \retval 0 Success
-* \retval 1 Failure
+* \retval  array size
+* \retval -1 Failure
 */
 int ch5s_nodal_read_time_series(hid_t hdf_file, unsigned int grid_index,
   unsigned int node_index, float *out)
@@ -322,9 +324,9 @@ int ch5s_nodal_read_time_series(hid_t hdf_file, unsigned int grid_index,
   H5Sclose(memspace_id);
   H5Dclose(grid_id);
   
-  if (result < 0) return 1;
+  if (result < 0) return -1;
   
-  return 0;
+  return info.time_steps;
 }
 
 /// @cond INTERNAL
@@ -349,11 +351,16 @@ int _ch5s_nodal_read_write_general(hid_t hdf_file, unsigned int grid_index,
   ch5s_nodal_grid info;
   ch5s_nodal_grid_info(hdf_file, grid_index, &info);
   ch5s_nodal_free_grid_info(&info);/* don't need the strings anyway */
-  
-  if (from_time >= info.time_steps || to_time >= info.time_steps) {
-    H5Dclose(grid_id);
-    return 1;
-  }
+
+  if( to_time >= info.time_steps ) {
+    if( rw_id==CH5_READ || to_time>=info.max_time_steps ) { 
+      H5Dclose(grid_id);
+      return 1;
+    } else {
+      unsigned int t = to_time+1;
+      SET_ATTR(grid_id, H5T_NATIVE_UINT32, CH5_T_ATTR, &t);
+    }
+  } 
   
   int node_width = (info.type == CH5_SCALAR) ? CH5_NODA_SCALAR_NODE_WIDTH : CH5_NODA_DYNPTS_NODE_WIDTH;
   
@@ -370,13 +377,21 @@ int _ch5s_nodal_read_write_general(hid_t hdf_file, unsigned int grid_index,
   hid_t memspace_id = H5Screate_simple(3,
     (hsize_t[3]){ to_time-from_time+1, nnode, node_width }, NULL);
     
+  hid_t plist_id;
+#ifdef HAVE_MPIIO
+  plist_id = H5Pcreate(H5P_DATASET_XFER);
+  H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_INDEPENDENT);
+#else
+  plist_id = H5P_DEFAULT;
+#endif
+
   switch (rw_id) {
     case CH5_READ:
-      result = H5Dread(grid_id, H5T_NATIVE_FLOAT, memspace_id, space_id, H5P_DEFAULT, inout);
+      result = H5Dread(grid_id, H5T_NATIVE_FLOAT, memspace_id, space_id, plist_id, inout);
       break;
     
     case CH5_WRITE:
-      result = H5Dwrite(grid_id, H5T_IEEE_F32LE, memspace_id, space_id, H5P_DEFAULT, inout);
+      result = H5Dwrite(grid_id, H5T_IEEE_F32LE, memspace_id, space_id, plist_id, inout);
       break;
   }
   

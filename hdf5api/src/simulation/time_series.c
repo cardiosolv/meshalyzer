@@ -32,7 +32,7 @@ int ch5s_series_create(hid_t hdf_file, unsigned int t, unsigned int n,
     return -1;
   }
   
-  char* series_name = ch5_nchild_gen_name(CH5_TIME_SERIES_PREFIX, series_num);
+  char* series_name = ch5_nchild_gen_name(CH5_TIME_SERIES_PREFIX, series_num,label);
   hid_t dset_id = ch5_gnrc_open_or_create_dset(container_id, series_name,
     H5T_IEEE_F64LE, 2, (hsize_t[2]){ t, n+1 });
   free(series_name);
