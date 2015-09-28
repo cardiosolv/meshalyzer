@@ -92,7 +92,7 @@ int Myslider :: handle( int event )
       break;
     case FL_PUSH:
     case FL_DRAG:
-      if ( Fl::event_key() == FL_Button+2 ) {
+      if ( Fl::event_key()==FL_Button+2 || (Fl::event_key()==FL_Button+1 && Fl::event_state(FL_SHIFT)) ) {
         float newval = float(Fl::event_x()-x()-w_valout)/
                        float(w()-w_valout)*(maximum()-minimum())+minimum();
         if ( newval< minimum() ) newval = minimum();
