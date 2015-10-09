@@ -2,16 +2,17 @@ package "Package_data"
 version "1.0"
 args "--default-optional"
 usage "package_data [--append] [--nodal=file.IGB [--label] [--comment]] \n\
-                    [--nodel=file --numnodes [generic_options] ]\n\
+                    [--nodal=file --numnodes [generic_options] ]\n\
                     [--vector=file.vpts [generic_options] ] \n\
                     [--auxgrid=files.pts_t [generic_options] ]\n\
                     [--dynpts=file.dynpt [generic_ptions] ]\n\
                     [--text=file [--label] ]\n\
-                    [--time-series [generic_options] ] FILE.datH5"
+                    [--time-series=file [generic_options] ] FILE.datH5"
 purpose "Concatenate several data files into one HDF5 data file"
 
+text ""
 option "append"        A "append to existing data file" flag off
-text "different data types"
+text "\nDifferent data types"
 option "nodal"         n "nodal data"        string typestr="filename" multiple
 option "numnodes"      N "number nodes for non-IGB" int multiple default="0"
         details = "\
@@ -25,14 +26,14 @@ option "time-series"   T "time series"       string typestr="filename" multiple
 option "auxgrid"       a "auxilliary grid"   string typestr="filename.vpts" multiple
 option "dynpts"        d "dynamic points"    string typestr="filename.dynpt" multiple
 option "text"          t "free format textual data" string typestr="filename" multiple
-text "The following are generic options ignored for IGB"
+text "\nThe following are generic options ignored for IGB"
 option "label"         l "data label"        string multiple
 option "comment"       c "general comment"   string multiple
 option "units"         u "units for data"    string multiple
 option "tm-units"      s "units for time"    string multiple
 option "dt"            D "time step"         float  multiple
 option "t0"            o "initial time"      float  multiple
-text "The following are only for time series"
+text "\nThe following is only for time series"
 option "quantities"    q "quantities for time series columns" string multiple
 text "\n\
 Example: package_data --numnodes=556812 -na.igb --label=Vm --vector J.vpts\n\

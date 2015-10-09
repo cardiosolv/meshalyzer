@@ -1,4 +1,7 @@
 HOSTMACHINE := $(shell uname)
+HDF5=1
+
+include make.conf
 
 HDF5API_ROOT  := ./hdf5api
 
@@ -12,10 +15,9 @@ OBJS = $(FLTK_SOURCES:.fl=.o)\
 	$(patsubst %.c,%.o,$(wildcard *.c))\
 	$(patsubst %.C,%.o,$(wildcard *.C))
 
-#HDF5=1
 ifdef HDF5
-LIB_CH5       := (HDF5_ROOT)/lib/libch5.a
-LIB_HDF5      := -lch5 -lhdf5 -lhdf5_hl 
+LIB_CH5       := $(HDF5API_ROOT)/lib/libch5.a
+LIB_HDF5      := -L$(HDF5_ROOT)/lib -lch5 -lhdf5 -lhdf5_hl 
 COMMON_INC    += -DUSE_HDF5
 else
 LIB_CH5       := 
@@ -32,7 +34,7 @@ endif
 
 COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5)
 #LDFLAGS      = -fopenmp
-CXXFLAGS     = -std=c++11 -I$(HDF5API_ROOT)/src $(FLTK_INC) $(COMMON_INC)
+CXXFLAGS     = -std=c++11 -I$(HDF5_ROOT)/include -I$(HDF5API_ROOT)/include $(FLTK_INC) $(COMMON_INC)
 LIBS         = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS) 
 
 CPPFLAGS = $(CFLAGS) -g
@@ -65,6 +67,9 @@ $(OS_files:.o=_os.o): %_os.o: %.cc
 
 clean:
 	rm -rf $(FLTK_SOURCES:.fl=.h) $(FLTK_SOURCES:.fl=.cc) *.o *.d meshalyzer mesalyzer meshalyzer.app
+ifdef HDF5
+	cd hdf5api && make clean
+endif
 
 utils: 
 	cd utils && make all

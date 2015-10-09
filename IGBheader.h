@@ -278,7 +278,7 @@ class IGBheader
     inline float org_t(void){ return v_org_t; }
     inline float org_t( bool &set ){ set=bool_org_t; return v_org_t; }
   inline void org_t( float a ){ v_org_t = a;  bool_org_t = true;}
-    inline float inc_x( float a ){ v_inc_x = a;  bool_inc_x = true;}
+    inline void inc_x( float a ){ v_inc_x = a;  bool_inc_x = true;}
     inline float inc_x( bool &set ){ set=bool_inc_x; return v_inc_x; }
   inline float inc_x(void){ return v_inc_x; }
     inline void inc_y( float a ){ v_inc_y = a;  bool_inc_y = true;}

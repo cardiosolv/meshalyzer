@@ -11,7 +11,6 @@
 #include "DataAllInMem.h"
 #include "ThreadedData.h"
 #ifdef USE_HDF5
-#include <hdf5.h>
 #include <ch5/ch5.h>
 #endif
 

@@ -48,7 +48,7 @@ int ch5s_nodal_create_grid(hid_t hdf_file, unsigned int n, unsigned int t,
   SET_ATTR(grid_id, H5T_STD_U32LE,  CH5_NODA_TYPE_ATTR,    &type);
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_LABEL_ATTR,      label,      (char*)label);
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_TIME_UNITS_ATTR, time_units, (char*)time_units);
-  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_UNITS_ATTR,      label,      (char*)units);
+  SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_UNITS_ATTR,      units,      (char*)units);
   SET_NON_NULL_ATTR(grid_id, H5T_C_S1, CH5_COMMENTS_ATTR,   comments,   (char*)comments);
   free( gen_name );
   

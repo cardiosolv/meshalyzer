@@ -360,11 +360,16 @@ hid_t ch5_gnrc_open_or_create_chunked_dset(hid_t parent_id, const char *name,
 * \param[in] label  use this nuame if supplied    
 */
 char* ch5_nchild_gen_name(const char *prefix, int n, const char *label ) {
-  if( label )
-    return strdup(label);
-  int new_total = strlen(prefix) + CH5_NCHILD_ZEROPAD + 1;
-  char *name = (char*) malloc(sizeof(char) * new_total);
-  sprintf(name, "%s%0" CH5_QUOTE(CH5_NCHILD_ZEROPAD) "d", prefix, n);
+  
+  char *name;
+
+  if( label ) {
+    name = strcpy( malloc(strlen(label)+1), label );
+  } else {
+    int new_total = strlen(prefix) + CH5_NCHILD_ZEROPAD + 1;
+    name = (char*) malloc(sizeof(char) * new_total);
+    sprintf(name, "%s%0" CH5_QUOTE(CH5_NCHILD_ZEROPAD) "d", prefix, n);
+  }
   return name;
 }
 

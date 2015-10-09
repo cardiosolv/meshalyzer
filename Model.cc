@@ -1357,7 +1357,8 @@ bool Model::read_elem_file( const char *fname )
 bool Model::add_elements(hid_t hdf_file)
 {
   ch5_dataset info;
-  ch5m_elem_get_info(hdf_file, &info);
+  if( ch5m_elem_get_info(hdf_file, &info) )
+    return false;
   
   _numVol = info.count;
   _vol = new VolElement*[_numVol];

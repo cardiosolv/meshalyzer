@@ -6,7 +6,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "IGBheader.h"
-#include "ch5.h"
+#include "ch5/ch5.h"
 #include "cmdline.h"
 using namespace std;
 
@@ -263,8 +263,7 @@ void
 add_nodal_igb( hid_t h5out, const char *fn, const char* label, 
                                                    ch5s_nodal_type type ) 
 {
-  gzFile in = open_gzip( fn );
-  IGBheader h(in);
+  IGBheader h(open_gzip(fn));
   if( h.read() )
     exit(1);
 
@@ -278,11 +277,11 @@ add_nodal_igb( hid_t h5out, const char *fn, const char* label,
 
   float *data = new float[h.x()*h.y()*h.z()*h.data_size()/sizeof(float)];
   for( int i=0; i< h.t(); i++ ) {
-    read_IGB_data( data, 1, &h, NULL );
+    h.read_data( data, 1, NULL );
     ch5s_nodal_write( h5out, grid_i, i, i, data );
   }
   delete[] data;
-  gzclose(in);
+  h.close();
 }
 
 
@@ -416,7 +415,7 @@ add_vector_data( hid_t h5out, const char *fn, int argc, char **argv )
   float *data = new float[numnodes*num_data];
   for( int i=0; i< num_t; i++ ) {
     if( is_igb ) {
-      read_IGB_data( data, 1, &h, NULL );
+      h.read_data( data, 1, NULL );
     } else {
       float a[4];
       for( int j=0; j<numnodes; j++ ) {

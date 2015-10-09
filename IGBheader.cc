@@ -268,7 +268,7 @@ const char
 
 static bool
 is_deprecated( char *s ) {
-  for( int i=0; i<sizeof(deprecated)/sizeof(deprecated[0]); i++ )
+  for( unsigned int i=0; i<sizeof(deprecated)/sizeof(deprecated[0]); i++ )
     if( !strcmp( s, deprecated[i] ) )
       return true;
   return false;
@@ -411,9 +411,6 @@ int IGBheader::write()
   MAKE_CONSISTENT( y );
   MAKE_CONSISTENT( z );
   MAKE_CONSISTENT( t );
-
-  // we will now only allow writing of big or little endian */
-  const char* systeme=(endian()==IGB_BIG_ENDIAN)?"big_endian":"little_endian";
 
   char ligne[1024];
   if (bool_t) {
@@ -1347,8 +1344,6 @@ int IGBheader::puts_fcn( void* f, char* s )
  */
 void IGBheader :: swab( void *data, int nd )
 {
-  unsigned char tmpb;
-
   if ( data_size()==1 || v_type==IGB_RGBA )
     return;
 

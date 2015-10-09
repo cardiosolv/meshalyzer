@@ -1,3 +1,5 @@
+include ../make.conf
+
 SRCDIR     := src
 SRCSUBDIRS := model simulation
 TESTDIR    := test
@@ -6,11 +8,9 @@ TESTINVALID:= ./test/data/test_invalid.h5
 GENBIN     := $(TESTDIR)/data/generator
 LIBFILE    := libch5.a
 LIBPATH    := lib/$(LIBFILE)
-CC         := h5cc # use the hdf5 compiler helper
 CFLAGS     := -std=c99 -Wall -Isrc -g -O0
 AR         := ar
 ARFLAGS    := -rcs
-HDF5_ROOT  := $(PETSC_DIR)/$(PETSC_ARCH)
 
 CFLAGS     += -I$(HDF5_ROOT)/include -L$(HDF5_ROOT)/lib
 OBJS       := $(patsubst %.c, %.o, $(wildcard $(SRCDIR)/*.c))

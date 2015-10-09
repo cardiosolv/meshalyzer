@@ -1,10 +1,10 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0303 
 header_name {.h} 
 code_name {.cc}
 declblock {\#ifdef USE_HDF5} {open public after {\#endif}
 } {
-  decl {\#include "ch5.h"} {selected public global
+  decl {\#include "ch5/ch5.h"} {selected public global
   }
 } 
 

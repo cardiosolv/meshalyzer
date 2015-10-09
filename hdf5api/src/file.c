@@ -1,4 +1,5 @@
 #include "file.h"
+#include "metadata.h"
 
 /**
 * \brief Opens an HDF file at the given path
@@ -46,6 +47,7 @@ int ch5_create(const char *path, hid_t *file_id) {
 #endif
   if (id < 0) return 1;
   *file_id = id;
+  ch5_meta_set_name( *file_id, path );
   return 0;
 }
 
