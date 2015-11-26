@@ -1,0 +1,133 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0303 
+header_name {.h} 
+code_name {.cxx}
+decl {\#include "TBmeshWin.h"} {private local
+} 
+
+decl {class TBmeshWin;} {public local
+} 
+
+class DeadDataGUI {open
+} {
+  Function {DeadDataGUI( TBmeshWin *w)} {open
+  } {
+    Fl_Window window {
+      label {Dead Data } open
+      xywh {1624 258 285 355} type Double visible
+    } {
+      Fl_Light_Button showDeadData {
+        label {Dead data}
+        callback {if( o->value() )
+  deadApp->do_callback();
+else {
+  mwtb->cs->deadRange();
+  mwtb->redraw();
+}}
+        xywh {22 15 110 40}
+      }
+      Fl_Value_Input minValidVal {
+        label {min valid value}
+        xywh {130 110 70 30} maximum 0 value 1 deactivate
+      }
+      Fl_Value_Input maxValidVal {
+        label {max valid value}
+        xywh {130 70 70 30} maximum 0 deactivate
+      }
+      Fl_Button {} {
+        label Recalibrate
+        callback {double min, max;
+
+if( minValid->value() )
+  min = minValidVal->value();
+else
+  min = mwtb->cs->min();
+  
+if( maxValid->value() )
+  max = maxValidVal->value();
+else
+  max = mwtb->cs->max();
+
+mwtb->cs->calibrate( min, max );}
+        tooltip {recalibrate colour scale using valid max & min values} xywh {156 15 110 40}
+      }
+      Fl_Box dead_color {
+        label {Dead Color}
+        callback {uchar ri = o->r()*255.;
+uchar bi = o->b()*255.;
+uchar gi = o->g()*255.;
+workingCol->color(fl_rgb_color(ri,gi,bi));
+workingCol->redraw();}
+        xywh {14 165 200 95} align 257
+        code0 {\#include <FL/Fl_Color_Chooser.H>}
+        class Fl_Color_Chooser
+      }
+      Fl_Value_Slider deadopac {
+        label Opacity
+        xywh {231 165 35 95} type {Vert Knob} color 26 align 1 minimum 1 maximum 0 value 1 textsize 14
+      }
+      Fl_Box curCol {
+        label Current
+        xywh {10 280 125 25} box GTK_DOWN_BOX labelcolor 98 align 1
+      }
+      Fl_Box workingCol {
+        label Working selected
+        xywh {145 280 122 25} box GTK_DOWN_BOX align 1
+      }
+      Fl_Return_Button {} {
+        label Done
+        callback {window->hide();}
+        xywh {145 310 125 35}
+      }
+      Fl_Button deadApp {
+        label Apply
+        callback {curCol->color(workingCol->color());
+curCol->redraw();
+
+DeadRange dr;
+if( minValid->value() ) {
+  if( maxValid->value() )
+    dr = DEAD_RANGE;
+  else
+    dr = DEAD_MIN;
+} else {
+  if( maxValid->value() )
+    dr = DEAD_MAX;
+  else
+    dr = NO_DEAD;
+}
+mwtb->cs->deadRange(minValidVal->value(),
+         maxValidVal->value(), dr );
+
+GLfloat col[3];
+col[0] = dead_color->r();
+col[1] = dead_color->g();
+col[2] = dead_color->b();
+
+mwtb->cs->deadColour(col,deadopac->value());
+
+mwtb->redraw();}
+        xywh {10 310 125 35}
+      }
+      Fl_Light_Button minValid {
+        label Min
+        callback {if( o->value())
+  minValidVal->activate();
+else
+  minValidVal->deactivate();}
+        tooltip {specify a minimum vaid data value} xywh {211 110 55 30}
+      }
+      Fl_Light_Button maxValid {
+        label Max
+        callback {if( o->value() ) 
+  maxValidVal->activate();
+else
+  maxValidVal->deactivate();}
+        tooltip {specify a maximum valid data value} xywh {211 70 55 30}
+      }
+    }
+    code {mwtb = w;} {}
+  }
+  decl {TBmeshWin *mwtb;} {private local
+  }
+} 
