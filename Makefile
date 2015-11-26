@@ -1,5 +1,5 @@
 HOSTMACHINE := $(shell uname)
-HDF5=1
+#HDF5=1
 
 include make.conf
 
@@ -81,7 +81,7 @@ ifdef HDF5
 endif
 
 %.h %.cc: %.fl
-	fluid -c $<
+	fluid -c -o .cc $<
 
 -include $(OBJS:.o=.d)
 

@@ -1,6 +1,7 @@
 #include "Colourscale.h"
 
-Colourscale :: Colourscale( int ts, CScale_t tcs ) : n(0), mindat(0.),maxdat(1.)
+Colourscale :: Colourscale( int ts, CScale_t tcs ) : n(0), mindat(0.),maxdat(1.),
+        _deadRange(NO_DEAD), _deadColour({0.,0.,0.,1.}),_deadMin(0.), _deadMax(1.)
 {
   scaletype = tcs;
   size( ts );
@@ -184,12 +185,6 @@ void Colourscale :: scale( CScale_t cs )
       for ( i=0; i<n; i++ ) {
         cmap[i][2] = ((float)i)/ispan;
         cmap[i][0] = cmap[i][1] = 0;
-      }
-      break;
-    case CS_IGREY: 							/* bw */
-      for ( i=0; i<n; i++ ) {
-        cmap[i][0] = cmap[i][2] = 0.0;
-        cmap[i][1] = ((float)i)/ispan;
       }
       break;
     case CS_HOT:
@@ -403,6 +398,12 @@ void Colourscale :: scale( CScale_t cs )
 
 void Colourscale :: colourize( float val )
 {
+  if( ( _deadRange==DEAD_MIN && val<_deadMin ) ||
+      ( _deadRange==DEAD_MAX && val>_deadMax ) ||
+      ( _deadRange==DEAD_RANGE && (val<_deadMin||val>_deadMax) ) ) {
+    glColor4fv( _deadColour );
+    return;
+  } 
   int indx=int(rint(a*val+b));
   if ( indx<0 ) indx = 0;
   else if ( indx>=n ) indx = n-1;
@@ -412,6 +413,12 @@ void Colourscale :: colourize( float val )
 
 void Colourscale :: colourize( float val, float alpha )
 {
+  if( ( _deadRange==DEAD_MIN && val<_deadMin ) ||
+      ( _deadRange==DEAD_MAX && val>_deadMax ) ||
+      ( _deadRange==DEAD_RANGE && (val<_deadMin||val>_deadMax) ) ) {
+    glColor4fv( _deadColour );
+    return;
+  } 
   int indx=int(rint(a*val+b));
   if ( indx<0 ) indx = 0;
   else if ( indx>=n ) indx = n-1;
@@ -438,6 +445,11 @@ void Colourscale :: size( int s )
 
 GLfloat* Colourscale :: colorvec( double val )
 {
+  if( ( _deadRange==DEAD_MIN && val<_deadMin ) ||
+      ( _deadRange==DEAD_MAX && val>_deadMax ) ||
+      ( _deadRange==DEAD_RANGE && (val<_deadMin||val>_deadMax) ) ) {
+    return _deadColour;
+  }
   int indx=int(rint(a*val+b));
   if ( indx<0 ) indx = 0;
   else if ( indx>=n ) indx = n-1;
@@ -469,4 +481,20 @@ Colourscale :: output_png( const char *filename )
     }
   }
   cbar.write( buffer, 1 );
+}
+
+
+void  
+Colourscale::deadColour( GLfloat *dc, GLfloat dopac )
+{
+  memcpy( _deadColour, dc, 3*sizeof(GLfloat) );
+  _deadColour[3] = dopac;
+}
+
+void
+Colourscale::deadRange( double min, double max, DeadRange dr )
+{
+  _deadMin = min;
+  _deadMax = max;
+  _deadRange = dr;
 }

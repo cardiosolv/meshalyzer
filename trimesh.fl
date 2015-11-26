@@ -76,7 +76,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1090 251 350 645} type Double box UP_BOX
+      xywh {614 257 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -84,7 +84,7 @@ class Controls {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -175,7 +175,7 @@ if( fn ) mwtb->read_dynamic_pts( fn, tmslider );}
             label {Read  HDF5 Data}
             callback {\#ifdef USE_HDF5
 HDF5DataBrowser *brow =  new HDF5DataBrowser( fl_file_chooser("Choose HDF5 data file", "*.datH5", NULL ), mwtb );
-\#endif} selected
+\#endif}
             xywh {0 0 30 20}
           }
           MenuItem read_recalibrate {
@@ -464,7 +464,7 @@ mwtb->redraw();}
           }
         }
         Submenu {} {
-          label Data
+          label Data open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -482,8 +482,13 @@ mwtb->redraw();}
             callback {mwtb->isosurfwin->isowin->show();}
             xywh {0 0 31 20}
           }
+          MenuItem {} {
+            label {Dead range}
+            callback {mwtb->deadData->window->show();}
+            xywh {0 0 34 20}
+          }
           Submenu brcut {
-            label {Branch cut} open
+            label {Branch cut}
             tooltip {Do not interpolqte betzeen limits} xywh {0 0 70 20}
           } {
             MenuItem brcutNone {
@@ -782,7 +787,7 @@ op->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
@@ -1837,7 +1842,7 @@ hdfreadbut->deactivate();
   }
   decl {TBmeshWin *mwtb;} {private local
   }
-  decl {Fl_Window* proginfo;} {public local
+  decl {Fl_Window* proginfo;} {selected public local
   }
   Function {pickcolor(Object_t obj, const char* wintitle )} {} {
     code {bool* sel=regselected();
@@ -2118,6 +2123,16 @@ save_colour( mshzf, mwtb->isosurfwin->issColor(0) );
 mshzf << endl;
 mshzf << "ISOSURF_COLOUR 1 = ";
 save_colour( mshzf, mwtb->isosurfwin->issColor(1) );
+mshzf << endl;
+
+SAVE_WIDGET( mshzf, mwtb->deadData->minValid );
+SAVE_WIDGET( mshzf, mwtb->deadData->minValidVal );
+SAVE_WIDGET( mshzf, mwtb->deadData->maxValid );
+SAVE_WIDGET( mshzf, mwtb->deadData->maxValidVal );
+SAVE_WIDGET( mshzf, mwtb->deadData->deadopac );
+SAVE_WIDGET( mshzf, mwtb->deadData->showDeadData );
+mshzf << "DEAD_COLOUR = ";
+save_colour( mshzf, mwtb->cs->deadColour() );
 mshzf << endl;} {}
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
@@ -2143,7 +2158,8 @@ colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
 cc->window->label(winlab);
 cc->window->show();} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2433,6 +2449,22 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     continue;
   }
   
+  TEST_VAR( mwtb->deadData->minValid, var, val )
+  TEST_VAR( mwtb->deadData->minValidVal, var, val ) 
+  TEST_VAR( mwtb->deadData->maxValid, var, val )
+  TEST_VAR( mwtb->deadData->maxValidVal, var, val )
+  TEST_VAR( mwtb->deadData->deadopac, var, val )
+  TEST_VAR( mwtb->deadData->showDeadData, var, val )
+  if( !strcmp( var, "DEAD_COLOUR" ) ){
+    sscanf( buf, "%*s = %f %f %f %f", &r, &g, &b, &a );
+    mwtb->deadData->dead_color->rgb(r,g,b);
+    mwtb->deadData->dead_color->do_callback();
+    mwtb->deadData->deadApp->do_callback();
+    continue;
+  }
+
+ TEST_VAR( mwtb->deadData->minValid, var, val )
+ 
   if( !strcmp( "BGD_COLOUR", var )) { mwtb->bgd(val); continue; }
 
   cerr << "Unknown variable specified: " << var << endl;

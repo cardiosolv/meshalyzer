@@ -861,7 +861,16 @@ the data colour scale, otherwise all lines are drawn with the same
 specified ``colour''.
 The thickness of the lines can also be controlled.
 
-\subsection{Branch cut}
+\subsubsection{Dead range}
+
+Often, one does not have data for all vertices in the mesh and one uses a bogus placeholder value. 
+In this case, it is conventient to draw the nondatified objects in a different colour so that they stand out, or
+not even draw them at all. We consider data outside of a specified range to be ``dead''. You can specifiy a \emph{minimum valid value} and any data below this
+value will be considered dead. Likewise a \emph{maximum valid value} can be selected, or both. The colour and opacity of the dead vertices can be selected
+arbitrarily.
+The \emph{Apply} button must be pressed to enact the changes. \emph{Recalibrate} scales the colour scale for the nondead range.
+
+\subsubsection{Branch cut}
 
 Branch cuts represent discontinuities in the value of a function which are artificial. 
 An example is the branch cut in
@@ -873,7 +882,8 @@ should not be interpolated to contain a zero value.
 Choosing the appropriate branch cut range will ignore interpolation within such elements,
 especially when calculating isolines and surfaces.
 Four common ranges are available.
-It is suggested that an appropriate colour scale is used which has the same value at the two extremes.
+It is suggested that an appropriate colour scale is used which wraps around, 
+i.e., has the same value at the two extremes.
 
 \subsection{Output Menu}
 

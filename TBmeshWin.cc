@@ -113,7 +113,8 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     disp(asSurface),data(NULL),facetshading(false),numframes(0),
     headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] ),
     iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL),
-    bgd_trans(false),_norot(false),forcedThreaded(false),_branch_cut(false)
+    bgd_trans(false),_norot(false),forcedThreaded(false),_branch_cut(false),
+    deadData(new DeadDataGUI(this)) 
 {
   model = new Model();
   memset( hilight, 0, sizeof(int)*maxobject );

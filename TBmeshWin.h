@@ -22,6 +22,7 @@
 #include "IsoSurface.h"
 #include "IsoLines.h"
 #include "TimeLink.h"
+#include "DeadDataGUI.h"
 #ifdef USE_HDF5
 #include "hdf5.h"
 #endif
@@ -214,6 +215,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     static unsigned int MAX_MESSAGES_READ;
     bool   _branch_cut;
     double _branch_range[2];
+    DeadDataGUI *deadData;
 };
 
 #include "DataOpacity.h"

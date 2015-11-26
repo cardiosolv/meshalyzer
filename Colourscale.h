@@ -10,9 +10,13 @@
 #include "PNGwrite.h"
 
 typedef enum {
-  CS_HOT, CS_GREY, CS_RGREY, CS_GGREY, CS_BGREY, CS_IGREY, CS_RAINBOW, CS_BL_RAINBOW, 
+  CS_HOT, CS_GREY, CS_RGREY, CS_GGREY, CS_BGREY, CS_RAINBOW, CS_BL_RAINBOW, 
   CS_COLD_HOT, CS_CG, CS_MATLAB_REV, CS_MATLAB, CS_ACID, CS_P2G, CS_VIRIDIS, CS_VIRIDIS_LIGHT
 } CScale_t;
+
+typedef enum {
+  NO_DEAD, DEAD_MIN, DEAD_MAX, DEAD_RANGE
+} DeadRange;
 
 class Colourscale
 {
@@ -26,16 +30,25 @@ class Colourscale
     void colourize( float );				// colour vector for data value
     void colourize( float, float );			// same as above, specify alpha
     inline int size(){ return n; }			// get the size
-    void   size( int );	    				// set the size
-    inline GLfloat* entry(int a){return cmap[a];}	// return an entry
+    void     size( int );	    				// set the size
+    inline   GLfloat* entry(int a){return cmap[a];}	// return an entry
     GLfloat *colorvec( double );
-    void   output_png( const char * );            // output the map
+    void     output_png( const char * );            // output the map
+    void     deadColour( GLfloat *, GLfloat );
+    GLfloat *deadColour(){return _deadColour;}
+    void     deadRange( double min, double max, DeadRange dr=DEAD_RANGE );
+    void     deadRange( void ){_deadRange=NO_DEAD;};
+    void     get_deadRange( double &min, double &max, DeadRange &dr )
+                          { min=_deadMin;max=_deadMax;dr=_deadRange;}
   private:
     GLfloat** cmap;							// the map
     int       n;							// size of map
     double    a, b;							// map data to colour map
     CScale_t  scaletype;
     double    mindat, maxdat;
+    DeadRange _deadRange;                    // what to ignore
+    double    _deadMin, _deadMax;             // ignore below and above these values
+    GLfloat   _deadColour[4];                 // how to colour dead data
 };
 
 #endif
