@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0303 
+version 1.0302 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -1834,7 +1834,7 @@ mwtb->redraw();}
         }
         Fl_Value_Input animdelay {
           label {delay:}
-          callback {mwtb->animate_delay(o->value()/1000.);} selected
+          callback {mwtb->animate_delay(o->value()/1000.);}
           tooltip {delay between frames (ms )} xywh {260 606 70 20} maximum 2000 step 5 value 10
         }
         Fl_Button tsync_but {
@@ -2614,6 +2614,11 @@ delete sel;}
       }
       Fl_Box color {
         label Colour
+        callback {uchar ri = o->r()*255.;
+uchar bi = o->b()*255.;
+uchar gi = o->g()*255.;
+opacity->selection_color(fl_rgb_color(ri,gi,bi));
+opacity->redraw();}
         xywh {10 53 200 95}
         code0 {\#include <FL/Fl_Color_Chooser.H>}
         class Fl_Color_Chooser
@@ -2668,8 +2673,10 @@ for( int i=0; i<nreg; i++ )
     GLfloat *c = mwtb->get_color( obj, i );
     color->rgb(c[0],c[1],c[2]);
     opacity->value(c[3]);
+    color->do_callback();
     color->redraw();
   }
-delete sel;} {}
+delete sel;} {selected
+    }
   }
 } 

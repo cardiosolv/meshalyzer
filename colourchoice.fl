@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
+version 1.0302 
 header_name {.h} 
 code_name {.cc}
 decl {\#include <FL/gl.h>} {public local
@@ -23,9 +23,14 @@ class colourChoice {open
   } {
     Fl_Window window {
       label {Choose colour} open
-      xywh {639 50 225 260} type Double visible
+      xywh {1548 23 225 260} type Double visible
     } {
       Fl_Box rgb_choice {
+        callback {uchar ri = o->r()*255.;
+uchar bi = o->b()*255.;
+uchar gi = o->g()*255.;
+opacity->selection_color(fl_rgb_color(ri,gi,bi));
+opacity->redraw();} selected
         xywh {0 0 225 175}
         code0 {\#include <FL/Fl_Color_Chooser.H>}
         class Fl_Color_Chooser
@@ -94,6 +99,11 @@ class AuxColourChoice {open
       xywh {656 435 225 260} type Double visible
     } {
       Fl_Box rgb_choice {
+        callback {uchar ri = o->r()*255.;
+uchar bi = o->b()*255.;
+uchar gi = o->g()*255.;
+opacity->selection_color(fl_rgb_color(ri,gi,bi));
+opacity->redraw();}
         xywh {0 0 225 175}
         code0 {\#include <FL/Fl_Color_Chooser.H>}
         class Fl_Color_Chooser
@@ -110,7 +120,7 @@ col[2] = rgb_choice->b();
 col[3] = opacity->value();
 tbmw->auxGrid->color( obj, col );
 tbmw->redraw();
-window->~Fl_Double_Window();} selected
+window->~Fl_Double_Window();}
         xywh {125 225 90 30}
       }
       Fl_Button apbut {
