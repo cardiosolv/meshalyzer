@@ -81,9 +81,9 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {614 257 350 645} type Double box UP_BOX hide
+      xywh {614 257 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
-      code1 {\#include "VecData.h"}
+      code1 {\#include "VecData.h"} visible
     } {
       Fl_Menu_Bar mainbar {
         xywh {0 0 350 30} labelcolor 1
@@ -773,7 +773,7 @@ delete[] selreg;}
         Fl_Button {} {
           label {select all}
           callback {reglist->check_all();
-reglist->do_callback();} selected
+reglist->do_callback();}
           xywh {160 240 90 20}
         }
         Fl_Check_Browser reglist {
@@ -1834,8 +1834,8 @@ mwtb->redraw();}
         }
         Fl_Value_Input animdelay {
           label {delay:}
-          callback {mwtb->animate_delay(o->value()/1000.);}
-          tooltip {delay between frames (ms )} xywh {260 620 70 20} maximum 2000 step 5 value 10
+          callback {mwtb->animate_delay(o->value()/1000.);} selected
+          tooltip {delay between frames (ms )} xywh {260 606 70 20} maximum 2000 step 5 value 10
         }
         Fl_Button tsync_but {
           callback {mwtb->SendTimeSyncMessage();}
@@ -2624,6 +2624,7 @@ delete sel;}
       }
       Fl_Button {} {
         label Done
+        callback {win->hide();}
         xywh {135 205 75 30} color 204
       }
       Fl_Return_Button {} {

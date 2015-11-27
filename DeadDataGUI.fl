@@ -18,25 +18,30 @@ class DeadDataGUI {open
     } {
       Fl_Light_Button showDeadData {
         label {Dead data}
-        callback {if( o->value() )
+        callback {if( o->value() ) {
   deadApp->do_callback();
-else {
+  deadgrp->activate();
+} else {
+  deadgrp->deactivate();
   mwtb->cs->deadRange();
   mwtb->redraw();
-}} selected
-        tooltip {Determine if data is valid or not} xywh {22 15 110 40}
+}}
+        tooltip {Determine if data is valid or not} xywh {27 23 110 40}
       }
-      Fl_Value_Input minValidVal {
-        label {min valid value}
-        tooltip {colour data below this value} xywh {130 110 70 30} maximum 0 deactivate
-      }
-      Fl_Value_Input maxValidVal {
-        label {max valid value}
-        tooltip {colour data above this value} xywh {130 70 70 30} maximum 0 value 1 deactivate
-      }
-      Fl_Button {} {
-        label Recalibrate
-        callback {double min, max;
+      Fl_Group deadgrp {open selected
+        xywh {12 24 260 320} deactivate
+      } {
+        Fl_Value_Input minValidVal {
+          label {min valid value}
+          tooltip {colour data below this value} xywh {132 109 70 30} maximum 0 deactivate
+        }
+        Fl_Value_Input maxValidVal {
+          label {max valid value}
+          tooltip {colour data above this value} xywh {132 69 70 30} maximum 0 value 1 deactivate
+        }
+        Fl_Button {} {
+          label Recalibrate
+          callback {double min, max;
 
 if( minValid->value() )
   min = minValidVal->value();
@@ -49,39 +54,42 @@ else
   max = mwtb->cs->max();
 
 mwtb->cs->calibrate( min, max );}
-        tooltip {recalibrate colour scale using valid max & min values} xywh {156 15 110 40} color 134
-      }
-      Fl_Box dead_color {
-        label {Dead Color}
-        callback {uchar ri = o->r()*255.;
+          tooltip {recalibrate colour scale using valid max & min values} xywh {158 24 110 30} color 134
+        }
+        Fl_Box dead_color {
+          label {Dead Color}
+          callback {uchar ri = o->r()*255.;
 uchar bi = o->b()*255.;
 uchar gi = o->g()*255.;
 workingCol->color(fl_rgb_color(ri,gi,bi));
 workingCol->redraw();}
-        tooltip {colour of invalid data} xywh {14 165 200 95} align 257
-        code0 {\#include <FL/Fl_Color_Chooser.H>}
-        class Fl_Color_Chooser
-      }
-      Fl_Value_Slider deadopac {
-        label Opacity
-        tooltip {opacity of invalid data} xywh {231 165 35 95} type {Vert Knob} color 26 align 1 minimum 1 maximum 0 value 1 textsize 14
-      }
-      Fl_Box curCol {
-        label Current
-        tooltip {current colour} xywh {10 280 125 25} box GTK_DOWN_BOX labelcolor 98 align 1
-      }
-      Fl_Box workingCol {
-        label Working
-        tooltip {selected colour} xywh {145 280 125 25} box GTK_DOWN_BOX align 1
-      }
-      Fl_Return_Button {} {
-        label Done
-        callback {window->hide();}
-        tooltip {close window} xywh {145 310 125 35} color 215
-      }
-      Fl_Button deadApp {
-        label Apply
-        callback {curCol->color(workingCol->color());
+          tooltip {colour of invalid data} xywh {16 164 200 95} align 257
+          code0 {\#include <FL/Fl_Color_Chooser.H>}
+          class Fl_Color_Chooser
+        }
+        Fl_Value_Slider deadopac {
+          label Opacity
+          tooltip {opacity of invalid data} xywh {233 164 35 95} type {Vert Knob} color 26 align 1 minimum 1 maximum 0 value 1 textsize 14
+        }
+        Fl_Box curCol {
+          label Current
+          tooltip {current colour} xywh {12 279 125 25} box GTK_DOWN_BOX labelcolor 98 align 1
+        }
+        Fl_Box workingCol {
+          label Working
+          tooltip {selected colour} xywh {147 279 125 25} box GTK_DOWN_BOX align 1
+        }
+        Fl_Light_Button minValid {
+          label Min
+          callback {if( o->value())
+  minValidVal->activate();
+else
+  minValidVal->deactivate();}
+          tooltip {specify a minimum vaid data value} xywh {213 109 55 30}
+        }
+        Fl_Button deadApp {
+          label Apply
+          callback {curCol->color(workingCol->color());
 curCol->redraw();
 
 DeadRange dr;
@@ -107,23 +115,21 @@ col[2] = dead_color->b();
 mwtb->cs->deadColour(col,deadopac->value());
 
 mwtb->redraw();}
-        tooltip {apply colour and range changes} xywh {10 310 125 35} color 238
-      }
-      Fl_Light_Button minValid {
-        label Min
-        callback {if( o->value())
-  minValidVal->activate();
-else
-  minValidVal->deactivate();}
-        tooltip {specify a minimum vaid data value} xywh {211 110 55 30}
-      }
-      Fl_Light_Button maxValid {
-        label Max
-        callback {if( o->value() ) 
+          tooltip {apply colour and range changes} xywh {12 309 125 35} color 238
+        }
+        Fl_Light_Button maxValid {
+          label Max
+          callback {if( o->value() ) 
   maxValidVal->activate();
 else
   maxValidVal->deactivate();}
-        tooltip {specify a maximum valid data value} xywh {211 70 55 30}
+          tooltip {specify a maximum valid data value} xywh {213 69 55 30}
+        }
+      }
+      Fl_Return_Button {} {
+        label Done
+        callback {window->hide();}
+        tooltip {close window} xywh {147 309 125 35} color 215
       }
     }
     code {mwtb = w;} {}
