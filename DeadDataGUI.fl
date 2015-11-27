@@ -14,7 +14,7 @@ class DeadDataGUI {open
   } {
     Fl_Window window {
       label {Dead Data } open
-      xywh {1624 258 285 355} type Double visible
+      xywh {979 403 285 355} type Double visible
     } {
       Fl_Light_Button showDeadData {
         label {Dead data}
@@ -23,16 +23,16 @@ class DeadDataGUI {open
 else {
   mwtb->cs->deadRange();
   mwtb->redraw();
-}}
-        xywh {22 15 110 40}
+}} selected
+        tooltip {Determine if data is valid or not} xywh {22 15 110 40}
       }
       Fl_Value_Input minValidVal {
         label {min valid value}
-        xywh {130 110 70 30} maximum 0 value 1 deactivate
+        tooltip {colour data below this value} xywh {130 110 70 30} maximum 0 deactivate
       }
       Fl_Value_Input maxValidVal {
         label {max valid value}
-        xywh {130 70 70 30} maximum 0 deactivate
+        tooltip {colour data above this value} xywh {130 70 70 30} maximum 0 value 1 deactivate
       }
       Fl_Button {} {
         label Recalibrate
@@ -49,7 +49,7 @@ else
   max = mwtb->cs->max();
 
 mwtb->cs->calibrate( min, max );}
-        tooltip {recalibrate colour scale using valid max & min values} xywh {156 15 110 40}
+        tooltip {recalibrate colour scale using valid max & min values} xywh {156 15 110 40} color 134
       }
       Fl_Box dead_color {
         label {Dead Color}
@@ -58,26 +58,26 @@ uchar bi = o->b()*255.;
 uchar gi = o->g()*255.;
 workingCol->color(fl_rgb_color(ri,gi,bi));
 workingCol->redraw();}
-        xywh {14 165 200 95} align 257
+        tooltip {colour of invalid data} xywh {14 165 200 95} align 257
         code0 {\#include <FL/Fl_Color_Chooser.H>}
         class Fl_Color_Chooser
       }
       Fl_Value_Slider deadopac {
         label Opacity
-        xywh {231 165 35 95} type {Vert Knob} color 26 align 1 minimum 1 maximum 0 value 1 textsize 14
+        tooltip {opacity of invalid data} xywh {231 165 35 95} type {Vert Knob} color 26 align 1 minimum 1 maximum 0 value 1 textsize 14
       }
       Fl_Box curCol {
         label Current
-        xywh {10 280 125 25} box GTK_DOWN_BOX labelcolor 98 align 1
+        tooltip {current colour} xywh {10 280 125 25} box GTK_DOWN_BOX labelcolor 98 align 1
       }
       Fl_Box workingCol {
-        label Working selected
-        xywh {145 280 122 25} box GTK_DOWN_BOX align 1
+        label Working
+        tooltip {selected colour} xywh {145 280 125 25} box GTK_DOWN_BOX align 1
       }
       Fl_Return_Button {} {
         label Done
         callback {window->hide();}
-        xywh {145 310 125 35}
+        tooltip {close window} xywh {145 310 125 35} color 215
       }
       Fl_Button deadApp {
         label Apply
@@ -107,7 +107,7 @@ col[2] = dead_color->b();
 mwtb->cs->deadColour(col,deadopac->value());
 
 mwtb->redraw();}
-        xywh {10 310 125 35}
+        tooltip {apply colour and range changes} xywh {10 310 125 35} color 238
       }
       Fl_Light_Button minValid {
         label Min
