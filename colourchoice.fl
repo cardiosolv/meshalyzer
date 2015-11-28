@@ -5,7 +5,10 @@ code_name {.cc}
 decl {\#include <FL/gl.h>} {public local
 } 
 
-decl {\#include "TBmeshWin.h"} {public local
+decl {class TBmeshWin;} {public global
+} 
+
+decl {\#include "TBmeshWin.h"} {private local
 } 
 
 decl {\#include "Surfaces.h"} {public local
@@ -23,80 +26,7 @@ class colourChoice {open
   } {
     Fl_Window window {
       label {Choose colour} open
-      xywh {1548 23 225 260} type Double visible
-    } {
-      Fl_Box rgb_choice {
-        callback {uchar ri = o->r()*255.;
-uchar bi = o->b()*255.;
-uchar gi = o->g()*255.;
-opacity->selection_color(fl_rgb_color(ri,gi,bi));
-opacity->redraw();} selected
-        xywh {0 0 225 175}
-        code0 {\#include <FL/Fl_Color_Chooser.H>}
-        class Fl_Color_Chooser
-      }
-      Fl_Slider opacity {
-        label Opacity
-        xywh {10 190 205 25} type {Horz Fill} selection_color 0 align 1 step 0.01 value 1
-      }
-      Fl_Return_Button {} {
-        label Done
-        callback {col[0] = rgb_choice->r();
-col[1] = rgb_choice->g();
-col[2] = rgb_choice->b();
-col[3] = opacity->value();
-for( int r=0; r<numreg; r++ )
-  if( sc[r] )
-    tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
-tbmw->redraw();
-window->~Fl_Double_Window();}
-        xywh {125 225 90 30}
-      }
-      Fl_Button apbut {
-        label Apply
-        callback {col[0] = rgb_choice->r();
-col[1] = rgb_choice->g();
-col[2] = rgb_choice->b();
-col[3] = opacity->value();
-for( int r=0; r<numreg; r++ )
-  if( sc[r] ) 
-    tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
-tbmw->redraw();}
-        xywh {15 225 95 30}
-      }
-    }
-    code {col = c;
-obj = o;
-tbmw = t;
-sc = b;
-numreg = nb;
-
-rgb_choice->rgb(col[0], col[1], col[2] );
-opacity->value( col[3] );} {}
-  }
-  Function {~colourChoice()} {open
-  } {
-    code {delete[] sc;} {}
-  }
-  decl {GLfloat *col;} {private local
-  }
-  decl {int numreg;} {private local
-  }
-  decl {Object_t obj;} {private local
-  }
-  decl {TBmeshWin *tbmw;} {private local
-  }
-  decl {bool *sc} {private local
-  }
-} 
-
-class AuxColourChoice {open
-} {
-  Function {AuxColourChoice( GLfloat *c, Object_t o, TBmeshWin *tb)} {open
-  } {
-    Fl_Window window {
-      label {Choose colour} open
-      xywh {656 435 225 260} type Double visible
+      xywh {394 505 225 260} type Double visible
     } {
       Fl_Box rgb_choice {
         callback {uchar ri = o->r()*255.;
@@ -114,13 +44,69 @@ opacity->redraw();}
       }
       Fl_Return_Button {} {
         label Done
-        callback {col[0] = rgb_choice->r();
+        callback {apbut->do_callback();
+window->hide();}
+        xywh {125 225 90 30}
+      }
+      Fl_Button apbut {
+        label Apply
+        callback {bool *sr = tbmw->contwin->regselected();
+col[0] = rgb_choice->r();
 col[1] = rgb_choice->g();
 col[2] = rgb_choice->b();
 col[3] = opacity->value();
-tbmw->auxGrid->color( obj, col );
+for( int r=0; r<numreg; r++ )
+  if( sr[r] ) 
+    tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
 tbmw->redraw();
-window->~Fl_Double_Window();}
+delete sr;}
+        xywh {15 225 95 30}
+      }
+    }
+    code {col = c;
+obj = o;
+tbmw = t;
+numreg = nb;
+
+rgb_choice->rgb(col[0], col[1], col[2] );
+opacity->value( col[3] );} {}
+  }
+  decl {GLfloat *col;} {private local
+  }
+  decl {int numreg;} {private local
+  }
+  decl {Object_t obj;} {private local
+  }
+  decl {TBmeshWin *tbmw;} {private local
+  }
+} 
+
+class AuxColourChoice {open
+} {
+  Function {AuxColourChoice( GLfloat *c, Object_t o, TBmeshWin *tb)} {open
+  } {
+    Fl_Window window {
+      label {Choose colour} open
+      xywh {656 435 225 260} type Double hide
+    } {
+      Fl_Box rgb_choice {
+        callback {uchar ri = o->r()*255.;
+uchar bi = o->b()*255.;
+uchar gi = o->g()*255.;
+opacity->selection_color(fl_rgb_color(ri,gi,bi));
+opacity->redraw();}
+        xywh {0 0 225 175}
+        code0 {\#include <FL/Fl_Color_Chooser.H>}
+        class Fl_Color_Chooser
+      }
+      Fl_Slider opacity {
+        label Opacity
+        xywh {10 190 205 25} type {Horz Fill} selection_color 0 align 1 step 0.01 value 1
+      }
+      Fl_Return_Button {} {
+        label Done
+        callback {apbut->do_callback();
+window->hide();}
         xywh {125 225 90 30}
       }
       Fl_Button apbut {
@@ -140,7 +126,8 @@ tbmw = tb;
 
 rgb_choice->rgb(col[0], col[1], col[2] );
 opacity->value( col[3] );
-string title=objnames[obj];
+string title="Aux ";
+title += objnames[obj];
 title += " color";
 window->label( title.c_str() );
 window->show();} {}

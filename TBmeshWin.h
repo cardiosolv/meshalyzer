@@ -156,6 +156,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     friend class HDF5DataBrowser;
     friend class Frame;
     friend class ObjProps;
+    friend class colourChoice;
         
   private:
     int        hilight[maxobject];	// which object to highlight

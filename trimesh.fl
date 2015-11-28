@@ -50,7 +50,7 @@ decl {\#include "Model.h"} {public local
 decl {\#include <set>} {private local
 } 
 
-decl {\#include "colourchoice.h"} {private local
+decl {\#include "colourchoice.h"} {public local
 } 
 
 class Meshwin {} {
@@ -81,7 +81,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {614 257 350 645} type Double box UP_BOX
+      xywh {796 80 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -700,7 +700,8 @@ voldisp->uncheck();}
       }
       Fl_Button {} {
         label {Voxele  colour}
-        callback {pickcolor(VolEle, "Voxele colour");}
+        callback {static colourChoice* cc=NULL;
+cc=pickcolor(VolEle, "Voxele colour",cc);}
         xywh {80 85 100 25} labelsize 13
       }
       Fl_Group {} {
@@ -800,11 +801,11 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
+          label Highlight selected
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1006,7 +1007,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface
+          label Surface open
           xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
@@ -1032,12 +1033,14 @@ mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
           }
           Fl_Button {} {
             label {Outline colour}
-            callback {pick_surf_color( SurfEle, "Outline Colour" );}
+            callback {static colourChoice *cc=NULL;
+cc=pick_surf_color( SurfEle, "Outline Colour",cc );}
             xywh {140 355 90 30} labelsize 12
           }
           Fl_Button {} {
             label {Fill colour}
-            callback {pick_surf_color( Surface, "Surface colour" );}
+            callback {static colourChoice *cc=NULL;
+cc=pick_surf_color( Surface, "Surface colour",cc );}
             xywh {240 355 90 30} labelsize 12
           }
           Fl_Check_Browser surflist {
@@ -1335,7 +1338,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid}
+          label {Aux Grid} open
           xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
@@ -1458,8 +1461,11 @@ mwtb->redraw();}
           } {
             Fl_Button auxptcolor {
               label color
-              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(Vertex),Vertex,mwtb);
-mwtb->redraw();}
+              callback {static AuxColourChoice *cc=NULL;
+
+if( !cc )
+  cc = new AuxColourChoice(mwtb->auxGrid->color(Vertex),Vertex,mwtb);
+cc->window->show();}
               xywh {65 380 55 20}
             }
             Fl_Light_Button auxptdat {
@@ -1506,8 +1512,9 @@ mwtb->redraw();}
           } {
             Fl_Button auxlinecolor {
               label color
-              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(Cnnx),Cnnx,mwtb);
-mwtb->redraw();}
+              callback {static AuxColourChoice *cc=NULL;
+if( !cc ) cc =new AuxColourChoice(mwtb->auxGrid->color(Cnnx),Cnnx,mwtb);
+cc->window->show();}
               xywh {65 405 55 20}
             }
             Fl_Light_Button auxlinedat {
@@ -1554,8 +1561,10 @@ mwtb->redraw();}
           } {
             Fl_Button auxsurfcolor {
               label color
-              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(SurfEle),SurfEle,mwtb);
-mwtb->redraw();}
+              callback {static AuxColourChoice *cc=NULL;
+if(!cc)
+cc = new AuxColourChoice(mwtb->auxGrid->color(SurfEle),SurfEle,mwtb);
+cc->window->show();}
               xywh {65 430 55 20}
             }
             Fl_Light_Button auxsurfdat {
@@ -1602,8 +1611,10 @@ mwtb->redraw();}
           } {
             Fl_Button auxvolcolor {
               label color
-              callback {AuxColourChoice *cc=new AuxColourChoice(mwtb->auxGrid->color(VolEle),VolEle,mwtb);
-mwtb->redraw();}
+              callback {static AuxColourChoice *cc=NULL;
+if(!cc)
+cc=new AuxColourChoice(mwtb->auxGrid->color(VolEle),VolEle,mwtb);
+cc->window->show();}
               xywh {65 455 55 20}
             }
             Fl_Light_Button auxvoldat {
@@ -1860,17 +1871,21 @@ memset( objprops, 0, sizeof(ObjProps*)*maxobject );} {}
   }
   decl {ObjProps *objprops[maxobject];} {private local
   }
-  Function {pickcolor(Object_t obj, const char* wintitle )} {} {
+  Function {pickcolor(Object_t obj, const char* wintitle, colourChoice *cc=NULL )} {return_type {colourChoice *}
+  } {
     code {bool* sel=regselected();
 for( int i=0; i<reglist->nitems(); i++ )
   if( sel[i] ) { 
-   GLfloat *c = mwtb->get_color(obj, i);
-   colourChoice *cc = new colourChoice( c, sel, reglist->nitems(), obj, mwtb );
-   cc->window->label(wintitle);
-   cc->window->show();
-   break;
-   }
-delete[] sel;} {}
+    GLfloat *c = mwtb->get_color(obj, i);
+    if (!cc ) {
+     cc = new colourChoice( c, sel, reglist->nitems(), obj, mwtb );
+     cc->window->label(wintitle);
+    }
+    cc->window->show();
+    break;
+  }
+delete[] sel;
+return cc;} {}
   }
   Function {update_surfGUI( int s )} {return_type void
   } {
@@ -2154,10 +2169,11 @@ mshzf << endl;} {}
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, const char *winlab)} {} {
+  Function {pick_surf_color(Object_t ot, const char *winlab, colourChoice *cc=NULL)} {open return_type {colourChoice *}
+  } {
     code {int msz = surflist->nitems();
 
-if( !msz || !surflist->nchecked()) return;
+if( !msz || !surflist->nchecked()) return cc;
 
 bool* cs = new bool[msz];
 GLfloat *col;
@@ -2169,9 +2185,12 @@ for( int mi=0; mi<surflist->nitems(); mi++ )
  } else
    cs[mi] = false;  
 
-colourChoice *cc = new colourChoice( col, cs, msz, ot, mwtb );
-cc->window->label(winlab);
-cc->window->show();} {}
+if( !cc ) {
+  cc = new colourChoice( col, cs, msz, ot, mwtb );
+  cc->window->label(winlab);
+}
+cc->window->show();
+return cc;} {}
   }
   Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
@@ -2582,12 +2601,11 @@ class ProgInfo {} {
   }
 } 
 
-class ObjProps {open
-} {
+class ObjProps {} {
   Function {ObjProps( TBmeshWin* wtb, Object_t o ):mwtb(wtb),obj(o)} {open
   } {
     Fl_Window win {open
-      xywh {685 480 220 245} type Single box ENGRAVED_BOX visible
+      xywh {1044 451 220 245} type Single box ENGRAVED_BOX hide
     } {
       Fl_Check_Button thrD {
         label {3D }
@@ -2676,7 +2694,6 @@ for( int i=0; i<nreg; i++ )
     color->do_callback();
     color->redraw();
   }
-delete sel;} {selected
-    }
+delete sel;} {}
   }
 } 

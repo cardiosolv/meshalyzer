@@ -303,7 +303,6 @@ VecData::~VecData()
 void
 VecData::colourize()
 {
-
   double r=_colour[0],g=_colour[1],b=_colour[2];
   if ( fl_color_chooser( "Vector colour", r, g, b ) ) {
     _colour[0] = r;
