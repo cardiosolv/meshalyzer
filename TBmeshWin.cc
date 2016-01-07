@@ -828,6 +828,7 @@ GLfloat* TBmeshWin:: get_color( Object_t obj, int s )
     return model->get_color(obj, s );
 }
 
+
 void TBmeshWin:: set_color( Object_t obj, int s, float r, float g, float b, float a )
 {
   if ( obj==VolEle ) {
@@ -835,9 +836,10 @@ void TBmeshWin:: set_color( Object_t obj, int s, float r, float g, float b, floa
     tet_color[1] = g;
     tet_color[2] = b;
     tet_color[3] = a;
-  } else
-    model->set_color( obj, s, r, g, b, a );
+  } 
+  model->set_color( obj, s, r, g, b, a );
 }
+
 
 void TBmeshWin :: visibility( bool* reg, bool a )
 {
@@ -850,6 +852,7 @@ void TBmeshWin :: visibility( bool* reg, bool a )
       determine_cutplane(i);
   redraw();
 }
+
 
 void TBmeshWin :: opacity( int s, float opac )
 {

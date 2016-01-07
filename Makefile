@@ -17,7 +17,7 @@ OBJS = $(FLTK_SOURCES:.fl=.o)\
 
 ifdef HDF5
 LIB_CH5       := $(HDF5API_ROOT)/lib/libch5.a
-LIB_HDF5      := -L$(HDF5_ROOT)/lib -lch5 -lhdf5 -lhdf5_hl 
+LIB_HDF5      := -L$(HDF5_ROOT)/lib -lch5 -lhdf5_hl -lhdf5
 COMMON_INC    += -DUSE_HDF5
 else
 LIB_CH5       := 

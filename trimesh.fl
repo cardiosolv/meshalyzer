@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
+version 1.0303 
 header_name {.h} 
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -698,29 +698,29 @@ voldisp->uncheck();}
         callback {mwtb->redraw();}
         tooltip {toggle axs display} xywh {10 85 65 25}
       }
-      Fl_Button {} {
+      Fl_Button voxeleColor {
         label {Voxele  colour}
         callback {static colourChoice* cc=NULL;
 cc=pickcolor(VolEle, "Voxele colour",cc);}
         xywh {80 85 100 25} labelsize 13
       }
       Fl_Group {} {
-        label {Display as:}
+        label {Display as:} open
         xywh {190 50 150 60} box ENGRAVED_BOX
       } {
-        Fl_Check_Button {} {
+        Fl_Check_Button dispAsSurf {
           label Surfaces
           callback {mwtb->dispmode(asSurface);}
           xywh {195 55 90 25} type Radio down_box DIAMOND_DOWN_BOX value 1
         }
-        Fl_Check_Button {} {
+        Fl_Check_Button dispAsVol {
           label {Volume Mesh}
           callback {mwtb->dispmode(asTetMesh);}
           xywh {195 80 140 25} type Radio down_box DIAMOND_DOWN_BOX
         }
       }
       Fl_Group regiondisp {
-        label Region open
+        label Region
         xywh {10 120 330 145} box ENGRAVED_BOX align 17
       } {
         Fl_Light_Button vertbut {
@@ -801,11 +801,11 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight selected
+          label Highlight
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1990,6 +1990,8 @@ SAVE_WIDGET(mshzf,surfedgedisp);
 SAVE_WIDGET(mshzf,surfdisp);
 SAVE_WIDGET(mshzf,voldisp);
 SAVE_WIDGET(mshzf,draw_axes);
+SAVE_WIDGET(mshzf,dispAsSurf);
+SAVE_WIDGET(mshzf,dispAsVol);
 //region group
 SAVE_WIDGET(mshzf,vertbut);
 SAVE_WIDGET(mshzf,cabbut);
@@ -2169,7 +2171,7 @@ mshzf << endl;} {}
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, const char *winlab, colourChoice *cc=NULL)} {open return_type {colourChoice *}
+  Function {pick_surf_color(Object_t ot, const char *winlab, colourChoice *cc=NULL)} {return_type {colourChoice *}
   } {
     code {int msz = surflist->nitems();
 
@@ -2192,7 +2194,8 @@ if( !cc ) {
 cc->window->show();
 return cc;} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2332,6 +2335,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_RADIO( brcutPMpi, var, int(val), mainbar )
   TEST_RADIO( brcut02pi, var, int(val), mainbar )
   TEST_VAR( draw_axes, var, int(val) )  
+  TEST_VAR( dispAsSurf, var, int(val) ) 
+  TEST_VAR( dispAsVol, var, int(val) )
   TEST_VAR( vertbut, var, int(val) )  
   TEST_VAR( cabbut, var, int(val) )  
   TEST_VAR( cnnxbut, var, int(val) )    
