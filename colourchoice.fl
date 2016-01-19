@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0302 
+version 1.0303 
 header_name {.h} 
 code_name {.cc}
 decl {\#include <FL/gl.h>} {public local
@@ -9,6 +9,9 @@ decl {class TBmeshWin;} {public global
 } 
 
 decl {\#include "TBmeshWin.h"} {private local
+} 
+
+decl {\#include "FL/Fl_Check_Browser.H"} {public local
 } 
 
 decl {\#include "Surfaces.h"} {public local
@@ -22,7 +25,7 @@ decl {\#include <string>} {private local
 
 class colourChoice {open
 } {
-  Function {colourChoice( GLfloat *c, bool *b, int nb, Object_t o, TBmeshWin *t )} {open
+  Function {colourChoice( GLfloat *c, Fl_Check_Browser *cb, Object_t o, TBmeshWin *t )} {open
   } {
     Fl_Window window {
       label {Choose colour} open
@@ -50,30 +53,26 @@ window->hide();}
       }
       Fl_Button apbut {
         label Apply
-        callback {bool *sr = tbmw->contwin->regselected();
+        callback {GLfloat col[4];
 col[0] = rgb_choice->r();
 col[1] = rgb_choice->g();
 col[2] = rgb_choice->b();
 col[3] = opacity->value();
-for( int r=0; r<numreg; r++ )
-  if( sr[r] ) 
+for( int r=0; r<ch_br->nitems(); r++ )
+  if( ch_br->checked(r+1) ) 
     tbmw->set_color( obj, r, col[0], col[1], col[2], col[3] );
-tbmw->redraw();
-delete sr;}
+tbmw->redraw();}
         xywh {15 225 95 30}
       }
     }
-    code {col = c;
-obj = o;
+    code {obj = o;
 tbmw = t;
-numreg = nb;
+ch_br = cb;
 
-rgb_choice->rgb(col[0], col[1], col[2] );
-opacity->value( col[3] );} {}
+rgb_choice->rgb(c[0], c[1], c[2] );
+opacity->value( c[3] );} {}
   }
-  decl {GLfloat *col;} {private local
-  }
-  decl {int numreg;} {private local
+  decl {Fl_Check_Browser *ch_br;} {private local
   }
   decl {Object_t obj;} {private local
   }
@@ -81,7 +80,7 @@ opacity->value( col[3] );} {}
   }
 } 
 
-class AuxColourChoice {open
+class AuxColourChoice {open selected
 } {
   Function {AuxColourChoice( GLfloat *c, Object_t o, TBmeshWin *tb)} {open
   } {
@@ -111,7 +110,8 @@ window->hide();}
       }
       Fl_Button apbut {
         label Apply
-        callback {col[0] = rgb_choice->r();
+        callback {GLfloat col[4];
+col[0] = rgb_choice->r();
 col[1] = rgb_choice->g();
 col[2] = rgb_choice->b();
 col[3] = opacity->value(); 

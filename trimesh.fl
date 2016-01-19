@@ -801,11 +801,11 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
+          label Highlight selected
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1048,7 +1048,7 @@ cc=pick_surf_color( Surface, "Surface colour",cc );}
             xywh {20 320 110 160} type Multi align 5
           }
           Fl_Group {} {
-            label Select open
+            label Select
             xywh {140 445 185 35} box ENGRAVED_FRAME labelsize 13
           } {
             Fl_Button {} {
@@ -1085,7 +1085,7 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
             }
           }
           Fl_Menu_Button {} {
-            label Delete open
+            label Delete
             xywh {265 395 65 30} box GTK_UP_BOX color 88 labelsize 12 align 20
           } {
             MenuItem {} {
@@ -1135,7 +1135,7 @@ write_surfaces(0);}
           }
         }
         Fl_Group vectorgrp {
-          label Vectors open
+          label Vectors
           xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
@@ -1338,7 +1338,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid} open
+          label {Aux Grid}
           xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
@@ -1871,20 +1871,23 @@ memset( objprops, 0, sizeof(ObjProps*)*maxobject );} {}
   }
   decl {ObjProps *objprops[maxobject];} {private local
   }
-  Function {pickcolor(Object_t obj, const char* wintitle, colourChoice *cc=NULL )} {return_type {colourChoice *}
+  Function {pickcolor(Object_t obj, const char* wintitle, colourChoice *cc=NULL )} {open return_type {colourChoice *}
   } {
-    code {bool* sel=regselected();
-for( int i=0; i<reglist->nitems(); i++ )
-  if( sel[i] ) { 
-    GLfloat *c = mwtb->get_color(obj, i);
-    if (!cc ) {
-     cc = new colourChoice( c, sel, reglist->nitems(), obj, mwtb );
+    code {if( !reglist->nchecked() ) return cc;
+
+GLfloat *col;
+
+for( int mi=0; mi<reglist->nitems(); mi++ ) 
+ if( reglist->checked(mi+1) ){
+     col = mwtb->get_color(VolEle, mi);
+ }
+
+if (!cc ) {
+     cc = new colourChoice( col, reglist, obj, mwtb );
      cc->window->label(wintitle);
-    }
+} else
     cc->window->show();
-    break;
-  }
-delete[] sel;
+
 return cc;} {}
   }
   Function {update_surfGUI( int s )} {return_type void
@@ -1953,7 +1956,7 @@ mwtb->redraw();} {}
   reglist->checked(i+1,1);
 }} {}
   }
-  Function {regselected()} {open return_type {bool *}
+  Function {regselected()} {return_type {bool *}
   } {
     code {bool *sel = new bool[reglist->nitems()];
 for( int i=1; i<=reglist->nitems(); i++ )
@@ -2171,31 +2174,27 @@ mshzf << endl;} {}
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, const char *winlab, colourChoice *cc=NULL)} {return_type {colourChoice *}
+  Function {pick_surf_color(Object_t ot, const char *winlab, colourChoice *cc=NULL)} {open return_type {colourChoice *}
   } {
     code {int msz = surflist->nitems();
 
 if( !msz || !surflist->nchecked()) return cc;
 
-bool* cs = new bool[msz];
 GLfloat *col;
 
 for( int mi=0; mi<surflist->nitems(); mi++ ) 
  if( surflist->checked(mi+1) ){
-   cs[mi] = true;
-   col = mwtb->get_color(ot, mi);
- } else
-   cs[mi] = false;  
-
+     col = mwtb->get_color(ot, mi);
+ }
+ 
 if( !cc ) {
-  cc = new colourChoice( col, cs, msz, ot, mwtb );
+  cc = new colourChoice( col, surflist, ot, mwtb );
   cc->window->label(winlab);
 }
 cc->window->show();
 return cc;} {}
   }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
+  Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
