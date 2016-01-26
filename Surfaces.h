@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "DrawingObjects.h"
 #include <string>
+#include <fstream>
 
 class Surfaces
 {
@@ -36,6 +37,7 @@ class Surfaces
     void   flip_norms();
     void   correct_branch_elements( GLdouble *, DATA_TYPE *, 
                           Colourscale *, int, dataOpac * );
+    void  to_file( ofstream &of );
   protected:
     PPoint   *_p;
     GLfloat  _fillcolor[4];

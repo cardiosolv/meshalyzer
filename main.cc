@@ -56,6 +56,22 @@ void do_cleanup( int sig, siginfo_t *si, void *v )
 }
 
 
+/** compute the surfaces and output them */
+void
+compute_write_surfaces( Model *model, string sf )
+{
+  int nsa = model->add_region_surfaces();
+  int ns  = model->numSurf();
+  if(sf[sf.length()-1] != '.')
+    sf += ".";
+  sf += "surf";
+  ofstream of(sf);
+  for( int i=nsa; i<ns; i++ )
+    model->surface(i)->to_file(of);
+  cout << "Finished writing " << sf << endl;
+}
+
+
 /** animate in response to a signal received: SIGUSR1 for forward, 
  *  SIGUSR2 for backward
  *
@@ -336,6 +352,7 @@ print_usage(void)
   cout << "--numframe=num        number of frames to output (default=1)" << endl;
   cout << "--size=num            output size of PNG in pixels (default=512)" << endl;
   cout << "--nproc=num           #parallel procs for PNG sequences" << endl;
+  cout << "--compSurf=[file]     compute surfaces and write to file" << endl;
   exit(0);
 }
 
@@ -351,6 +368,7 @@ static struct option longopts[] = {
   { "numframe"       , 1          , NULL, 'N' },
   { "size"           , 1          , NULL, 's' },
   { "nproc"          , 1          , NULL, 'p' },
+  { "compSurf"       , 2          , NULL, 'S' },
   { NULL             , 0          , NULL, 0   }
 };
 
@@ -369,12 +387,13 @@ main( int argc, char *argv[] )
   char *PNGfile       = NULL;
   int   pngsize        = 512;
   const char *grpID   = "0";
-  int frame0   = -1,
-      numframe =  1;
-  int nproc    =  1;
+  int    frame0   = -1,
+         numframe =  1;
+  int    nproc    =  1;
+  char *surfFile  = NULL;
 
   int ch;
-  while( (ch=getopt_long(argc, argv, "inhg:", longopts, NULL)) != -1 )
+  while( (ch=getopt_long(argc, argv, "ing:hP:N:f:p:ts:S::", longopts, NULL)) != -1 )
 	switch(ch) {
 		case 'i':
 			iconcontrols = true;
@@ -406,6 +425,9 @@ main( int argc, char *argv[] )
         case 's':
             pngsize = atoi(optarg);
 			break;
+        case 'S' : 
+            surfFile = strdup(optarg?optarg:"");
+            break;
         case '?':
             cerr << "Unrecognized option --- bailing" << endl;
             exit(1);
@@ -548,6 +570,12 @@ main( int argc, char *argv[] )
   if( PNGfile ) 
     os_png_seq( PNGfile, frame0, numframe, win.trackballwin, pngsize, nproc );
 
+  if( surfFile ) {
+    if( *surfFile=='\0' ) 
+        surfFile = strdup(win.trackballwin->model->file().c_str());
+    compute_write_surfaces( win.trackballwin->model, surfFile );
+    exit(0);
+  }
   Fl::run();
 
   return 0;

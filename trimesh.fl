@@ -85,11 +85,11 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File
+          label File open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -801,11 +801,11 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight selected
+          label Highlight
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -2526,32 +2526,20 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   Function {dispVertVal(double d)} {} {
     code {vertvalout->value(d);} {}
   }
-  Function {write_surfaces(int start )} {} {
+  Function {write_surfaces(int start )} {open
+  } {
     code {char *fn;
 string surffn=mwtb->model->file();
 surffn += "surf";
 if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str() )){
   fl_cursor(FL_CURSOR_WAIT );
   ofstream outf(fn);
-  for( int i=start; i<mwtb->model->numSurf(); i++ ) {
-    SurfaceElement *e;
-    outf << mwtb->model->surface(i)->num() << "  ";
-    outf << mwtb->model->surface(i)->label() << endl;
-    for( int j=0; j<mwtb->model->surface(i)->num();j++ ) {
-      e = mwtb->model->element(i,j);
-      const int* n=e->obj();
-      if( e->ptsPerObj()==3 ) 
-        outf << "Tr";
-      else
-        outf << "Qd";
-      for( int k=0; k< e->ptsPerObj(); k++ )
-        outf << " " << n[k];
-      outf << endl;
-    }
-  }
+  for( int i=start; i<mwtb->model->numSurf(); i++ ) 
+    mwtb->model->surface(i)->to_file(outf);
   fl_cursor(FL_CURSOR_DEFAULT);
   mwtb->redraw();
-}} {}
+}} {selected
+    }
   }
   Function {update_vecdata(VecData *vd)} {} {
     code {if( vd->length_det()==Vector ) {

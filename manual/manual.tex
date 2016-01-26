@@ -505,7 +505,7 @@ vector data grid could only be read if it had 1 or 100 frames of data.
 \section{Invocation}
 The program is run by typing
 \begin{verbatim}
-meshalyzer [otps] [pts [vpts] [dat|tdat|igb] [mshz] [tri ...] [pts_t] [dynpt]]
+meshalyzer [opts] [pts [vpts] [dat|tdat|igb] [mshz] [tri ...] [pts_t] [dynpt]]
 \end{verbatim}
 where the extensions of the required file types are given.
 If no file is specified, a file input box will pop up.
@@ -527,10 +527,11 @@ This only applies to the vertex file.
     \item[--thrdRdr] Force threaded data reading. Even if one has enough memory to read in all the data at
         once, it is probably just as fast to read it in on demand. Using this option will reduce start up time
         and stop \meshal from using all the RAM.
-    \item[--PNGfile] Output file name for PNG files or output directory name for PNG sequences
-    \item[--frame] first frame for PNG output (-1=do not set)
-    \item[--numframe] number of frames to output to PNG images (default=1,-1=all)
-    \item[--size] width (and height) of PNG in pixels (default=512)
+    \item[--PNGfile=\emph{file}] Output file name for PNG files or output directory name for PNG sequences
+    \item[--frame=\emph{int}] first frame for PNG output (-1=do not set)
+    \item[--numframe=\emph{int}] number of frames to output to PNG images (default=1,-1=all)
+    \item[--size=\emph{int}] width and height of PNG in pixels (default=512)
+    \item[--compSurf=\emph{[file]}] compute and output boundary surfaces and exit. If not specified, use model name
 \end{description}
 
 Note that only enough characters to uniquely identify the option need be used.

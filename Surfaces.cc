@@ -87,7 +87,7 @@ void Surfaces::determine_vert_norms( PPoint& pt )
     }
   }
   _vert[numvert] = -1;
-  delete[] tvn;
+  delete tvn;
 }
 
 
@@ -159,3 +159,26 @@ void Surfaces :: flip_norms()
   for( int i=0; i<3*(numvert-1); i++ )
     _vertnorm[i] *=-1;
 }
+
+
+/** write the surface to a file 
+ * \param of output stream
+ */
+void
+Surfaces :: to_file( ofstream &of )
+{
+    of << num() << "  " << label() << endl;
+ 
+    for( int j=0; j<num();j++ ) {
+      SurfaceElement *e = ele(j);
+      const int* n=e->obj();
+      if( e->ptsPerObj()==3 ) 
+        of << "Tr";
+      else
+        of << "Qd";
+      for( int k=0; k< e->ptsPerObj(); k++ )
+        of << " " << n[k];
+      of << endl;
+    }  
+}
+
