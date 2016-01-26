@@ -60,14 +60,15 @@ void do_cleanup( int sig, siginfo_t *si, void *v )
 void
 compute_write_surfaces( Model *model, string sf )
 {
-  int nsa = model->add_region_surfaces();
   int ns  = model->numSurf();
+  int nsa = model->add_region_surfaces();
   if(sf[sf.length()-1] != '.')
     sf += ".";
   sf += "surf";
   ofstream of(sf);
-  for( int i=nsa; i<ns; i++ )
+  for( int i=ns; i<nsa; i++ )
     model->surface(i)->to_file(of);
+  of.close();
   cout << "Finished writing " << sf << endl;
 }
 
