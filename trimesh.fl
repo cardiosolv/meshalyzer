@@ -89,7 +89,7 @@ class Controls {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -469,7 +469,7 @@ mwtb->redraw();}
           }
         }
         Submenu {} {
-          label Data
+          label Data open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -704,7 +704,7 @@ voldisp->uncheck();}
 cc=pickcolor(VolEle, "Voxele colour",cc);}
         xywh {80 85 100 25} labelsize 13
       }
-      Fl_Group {} {
+      Fl_Group dispAs {
         label {Display as:} open
         xywh {190 50 150 60} box ENGRAVED_BOX
       } {
@@ -1871,7 +1871,7 @@ memset( objprops, 0, sizeof(ObjProps*)*maxobject );} {}
   }
   decl {ObjProps *objprops[maxobject];} {private local
   }
-  Function {pickcolor(Object_t obj, const char* wintitle, colourChoice *cc=NULL )} {open return_type {colourChoice *}
+  Function {pickcolor(Object_t obj, const char* wintitle, colourChoice *cc=NULL )} {return_type {colourChoice *}
   } {
     code {if( !reglist->nchecked() ) return cc;
 
@@ -2174,7 +2174,7 @@ mshzf << endl;} {}
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, const char *winlab, colourChoice *cc=NULL)} {open return_type {colourChoice *}
+  Function {pick_surf_color(Object_t ot, const char *winlab, colourChoice *cc=NULL)} {return_type {colourChoice *}
   } {
     code {int msz = surflist->nitems();
 
@@ -2194,7 +2194,8 @@ if( !cc ) {
 cc->window->show();
 return cc;} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2240,7 +2241,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   if( !strcmp( var, "SURFACE_COLOURS" ) ) {
     for( int i=0; i<val; i++ ) {
       if( i >= mwtb->model->numSurf() ){
-        mshzf.getline(var, 1024);
+        mshzf.getline(buf, BUFLEN);
         continue;
       }
       mshzf >> r >> g >> b >> a;
@@ -2251,6 +2252,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
       mwtb->model->surface(i)->visible(int(r));
       mwtb->model->surface(i)->filled(int(g));
       mwtb->model->surface(i)->outline(int(b));
+      mshzf.getline(buf, BUFLEN);
 	}
 	continue;
   } 
@@ -2334,8 +2336,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_RADIO( brcutPMpi, var, int(val), mainbar )
   TEST_RADIO( brcut02pi, var, int(val), mainbar )
   TEST_VAR( draw_axes, var, int(val) )  
-  TEST_VAR( dispAsSurf, var, int(val) ) 
-  TEST_VAR( dispAsVol, var, int(val) )
+  TEST_RADIO( dispAsSurf, var, int(val), dispAsSurf ) 
+  TEST_RADIO( dispAsVol, var, int(val), dispAsSurf )
   TEST_VAR( vertbut, var, int(val) )  
   TEST_VAR( cabbut, var, int(val) )  
   TEST_VAR( cnnxbut, var, int(val) )    
@@ -2526,8 +2528,7 @@ for( int s=0; s<mwtb->model->numSurf(); s++ ) {
   Function {dispVertVal(double d)} {} {
     code {vertvalout->value(d);} {}
   }
-  Function {write_surfaces(int start )} {open
-  } {
+  Function {write_surfaces(int start )} {} {
     code {char *fn;
 string surffn=mwtb->model->file();
 surffn += "surf";
@@ -2538,10 +2539,10 @@ if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str()
     mwtb->model->surface(i)->to_file(outf);
   fl_cursor(FL_CURSOR_DEFAULT);
   mwtb->redraw();
-}} {selected
-    }
+}} {}
   }
-  Function {update_vecdata(VecData *vd)} {} {
+  Function {update_vecdata(VecData *vd)} {selected
+  } {
     code {if( vd->length_det()==Vector ) {
   veclenmag->setonly();
   veclenmag->do_callback(veclengthdeterm);
