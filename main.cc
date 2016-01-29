@@ -66,9 +66,8 @@ compute_write_surfaces( Model *model, string sf )
     sf += ".";
   sf += "surf";
   ofstream of(sf);
-  for( int i=ns; i<nsa; i++ )
+  for( int i=ns; i<ns+nsa; i++ )
     model->surface(i)->to_file(of);
-  of.close();
   cout << "Finished writing " << sf << endl;
 }
 
