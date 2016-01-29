@@ -61,12 +61,13 @@ void
 compute_write_surfaces( Model *model, string sf )
 {
   int ns  = model->numSurf();
-  int nsa = model->add_region_surfaces();
+  model->add_region_surfaces();
+  model->add_surface_from_elem( model->file().c_str() );
   if(sf[sf.length()-1] != '.')
     sf += ".";
   sf += "surf";
   ofstream of(sf);
-  for( int i=ns; i<ns+nsa; i++ )
+  for( int i=ns; i<model->numSurf(); i++ )
     model->surface(i)->to_file(of);
   cout << "Finished writing " << sf << endl;
 }

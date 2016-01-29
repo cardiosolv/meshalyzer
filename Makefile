@@ -1,7 +1,7 @@
 HOSTMACHINE := $(shell uname)
-#HDF5=1
-
+HDF5=1
 include make.conf
+CXX:=c++
 
 HDF5API_ROOT  := ./hdf5api
 
@@ -22,7 +22,6 @@ COMMON_INC    += -DUSE_HDF5
 else
 LIB_CH5       := 
 LIB_HDF5      :=
-OBJS          := $(OBJS:HDF5DataBrowser.o= )
 OBJS          := $(OBJS:HDF5DataBrowser.o=)
 endif
 
@@ -35,6 +34,7 @@ endif
 COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5)
 #LDFLAGS      = -fopenmp
 CXXFLAGS     = -std=c++11 -I$(HDF5_ROOT)/include -I$(HDF5API_ROOT)/include $(FLTK_INC) $(COMMON_INC)
+HDF5_CXXFLAGS=£(CXXFLAGS)
 LIBS         = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS) 
 
 CPPFLAGS = $(CFLAGS) -g
@@ -59,7 +59,6 @@ mesalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OS_OBJS) $(LIB_CH5)
 ifdef HDF5
 $(LIB_CH5): 
 	cd hdf5api && make all $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OBJS) $(LIB_CH5)
-
 endif
 
 $(OS_files:.o=_os.o): %_os.o: %.cc

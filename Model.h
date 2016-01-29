@@ -31,6 +31,7 @@ class Model
     bool         read_instance( gzFile, gzFile );
     int          add_surface_from_tri( const char * );
     int          add_surface_from_surf( const char * );
+    int          add_surface_from_elem( const char *fn );
     int          add_region_surfaces( void );
     int          add_cnnx_from_elem( string );
     inline int   reg_first( int s, Object_t t ){return _region[s]->first(t); }
@@ -101,7 +102,6 @@ class Model
     void             add_surfaces(hid_t hdf_file);
     void             add_surfaces(int *elements, int count, int max_width, char *name);
 #endif
-    int              add_surface_from_elem( const char *fn );
     bool             check_element( SurfaceElement *e );
     
     
