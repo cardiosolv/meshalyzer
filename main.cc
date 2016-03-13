@@ -56,20 +56,43 @@ void do_cleanup( int sig, siginfo_t *si, void *v )
 }
 
 
-/** compute the surfaces and output them */
-void
+/** compute the surfaces and output them 
+ *  the program should not exit if the filename
+ *  begins with "+". If the filename=="(+)?/dev/null",
+ *  do not write the file
+ *
+ * \retval true exit after call
+ * \retval false do not exit
+ */
+bool
 compute_write_surfaces( Model *model, string sf )
 {
   int ns  = model->numSurf();
   model->add_region_surfaces();
   model->add_surface_from_elem( model->file().c_str() );
-  if(sf[sf.length()-1] != '.')
-    sf += ".";
-  sf += "surf";
-  ofstream of(sf);
-  for( int i=ns; i<model->numSurf(); i++ )
-    model->surface(i)->to_file(of);
-  cout << "Finished writing " << sf << endl;
+
+  bool firstplus=false;
+  if(sf[0] == '+') {
+    firstplus = true;
+    sf.erase(0,1);
+  }
+
+  if( sf.compare("/dev/null") ) {
+    if(sf[sf.length()-1] != '.')
+      sf += ".";
+    sf += "surf";
+    ofstream of(sf);
+    for( int i=ns; i<model->numSurf(); i++ )
+      model->surface(i)->to_file(of);
+    cout << "Finished writing " << sf << endl;
+  }
+
+  if( firstplus ) {
+    for( int s=ns; s<model->numSurf(); s++ ) 
+      ctrl_ptr->surflist->add( model->surface(s)->label().c_str(),1);
+  }
+
+  return firstplus;
 }
 
 
@@ -353,7 +376,7 @@ print_usage(void)
   cout << "--numframe=num        number of frames to output (default=1)" << endl;
   cout << "--size=num            output size of PNG in pixels (default=512)" << endl;
   cout << "--nproc=num           #parallel procs for PNG sequences" << endl;
-  cout << "--compSurf=[file]     compute surfaces and write to file" << endl;
+  cout << "--compSurf=(+)?[file] compute surfaces, +=do not exit after" << endl;
   exit(0);
 }
 
@@ -574,8 +597,8 @@ main( int argc, char *argv[] )
   if( surfFile ) {
     if( *surfFile=='\0' ) 
         surfFile = strdup(win.trackballwin->model->file().c_str());
-    compute_write_surfaces( win.trackballwin->model, surfFile );
-    exit(0);
+    if(!compute_write_surfaces( win.trackballwin->model, surfFile ) )
+      exit(0);
   }
   Fl::run();
 
