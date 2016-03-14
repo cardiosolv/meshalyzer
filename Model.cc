@@ -545,14 +545,20 @@ int Model::add_surface_from_elem( const char *fn )
   map<string,int> surfs;             // number of elements in each surface
 
   gzFileBuffer file(in);
+  map<string,string> surfNameMap;
   while ( file.gets(buff,bufsize) != Z_NULL ) {
-    char   surfnum[16]="";
+    char surfnum[16]  ="";
+    char surfname[256]="";
     if ( !strncmp(buff,"Tr",2) ) {
-      if ( sscanf(buff, "%*s %*d %*d %*d %s", surfnum )<1 )
+      if ( sscanf(buff, "%*s %*d %*d %*d %s %s", surfnum, surfname )<1 )
         strcpy( surfnum, "EMPTY" );
+      else if( surfname[0] )
+        surfNameMap[surfnum] = surfname;
     } else if ( !strncmp(buff,"Qd",2) ) {
-      if ( sscanf(buff, "%*s %*d %*d %*d %*d %s", surfnum )<1 )
+      if ( sscanf(buff, "%*s %*d %*d %*d %*d %s %s", surfnum, surfname )<1 )
         strcpy( surfnum, "EMPTY" );
+      else if( surfname[0] )
+        surfNameMap[surfnum] = surfname;
     }
     if ( strlen(surfnum) )
       surfs[surfnum]++;
@@ -567,11 +573,15 @@ int Model::add_surface_from_elem( const char *fn )
   map<string,int> :: iterator iter = surfs.begin();
   for ( int s=oldnumSurf; iter!=surfs.end(); iter++, s++ ) {
     _surface[s]->num(iter->second );
-    string sname;
-    if( iter->first != "EMPTY" )
-      sname = iter->first+"-";
-    sname.append( fn, strlen(fn)-1 );
-    _surface[s]->label( sname );
+    if( surfNameMap.count(iter->first) )
+        _surface[s]->label( surfNameMap[iter->first] );
+    else {
+      string sname;
+      if( iter->first != "EMPTY" )
+        sname = iter->first+"-";
+      sname.append( fn, strlen(fn)-1 );
+      _surface[s]->label( sname );
+    }
     surfmap[iter->first] = s;   // map region to surface index
   }
 

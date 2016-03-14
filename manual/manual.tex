@@ -242,8 +242,8 @@ Hx n1 n2 n3 n4 n5 n6 n7 n8 [region]
 Py n1 n2 n3 n4 n5 [region]
 Pr n1 n2 n3 n4 n5 n6 [region]
 Tt n1 n2 n3 n4 [region]
-Tr n1 n2 n3 [region]
-Qd n1 n2 n3 n4 [region]
+Tr n1 n2 n3 [region [region_label]]
+Qd n1 n2 n3 n4 [region [regio_label]]
 .
 .
 .
@@ -252,6 +252,8 @@ where \texttt{Hx, Py, Pr, Tt,Tr,Qd}
 stand for Hexahedron, Pyramid, Prism,
 Tetrahedron, Triangle and Quadrilateral respectively.
 Each line may be any of the element types.
+For surface elements, a region label string may also be specified. It need only be defined
+once in the file per region.
 \begin{figure}
 \centerline{\includegraphics[width=10cm]{volelemdef}}
 \caption{Volume elements\label{fg:voleledef}}
@@ -531,7 +533,9 @@ This only applies to the vertex file.
     \item[--frame=\emph{int}] first frame for PNG output (-1=do not set)
     \item[--numframe=\emph{int}] number of frames to output to PNG images (default=1,-1=all)
     \item[--size=\emph{int}] width and height of PNG in pixels (default=512)
-    \item[--compSurf=\emph{[file]}] compute and output boundary surfaces and exit. If not specified, use model name
+    \item[--compSurf=\emph{[[+]file]}] compute and output boundary surfaces and exit. If not
+        specified, use model name. If ``+'' is not specified, exit after writing file. 
+        To not write a file, specify file as ``/dev/null''.
 \end{description}
 
 Note that only enough characters to uniquely identify the option need be used.
