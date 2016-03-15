@@ -48,7 +48,7 @@ class Colourscale
     double    mindat, maxdat;
     DeadRange _deadRange;                    // what to ignore
     double    _deadMin, _deadMax;             // ignore below and above these values
-    GLfloat   _deadColour[4];                 // how to colour dead data
+    GLfloat   _deadColour[4]={0.,0.,0.,1.};   // how to colour dead data
 };
 
 #endif

@@ -1,7 +1,7 @@
 #include "Colourscale.h"
 
 Colourscale :: Colourscale( int ts, CScale_t tcs ) : n(0), mindat(0.),maxdat(1.),
-        _deadRange(NO_DEAD), _deadColour({0.,0.,0.,1.}),_deadMin(0.), _deadMax(1.)
+        _deadRange(NO_DEAD), _deadMin(0.), _deadMax(1.)
 {
   scaletype = tcs;
   size( ts );
