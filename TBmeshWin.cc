@@ -101,32 +101,14 @@ void TBmeshWin::highlight( Object_t obj, int a )
 
 
 TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
-    : Fl_Gl_Tb_Window(x, y, w, h, l), vecdata( NULL ), hilighton(false),
-    autocol(false), have_data(NoData), datadst(ObjFlg[Surface]), vert_asc_obj(SurfEle),
-    fill_assc_obj(true), fill_hitet(false), revDrawOrder(false), tm(0),
-    frame_skip(0), frame_delay(0.01), lightson(true), auxGrid(NULL),
-    cs( new Colourscale( 64 ) ), renderMode(GL_RENDER),
+    : Fl_Gl_Tb_Window(x, y, w, h, l), datadst(ObjFlg[Surface]), cs( new Colourscale( 64 ) ),
     hinfo(new HiLiteInfoWin(this)), dataopac(new DataOpacity( this )),
     cplane(new ClipPlane( this )), hitbuffer(HITBUFSIZE),
-    dataBuffer(NULL), timeplotter(new PlotWin("Time series")),
-    timevec(NULL), recording(false), dump_vert_list(false),
-    disp(asSurface),data(NULL),facetshading(false),numframes(0),
-    headlamp_mode(true),_cutsurface(new CutSurfaces*[NUM_CP] ),
-    iso0(NULL),iso1(NULL),isosurfwin(new IsosurfControl(this)),isoline(NULL),
-    bgd_trans(false),_norot(false),forcedThreaded(false),_branch_cut(false),
-    deadData(new DeadDataGUI(this)) 
+    timeplotter(new PlotWin("Time series")), _cutsurface(new CutSurfaces*[NUM_CP] ),
+    isosurfwin(new IsosurfControl(this)), deadData(new DeadDataGUI(this)) 
 {
   model = new Model();
   memset( hilight, 0, sizeof(int)*maxobject );
-  tet_color[0]     = 1.; tet_color[1]     = 1.;  tet_color[2]     = 1.;
-  hitet_color[0]   = 1.; hitet_color[1]   = 0.;  hitet_color[2]   = 0.;
-  hiele_color[0]   = 0.; hiele_color[1]   = 0.;  hiele_color[2]   = 1.;
-  hicable_color[0] = 0.; hicable_color[1] = 1.;  hicable_color[2] = 1.;
-  hicnnx_color[0]  = 1.; hicnnx_color[1]  = 1.;  hicnnx_color[2]  = 0.;
-  hipt_color[0]    = 1.; hipt_color[1]    = 0.;  hipt_color[2]    = 1.;
-  hiptobj_color[0] = 1.; hiptobj_color[1] = 0.8; hiptobj_color[2] = 0.;
-  hitet_color[3] = hiele_color[3] = hicable_color[3] = hicnnx_color[3]
-                                    = tet_color[3] = hipt_color[3] = hiptobj_color[3] = 1.;
   bgd( 1. );
   for ( int i=0; i<NUM_CP; i++ ) _cutsurface[i]=NULL;
 

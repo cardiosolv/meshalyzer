@@ -530,7 +530,8 @@ main( int argc, char *argv[] )
       vectordata = !win.trackballwin->getVecData(control.tmslider, argv[i]);
     else if ( strstr( argv[i], ".pts_t" )    != NULL  ||
               strstr( argv[i], ":auxGrid/" ) != NULL )
-      win.trackballwin->readAuxGrid( control.tmslider, argv[i]);
+      if( !win.trackballwin->readAuxGrid( control.tmslider, argv[i]) )
+        control.auxgridgrp->activate();
     else if ( strstr( argv[i], ".dynpt" )  != NULL )
       win.trackballwin->read_dynamic_pts( argv[i], control.tmslider );
     else

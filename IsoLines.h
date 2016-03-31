@@ -26,6 +26,7 @@ class IsoLine {
           {_branch=b;if(b){_branch_range[0]=min;_branch_range[1]=max;_branch_tol=tol;} }
         bool branch(){return _branch;}
         double *branch_range(){ return _branch?_branch_range:NULL; }
+        void auxMesh( const char * );
     private:
         vector<MultiPoint *>  _polygon;
         vector<float>         _val;

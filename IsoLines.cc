@@ -112,3 +112,49 @@ void IsoLine::draw( Colourscale *cs, GLfloat size )
   }
 }
 
+
+void IsoLine::auxMesh( const char *fname )
+{ 
+  string basename = fname;
+  size_t pos = basename.find( ".pts_t");
+  if( pos == basename.length()-6 )
+    basename.erase( pos );
+
+  // count the number of points
+  int numpt = 0;
+  for( int i=0; i<_polygon.size(); i++ ) {
+    numpt += _polygon[i]->ptsPerObj();
+  }
+  
+  string ptfile = basename+".pts_t";
+  FILE*pout = fopen( ptfile.c_str(), "w" );
+  fprintf( pout, "1\n%d\n", numpt );
+  for( int i=0; i<_polygon.size(); i++ ) {
+    const PPoint *opt = _polygon[i]->pt();
+    const int* n = _polygon[i]->obj();
+    for( int j=0; j<_polygon[i]->ptsPerObj(); j++ ){
+      const GLfloat *p = opt->pt(n[j]);
+      fprintf( pout, "%f %f %f\n", p[0], p[1], p[2] );
+    }
+  }
+  fclose( pout );
+
+  string elemfile = basename+".elem_t";
+  string datfile  = basename+".dat_t";
+  FILE *eout = fopen( elemfile.c_str(), "w" );
+  FILE *dout = fopen( datfile.c_str(), "w" );
+
+  int ptoff = 0;
+  fprintf( eout, "1\n%d\n", _polygon.size() );
+  fprintf( dout, "1\n%d\n", numpt );
+  for( int i=0; i<_polygon.size(); i++ ) {
+    fprintf( eout, "%s", _polygon[i]->ptsPerObj()==2?"Ln":"Qd" );
+    for( int j=0;j<_polygon[i]->ptsPerObj();j++ ) 
+      fprintf( eout," %d", ptoff++ );
+      fprintf( dout," %f\n", _val[i] );
+    fprintf( eout,"\n" );
+  }
+  fclose( eout );
+  fclose( dout );
+
+}

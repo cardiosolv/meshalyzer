@@ -49,8 +49,8 @@ enum GridType { ScalarDataGrid, VecDataGrid, AuxDataGrid, DynPtGrid, NoDataGrid 
 class TBmeshWin:public Fl_Gl_Tb_Window
 {
   private:
-    HiLiteInfoWin* hinfo;			// window with highlight details
-    bool           fill_assc_obj;	// fill associated object
+    HiLiteInfoWin* hinfo;			     // window with highlight details
+    bool           fill_assc_obj = true; // fill associated object
     Controls*      contwin;
     Fl_Window*     flwin;
     string         flwintitle;
@@ -112,11 +112,11 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     DataOpacity *dataopac;			// data opacity
     ClipPlane* cplane;
     int       getVecData(void *, const char *vptsfile=NULL);
-    VecData  *vecdata;
+    VecData  *vecdata = NULL;
     void      select_vertex();
     PlotWin  *timeplotter;
     void      timeplot();
-    bool      recording;			   // true if recording events
+    bool      recording = false;			   // true if recording events
     void      record_events( char * ); // output the frame buffer after each change
     void      dump_vertices();
     void      compute_normals();
@@ -136,7 +136,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     float     size( Object_t o, int r ){ return model->size(o,r); }
     IsosurfControl *isosurfwin;
     int       readAuxGrid( void *, const char* agfile );
-    AuxGrid  *auxGrid;
+    AuxGrid  *auxGrid = NULL;
     TimeLink *tmLink;
     void      signal_links( int );
     void      transBgd( bool a ){ bgd_trans=a;valid(0); }
@@ -157,30 +157,36 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     friend class Frame;
     friend class ObjProps;
     friend class colourChoice;
+    friend class IsosurfControl;
         
   private:
     int        hilight[maxobject];	// which object to highlight
-    bool	   hilighton;			// whether to highlight
-    Display_t  disp;					// type of display
-    unsigned int   datadst;				// which object gets data coloured
-    GLfloat    tet_color[4], hitet_color[4], hiele_color[4],
-    hicable_color[4], hicnnx_color[4], hipt_color[4], bc[4],
-    hiptobj_color[4];
-    DataClass<DATA_TYPE>*  dataBuffer;
-    DATA_TYPE* data;				// data to display
-    Data_Type_t  have_data;			// true if data file has been read
-    GLfloat*   colourize( float );	// set GL colour for data value
-    Object_t   vert_asc_obj;			// object to draw with vertex
+    bool	   hilighton = false;	// whether to highlight
+    Display_t  disp = asSurface;	// type of display
+    unsigned int   datadst;			// which object gets data coloured
+    GLfloat tet_color[4]     = {1.,1.,1.,1.},
+            hitet_color[4]   = {1.,0.,0.,1.},
+            hiele_color[4]   = {0.,0.,1.,1.},
+            hicable_color[4] = {0.,1.,1.,1.},
+            hicnnx_color[4]  = {1.,1.,0.,1.}, 
+            hipt_color[4]    = {1.,0.,1.,1.},
+            hiptobj_color[4] = {1.,0.8,0.,1.},
+            bc[4];
+    DataClass<DATA_TYPE>*  dataBuffer = NULL;
+    DATA_TYPE* data = NULL;			    // data to display
+    Data_Type_t  have_data = NoData;    // true if data file has been read
+    GLfloat*   colourize( float );	    // set GL colour for data value
+    Object_t   vert_asc_obj = SurfEle;	// object to draw with vertex
     double     solid_angle3Dpt( int v, int a, int b, int c );
-    bool	   fill_hitet;			// true to fill hilighted tetrahedron
-    bool       revDrawOrder;			// draw surfaces in reverse orderc++ convert int to string
-    float      frame_delay;			// delay between frames
-    int        frame_skip;         	// direction and #frames to skip
-    int        tm;
-    int        numframes;
-    bool	   autocol;				// set colour range every frame
+    bool	   fill_hitet =  false;     // true to fill hilighted tetrahedron
+    bool       revDrawOrder = false;    // draw surfaces in reverse orderc++ convert int to string
+    float      frame_delay = 0.01;      // delay between frames
+    int        frame_skip = 0;     	    // direction and #frames to skip
+    int        tm = 0;
+    int        numframes = 0;
+    bool	   autocol = false;		// set colour range every frame
 
-    bool	  lightson;				// light or not
+    bool	  lightson = true;				// light or not
     void      illuminate(GLfloat);			// light the model
     void      draw_surfaces(Surfaces *);
     void      draw_elements(Surfaces *);
@@ -192,30 +198,30 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      draw_cut_planes( RRegion * );
     void      draw_iso_surfaces( );
     void      draw_iso_lines();
-    GLenum    renderMode;			// mode for drawing
-    vector<bool> ptDrawn;			// was a point drawn
-    vector<bool> ptVisible;         // is a point is a visible region?
+    GLenum    renderMode = GL_RENDER;// mode for drawing
+    vector<bool> ptDrawn;			 // was a point drawn
+    vector<bool> ptVisible;          // is a point is a visible region?
     void      register_vertex( int i ); // for picking
     vector<GLuint> hitbuffer;
     void      process_hits();		// determine picked node
-    DATA_TYPE* timevec;
+    DATA_TYPE* timevec = NULL;
     unsigned long framenum;			// keep track if a frame is drawn
-    bool      dump_vert_list;
+    bool      dump_vert_list = false;
     DataReaderEnum getReaderType( const char * );
-    bool      facetshading;			// do not blend over surface elements
-    bool      headlamp_mode;		// headlamp lighting mode
+    bool      facetshading = false;	// do not blend over surface elements
+    bool      headlamp_mode = true;	// headlamp lighting mode
     CutSurfaces **_cutsurface;      // clipped surfaces
-    IsoSurface *iso0, *iso1;
-    IsoLine    *isoline;
+    IsoSurface *iso0 = NULL, *iso1 = NULL;
+    IsoLine    *isoline = NULL;
     set<int>   timeLinks;           // other processes linked to this one
-    bool       bgd_trans;           //!< transparent background
-    bool       _norot;              //!< allow rotations
+    bool       bgd_trans = false;   //!< transparent background
+    bool       _norot = false;      //!< allow rotations
     float      _dt;                 //!< increment between time slices
     void       set_windows( Fl_Window*, const char * );
-    bool      forcedThreaded;        // force threaded reading of data
+    bool      forcedThreaded = false;  // force threaded reading of data
     // constants
     static unsigned int MAX_MESSAGES_READ;
-    bool   _branch_cut;
+    bool   _branch_cut = false;
     double _branch_range[2];
     DeadDataGUI *deadData;
 };

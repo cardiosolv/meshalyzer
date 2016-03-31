@@ -123,3 +123,49 @@ void IsoSurface::determine_vert_norms(PPoint& pt)
   _vert[numvert] = -1;
   free(tvn);
 }
+
+
+/** output the surface as an auxilliary grid
+ *
+ * \param fname base filename
+ */
+void 
+IsoSurface::saveAux( const char *fname ) 
+{
+  // count the number of points
+  int numpt = 0;
+  for( int i=0; i<polygon.size(); i++ ) {
+    numpt += polygon[i]->ptsPerObj();
+  }
+
+  string basename = fname;
+  size_t pos = basename.find( ".pts_t");
+  if( pos == basename.length()-6 )
+    basename.erase( pos );
+
+  string ptfile = basename+".pts_t";
+  FILE*pout = fopen( ptfile.c_str(), "w" );
+  fprintf( pout, "1\n%d\n", numpt );
+  for( int i=0; i<polygon.size(); i++ ) {
+    const PPoint *opt = polygon[i]->pt();
+    const int* n = polygon[i]->obj();
+    for( int j=0; j<polygon[i]->ptsPerObj(); j++ ){
+      const GLfloat *p = opt->pt(n[j]);
+      fprintf( pout, "%f %f %f\n", p[0], p[1], p[2] );
+    }
+  }
+  fclose( pout );
+
+  string elemfile = basename+".elem_t";
+  FILE *eout = fopen( elemfile.c_str(), "w" );
+  int ptoff = 0;
+  fprintf( eout, "1\n%d\n", polygon.size() );
+  for( int i=0; i<polygon.size(); i++ ) {
+    fprintf( eout, "%s", polygon[i]->ptsPerObj()==3?"Tr":"Qd" );
+    for( int j=0;j<polygon[i]->ptsPerObj();j++ ) 
+      fprintf( eout," %d", ptoff++ );
+    fprintf( eout,"\n" );
+  }
+  fclose( eout );
+}
+
