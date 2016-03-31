@@ -81,7 +81,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {796 80 350 645} type Double box UP_BOX
+      xywh {426 89 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -1890,7 +1890,7 @@ if (!cc ) {
 
 return cc;} {}
   }
-  Function {update_surfGUI( int s )} {return_type void
+  Function {update_surfGUI( int s )} {selected return_type void
   } {
     code {if( !mwtb->model->numSurf() ) return;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
@@ -1963,7 +1963,8 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {} {
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2152,6 +2153,7 @@ SAVE_WIDGET( mshzf, mwtb->isosurfwin->opacity0 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoOn1 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoval1 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->opacity1 );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoLineRestrict );
 
 mshzf << "ISOSURF_COLOUR 0 = ";
 save_colour( mshzf, mwtb->isosurfwin->issColor(0) );
@@ -2475,6 +2477,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( mwtb->isosurfwin->isoval1, var, val )
   TEST_VAR( mwtb->isosurfwin->opacity1, var, val )
   TEST_VAR( mwtb->isosurfwin->isoOn1, var, val )
+  TEST_VAR( mwtb->isosurfwin->isoLineRestrict, var, val )
 
   if( !strcmp( var, "ISOLINE_COLOUR" ) ){
     sscanf( buf, "%*s = %f %f %f %f", &r, &g, &b, &a );
@@ -2541,8 +2544,7 @@ if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str()
   mwtb->redraw();
 }} {}
   }
-  Function {update_vecdata(VecData *vd)} {selected
-  } {
+  Function {update_vecdata(VecData *vd)} {} {
     code {if( vd->length_det()==Vector ) {
   veclenmag->setonly();
   veclenmag->do_callback(veclengthdeterm);
