@@ -30,13 +30,14 @@ cross_branch( DATA_TYPE *d, int n, double min, double max, double tol )
 
 
 int 
-IsoLine :: process( Surfaces *s, DATA_TYPE *dat )
+IsoLine :: process( Surfaces *s, DATA_TYPE *dat, bool restricted )
 {
   int num_lines=0;
 
   for( int i=0; i<_nl; i++ ){
     double val = _nl==1? _v0: _v0 + i*(_v1-_v0)/(float)(_nl-1.);
     for( int j=0; j<s->num(); j++ ) {
+      if( restricted && !s->visible() ) continue;
       int npoly;
       MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly );
       if( npoly && _branch ) {

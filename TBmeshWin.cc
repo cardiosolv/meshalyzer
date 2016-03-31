@@ -1816,7 +1816,7 @@ TBmeshWin::draw_iso_lines()
     if( _branch_cut ) 
       isoline->branch( true, _branch_range[0], _branch_range[1] );
     for ( int s=0; s<model->numSurf(); s++ ) 
-      isoline->process( model->surface(s), data );
+      isoline->process( model->surface(s), data, isc->isoLineRestrict->value() );
   }
   isoline->color( isc->islColor() );
   isoline->draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );

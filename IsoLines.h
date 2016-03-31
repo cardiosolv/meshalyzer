@@ -14,7 +14,7 @@ class IsoLine {
                _t(t), _branch(false),_branch_tol(0.3)
                                 {_color[0]=_color[1]=_color[2]=0;_color[3]=1.;}
         ~IsoLine();
-        int process( Surfaces *, DATA_TYPE * );
+        int process( Surfaces *, DATA_TYPE *, bool );
         int process( CutSurfaces *, DATA_TYPE * );
         int nl(){ return _nl; }
         int v0(){ return _v0; }

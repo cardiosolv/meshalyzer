@@ -18,7 +18,7 @@ class IsosurfControl {open
   Function {IsosurfControl(TBmeshWin *tb)} {open
   } {
     Fl_Window isowin {open
-      xywh {783 614 305 410} type Double visible
+      xywh {393 622 305 410} type Double visible
     } {
       Fl_Group {} {
         label {Isosurface 0} open
@@ -67,7 +67,7 @@ mwtb->iso0->saveAux( file );}
         Fl_Light_Button isolineOn {
           label on
           callback {mwtb->redraw();}
-          xywh {24 281 65 30}
+          xywh {20 274 70 26}
         }
         Fl_Value_Input isolineVal0 {
           label {start value:}
@@ -93,12 +93,12 @@ if( isolineOn->value() ) mwtb->redraw();}
         Fl_Spinner isolineThick {
           label thickness
           callback {if( isolineOn->value() ) mwtb->redraw();}
-          xywh {24 367 60 24} align 5 minimum 0
+          xywh {91 367 50 24} minimum 0
         }
         Fl_Light_Button islDatify {
           label datified
           callback {if( isolineOn->value() ) mwtb->redraw();}
-          xywh {24 316 66 30}
+          xywh {20 304 70 26} selection_color 78
         }
         Fl_Button islcol {
           label colour
@@ -109,18 +109,25 @@ if(fl_color_chooser( "Isoline",r,g,b ) ){
   _islColor[2] = b;
   if( isolineOn->value() ) mwtb->redraw();
 }}
-          xywh {95 316 50 30}
+          xywh {95 305 50 25}
         }
         Fl_Value_Output isoinc {
           label {increment:}
-          tooltip {increment between isolines} xywh {199 364 87 27} color 3 selection_color 17
+          tooltip {increment between isolines} xywh {215 364 71 27} color 3 selection_color 17
         }
         Fl_Button {} {
           label save
           callback {char *fname = fl_file_chooser( "Auxiliary mesh name", "*.pts_t", "isoLines.pts_t", 0 );
 if( !fname ) return;
 mwtb->isoline->auxMesh( fname );}
-          xywh {95 280 50 30}
+          tooltip {save lines as auxiliary grid} xywh {95 275 50 25}
+        }
+        Fl_Light_Button isoLineRestrict {
+          label {undisplayed surf's}
+          callback {unrestricted = o->value();
+_islDirty = true;
+if( isolineOn->value() ) mwtb->redraw();} selected
+          tooltip {calculate isolines on undisplayed surfaces} xywh {20 335 135 25} value 1 selection_color 133 when 1
         }
       }
       Fl_Group {} {
@@ -190,7 +197,9 @@ _issDirty[1] = true;} {}
   }
   decl {bool _issDirty[2];} {private local
   }
-  Function {issColor(int s)} {open return_type {const GLfloat*}
+  decl {bool unrestricted = true;} {private local
+  }
+  Function {issColor(int s)} {return_type {const GLfloat*}
   } {
     code {if( s==0 )
   _color[s][3] = opacity0->value();
@@ -198,7 +207,7 @@ else if( s== 1 )
   _color[s][3] = opacity1->value();
 return _color[s];} {}
   }
-  Function {issColor(int s,float r, float g, float b, float a)} {open return_type void
+  Function {issColor(int s,float r, float g, float b, float a)} {return_type void
   } {
     code {_color[s][0] = r;
 _color[s][1] = g;
@@ -211,7 +220,7 @@ _color[s][3] = a;} {}
 _islDirty = b;
 return od;} {}
   }
-  Function {issDirty(int s, bool b=false)} {open return_type bool
+  Function {issDirty(int s, bool b=false)} {return_type bool
   } {
     code {bool od = _issDirty[s];
 _issDirty[s]=b;
