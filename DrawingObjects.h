@@ -22,7 +22,7 @@ gzFile openFile( const char*, const char* );
 class DrawingObj
 {
   public:
-    DrawingObj() : _n(0), _size(1), _3D(false) {}
+    DrawingObj() {}
     virtual ~DrawingObj() {}
 
     //! draw single objs
@@ -39,9 +39,9 @@ class DrawingObj
     void   threeD( bool b ){ _3D = b; }
     bool   threeD( void ){ return _3D; }
   protected:
-    int   _n;			                    //!< \# objects
-    float _size;                            //!< size to draw objects
-    bool  _3D;
+    int   _n = 0;			                    //!< \# objects
+    float _size = 1;                            //!< size to draw objects
+    bool  _3D = false;
 };
 
 
@@ -165,6 +165,8 @@ class SurfaceElement : public MultiPoint
     virtual void     draw( int, GLfloat*, float=1 )=0;
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride, dataOpac* dopac, const GLfloat * )=0;
+    virtual void     draw( int, GLfloat*, Colourscale*, DATA_TYPE*,
+                         dataOpac* dopa, const GLfloat *, bool )=0;
     void     read_normals( int, int, const char * );
     void     vertnorm( GLfloat *a ){ _ptnrml=a; }
     
@@ -185,6 +187,8 @@ class PolyGon : public SurfaceElement
                            int stride, dataOpac* dopac, const GLfloat * );
     virtual void draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
+    virtual void draw( int, GLfloat*, Colourscale*, DATA_TYPE*,
+                           dataOpac* dopac, const GLfloat *, bool lightson ){}
     virtual bool read( const char * ){}
 	static const int  _zero;
     const int* iso_polys(unsigned int index){return &_zero;}
@@ -202,6 +206,8 @@ class Triangle : public SurfaceElement
                            int stride=1, dataOpac* dopac=NULL );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride, dataOpac* dopac, const GLfloat *);
+    virtual void draw( int, GLfloat*, Colourscale*, DATA_TYPE*,
+                           dataOpac* dopac, const GLfloat *, bool lightson );
     virtual bool     read( const char * );
     virtual void     compute_normals( int, int );
     virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){}
@@ -223,6 +229,8 @@ class Quadrilateral : public SurfaceElement
                            int stride=1, dataOpac* dopac=NULL );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride, dataOpac* dopac, const GLfloat *);
+    virtual void draw( int, GLfloat*, Colourscale*, DATA_TYPE*,
+                           dataOpac* dopac, const GLfloat *, bool lightson );
     virtual bool     read( const char * );
     virtual void     compute_normals( int, int );
     bool     add( const char * );

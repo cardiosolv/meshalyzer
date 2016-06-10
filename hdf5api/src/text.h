@@ -24,6 +24,8 @@ int ch5_text_info(hid_t hdf_file, unsigned int index, ch5_text_file *info);
 
 int ch5_text_free_info(ch5_text_file *info);
 
+int ch5_text_flush( hid_t hdf_file, int index );
+
 int ch5_text_append(
   hid_t hdf_file,
   unsigned int file_index,

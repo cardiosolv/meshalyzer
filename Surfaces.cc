@@ -102,8 +102,19 @@ void Surfaces::determine_vert_norms( PPoint& pt )
 void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
                      int stride, dataOpac* dataopac, const GLfloat*ptnrml )
 {
+  GLboolean lightson;
+  glGetBooleanv( GL_LIGHTING, &lightson );
+
+  glBegin(GL_TRIANGLES);
   for ( int i=0; i<_ele.size(); i+=stride )
-    _ele[i]->draw( 0, 0, fill, cs, dat, stride, dataopac, ptnrml );
+    if( _ele[i]->ptsPerObj() == 3 )
+      _ele[i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+  glEnd();
+  glBegin(GL_QUADS);
+  for ( int i=0; i<_ele.size(); i+=stride )
+    if( _ele[i]->ptsPerObj() == 4 )
+      _ele[i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+  glEnd();
 }
 
 /** redraw elements through which the branch cut passes with flat shading 

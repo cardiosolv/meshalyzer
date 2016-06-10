@@ -154,7 +154,7 @@ int gets_type_insensitive_single_attribute() {
 
 int nchild_generates_names() {
   const char *expected = "Prefix000321";
-  char *name = ch5_nchild_gen_name("Prefix", 321);
+  char *name = ch5_nchild_gen_name("Prefix", 321, NULL);
   int result = 1;
   if (name == NULL) {
     fprintf(stderr, "Returned string was null.\n");

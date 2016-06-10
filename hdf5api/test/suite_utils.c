@@ -42,7 +42,8 @@ void run_test(char const *name, int (*test_fn)(void)) {
 
 void print_test_result(char const *name, int result) {
   struct winsize w;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  int e = ioctl(0, TIOCGWINSZ, &w);
+  if( !w.ws_col ) w.ws_col = 80;
   
   int name_width = w.ws_col - 3 - 5;
   char *out_name = pad_str_right(name, name_width, '.');
@@ -71,13 +72,14 @@ void print_result_summary() {
 
 void print_title(char const *text) {
   struct winsize w;
-  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  int e = ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   int orig_len = strlen(text);
   char *padded = (char*) calloc(sizeof(char), orig_len + 5);
   padded[0] = padded[1] = '=';
   padded[2] = ' ';
   strncpy(&padded[3], text, orig_len);
   padded[orig_len + 3] = ' ';
+  if( !w.ws_col ) w.ws_col = 80;
   char *full_text = pad_str_right(padded, w.ws_col, '=');
   printf("\n\x1B[33m%s\x1B[0m\n", full_text);
   free(padded);

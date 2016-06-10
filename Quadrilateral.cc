@@ -91,6 +91,53 @@ void Quadrilateral::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 }
 
 
+/** draw one Quadrilaterals and do not do glBegin/glEnd
+ *
+ *  \param p0       index of first point to draw
+ *  \param colour   colour to use if no data
+ *  \param cs       colour scale
+ *  \param data     data associated with nodes (NULL for no data display)
+ *  \param dataopac data opacity
+ *  \param ptnrml   vertex normals (NULL for none)
+ *  \param lightson true if lights are on
+ */
+void Quadrilateral::draw( int p0, GLfloat *colour, Colourscale* cs,
+                          DATA_TYPE* data, dataOpac* dataopac,
+                          const GLfloat* ptnrml, bool lightson )
+{
+  if ( p0>=_n ) return;
+
+  int i = 4*p0;
+  if ( !_pt->vis(_node[i]) || !_pt->vis(_node[i+1]) || !_pt->vis(_node[i+2])
+          || !_pt->vis(_node[i+3])                        )
+    return;
+
+  if ( lightson && ptnrml==NULL) glNormal3fv( nrml(i/3) );
+
+  if ( data!=NULL ) {
+    if ( dataopac->on() ) {		// data opacity
+      for ( int j=0; j<4; j++ ) {
+        cs->colourize( data[_node[i+j]], dataopac->alpha(data[_node[i+j]]));
+        if ( lightson && ptnrml ) glNormal3fv( ptnrml+_node[i+j]*3 );
+        glVertex3fv( _pt->pt(_node[i+j]) );
+      }
+    } else {		// no data opacity
+      for ( int j=0; j<4; j++ ) {
+        cs->colourize( data[_node[i+j]], colour[3] );
+        if ( lightson && ptnrml ) glNormal3fv( ptnrml+_node[i+j]*3 );
+        glVertex3fv( _pt->pt(_node[i+j]) );
+      }
+    }
+  } else {							// no data
+    glColor4fv( colour );
+    for ( int j=0; j<4; j++ ) {
+      if ( lightson && ptnrml ) glNormal3fv( ptnrml+_node[i+j]*3 );
+      glVertex3fv( _pt->pt(_node[i+j]) );
+    }
+  }
+}
+
+
 /** draw a quadrilateral
  *
  *  \param e      element to highlight

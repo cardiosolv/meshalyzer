@@ -216,7 +216,7 @@ HEX2:				3	-o-o-o-o-o-	-o---o---o---o---o---o
 
 int my_fputs( FILE *, char * );
 
-bool Header_Quiet = 0;
+bool Header_Quiet = false;
 char Header_Message[256];
 
 const char    *Header_Type[] =

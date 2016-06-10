@@ -364,7 +364,8 @@ void process_h5_format(char *fin, Meshwin *w, Controls *control, bool no_elems)
 void
 print_usage(void) 
 {
-  cout << "meshalyzer [options] model_base[.] [file.dat] [file.xfrm] [file.mshz] [file.vpts]"<<endl;
+  cout << "meshalyzer [options] model_base[.[pts]] [file.igb|file.dat|file.datH5:nodal/#] [file.xfrm] [file.mshz] "
+          "[file.vpts]"<<endl;
   cout << "with options: " << endl;
   cout << "--iconifycontrols|-i  iconify controls on startup" << endl;
   cout << "--no_elem|-n          do not read element info" << endl;

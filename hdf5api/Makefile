@@ -11,6 +11,7 @@ LIBPATH    := lib/$(LIBFILE)
 CFLAGS     := -std=c99 -Wall -Isrc -g -O0
 AR         := ar
 ARFLAGS    := -rcs
+HDF5_LIBS  := $(LIBPATH) -lhdf5_hl -lhdf5
 
 CFLAGS     += -I$(HDF5_ROOT)/include -L$(HDF5_ROOT)/lib
 OBJS       := $(patsubst %.c, %.o, $(wildcard $(SRCDIR)/*.c))
@@ -45,7 +46,7 @@ $(TESTINVALID): $(GENBIN)
 	./$(GENBIN) ./test/data/test_invalid.h5
 
 $(TESTBIN):	$(LIBPATH) $(TESTOBJS) $(TESTINVALID)
-	$(CC) $(CFLAGS) $(LIBPATH) $(TESTOBJS) -o $(TESTBIN)
+	$(CC) $(CFLAGS) $(TESTOBJS) $(HDF5_LIBS) -o $(TESTBIN)
 
 $(GENBIN): $(GENOBJS)
 	$(CC) $(CFLAGS) $(GENOBJS) -o $(GENBIN)

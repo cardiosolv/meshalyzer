@@ -4,6 +4,31 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+/** \brief flush a text file or all text files 
+* \param[in] hdf_file     The HDF file reference id
+* \param[in] index        text file index, -1=all
+* \returns 0 if successful, -1 on error
+*/
+int ch5_text_flush( hid_t hdf_file, int index )
+{
+  hid_t container_id = ch5_nchild_create_or_open_container(hdf_file,
+    CH5_TEXT_GROUP_NAME);
+  if (container_id < 0) return -1;
+  
+  if( index == -1 )
+    H5Fflush( container_id, H5F_SCOPE_LOCAL );
+  else {
+    hid_t text_id;
+    int status = ch5_nchild_open_child(container_id, index, &text_id, NULL);
+    if (status != 0) return 1;
+    H5Fflush( text_id, H5F_SCOPE_LOCAL );
+    H5Dclose(text_id);
+  }
+  H5Gclose(container_id);
+}
+
+
 /**
 * \brief Creates a new text file
 * \param[in] hdf_file     The HDF file reference id

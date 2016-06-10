@@ -9,7 +9,7 @@
 int surf_creates_named_surface() {
   OPEN_WRITE_TEST_FILE;
   char *name = fixture_surface_name(0);
-  char *dset_name = ch5_nchild_gen_name(CH5_SURF_CHILD_PREFIX, 0);
+  char *dset_name = ch5_nchild_gen_name(CH5_SURF_CHILD_PREFIX, 0, NULL);
   int surf0_idx = ch5m_surf_create(file, name, 5, 8);
   int result = (surf0_idx != -1);
   
