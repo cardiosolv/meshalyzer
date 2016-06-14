@@ -53,12 +53,13 @@ decl {\#include <set>} {private local
 decl {\#include "colourchoice.h"} {public local
 } 
 
-class Meshwin {} {
+class Meshwin {open
+} {
   Function {Meshwin()} {open
   } {
     Fl_Window winny {
-      label trimesh open
-      xywh {60 84 455 455} type Double hide
+      label trimesh open selected
+      xywh {400 840 455 455} type Double resizable hotspot visible
     } {
       Fl_Box trackballwin {
         xywh {0 0 455 455}
@@ -67,7 +68,7 @@ class Meshwin {} {
       }
     }
     code {winny->resizable(trackballwin);
-winny->size_range(50,50,1200,1200,5,5,1);} {}
+winny->size_range(50,50,1600,1600,5,5,1);} {}
   }
   class UserInterface {open
   } {}
@@ -77,13 +78,12 @@ class Controls {open
 } {
   decl {friend class ObjProps;} {private local
   }
-  Function {Controls()} {open
-  } {
+  Function {Controls()} {} {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {426 89 350 645} type Double box UP_BOX
+      xywh {173 609 350 645} type Double box UP_BOX hide
       code0 {\#include <FL/Fl_Color_Chooser.H>}
-      code1 {\#include "VecData.h"} visible
+      code1 {\#include "VecData.h"}
     } {
       Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
@@ -1890,7 +1890,7 @@ if (!cc ) {
 
 return cc;} {}
   }
-  Function {update_surfGUI( int s )} {selected return_type void
+  Function {update_surfGUI( int s )} {return_type void
   } {
     code {if( !mwtb->model->numSurf() ) return;
 surfvisbut->value( mwtb->model->surface(s)->visible() );
