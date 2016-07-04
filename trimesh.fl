@@ -53,13 +53,12 @@ decl {\#include <set>} {private local
 decl {\#include "colourchoice.h"} {public local
 } 
 
-class Meshwin {open
-} {
+class Meshwin {} {
   Function {Meshwin()} {open
   } {
     Fl_Window winny {
-      label trimesh open selected
-      xywh {400 840 455 455} type Double resizable hotspot visible
+      label trimesh open
+      xywh {400 840 455 455} type Double hide resizable hotspot
     } {
       Fl_Box trackballwin {
         xywh {0 0 455 455}
@@ -78,12 +77,13 @@ class Controls {open
 } {
   decl {friend class ObjProps;} {private local
   }
-  Function {Controls()} {} {
+  Function {Controls()} {open
+  } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {173 609 350 645} type Double box UP_BOX hide
+      xywh {927 506 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
-      code1 {\#include "VecData.h"}
+      code1 {\#include "VecData.h"} visible
     } {
       Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
@@ -801,11 +801,11 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
+          label Highlight open selected
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1135,7 +1135,7 @@ write_surfaces(0);}
           }
         }
         Fl_Group vectorgrp {
-          label Vectors
+          label Vectors open
           xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
@@ -1222,15 +1222,23 @@ mwtb->redraw();}
             label Stochastic
             callback {mwtb->vecdata->stoch_stride(o->value());
 mwtb->redraw();}
-            xywh {95 435 75 25} down_box DOWN_BOX labelcolor 7
+            xywh {120 435 75 25} down_box DOWN_BOX labelcolor 7
           }
           Fl_Check_Button vecheads {
             label Heads
             callback {mwtb->vecdata->heads(o->value());
 mwtb->redraw();}
-            xywh {95 465 90 15} down_box DOWN_BOX value 1 labelcolor 7
+            xywh {120 465 90 15} down_box DOWN_BOX value 1 labelcolor 7
           }
-          Fl_Group veccolgroup {open
+          Fl_Value_Input vecstart {
+            label start
+            callback {mwtb->vecdata->start(o->value());
+mwtb->redraw();}
+            xywh {75 442 35 24} labelcolor 7 align 2 maximum 10000 step 1
+            code1 {\#include "MyValueInput.h"}
+            class MyValueInput
+          }
+          Fl_Group veccolgroup {
             xywh {20 390 305 100} labelfont 1
           } {
             Fl_Value_Input veccolmin {

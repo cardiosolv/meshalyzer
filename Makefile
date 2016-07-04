@@ -1,5 +1,5 @@
 HOSTMACHINE := $(shell uname)
-HDF5=1
+#HDF5=1
 include make.conf
 CXX:=c++ -std=c++11 -fopenmp
 

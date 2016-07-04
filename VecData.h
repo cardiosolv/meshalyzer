@@ -40,6 +40,7 @@ class VecData
     void         auto_cs(bool a){ autocal=a; }
     void         optimize_cs();
     void         stride( int a ){ _stride=a; }
+    void         start( int a ){ _start=a; }
     void         stoch_stride( bool a ){ _stoch = a; }
     void         heads( bool b ){ _draw_heads=b; }
     Colourscale *cs;			// colour scale for display
@@ -47,27 +48,28 @@ class VecData
     bool         have_scalar(){ return sdata; }
     int          size(void){ return numpt; }
   private:
-    int      numpt;			// number of spatial points
-    int      numtm;			// number of time instances
-    float*   pts;			// locations
-    float*   vdata;         // vector data
-    float*   sdata;         // scalar data
-    float    _length;		// length of vectors
+    int      numpt       = 0;		// number of spatial points
+    int      numtm       = 0;		// number of time instances
+    float*   pts         = NULL;	// locations
+    float*   vdata       = NULL;    // vector data
+    float*   sdata       = NULL;    // scalar data
+    float    _length     = 1;		// length of vectors
     GLfloat  _colour[4];	// colour of vectors
     int      _numcol;       // number of colours
-    bool     _disp;		    // whether or not to draw
-    float    maxmag;		// maximum magnitude of data
-    bool     autocal;		// autocalibrate each time
-    DataType _length_det;	// what determines length
-    DataType _colour_det;   // what determines colour
-    float scalar_min,		// scalar data extrema
+    bool     _disp       = true;	// whether or not to draw
+    float    maxmag      = 0;		// maximum magnitude of data
+    bool     autocal     = false;	// autocalibrate each time
+    DataType _length_det = Vector;	// what determines length
+    DataType _colour_det = Vector;  // what determines colour
+    float scalar_min,		        // scalar data extrema
     scalar_max;
     GLUquadricObj* quado;
-    int      _last_tm;      // last time drawn
-    int      _stride;
-    bool     _stoch;        // true for stochastic stride
-    bool     _3D;
-    bool     _draw_heads;   // draw arrow heads
+    int      _last_tm    = 0;             // last time drawn
+    int      _stride     = 1;
+    int      _start      = 0;
+    bool     _stoch      = false;  // true for stochastic stride
+    bool     _3D         = true;
+    bool     _draw_heads = true;   // draw arrow heads
 #ifdef USE_HDF5
     void     read_vec_HDF5( const char *);
 #endif
