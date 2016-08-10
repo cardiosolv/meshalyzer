@@ -404,7 +404,7 @@ void Colourscale :: colourize( float val )
     glColor4fv( _deadColour );
     return;
   } 
-  int indx=int(rint(a*val+b));
+  int indx=int(a*val+b);
   if ( indx<0 ) indx = 0;
   else if ( indx>=n ) indx = n-1;
   glColor3fv( cmap[indx] );
@@ -419,7 +419,7 @@ void Colourscale :: colourize( float val, float alpha )
     glColor4fv( _deadColour );
     return;
   } 
-  int indx=int(rint(a*val+b));
+  int indx=int(a*val+b);
   if ( indx<0 ) indx = 0;
   else if ( indx>=n ) indx = n-1;
   cmap[indx][3] = alpha;
