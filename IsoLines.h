@@ -11,8 +11,7 @@
 class IsoLine {
     public:
         IsoLine( double v0, double v1, int n, int t ):_v0(v0),_v1(v1),_nl(n),
-               _t(t), _branch(false),_branch_tol(0.3)
-                                {_color[0]=_color[1]=_color[2]=0;_color[3]=1.;}
+               _t(t) {}
         ~IsoLine();
         int process( Surfaces *, DATA_TYPE *, bool );
         int process( CutSurfaces *, DATA_TYPE * );
@@ -27,16 +26,18 @@ class IsoLine {
         bool branch(){return _branch;}
         double *branch_range(){ return _branch?_branch_range:NULL; }
         void auxMesh( const char * );
+        void threeD( bool b){_3D=b;}
     private:
         vector<MultiPoint *>  _polygon;
         vector<float>         _val;
-        bool                  _branch; // do not interpolate over a value
+        bool                  _branch=false; // do not interpolate over a value
         double                _branch_range[2];
-        float                 _branch_tol;
-        GLfloat               _color[4];
+        float                 _branch_tol=0.3;
+        GLfloat               _color[4] = {0.,0.,0.,1.};
         double                _v0, _v1;
         int                   _nl;
         int                   _t;
+        bool                  _3D=false;
 };
 
 #endif

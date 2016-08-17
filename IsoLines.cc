@@ -105,9 +105,11 @@ void IsoLine::draw( Colourscale *cs, GLfloat size )
 {
   if( cs==NULL )
     for( int i=0; i<_polygon.size(); i++ ) {
+      _polygon[i]->threeD(_3D);
       _polygon[i]->draw(0, _color, size );
   } else {
     for( int i=0; i<_polygon.size(); i++ ) {
+      _polygon[i]->threeD(_3D);
       _polygon[i]->draw( 0, cs->colorvec(_val[i]), size );
 	}
   }
@@ -152,7 +154,7 @@ void IsoLine::auxMesh( const char *fname )
     fprintf( eout, "%s", _polygon[i]->ptsPerObj()==2?"Ln":"Qd" );
     for( int j=0;j<_polygon[i]->ptsPerObj();j++ ) 
       fprintf( eout," %d", ptoff++ );
-      fprintf( dout," %f\n", _val[i] );
+    fprintf( dout," %f\n", _val[i] );
     fprintf( eout,"\n" );
   }
   fclose( eout );

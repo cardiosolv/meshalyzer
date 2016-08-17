@@ -589,7 +589,7 @@ menu.
 
 For each structure, there is a button toggling its display, 
 and a button to select its display properties.
-pressing the ``props'' button will open a widget to specify 
+Pressing the ``props'' button will open a widget to specify 
 colour when it is not displaying data, to specify the output stride, size 
 and if a 3D effect is to be used. 
 Note that the 3D effect is graphics intensive and may be very slow for a 
@@ -607,8 +607,9 @@ coloured based on the region to which it belongs.
 Highlighting allows one to investigate the structure of the mesh.
 One of each type of structure can be highlighted. 
 A highlighted element is drawn in a special highlight colour.
-The highlighted structure can be chosen by typing its number. Values can be changed
-by using the up/down arrow keys and by dragging the mouse. See the FLTK manual for
+The highlighted structure can be chosen by typing its number.
+Values can also by dragging the mouse. 
+See the FLTK manual for
 a full explanation of the latter.
 Pressing CTRL causes the arrow keys to increment by 10 while pressing
 SHIFT causes them to increment by 100.
@@ -734,6 +735,10 @@ To display a subset of the data, a stride may be chosen.
 Sometimes, especially with a regular grid is used, a constant stride will lead to aliasing effects. In this case,
 checking the ``stochastic'' button will add a random perturbation to the stride so that the model is
 irregularly sampled but on average, at the specified stride.
+The initial starting point for the stride, \emph{start}, can also be set.
+Drawing heads in the vectors is also optional. Not drawing them will improve
+rendering speed and they may not be necessary for certain kinds of data, like
+fibre direction.
 
 \subsubsection{Auxiliary Grid}
 
@@ -770,11 +775,13 @@ data sets from the file which may be viewed on the current grid.
 
 \subsubsection{Surfaces}
 
+Only surfaces checked in the list are affected by operations.
 The fill colour of the elements composing surfaces can be selected as well
 as the outline colour. Outlining and filling the elements can also be
-controlled. In the surface tab, the surfaces to which the changes are
-applied are chosen by the drop down menu.
+controlled. 
 Surfaces can also be randomly coloured by Image/Randomly Color/Surfaces.
+Surfaces are renamed with the ``Rename'' button. You will be prompted if you
+want to overwrite the surface file with the new label.
 
 \subsection{Image Menu}
 
@@ -799,6 +806,11 @@ Select the background colour.
 
 Draw the surfaces in the opposite order. This can be useful when surfaces
 overlap and different perspectives are chosen.
+
+\subsubsection{No rotation}
+
+During off rotating with the trackball. This is automatically set for 1D and
+2D data.
 
 \subsection{Data Menu}
 

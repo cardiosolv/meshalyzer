@@ -81,7 +81,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {927 506 350 645} type Double box UP_BOX
+      xywh {927 405 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -805,7 +805,7 @@ objprops[Cable]->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open selected
+          label Highlight open
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -2154,6 +2154,7 @@ SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineVal1 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoNumLines );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineThick );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->islDatify );
+SAVE_WIDGET( mshzf, mwtb->isosurfwin->isl3D );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isolineOn );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoOn0 );
 SAVE_WIDGET( mshzf, mwtb->isosurfwin->isoval0 );
@@ -2178,7 +2179,8 @@ SAVE_WIDGET( mshzf, mwtb->deadData->deadopac );
 SAVE_WIDGET( mshzf, mwtb->deadData->showDeadData );
 mshzf << "DEAD_COLOUR = ";
 save_colour( mshzf, mwtb->cs->deadColour() );
-mshzf << endl;} {}
+mshzf << endl;} {selected
+    }
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
@@ -2478,6 +2480,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( mwtb->isosurfwin->isoNumLines, var, int(val) )
   TEST_VAR( mwtb->isosurfwin->isolineThick, var, int(val) )
   TEST_VAR( mwtb->isosurfwin->islDatify, var, int(val) )
+  TEST_VAR( mwtb->isosurfwin->isl3D, var, int(val) )
   TEST_VAR( mwtb->isosurfwin->isolineOn, var, int(val) )
   TEST_VAR( mwtb->isosurfwin->isoval0, var, val )
   TEST_VAR( mwtb->isosurfwin->opacity0, var, val )

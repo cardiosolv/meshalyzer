@@ -1820,6 +1820,7 @@ TBmeshWin::draw_iso_lines()
   }
   isoline->color( isc->islColor() );
   isoline->draw( isc->islDatify->value()?cs:NULL, isc->islThickness() );
+  isoline->threeD( isc->threeD() );
   
   // we need to turn off clipping when we draw on the clipping plane or we will 
   // get z-fighting 
