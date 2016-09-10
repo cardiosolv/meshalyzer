@@ -69,29 +69,36 @@ int PNGwrite :: write( void *data, int align )
 }
 
 void
-PNGwrite :: description( string datafile, string colour_range ) 
+PNGwrite :: description( string datafile, string colour_range, string tm ) 
 {
-  png_text tptr[3];
+  const int ntext = 4;
 
-  for( int i=0; i<3; i++ ) {
+  png_text tptr[ntext];
+  char *strptr[ntext];
+
+  for( int i=0; i<ntext; i++ ) {
     tptr[i].compression = PNG_TEXT_COMPRESSION_NONE;
   }
 
-  tptr[1].key         = "Description";
-  char *a             = strdup(colour_range.c_str());
-  tptr[1].text        = a;
-  
   tptr[0].key         = "Software";
   tptr[0].text        = "meshalyzer";
   
+  tptr[1].key         = "Description";
+  strptr[1]           = strdup(colour_range.c_str());
+  tptr[1].text        = strptr[1];
+  
   tptr[2].key         = "Data file";
-  char *b             = strdup(datafile.c_str());
-  tptr[2].text        = b;
+  strptr[2]           = strdup(datafile.c_str());
+  tptr[2].text        = strptr[2];
   
-  png_set_text(png_ptr, info_ptr, tptr, datafile.length()?3:1 );
+  tptr[3].key         = "Data frame";
+  strptr[3]           = strdup(tm.c_str());
+  tptr[3].text        = strptr[3];
   
-  free(a) ;
-  free(b) ;
+  png_set_text(png_ptr, info_ptr, tptr, datafile.length()?ntext:1 );
+  
+  for( int i=1; i<ntext; i++ ) 
+    free(strptr[i]);
 } 
 
 
