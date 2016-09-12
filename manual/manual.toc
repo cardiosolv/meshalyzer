@@ -1,0 +1,66 @@
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}
+\contentsline {subsection}{\numberline {1.1}Purpose}{1}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}System requirements}{1}{subsection.1.2}
+\contentsline {section}{\numberline {2}Input Files}{1}{section.2}
+\contentsline {subsection}{\numberline {2.1}Vertices}{2}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Cables}{3}{subsection.2.2}
+\contentsline {subsection}{\numberline {2.3}Connections}{3}{subsection.2.3}
+\contentsline {subsection}{\numberline {2.4}Surface Elements}{3}{subsection.2.4}
+\contentsline {subsubsection}{\numberline {2.4.1}Triangles}{4}{subsubsection.2.4.1}
+\contentsline {subsection}{\numberline {2.5}Volume Elements}{5}{subsection.2.5}
+\contentsline {subsubsection}{\numberline {2.5.1}Mixed element files}{5}{subsubsection.2.5.1}
+\contentsline {subsubsection}{\numberline {2.5.2}Tetrahedra}{5}{subsubsection.2.5.2}
+\contentsline {subsection}{\numberline {2.6}Regions}{7}{subsection.2.6}
+\contentsline {subsection}{\numberline {2.7}Vertex Scalar Data}{7}{subsection.2.7}
+\contentsline {subsubsection}{\numberline {2.7.1}Time Independent}{7}{subsubsection.2.7.1}
+\contentsline {subsubsection}{\numberline {2.7.2}Time Dependent}{7}{subsubsection.2.7.2}
+\contentsline {subsubsection}{\numberline {2.7.3}IGB format}{8}{subsubsection.2.7.3}
+\contentsline {subsection}{\numberline {2.8}Vector Data}{9}{subsection.2.8}
+\contentsline {subsection}{\numberline {2.9}Auxiliary Grid}{9}{subsection.2.9}
+\contentsline {subsection}{\numberline {2.10}Dynamic Points}{10}{subsection.2.10}
+\contentsline {subsection}{\numberline {2.11}HDF5 Format}{10}{subsection.2.11}
+\contentsline {subsection}{\numberline {2.12}CG meta format}{11}{subsection.2.12}
+\contentsline {subsubsection}{\numberline {2.12.1}CG metafile}{11}{subsubsection.2.12.1}
+\contentsline {subsubsection}{\numberline {2.12.2}Data files}{11}{subsubsection.2.12.2}
+\contentsline {subsection}{\numberline {2.13}Temporal Data Agreement}{12}{subsection.2.13}
+\contentsline {section}{\numberline {3}Invocation}{12}{section.3}
+\contentsline {subsection}{\numberline {3.1}Options}{12}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Environment variables}{13}{subsection.3.2}
+\contentsline {section}{\numberline {4}Graphical User Interface}{13}{section.4}
+\contentsline {subsection}{\numberline {4.1}Volume Mesh}{13}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Regions}{13}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3}Tab Widget}{15}{subsection.4.3}
+\contentsline {subsubsection}{\numberline {4.3.1}Highlighting}{15}{subsubsection.4.3.1}
+\contentsline {subsubsection}{\numberline {4.3.2}Time Plot}{16}{subsubsection.4.3.2}
+\contentsline {subsubsection}{\numberline {4.3.3}Information Window}{16}{subsubsection.4.3.3}
+\contentsline {subsubsection}{\numberline {4.3.4}Lighting}{17}{subsubsection.4.3.4}
+\contentsline {subsubsection}{\numberline {4.3.5}Scalar Data}{17}{subsubsection.4.3.5}
+\contentsline {subsubsection}{\numberline {4.3.6}Vector Data}{17}{subsubsection.4.3.6}
+\contentsline {subsubsection}{\numberline {4.3.7}Auxiliary Grid}{18}{subsubsection.4.3.7}
+\contentsline {subsubsection}{\numberline {4.3.8}HDF5 data}{18}{subsubsection.4.3.8}
+\contentsline {subsubsection}{\numberline {4.3.9}Surfaces}{18}{subsubsection.4.3.9}
+\contentsline {subsection}{\numberline {4.4}Image Menu}{19}{subsection.4.4}
+\contentsline {subsubsection}{\numberline {4.4.1}Reset Transform}{19}{subsubsection.4.4.1}
+\contentsline {subsubsection}{\numberline {4.4.2}View}{19}{subsubsection.4.4.2}
+\contentsline {subsubsection}{\numberline {4.4.3}Randomly colour}{19}{subsubsection.4.4.3}
+\contentsline {subsubsection}{\numberline {4.4.4}Background colour}{19}{subsubsection.4.4.4}
+\contentsline {subsubsection}{\numberline {4.4.5}Reverse draw order}{19}{subsubsection.4.4.5}
+\contentsline {subsection}{\numberline {4.5}Data Menu}{19}{subsection.4.5}
+\contentsline {subsubsection}{\numberline {4.5.1}Data Opacity}{19}{subsubsection.4.5.1}
+\contentsline {subsubsection}{\numberline {4.5.2}Clipping Planes}{19}{subsubsection.4.5.2}
+\contentsline {subsubsection}{\numberline {4.5.3}IsoSurfaces/IsoLines}{20}{subsubsection.4.5.3}
+\contentsline {subsubsection}{\numberline {4.5.4}Dead range}{21}{subsubsection.4.5.4}
+\contentsline {subsubsection}{\numberline {4.5.5}Branch cut}{22}{subsubsection.4.5.5}
+\contentsline {subsection}{\numberline {4.6}Output Menu}{22}{subsection.4.6}
+\contentsline {subsubsection}{\numberline {4.6.1}Single Images}{22}{subsubsection.4.6.1}
+\contentsline {subsubsection}{\numberline {4.6.2}Colour Bar}{22}{subsubsection.4.6.2}
+\contentsline {subsubsection}{\numberline {4.6.3}Animation Sequences}{22}{subsubsection.4.6.3}
+\contentsline {subsubsection}{\numberline {4.6.4}Recording Event Sequences}{23}{subsubsection.4.6.4}
+\contentsline {subsubsection}{\numberline {4.6.5}Visible nodes}{23}{subsubsection.4.6.5}
+\contentsline {subsection}{\numberline {4.7}Saving The Current View}{23}{subsection.4.7}
+\contentsline {subsection}{\numberline {4.8}Saving/Restoring the State}{24}{subsection.4.8}
+\contentsline {section}{\numberline {5}Grid window}{24}{section.5}
+\contentsline {section}{\numberline {6}Linking}{24}{section.6}
+\contentsline {section}{\numberline {7}Offscreen Rendering}{25}{section.7}
+\contentsline {subsection}{\numberline {7.1}OSMesa}{26}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.2}GLUT rendering}{26}{subsection.7.2}

@@ -81,7 +81,11 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
+<<<<<<< Updated upstream
       xywh {927 405 350 645} type Double box UP_BOX
+=======
+      xywh {1627 469 350 645} type Double box UP_BOX
+>>>>>>> Stashed changes
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -805,8 +809,13 @@ objprops[Cable]->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
+<<<<<<< Updated upstream
           label Highlight open
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
+=======
+          label Highlight
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+>>>>>>> Stashed changes
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -849,7 +858,7 @@ objprops[Cable]->win->show();}
             xywh {100 315 85 25}
           }
           Fl_Choice attachtype {
-            label attached open
+            label attached
             tooltip {draw which objects associated with vertex} xywh {190 435 140 25} down_box BORDER_BOX align 2 when 1
           } {
             MenuItem {} {
@@ -1007,7 +1016,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface open
+          label Surface
           xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
@@ -1136,7 +1145,7 @@ write_surfaces(0);}
         }
         Fl_Group vectorgrp {
           label Vectors open
-          xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
+          xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 deactivate
         } {
           Fl_Light_Button veconbut {
             label Vectors
@@ -1215,6 +1224,10 @@ mwtb->redraw();}
           Fl_Value_Input vecstride {
             label stride
             callback {mwtb->vecdata->stride(o->value());
+int stride = int(o->value());
+vecstart->maximum(stride-1);
+if( vecstart->value() >= stride )
+  vecstart->value(int(vecstart->value())%stride);
 mwtb->redraw();}
             xywh {25 441 35 24} labelcolor 7 align 2 when 8 minimum 1 maximum 100000 step 1 value 1
           }
@@ -1971,8 +1984,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2206,8 +2218,7 @@ if( !cc ) {
 cc->window->show();
 return cc;} {}
   }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
+  Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2555,7 +2566,8 @@ if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str()
   mwtb->redraw();
 }} {}
   }
-  Function {update_vecdata(VecData *vd)} {} {
+  Function {update_vecdata(VecData *vd)} {open
+  } {
     code {if( vd->length_det()==Vector ) {
   veclenmag->setonly();
   veclenmag->do_callback(veclengthdeterm);
@@ -2589,7 +2601,12 @@ if( vd->size()/int(vecstride->value())>MAX_INIT_VECS ) {
   int stride = vd->size()/(MAX_INIT_VECS)+1;
   vecstride->value(stride);
   vd->stride(stride);
-}} {}
+  vecstart->maximum(stride-1);
+  int start = vecstart->value();
+  if( start >= stride ) 
+    vecstart->value( start%stride );
+}} {selected
+    }
   }
 } 
 

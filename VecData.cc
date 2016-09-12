@@ -258,7 +258,7 @@ VecData::read_vec_nonHDF5( const char *vptfile )
 	else if ( npl==3 )
 	  scanstr="%f %f %f";
 	else
-	  return;
+	  throw -1;
 	gzrewind( in );
 
 	int nread;

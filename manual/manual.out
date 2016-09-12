@@ -1,0 +1,66 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Purpose}{section.1}% 2
+\BOOKMARK [2][-]{subsection.1.2}{System requirements}{section.1}% 3
+\BOOKMARK [1][-]{section.2}{Input Files}{}% 4
+\BOOKMARK [2][-]{subsection.2.1}{Vertices}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.2}{Cables}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.3}{Connections}{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.4}{Surface Elements}{section.2}% 8
+\BOOKMARK [3][-]{subsubsection.2.4.1}{Triangles}{subsection.2.4}% 9
+\BOOKMARK [2][-]{subsection.2.5}{Volume Elements}{section.2}% 10
+\BOOKMARK [3][-]{subsubsection.2.5.1}{Mixed element files}{subsection.2.5}% 11
+\BOOKMARK [3][-]{subsubsection.2.5.2}{Tetrahedra}{subsection.2.5}% 12
+\BOOKMARK [2][-]{subsection.2.6}{Regions}{section.2}% 13
+\BOOKMARK [2][-]{subsection.2.7}{Vertex Scalar Data}{section.2}% 14
+\BOOKMARK [3][-]{subsubsection.2.7.1}{Time Independent}{subsection.2.7}% 15
+\BOOKMARK [3][-]{subsubsection.2.7.2}{Time Dependent}{subsection.2.7}% 16
+\BOOKMARK [3][-]{subsubsection.2.7.3}{IGB format}{subsection.2.7}% 17
+\BOOKMARK [2][-]{subsection.2.8}{Vector Data}{section.2}% 18
+\BOOKMARK [2][-]{subsection.2.9}{Auxiliary Grid}{section.2}% 19
+\BOOKMARK [2][-]{subsection.2.10}{Dynamic Points}{section.2}% 20
+\BOOKMARK [2][-]{subsection.2.11}{HDF5 Format}{section.2}% 21
+\BOOKMARK [2][-]{subsection.2.12}{CG meta format}{section.2}% 22
+\BOOKMARK [3][-]{subsubsection.2.12.1}{CG metafile}{subsection.2.12}% 23
+\BOOKMARK [3][-]{subsubsection.2.12.2}{Data files}{subsection.2.12}% 24
+\BOOKMARK [2][-]{subsection.2.13}{Temporal Data Agreement}{section.2}% 25
+\BOOKMARK [1][-]{section.3}{Invocation}{}% 26
+\BOOKMARK [2][-]{subsection.3.1}{Options}{section.3}% 27
+\BOOKMARK [2][-]{subsection.3.2}{Environment variables}{section.3}% 28
+\BOOKMARK [1][-]{section.4}{Graphical User Interface}{}% 29
+\BOOKMARK [2][-]{subsection.4.1}{Volume Mesh}{section.4}% 30
+\BOOKMARK [2][-]{subsection.4.2}{Regions}{section.4}% 31
+\BOOKMARK [2][-]{subsection.4.3}{Tab Widget}{section.4}% 32
+\BOOKMARK [3][-]{subsubsection.4.3.1}{Highlighting}{subsection.4.3}% 33
+\BOOKMARK [3][-]{subsubsection.4.3.2}{Time Plot}{subsection.4.3}% 34
+\BOOKMARK [3][-]{subsubsection.4.3.3}{Information Window}{subsection.4.3}% 35
+\BOOKMARK [3][-]{subsubsection.4.3.4}{Lighting}{subsection.4.3}% 36
+\BOOKMARK [3][-]{subsubsection.4.3.5}{Scalar Data}{subsection.4.3}% 37
+\BOOKMARK [3][-]{subsubsection.4.3.6}{Vector Data}{subsection.4.3}% 38
+\BOOKMARK [3][-]{subsubsection.4.3.7}{Auxiliary Grid}{subsection.4.3}% 39
+\BOOKMARK [3][-]{subsubsection.4.3.8}{HDF5 data}{subsection.4.3}% 40
+\BOOKMARK [3][-]{subsubsection.4.3.9}{Surfaces}{subsection.4.3}% 41
+\BOOKMARK [2][-]{subsection.4.4}{Image Menu}{section.4}% 42
+\BOOKMARK [3][-]{subsubsection.4.4.1}{Reset Transform}{subsection.4.4}% 43
+\BOOKMARK [3][-]{subsubsection.4.4.2}{View}{subsection.4.4}% 44
+\BOOKMARK [3][-]{subsubsection.4.4.3}{Randomly colour}{subsection.4.4}% 45
+\BOOKMARK [3][-]{subsubsection.4.4.4}{Background colour}{subsection.4.4}% 46
+\BOOKMARK [3][-]{subsubsection.4.4.5}{Reverse draw order}{subsection.4.4}% 47
+\BOOKMARK [2][-]{subsection.4.5}{Data Menu}{section.4}% 48
+\BOOKMARK [3][-]{subsubsection.4.5.1}{Data Opacity}{subsection.4.5}% 49
+\BOOKMARK [3][-]{subsubsection.4.5.2}{Clipping Planes}{subsection.4.5}% 50
+\BOOKMARK [3][-]{subsubsection.4.5.3}{IsoSurfaces/IsoLines}{subsection.4.5}% 51
+\BOOKMARK [3][-]{subsubsection.4.5.4}{Dead range}{subsection.4.5}% 52
+\BOOKMARK [3][-]{subsubsection.4.5.5}{Branch cut}{subsection.4.5}% 53
+\BOOKMARK [2][-]{subsection.4.6}{Output Menu}{section.4}% 54
+\BOOKMARK [3][-]{subsubsection.4.6.1}{Single Images}{subsection.4.6}% 55
+\BOOKMARK [3][-]{subsubsection.4.6.2}{Colour Bar}{subsection.4.6}% 56
+\BOOKMARK [3][-]{subsubsection.4.6.3}{Animation Sequences}{subsection.4.6}% 57
+\BOOKMARK [3][-]{subsubsection.4.6.4}{Recording Event Sequences}{subsection.4.6}% 58
+\BOOKMARK [3][-]{subsubsection.4.6.5}{Visible nodes}{subsection.4.6}% 59
+\BOOKMARK [2][-]{subsection.4.7}{Saving The Current View}{section.4}% 60
+\BOOKMARK [2][-]{subsection.4.8}{Saving/Restoring the State}{section.4}% 61
+\BOOKMARK [1][-]{section.5}{Grid window}{}% 62
+\BOOKMARK [1][-]{section.6}{Linking}{}% 63
+\BOOKMARK [1][-]{section.7}{Offscreen Rendering}{}% 64
+\BOOKMARK [2][-]{subsection.7.1}{OSMesa}{section.7}% 65
+\BOOKMARK [2][-]{subsection.7.2}{GLUT rendering}{section.7}% 66
