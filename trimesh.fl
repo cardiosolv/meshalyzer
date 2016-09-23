@@ -81,11 +81,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-<<<<<<< Updated upstream
-      xywh {927 405 350 645} type Double box UP_BOX
-=======
-      xywh {1627 469 350 645} type Double box UP_BOX
->>>>>>> Stashed changes
+      xywh {466 347 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -128,7 +124,7 @@ write_surfaces(ns-nsa);}
             xywh {0 0 30 20} divider
           }
           MenuItem {} {
-            label {Read data}
+            label {Read ASCII data}
             callback {char *fn=fl_file_chooser("Data file","*{out,dat}*",NULL);
 if(fn != NULL) mwtb->get_data(fn,tmslider);
 mincolval->value(mwtb->cs->min());
@@ -189,7 +185,12 @@ HDF5DataBrowser *brow =  new HDF5DataBrowser( fl_file_chooser("Choose HDF5 data 
           }
           MenuItem read_recalibrate {
             label {Recalibrate on read}
-            xywh {0 0 100 20} type Toggle value 1 divider
+            tooltip {Recalibrate colour scale when reading a new data file} xywh {0 0 100 20} type Toggle value 1
+          }
+          MenuItem read_threaded {
+            label {Force threaded read}
+            callback {mwtb->forceThreadData(o->value());}
+            tooltip {do not attempt to read whole data file into memroy} xywh {0 0 100 20} type Toggle divider
           }
           MenuItem {} {
             label {Save transform}
@@ -473,32 +474,32 @@ mwtb->redraw();}
           }
         }
         Submenu {} {
-          label Data open
+          label Data
           xywh {0 0 100 20}
         } {
           MenuItem {} {
             label Opacity
             callback {mwtb->dataopac->window->show();}
-            xywh {0 0 100 20}
+            tooltip {Set opacity based on data values} xywh {0 0 100 20}
           }
           MenuItem {} {
             label Clipping
             callback {mwtb->cplane->window->show();}
-            xywh {10 10 100 20}
+            tooltip {manage clipping planes} xywh {10 10 100 20}
           }
           MenuItem {} {
             label Isosurf
             callback {mwtb->isosurfwin->isowin->show();}
-            xywh {0 0 31 20}
+            tooltip {isoline and isosurface display} xywh {0 0 31 20}
           }
           MenuItem {} {
             label {Dead range}
             callback {mwtb->deadData->window->show();}
-            xywh {0 0 34 20}
+            tooltip {Ignore ranges of data} xywh {0 0 34 20}
           }
           Submenu brcut {
             label {Branch cut}
-            tooltip {Do not interpolqte betzeen limits} xywh {0 0 70 20}
+            tooltip {Do not interpolate over a branch cut} xywh {0 0 70 20}
           } {
             MenuItem brcutNone {
               label None
@@ -528,7 +529,7 @@ mwtb->redraw();}
           }
         }
         Submenu outmenu {
-          label Output
+          label Output open
           xywh {0 0 100 20}
         } {
           Submenu {} {
@@ -575,16 +576,16 @@ mwtb->output_pdf( fn, false );}
             callback {char *fn = fl_file_chooser("colour bar image", "*.png", "colour_bar.png" );
 if( fn!=NULL)
 mwtb->cs->output_png(fn);}
-            xywh {0 0 34 20}
+            tooltip {output the colour bar as an image file} xywh {0 0 34 20}
           }
           MenuItem {} {
             label {Visible vertices}
             callback {mwtb->dump_vertices();}
-            xywh {0 0 100 20}
+            tooltip {output the indices of the visible vertices} xywh {0 0 100 20}
           }
           Submenu recordmenu {
-            label Record
-            xywh {0 0 100 20}
+            label Record selected
+            tooltip {take an image snapshot each time something changes} xywh {0 0 100 20}
           } {
             MenuItem {} {
               label start
@@ -709,7 +710,7 @@ cc=pickcolor(VolEle, "Voxele colour",cc);}
         xywh {80 85 100 25} labelsize 13
       }
       Fl_Group dispAs {
-        label {Display as:} open
+        label {Display as:}
         xywh {190 50 150 60} box ENGRAVED_BOX
       } {
         Fl_Check_Button dispAsSurf {
@@ -809,13 +810,8 @@ objprops[Cable]->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-<<<<<<< Updated upstream
           label Highlight open
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
-=======
-          label Highlight
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
->>>>>>> Stashed changes
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -858,7 +854,7 @@ objprops[Cable]->win->show();}
             xywh {100 315 85 25}
           }
           Fl_Choice attachtype {
-            label attached
+            label attached open
             tooltip {draw which objects associated with vertex} xywh {190 435 140 25} down_box BORDER_BOX align 2 when 1
           } {
             MenuItem {} {
@@ -901,7 +897,7 @@ objprops[Cable]->win->show();}
             label {:value}
             tooltip {vertex value} xywh {190 405 85 25} color 174 align 8
           }
-          Fl_Choice hitettype {open
+          Fl_Choice hitettype {
             tooltip {display style} xywh {15 345 85 25} down_box BORDER_BOX textsize 10
           } {
             MenuItem {} {
@@ -1016,7 +1012,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface
+          label Surface open
           xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
@@ -1145,7 +1141,7 @@ write_surfaces(0);}
         }
         Fl_Group vectorgrp {
           label Vectors open
-          xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 deactivate
+          xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
             label Vectors
@@ -1224,10 +1220,6 @@ mwtb->redraw();}
           Fl_Value_Input vecstride {
             label stride
             callback {mwtb->vecdata->stride(o->value());
-int stride = int(o->value());
-vecstart->maximum(stride-1);
-if( vecstart->value() >= stride )
-  vecstart->value(int(vecstart->value())%stride);
 mwtb->redraw();}
             xywh {25 441 35 24} labelcolor 7 align 2 when 8 minimum 1 maximum 100000 step 1 value 1
           }
@@ -1984,7 +1976,8 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {} {
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2191,8 +2184,7 @@ SAVE_WIDGET( mshzf, mwtb->deadData->deadopac );
 SAVE_WIDGET( mshzf, mwtb->deadData->showDeadData );
 mshzf << "DEAD_COLOUR = ";
 save_colour( mshzf, mwtb->cs->deadColour() );
-mshzf << endl;} {selected
-    }
+mshzf << endl;} {}
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
@@ -2218,7 +2210,8 @@ if( !cc ) {
 cc->window->show();
 return cc;} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2566,8 +2559,7 @@ if( fn=fl_file_chooser( "Save surface file as:", "*.{tri,surf}*", surffn.c_str()
   mwtb->redraw();
 }} {}
   }
-  Function {update_vecdata(VecData *vd)} {open
-  } {
+  Function {update_vecdata(VecData *vd)} {} {
     code {if( vd->length_det()==Vector ) {
   veclenmag->setonly();
   veclenmag->do_callback(veclengthdeterm);
@@ -2601,12 +2593,7 @@ if( vd->size()/int(vecstride->value())>MAX_INIT_VECS ) {
   int stride = vd->size()/(MAX_INIT_VECS)+1;
   vecstride->value(stride);
   vd->stride(stride);
-  vecstart->maximum(stride-1);
-  int start = vecstart->value();
-  if( start >= stride ) 
-    vecstart->value( start%stride );
-}} {selected
-    }
+}} {}
   }
 } 
 

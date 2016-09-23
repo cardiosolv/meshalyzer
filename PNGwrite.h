@@ -37,7 +37,7 @@ class PNGwrite
     inline void colour_type( int c ){ ctype=c; }
     inline void interlace( int i ){ interlace_type=i; }
     inline void palette( png_colorp p ){ cpalette=p; }
-    void  description( string d, string c, string tm );
+    void  description( const char* d, const char* c, const char* tm );
   private:
     png_structp png_ptr;
     png_infop   info_ptr;

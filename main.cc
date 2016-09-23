@@ -506,6 +506,10 @@ main( int argc, char *argv[] )
   if( !PNGfile )
     win.winny->show();
   win.trackballwin->forceThreadData( threadedReader );
+  if( threadedReader )
+    control.read_threaded->set( );
+  else
+    control.read_threaded->clear( );
 
   // deal with command line files specified
   for ( int i=model_index+1; i<argc; i++ ) {
