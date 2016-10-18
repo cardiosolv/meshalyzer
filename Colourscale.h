@@ -42,12 +42,12 @@ class Colourscale
                           { min=_deadMin;max=_deadMax;dr=_deadRange;}
   private:
     GLfloat** cmap;							// the map
-    int       n;							// size of map
+    int       n = 0;				  	    // size of map
     double    a, b;							// map data to colour map
     CScale_t  scaletype;
-    double    mindat, maxdat;
-    DeadRange _deadRange;                    // what to ignore
-    double    _deadMin, _deadMax;             // ignore below and above these values
+    double    mindat=0., maxdat=1.;
+    DeadRange _deadRange=NO_DEAD;             // what to ignore
+    double    _deadMin=0, _deadMax=1.;        // ignore below and above these values
     GLfloat   _deadColour[4]={0.,0.,0.,1.};   // how to colour dead data
 };
 

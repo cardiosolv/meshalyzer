@@ -16,7 +16,7 @@ class  Frame {
       int write( int, int,  string, int, int,int stride=1 );
       void dump( int, int,  string );
     private:
-     GLubyte* _buffer;
+     GLubyte* _buffer = NULL;
      int _w;
      int _h;
      TBmeshWin *_tbwm;

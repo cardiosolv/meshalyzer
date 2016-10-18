@@ -21,13 +21,13 @@
 
 #ifdef OSMESA
 #include <sys/mman.h>
-pid_t  master;
 #else
 #include <FL/glut.H>
 #endif
 
 static Controls *ctrl_ptr;
 static Meshwin  *win_ptr;
+pid_t master;
 
 
 sem_t *meshProcSem;               // global semaphore for temporal linking
@@ -44,13 +44,14 @@ sem_t *linkingProcSem;            // global semaphore for process linking
  */
 void do_cleanup( int sig, siginfo_t *si, void *v )
 {
-#ifndef OSMESA
+#ifdef OSMESA
+    cerr << "Cleaning up semaphores and shm" << endl;
     stringstream nw_name("/nw_");
     nw_name << getpid();
-    stringstream fini_name("/fini_");
-    fini_name << getpid();
-    sem_unlink( fini_name.str().c_str() );
+    stringstream cnt_name("/cnt_");
+    cnt_name << getpid();
     sem_unlink( nw_name.str().c_str() );
+    shm_unlink( cnt_name.str().c_str() );
 #endif
   exit(0);
 }
@@ -161,10 +162,11 @@ read_version_info( Fl_Text_Display *txt )
 /** output a sequence of PNG images offscreen
  *
  * \param filename file or directory (numf>1) name
- * \param f0       first frame number, -1->do not use it
+ * \param f0       first frame number
  * \param numf     number of frames
  * \param tbwm     rendering window
  * \param size     image width/height
+ * \param nproc    number of processes concurrently writing
 */
 void
 os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int nproc )
@@ -178,17 +180,12 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
   glutCreateWindow("Take it eaze");
 #endif
 
-  // determine first and last frame numbers
-  if( f0<0 )
-    f0 = tbwm->time();
-  if( numf==-1 )
-    numf = tbwm->max_time()-f0+1;
   int f1 = f0+numf-1;
 
   // strip ".png" from file name if present
   if( filename.length()>4 && (filename.substr(filename.length()-4)==".png") )
     filename.erase(filename.length()-4);
-  
+ 
   // output sequence into a directory which we may need to create
   if( numf>1 ) {
     tbwm->transBgd(false);
@@ -207,39 +204,23 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
   } else {
 #ifdef OSMESA
     // create 2 semaphores and shared memory needed for interprocess communication
-    stringstream nw_name("/nw");
-    master = getpid();
+    stringstream nw_name("/nw_");
     nw_name << master;
     sem_t *nw_cnt   = sem_open( nw_name.str().c_str(), O_CREAT, S_IRWXU, 1 );
-    stringstream fini_name("/fini");
-    fini_name << master;
-    sem_t *finished = sem_open( fini_name.str().c_str(), O_CREAT, S_IRWXU, 0 );
-    stringstream cnt_name("/cnt");
+    stringstream cnt_name("/cnt_");
     cnt_name << master;
     int shm = shm_open(cnt_name.str().c_str(), O_CREAT|O_RDWR, 0666);
-    ftruncate(shm, sizeof(int));
-    int *nwr = (int*)mmap(NULL, sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED, shm, 0 ); 
-
-    // fork since it is too difficult to copy tbwm with all of its dynamic allocations
-    for( int i=1; i<nproc;i++ ) {
-      if( !fork() ) { 
-        f0 += i;
-        break;
-      }
-    }
+    ftruncate(shm, 2*sizeof(int));
+    int *nwr = (int*)mmap(NULL, 2*sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED, shm, 0 ); 
     
     int nw = frame.write( size, size, filename, f0, f1, nproc );
 
+    // count the number of frames written on the way out
     sem_wait( nw_cnt );
-    *nwr = *nwr + nw;
-    // wait for everyone to finish and count the number of frames written
-    sem_post( finished );
-    int nfin;
-    sem_getvalue( finished, &nfin );
-    if( nfin==nproc ) {
-      cerr << "Wrote " << *nwr << " frames\n" << endl;
+    nwr[0] += nw;
+    if( ++nwr[1]==nproc ) {
+      cerr << "Wrote " << nwr[0] << " frames\n" << endl;
       sem_unlink(nw_name.str().c_str() );
-      sem_unlink(fini_name.str().c_str() );
       shm_unlink(cnt_name.str().c_str() );
     }
     sem_post( nw_cnt );
@@ -401,7 +382,6 @@ static struct option longopts[] = {
 int
 main( int argc, char *argv[] )
 {
-  Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);
 #ifdef USE_HDF5
   H5Eset_auto1(NULL, NULL);// silence HDF errors
 #endif
@@ -460,7 +440,17 @@ main( int argc, char *argv[] )
 			break;
 	}
   
+  // fork since it is too difficult to copy tbwm with all of its dynamic allocations
+  int proc=0;
+  master = getpid();
+  for( int i=1; i<nproc;i++ ) {
+    if( !fork() ) { 
+      proc = i;
+      break;
+    }
+  }
 
+  Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);
   Controls control;
   ctrl_ptr = &control;
   Meshwin win;
@@ -597,8 +587,11 @@ main( int argc, char *argv[] )
 	 << endl;
 
   // just output images, no interaction
-  if( PNGfile ) 
-    os_png_seq( PNGfile, frame0, numframe, win.trackballwin, pngsize, nproc );
+  if( PNGfile )  {
+    if( frame0<0 )   frame0   = win.trackballwin->time();
+    if( numframe<0 ) numframe = win.trackballwin->max_time()-frame0+1;
+    os_png_seq( PNGfile, frame0+proc, numframe-proc, win.trackballwin, pngsize, nproc );
+  }
 
   if( surfFile ) {
     if( *surfFile=='\0' ) 

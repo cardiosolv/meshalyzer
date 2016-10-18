@@ -6,12 +6,12 @@
 #endif 
 #define COUT_ERROR(A) if(gle==A)cout<<#A<<endl;
 
-Frame :: Frame( TBmeshWin *t ) : _tbwm(t), _buffer(NULL)
+Frame :: Frame( TBmeshWin *t ) : _tbwm(t)
 {
 }
 
 
-Frame :: Frame( TBmeshWin *t, int w, int h, string fname ) : _tbwm(t), _buffer(NULL)
+Frame :: Frame( TBmeshWin *t, int w, int h, string fname ) : _tbwm(t)
 {
   dump( w, h, fname );
 }
