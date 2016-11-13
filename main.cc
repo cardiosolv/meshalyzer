@@ -544,8 +544,15 @@ main( int argc, char *argv[] )
   control.mincolval->value(win.trackballwin->cs->min());
   control.maxcolval->value(win.trackballwin->cs->max());
   control.set_tet_region( win.trackballwin->model );
+
   if( !PNGfile )
+#ifdef OSMESA
+    stderr << "PNGfile must be specified with mesalyzer!" << endl;
+    exit(1);
+#else
     control.window->show();
+#endif
+
   if ( win.trackballwin->auxGrid ) control.auxgridgrp->activate();
   if ( iconcontrols )
     control.window->iconize();

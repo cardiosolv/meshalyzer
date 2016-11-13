@@ -1093,7 +1093,7 @@ The executable still expects an available Xserver but does not actually use it. 
 (or having display troubles), you can try running a virtual X server with the command \texttt{Xvfb}.
 Below is an example with a bash shell.
 \begin{verbatim}
-Xfvb :1 &
+Xvfb :1 &
 export DISPLAY=:1
 mesalyzer ....
 \end{verbatim}
