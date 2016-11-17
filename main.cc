@@ -493,8 +493,14 @@ main( int argc, char *argv[] )
   if( !stat( defstate.c_str(), &buf) )
     control.restore_state( defstate.c_str() );
 
-  if( !PNGfile )
+  if( !PNGfile ) {
+#ifdef OSMESA
+    cerr << "PNGfile must be specified with mesalyzer!" << endl;
+    exit(1);
+#else
     win.winny->show();
+#endif
+  }
   win.trackballwin->forceThreadData( threadedReader );
   if( threadedReader )
     control.read_threaded->set( );
@@ -546,12 +552,7 @@ main( int argc, char *argv[] )
   control.set_tet_region( win.trackballwin->model );
 
   if( !PNGfile )
-#ifdef OSMESA
-    stderr << "PNGfile must be specified with mesalyzer!" << endl;
-    exit(1);
-#else
     control.window->show();
-#endif
 
   if ( win.trackballwin->auxGrid ) control.auxgridgrp->activate();
   if ( iconcontrols )
