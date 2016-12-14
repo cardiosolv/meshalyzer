@@ -637,10 +637,10 @@ int Model::add_region_surfaces()
   int numNewSurf=0;
 
   for( int r=0; r<_numReg; r++ )  {
-    
+
     set<Face*, bool (*)(const Face*, const Face*)> facetree(cmpface);
     Face *newface = new Face;
-    
+
     for( int e=0; e<_numVol; e++ )
       if( _region[r]->ele_member(e) ) {
         int ns = _vol[e]->surfaces( faces );
