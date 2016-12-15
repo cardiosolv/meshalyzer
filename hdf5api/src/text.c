@@ -26,6 +26,7 @@ int ch5_text_flush( hid_t hdf_file, int index )
     H5Dclose(text_id);
   }
   H5Gclose(container_id);
+  return 0;
 }
 
 
