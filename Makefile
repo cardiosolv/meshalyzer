@@ -31,7 +31,7 @@ else
   GLUT_LIB = -lglut
 endif
 
-COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5)
+COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5) -lGL -lGLU
 CXXFLAGS     = -std=c++11 $(OMP_FLAG) -I$(HDF5_ROOT)/include -I$(HDF5API_ROOT)/include $(FLTK_INC) $(COMMON_INC)
 HDF5_CXXFLAGS=£(CXXFLAGS)
 LIBS         = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS) 
