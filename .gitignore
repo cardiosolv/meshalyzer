@@ -1,3 +1,5 @@
+meshalyzer
+*.o
 AuxGrid.d
 ClipPlane.cc
 ClipPlane.d
