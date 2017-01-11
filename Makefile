@@ -58,6 +58,7 @@ mesalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OS_OBJS) $(LIB_CH5)
 ifdef HDF5
 $(LIB_CH5): 
 	cd hdf5api && make all 
+	cd hdf5api && make install PREFIX=. 
 endif
 
 $(OS_files:.o=_os.o): %_os.o: %.cc

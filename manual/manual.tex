@@ -13,7 +13,7 @@
 \usepackage{overcite}                                 % superscript notation of references
 
 \usepackage[pdftex]{graphicx}                  % Grafikpaket für Bilder laden
-\usepackage{hyperref}                  % Für Referenzerstellung
+\usepackage[colorlinks=true]{hyperref}                  % Für Referenzerstellung
 \usepackage{xspace}
 
 \newcommand{\rb}[2]{\raisebox{#1ex}{#2}}
@@ -1084,12 +1084,20 @@ question of environment and speed.
 OSMesa (http://www.mesa3d.org/osmesa.html) is an offscreen rendering library which performs all of its operations in
 software. This has the advantage that it can be used even if a window server is not running. This library must be
 available on the system. However, since it does not take advantage of the graphics hardware, rendering is considerably
-slower. This executable must be explicitly compiled by
+slower but can be compensated for by specifying many processes (\texttt{--nprocs}).
+This executable must be explicitly compiled by
 \begin{verbatim}
 make mesalyzer
 \end{verbatim}
-with the resultant executable called \texttt{mesalyzer}. It cannot be used to display a window on the screen.
-The executable still expects an available Xserver but does not actually use it. If you are running on a headless system
+with the resultant executable called \texttt{mesalyzer}. It cannot be used to display a window on the screen. 
+The executable still expects an available Xserver but does not actually use it. 
+Thus, you need to forward X connections if 
+remotely connecting using \texttt{ssh}.
+If running remotely, you probably also need to set the following environment variable:
+\begin{verbatim}
+export LIBGL_ LIBGL_ALWAYS_INDIRECT=y
+\end{verbatim}
+If you are running on a headless system
 (or having display troubles), you can try running a virtual X server with the command \texttt{Xvfb}.
 Below is an example with a bash shell.
 \begin{verbatim}

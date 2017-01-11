@@ -560,11 +560,13 @@ main( int argc, char *argv[] )
   win.winny->position(1,1);
 
   // set up named semaphore for meshProcSem
-  string semstr = "/mshz";
+  string semstr = "/mshz_";
+  semstr += to_string(getuid());
+  semstr += "_";
   semstr += grpID;
   meshProcSem = sem_open( semstr.c_str(), O_CREAT, S_IRWXU, 0 );
   if( meshProcSem==SEM_FAILED )
-    cerr << "Temporal linking not possible" << endl;
+    perror("Temporal linking not possible");
 
   // set up signal handling
   struct sigaction sigact;
@@ -587,12 +589,13 @@ main( int argc, char *argv[] )
   sigaction( SIGALRM, &sigLinkAct, NULL );
 
   // set up named semphore for linkingProcSem
-  string linkageStr = "/linkage";
+  string linkageStr = "/linkage_";
+  linkageStr += to_string(getuid());
+  linkageStr += "_";
   linkageStr += grpID;
   linkingProcSem = sem_open( linkageStr.c_str(), O_CREAT, S_IRWXU, 0 );
   if (linkingProcSem == SEM_FAILED)
-    cerr << "Message Queue inter-process communication not possible"
-	 << endl;
+    perror("Message Queue inter-process communication not possible");
 
   // just output images, no interaction
   if( PNGfile )  {
