@@ -1247,7 +1247,7 @@ const int* Hexahedron::iso_polys(unsigned int index)
  * \param pointer to a vector of vectors
  */
 int
-Hexahedron::surfaces( int **ft, int v )
+Hexahedron::surfaces( int ft[][MAX_NUM_SURF_NODES+1], int v )
 {
   return make_surf_nodelist( v, ft, hex_num_surf, 
           int(hex_surface_table[1]-hex_surface_table[0]), 

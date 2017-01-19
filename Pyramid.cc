@@ -253,7 +253,7 @@ const int* Pyramid::iso_polys(unsigned int index)
  * \pre the size of ft is big enough
  */
 int 
-Pyramid::surfaces( int **ft, int v )
+Pyramid::surfaces( int ft[][MAX_NUM_SURF_NODES+1], int v )
 {
   return make_surf_nodelist( v, ft, pyr_num_surf, 
         int(pyr_surface_table[1]-pyr_surface_table[0]), (const int **)pyr_surface_table );

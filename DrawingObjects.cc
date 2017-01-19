@@ -461,7 +461,7 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
  * \return the number of faces
  */
 int 
-VolElement:: make_surf_nodelist( int ve, int **ft, const int ns, int nn, 
+VolElement:: make_surf_nodelist( int ve, int ft[][MAX_NUM_SURF_NODES+1], const int ns, int nn, 
                                                         const int **nl )
 {
   for( int s=0; s<ns; s++ ) {

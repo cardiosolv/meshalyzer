@@ -73,28 +73,24 @@ class Model
     bool  twoD(){return _2D; }
 
     PPoint             pt;
-    Connection*      _cnnx;
-    ContCable*       _cable;
-    VolElement**     _vol;
-    int              _numVol;
+    Connection*      _cnnx=NULL;
+    ContCable*       _cable=NULL;
+    VolElement**     _vol=NULL;
+    int              _numVol=0;
     int               numSurf(void){return _surface.size();}
-    int              _numReg;
+    int              _numReg=0;
     int               localElemnum(int, int&);
     int               globalElemnum(int, int);
     MultiPoint*      _elems;
   private:
-    RRegion**        _region;
-    vector<Surfaces*> _surface;
-    float           _maxdim;		      // maximum physical dimension
-    int             _outstride[maxobject];// stride to use when outputting
-    bool            _base1;  		    //whether node numbering starts at 1
     void             read_region_file( gzFile, const char * );
     void             read_normals( gzFile, const char * );
-    void             increase_ele( int );
-    GLfloat*        _vertnrml;			 //!< vertex normals
+    int             _outstride[maxobject];// stride to use when outputting
     void             find_max_dim_and_bounds();
     void             determine_regions();
     bool             read_elem_file(const char *);
+    void             increase_ele( int );
+    bool             check_element( SurfaceElement *e );
 #ifdef USE_HDF5
     bool             read_elements(hid_t);
     bool             add_elements(hid_t hdf_file);
@@ -102,14 +98,17 @@ class Model
     void             add_surfaces(hid_t hdf_file);
     void             add_surfaces(int *elements, int count, int max_width, char *name);
 #endif
-    bool             check_element( SurfaceElement *e );
     
-    
+    RRegion**        _region=NULL;
+    vector<Surfaces*> _surface;
+    float           _maxdim;		     // maximum physical dimension
+    bool            _base1=false;  	     //whether node numbering starts at 1
+    GLfloat*        _vertnrml=NULL;		 //!< vertex normals
     vector<bool>     allvis;
     int             _numtm;
     int              new_region_label();
     string          _file;               //!< base file name
-    bool            _2D;
+    bool            _2D=false;
 };
 
 #endif

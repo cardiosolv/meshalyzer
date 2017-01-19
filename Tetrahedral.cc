@@ -207,7 +207,7 @@ Tetrahedral::iso_polys(unsigned int index)
  * \param pointer to a vector of vectors
  */
 int 
-Tetrahedral::surfaces( int **nl, int v )
+Tetrahedral::surfaces( int nl[][MAX_NUM_SURF_NODES+1], int v )
 {
   return make_surf_nodelist( v, nl, tet_num_surf, 
              int(tetra_surface_table[1]-tetra_surface_table[0]), 

@@ -304,7 +304,7 @@ Prism::iso_polys(unsigned int index)
  * \param pointer to a vector of vectors
  */
 int
-Prism::surfaces( int **ft, int v )
+Prism::surfaces( int ft[][MAX_NUM_SURF_NODES+1], int v )
 {
   return make_surf_nodelist( v, ft, prism_num_surf,
           int(prism_surface_table[1]-prism_surface_table[0]), 

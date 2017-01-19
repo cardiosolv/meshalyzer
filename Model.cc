@@ -13,6 +13,9 @@
 #include <algorithm>
 #include <queue>
 
+#ifdef _OPENMP
+#include<omp.h>
+#endif
 
 struct Face {
   int nsort[MAX_NUM_SURF_NODES];  //!< sorted nodes
@@ -23,14 +26,16 @@ struct Face {
 int intcmp( const void *a, const void *b ){ return *(int *)a-*(int *)b; }
 
 /** compare 2 faces for sorting */
-bool cmpface( const Face *A, const Face *B)
+bool cmpface( const Face &A, const Face &B)
 {
-  if( A->nnode != B->nnode ) return  A->nnode < B->nnode;
-  for(  int i=0; i< A->nnode; i++ )
-    if( A->nsort[i] != B->nsort[i] ) return  A->nsort[i] < B->nsort[i];
+  if( A.nnode != B.nnode ) return  A.nnode < B.nnode;
+  for(  int i=0; i< A.nnode; i++ )
+    if( A.nsort[i] != B.nsort[i] ) return  A.nsort[i] < B.nsort[i];
   return false;
 };
 
+
+typedef set<Face, bool (*)(const Face&, const Face&)> faceset;
 
 /** make a face from a node list
  *
@@ -39,12 +44,12 @@ bool cmpface( const Face *A, const Face *B)
  * \param orig nodes in original order
  */
 void
-make_face( Face *f, int n, int* orig )
+make_face( Face &f, int n, int* orig )
 {
-  f->nnode = n;
-  memcpy( f->norig, orig, n*sizeof(int) );
-  memcpy( f->nsort, orig, n*sizeof(int) );
-  qsort( f->nsort, n, sizeof(int), intcmp ); 
+  f.nnode = n;
+  memcpy( f.norig, orig, n*sizeof(int) );
+  memcpy( f.nsort, orig, n*sizeof(int) );
+  qsort( f.nsort, n, sizeof(int), intcmp ); 
 }
 
 
@@ -111,9 +116,7 @@ int Model::new_region_label()
 }
 
 
-Model::Model():
-    _base1(false), _vertnrml(NULL),_cable(0),
-    _numReg(0), _region(NULL), _numVol(0), _vol(NULL), _cnnx(NULL), _2D(false)
+Model::Model()
 {
   for ( int i=0; i<maxobject; i++ ) {
     _outstride[i] = 1;
@@ -357,7 +360,7 @@ void Model::add_surfaces(int *elements, int count, int max_width, char *name) {
     }
   }
 }
-#endif
+#endif // USE_HDF5
 
 void Model::find_max_dim_and_bounds()
 {
@@ -525,7 +528,7 @@ int Model::add_cnnx_from_elem( string fname )
 /** add surface by selecting 2D elements from .elem file
  *
  *  A surface will be created for each different region specified.
- *  Also, all elements withoyut a region specified will form a surface.
+ *  Also, all elements without a region specified will form a surface.
  *
  *  \param base model name
  */
@@ -631,69 +634,87 @@ int Model::add_surface_from_elem( const char *fn )
  */
 int Model::add_region_surfaces()
 {
-  // set up matrix to hold element faces
-  int **faces = new int *[MAX_NUM_SURF];
-  for( int i=0; i<MAX_NUM_SURF; i++ ) faces[i] = new int[MAX_NUM_SURF_NODES+1];
   int numNewSurf=0;
 
   for( int r=0; r<_numReg; r++ )  {
 
-    set<Face*, bool (*)(const Face*, const Face*)> facetree(cmpface);
-    Face *newface = new Face;
+#ifdef _OPENMP
+    int numthrd = omp_get_max_threads();
+#else
+    int numthrd = 1;
+#endif
+    vector< faceset > facetree(numthrd, faceset(cmpface));
 
-    for( int e=0; e<_numVol; e++ )
+#pragma omp parallel for 
+    for( int e=0; e<_numVol; e++ ) {
+#ifdef _OPENMP
+      int thrd    = omp_get_thread_num();
+#else
+      int thrd    = 0;
+#endif
       if( _region[r]->ele_member(e) ) {
+        int faces[MAX_NUM_SURF][MAX_NUM_SURF_NODES+1];
         int ns = _vol[e]->surfaces( faces );
         for( int i=0; i<ns; i++ ) {
+          Face newface;
           make_face( newface, faces[i][0], faces[i]+1 );
-          set<Face*>::iterator iter = facetree.find(newface);
-          if (iter != facetree.end()) {
-            delete *iter;
-            facetree.erase(iter);
+          faceset::iterator iter = facetree[thrd].find(newface);
+          if (iter != facetree[thrd].end()) {
+            facetree[thrd].erase(iter);
           } else {
-            facetree.insert(newface);
-            newface = new Face;  // added to list, get memory for a new face
+            facetree[thrd].insert(newface);
           }
         }
       }
+    }
 
     // count the number of faces left in the list
-    delete newface;
+    for( int s=1; s<numthrd; s++ ) {
+      for(faceset::iterator sn=facetree[s].begin(); sn!=facetree[s].end(); sn++) { 
+        faceset::iterator iter = facetree[0].find(*sn);
+        if (iter != facetree[0].end()) {
+          facetree[0].erase(iter);
+        } else {
+          facetree[0].insert(*sn);
+        }
+      }
+    }
 
-    if( facetree.size() ) {             // convert the left over faces into a surface
+    if( facetree[0].size() ) {   // convert the left over faces into a surface
       numNewSurf++;
       
       _surface.push_back( new Surfaces( &pt ) );
-      _surface.back()->num( facetree.size() );
+      _surface.back()->num( facetree[0].size() );
 
       int e=0;
-      for(set<Face*>::iterator iter=facetree.begin();
-          iter!=facetree.end();
-          ++iter) {
+      for(faceset::iterator iter=facetree[0].begin();
+                            iter!=facetree[0].end(); ++iter) {
 
-        newface = *iter;
-
-        if( newface->nnode == 3 ) {
+        Face newface = *iter;
+        if( newface.nnode == 3 ) {
           _surface.back()->addele(e, new Triangle( &pt ));
-        } else if( newface->nnode==4 ) {
+        } else if( newface.nnode==4 ) {
           _surface.back()->addele(e, new Quadrilateral( &pt ));
-        } else
+        } else {
+          cout << newface.nnode;
+          for( int n=0;n< newface.nnode; n++ )
+            cout << "In element " << distance(facetree[0].begin(),iter) 
+                        << " of " << facetree[0].size()
+                        << ": " << newface.nnode << endl;
           assert(0);
+        }
 
-        _surface.back()->ele(e)->define( newface->norig );
+        _surface.back()->ele(e)->define( newface.norig );
         _surface.back()->ele(e)->compute_normals(0,0);
-
-        delete newface; // no longer needed
         e++;
       }
       _surface.back()->determine_vert_norms( pt );
       ostringstream regnum;
       regnum << "Reg " << r;
       _surface.back()->label( regnum.str() );
+
     }
   }
-  for( int i=0; i<MAX_NUM_SURF; i++ ) delete[] faces[i];
-  delete[] faces;
   return numNewSurf;
 }
 
