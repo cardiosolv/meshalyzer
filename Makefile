@@ -1,13 +1,11 @@
 HOSTMACHINE := $(shell uname)
-#HDF5=1
 include make.conf
-CXX:=c++ -std=c++11 -fopenmp
 
 HDF5API_ROOT  := ./hdf5api
 
 FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)
-COMMON_INC    := -I. -O0 -g -DOBJ_CLASS -D_REENTRANT -MMD -DNOMINMAX  #-fopenmp
+COMMON_INC    := -I. -DOBJ_CLASS -D_REENTRANT
 
 FLTK_SOURCES  := $(wildcard *.fl)
 OBJS = $(FLTK_SOURCES:.fl=.o)\
@@ -25,18 +23,24 @@ LIB_HDF5      :=
 OBJS          := $(OBJS:HDF5DataBrowser.o=)
 endif
 
+# MAC vs Linux differences
 ifeq ($(HOSTMACHINE), Darwin)
   GLUT_LIB = -framework GLUT 
 else
   GLUT_LIB = -lglut
+  OMPFLAG := -fopenmp
+ifeq (,$(findstring -lGL,$(FLTK_LD_FLAGS)))
+  FLTK_LD_FLAGS += -lGL -lGLU
+endif
 endif
 
-COMMON_LIBS  = $(FLTK_LIBS) -lpng -lpthread -lm -lz $(LIB_HDF5) -lGL -lGLU
-CXXFLAGS     = -std=c++11 $(OMP_FLAG) -I$(HDF5_ROOT)/include -I$(HDF5API_ROOT)/include $(FLTK_INC) $(COMMON_INC)
-HDF5_CXXFLAGS=£(CXXFLAGS)
+COMMON_LIBS  = -lpng -lpthread -lm -lz $(LIB_HDF5) 
 LIBS         = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS) 
+CPPFLAGS     = -I$(HDF5_ROOT)/include -I$(HDF5API_ROOT)/include $(FLTK_INC) $(COMMON_INC)
+CXXFLAGS     = -std=c++11 -g -O$(DEBUG_LEVEL) $(OMP_FLAG) -MMD -DNOMINMAX  
 
-CPPFLAGS = $(CFLAGS) -g
+HDF5_CXXFLAGS= $(CXXFLAGS)
+
 ifdef ENABLE_LOGGING
 CPPFLAGS += -DLOGGING_ENABLED
 endif
@@ -62,7 +66,7 @@ $(LIB_CH5):
 endif
 
 $(OS_files:.o=_os.o): %_os.o: %.cc
-	$(CXX) $(CXXFLAGS) $(CPP_FLAGS) -D OSMESA -c -o $@  $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -D OSMESA -c -o $@  $<
 
 clean:
 	rm -rf $(FLTK_SOURCES:.fl=.h) $(FLTK_SOURCES:.fl=.cc) *.o *.d meshalyzer mesalyzer meshalyzer.app
