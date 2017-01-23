@@ -204,7 +204,6 @@ void TBmeshWin :: draw()
     actual_disp = asSurface;
   else
     actual_disp = disp;
-  actual_disp = disp;
 
   if ( have_data != NoData ) {
     if ( (data = dataBuffer->slice(tm)) == NULL )
@@ -218,7 +217,7 @@ void TBmeshWin :: draw()
     contwin->maxcolval->value(cs->max());
   }
 
-  if ( actual_disp ) {
+  if ( actual_disp == asTetMesh ) {
 
     glLineWidth(0.5);
     glColor3fv( tet_color );

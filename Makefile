@@ -1,8 +1,6 @@
 HOSTMACHINE := $(shell uname)
 include make.conf
 
-HDF5API_ROOT  := ./hdf5api
-
 FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)
 COMMON_INC    := -I. -DOBJ_CLASS -D_REENTRANT
@@ -13,6 +11,7 @@ OBJS = $(FLTK_SOURCES:.fl=.o)\
 	$(patsubst %.c,%.o,$(wildcard *.c))\
 	$(patsubst %.C,%.o,$(wildcard *.C))
 
+HDF5API_ROOT  := ./hdf5api
 ifdef HDF5
 LIB_CH5       := $(HDF5API_ROOT)/lib/libch5.a
 LIB_HDF5      := -L$(HDF5_ROOT)/lib -lch5 -lhdf5_hl -lhdf5
@@ -28,7 +27,8 @@ ifeq ($(HOSTMACHINE), Darwin)
   GLUT_LIB = -framework GLUT 
 else
   GLUT_LIB = -lglut
-  OMPFLAG := -fopenmp
+  OMP_FLAG := -fopenmp
+  LDFLAGS += $(OMP_FLAG)
 ifeq (,$(findstring -lGL,$(FLTK_LD_FLAGS)))
   FLTK_LD_FLAGS += -lGL -lGLU
 endif

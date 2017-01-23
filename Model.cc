@@ -1,5 +1,6 @@
 #include "Model.h"
 #include <set>
+#include <unordered_set>
 #include <map>
 #include <vector>
 #include <string>
@@ -23,7 +24,12 @@ struct Face {
   int nnode;                      //!< number of nodes
 };
 
-int intcmp( const void *a, const void *b ){ return *(int *)a-*(int *)b; }
+int intcmp( const void *a, const void *b )
+{
+  return *(int *)a-*(int *)b; 
+}
+
+#ifdef USE_SET
 
 /** compare 2 faces for sorting */
 bool cmpface( const Face &A, const Face &B)
@@ -34,8 +40,33 @@ bool cmpface( const Face &A, const Face &B)
   return false;
 };
 
-
 typedef set<Face, bool (*)(const Face&, const Face&)> faceset;
+
+#else
+
+/** compare if 2 faces equivalent */
+bool operator==( const Face &A, const Face &B)
+{
+  if( A.nnode != B.nnode ) return  false;
+  return !memcmp( A.nsort, B.nsort, A.nnode*sizeof(A.nsort[0]) );
+}
+
+
+/** generate hash value for a face */
+const size_t hash_offset = 1000000000;
+struct face_hash
+{
+  size_t operator() ( const Face &A ) const {
+    unsigned long key = A.nnode;
+    for( int i=0; i<A.nnode; i++ )
+      key += A.nsort[i]*hash_offset*(i+1);
+    return hash<unsigned long>()(key);
+  }
+};
+
+typedef unordered_set<Face, face_hash> faceset;
+
+#endif // USE_SET
 
 /** make a face from a node list
  *
@@ -643,7 +674,12 @@ int Model::add_region_surfaces()
 #else
     int numthrd = 1;
 #endif
+
+#ifdef USE_SET
     vector< faceset > facetree(numthrd, faceset(cmpface));
+#else
+    vector< faceset > facetree(numthrd);
+#endif
 
 #pragma omp parallel for 
     for( int e=0; e<_numVol; e++ ) {
