@@ -704,6 +704,7 @@ int Model::add_region_surfaces()
       }
     }
 
+#if 0
     // count the number of faces left in the list
     for( int s=1; s<numthrd; s++ ) {
       for(faceset::iterator sn=facetree[s].begin(); sn!=facetree[s].end(); sn++) { 
@@ -715,6 +716,25 @@ int Model::add_region_surfaces()
         }
       }
     }
+#else
+    int nleft = numthrd;
+    while( nleft>1 ) {
+      int add = (nleft+1)/2;
+      nleft /= 2;
+#pragma omp parallel for num_threads(nleft)
+      for( int s=0; s<nleft; s++ ) {
+        for(faceset::iterator sn=facetree[s+add].begin(); sn!=facetree[s+add].end(); sn++) { 
+          faceset::iterator iter = facetree[s].find(*sn);
+          if (iter != facetree[s].end()) {
+            facetree[s].erase(iter);
+          } else {
+            facetree[s].insert(*sn);
+          }
+        }
+      }
+      nleft = add;
+    }
+#endif
 
     if( facetree[0].size() ) {   // convert the left over faces into a surface
       numNewSurf++;

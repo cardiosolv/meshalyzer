@@ -349,15 +349,15 @@ print_usage(void)
           "[file.vpts]"<<endl;
   cout << "with options: " << endl;
   cout << "--iconifycontrols|-i  iconify controls on startup" << endl;
-  cout << "--no_elem|-n          do not read element info" << endl;
-  cout << "--help|-h             print this message" << endl;
-  cout << "--thrdRdr|-t          force threaded data reading" << endl;
-  cout << "--groupID=GID|-gGID   meshalyzer group" << endl;
-  cout << "--PNGfile=file        output PNGs and exit" << endl;
-  cout << "--frame=file          first frame for PNG dump (-1=do not set)" << endl;
-  cout << "--numframe=num        number of frames to output (default=1)" << endl;
-  cout << "--size=num            output size of PNG in pixels (default=512)" << endl;
-  cout << "--nproc=num           #parallel procs for PNG sequences" << endl;
+  cout << "--no_elem        |-n  do not read element info" << endl;
+  cout << "--help           |-h  print this message" << endl;
+  cout << "--thrdRdr        |-t  force threaded data reading" << endl;
+  cout << "--groupID=GID    |-g  meshalyzer group" << endl;
+  cout << "--PNGfile=file   |-P  output PNGs and exit" << endl;
+  cout << "--frame=file     |-f  first frame for PNG dump (-1=do not set)" << endl;
+  cout << "--numframe=num   |-N  number of frames to output (default=1)" << endl;
+  cout << "--size=num       |-s  output size of PNG in pixels (default=512)" << endl;
+  cout << "--nproc=num      |-p  #parallel procs for PNG sequences" << endl;
   cout << "--compSurf=(+)?[file] compute surfaces, +=do not exit after" << endl;
   exit(0);
 }

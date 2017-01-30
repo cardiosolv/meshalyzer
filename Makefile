@@ -14,8 +14,8 @@ OBJS = $(FLTK_SOURCES:.fl=.o)\
 HDF5API_ROOT  := ./hdf5api
 ifdef HDF5
 LIB_CH5       := $(HDF5API_ROOT)/lib/libch5.a
-LIB_HDF5      := -L$(HDF5_ROOT)/lib -lch5 -lhdf5_hl -lhdf5
-COMMON_INC    += -DUSE_HDF5
+LIB_HDF5      := -L$(HDF5API_ROOT)/lib -L$(HDF5_ROOT)/lib -lch5 -lhdf5_hl -lhdf5
+COMMON_INC    += -DUSE_HDF5 -I$(HDF5_ROOT)/include -I$(HDF5API_ROOT)/include 
 else
 LIB_CH5       := 
 LIB_HDF5      :=
@@ -25,6 +25,7 @@ endif
 # MAC vs Linux differences
 ifeq ($(HOSTMACHINE), Darwin)
   GLUT_LIB = -framework GLUT 
+  FLTK_INC += /usr/X11/include
 else
   GLUT_LIB = -lglut
   OMP_FLAG := -fopenmp
@@ -35,11 +36,9 @@ endif
 endif
 
 COMMON_LIBS  = -lpng -lpthread -lm -lz $(LIB_HDF5) 
-LIBS         = -L$(HDF5API_ROOT)/lib $(FLTK_LD_FLAGS) $(COMMON_LIBS) 
-CPPFLAGS     = -I$(HDF5_ROOT)/include -I$(HDF5API_ROOT)/include $(FLTK_INC) $(COMMON_INC)
+LIBS         =  $(FLTK_LD_FLAGS) $(COMMON_LIBS) 
+CPPFLAGS     =  $(FLTK_INC) $(COMMON_INC)
 CXXFLAGS     = -std=c++11 -g -O$(DEBUG_LEVEL) $(OMP_FLAG) -MMD -DNOMINMAX  
-
-HDF5_CXXFLAGS= $(CXXFLAGS)
 
 ifdef ENABLE_LOGGING
 CPPFLAGS += -DLOGGING_ENABLED
@@ -51,11 +50,11 @@ OS_OBJS=$(filter-out $(OS_files),$(OBJS)) $(OS_files:.o=_os.o)
 
 all: meshalyzer
 
-meshalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OBJS) $(LIB_CH5)
+meshalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OBJS) 
 	$(CXX) $(LDFLAGS) -o meshalyzer $(sort $(OBJS)) $(GLUT_LIB) $(LIBS)
 	fltk-config --post meshalyzer
 
-mesalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OS_OBJS) $(LIB_CH5)
+mesalyzer: $(LIB_CH5) $(FLTK_SOURCES:.fl=.cc) $(OS_OBJS)
 	$(CXX) $(LDFLAGS) -o mesalyzer $(sort $(OS_OBJS)) -lOSMesa $(LIBS) -lrt
 	fltk-config --post mesalyzer
 

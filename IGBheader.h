@@ -49,6 +49,19 @@
 
 #define Byte hByte
 
+/* Types de trames */
+#define MIN_TRAME	0
+#define	C8		0
+#define	C4		1
+#define	HEX		2
+#define HEXEDGES	3
+#define HEXBRIDGES	4
+#define HEXLINES	5
+#define HEX2		6
+#define MAX_TRAME	6
+#define NTRAMES		7
+
+
 /* define for endedness */
 #define IGB_ENDIAN_VAL -1.24e5
 #define IGB_LITTLE_END_REP 0,48,242,199
@@ -158,55 +171,54 @@ T IGB_convert_buffer_datum( IGBheader*, void *buf, int a );
 class IGBheader
 {
   private:
-    void* file;					//!< file ptr to read/write header
-    bool gzipping;		  		// are we gzipping data?
-    int   v_x, v_y, v_z, v_t ;  //!< dimensions --------------------
-    int   v_type ;              //!< type arithmetique -------------
-    int   v_taille ;            //!< taille des pixels (type STRUCTURE)
-    unsigned long v_systeme ;   //!< systeme informatique ----------
-    int    v_num ;              //!< numero de la tranche ----------
-    int    v_bin ;              //!< nombre de couleurs ------------
-    int    v_trame ;            //!< trame(connectivite) -----------
-    unsigned int v_lut ;        //!< nombre de bytes table couleurs
-    unsigned int v_comp ;       //!< nombre de bytes table compres.
-    float  v_epais ;            //!< epaiseur d'une tranche --------
-    float  v_org_x, v_org_y, v_org_z, v_org_t ; //!< coin sup gauche --------
-    float  v_inc_x, v_inc_y, v_inc_z, v_inc_t ; //!< distance entre pixels -
+    void* file;				   	  //!< file ptr to read/write header
+    bool gzipping;		  	 	  // are we gzipping data?
+    int   v_x=0, v_y=0, v_z=1, v_t=1;  //!< dimensions --------------------
+    int   v_type=0;               //!< type arithmetique -------------
+    int   v_taille ;              //!< taille des pixels (type STRUCTURE)
+    unsigned long v_systeme=endian() ;     //!< systeme informatique ----------
+    int    v_num=0;               //!< numero de la tranche ----------
+    int    v_bin=0;               //!< nombre de couleurs ------------
+    int    v_trame=C8;            //!< trame(connectivite) -----------
+    unsigned int v_lut=0 ;        //!< nombre de bytes table couleurs
+    unsigned int v_comp=0 ;       //!< nombre de bytes table compres.
+    float  v_epais=0;             //!< epaiseur d'une tranche --------
+    float  v_org_x=1., v_org_y=1., v_org_z=1., v_org_t=0.; //!< coin sup gauche --------
+    float  v_inc_x=1., v_inc_y=1., v_inc_z=1., v_inc_t=1.; //!< distance entre pixels -
     float  v_dim_x, v_dim_y, v_dim_z, v_dim_t ; //!< dimension totale -------
-    float *v_vect_z ;           //!< coord z de chaque tranche -----
-    char   v_unites_x[41], v_unites_y[41], v_unites_z[41], v_unites_t[41] ;
+    float *v_vect_z=NULL;         //!< coord z de chaque tranche -----
+    char   v_unites_x[41]={}, v_unites_y[41]={}, v_unites_z[41]={}, v_unites_t[41]={};
     //!< unites de mesure --------------
-    char   v_unites[41] ;       //!< unites de mesure pour les valeurs des pixels -----------
-    float  v_facteur, v_zero ;  //!< facteur d'echelle et valeur du zero -
-    char   v_struct_desc[41] ;  //!< description de la structure ---
-    char   v_aut_name[41] ;     //!< nom de l'auteur ---------------
-    char** v_comment ;          //!< commentaires ------------------
-    void*  v_transparent;		//!< transparent value for data
+    char   v_unites[41]={};       //!< unites de mesure pour les valeurs des pixels -----------
+    float  v_facteur=1., v_zero=0.;  //!< facteur d'echelle et valeur du zero -
+    char   v_struct_desc[41]={};  //!< description de la structure ---
+    char   v_aut_name[41]={};     //!< nom de l'auteur ---------------
+    char** v_comment=(char**)calloc(NALLOC,sizeof(char*));    //!< commentaires ------------------
+    void*  v_transparent=NULL;	  //!< transparent value for data
     int    puts_fcn(void *, char *);
 
     // boolean flags to indicate if a default value has been overridden
-    bool bool_x, bool_y, bool_z, bool_t;
-    bool bool_type;
-    bool bool_taille;
-    bool bool_num;
-    bool bool_bin;
-    bool bool_trame;
-    bool bool_lut;
-    bool bool_comp;
-    bool bool_epais;
-    bool bool_org_x, bool_org_y, bool_org_z, bool_org_t;
-    bool bool_inc_x, bool_inc_y, bool_inc_z, bool_inc_t;
-    bool bool_dim_x, bool_dim_y, bool_dim_z, bool_dim_t;
-    bool bool_vect_z;
-    bool bool_unites_x, bool_unites_y, bool_unites_z, bool_unites_t;
-    bool bool_unites;
-    bool bool_facteur, bool_zero;
-    bool bool_struct_desc;
-    bool bool_aut_name;
-    bool bool_comment ;
-    bool bool_transparent;
+    bool bool_x=false, bool_y=false, bool_z=false, bool_t=false;
+    bool bool_type=false;
+    bool bool_taille=false;
+    bool bool_num=false;
+    bool bool_bin=false;
+    bool bool_trame=false;
+    bool bool_lut=false;
+    bool bool_comp=false;
+    bool bool_epais=false;
+    bool bool_org_x=false, bool_org_y=false, bool_org_z=false, bool_org_t=false;
+    bool bool_inc_x=false, bool_inc_y=false, bool_inc_z=false, bool_inc_t=false;
+    bool bool_dim_x, bool_dim_y=false, bool_dim_z=false, bool_dim_t=false;
+    bool bool_vect_z=false;
+    bool bool_unites_x=false, bool_unites_y=false, bool_unites_z=false, bool_unites_t=false;
+    bool bool_unites=false;
+    bool bool_facteur=false, bool_zero=false;
+    bool bool_struct_desc=false;
+    bool bool_aut_name=false;
+    bool bool_comment=false;
+    bool bool_transparent=false;
     char transstr[257];
-    void init(void);
 
   public:
     IGBheader( gzFile a = NULL, bool read=false, bool quiet=false );
