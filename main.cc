@@ -2,6 +2,7 @@
 #include "trimesh.h"
 #include "isosurf.h"
 #include <string>
+#include <cstring>
 #include <sstream>
 #include <libgen.h>
 #include <getopt.h>
@@ -266,6 +267,7 @@ find_model_dir( string fn )
     if( ifstream((filename+"pts.gz").c_str()) ) return filename;
     if( ifstream((filename+".pts").c_str()) ) return filename;
     if( ifstream((filename+".pts.gz").c_str()) ) return filename;
+    ptr = strtok( NULL, ":"  );
   }
   return "";
 }
