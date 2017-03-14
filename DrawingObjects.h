@@ -102,6 +102,7 @@ class MultiPoint : public DrawingObj
     MultiPoint **isosurf( DATA_TYPE *d, DATA_TYPE val, int &, 
                                     vector<Interpolator<DATA_TYPE>*> *a=NULL );
     virtual const int*iso_polys(unsigned int)=0; 
+    virtual int bytes()=0;
   protected:
     int *  _node;			//!< list of nodes defining objects
     PPoint* _pt;             //!< pointer to point list
@@ -123,6 +124,7 @@ class Connection : public MultiPoint
                            int stride=1, dataOpac* dopac=NULL );
     virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){}
     virtual bool     read( const char * );
+    virtual int      bytes(){return sizeof(Connection);}
 #ifdef USE_HDF5
     virtual bool     read( hid_t hdf_file );
 #endif
@@ -143,6 +145,8 @@ class ContCable : public MultiPoint
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
     virtual bool     read( const char * );
+    virtual int      bytes(){ return sizeof(ContCable);}
+    
 #ifdef USE_HDF5
     virtual bool     read( hid_t hdf_file );
 #endif
@@ -192,6 +196,7 @@ class PolyGon : public SurfaceElement
     virtual bool read( const char * ){}
 	static const int  _zero;
     const int* iso_polys(unsigned int index){return &_zero;}
+    int     bytes(){ return sizeof(Polygon);}
 };
 
 
@@ -213,6 +218,7 @@ class Triangle : public SurfaceElement
     virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){}
     bool     add( const char * );
     const int*       iso_polys(unsigned int);
+    int     bytes(){ return sizeof(Triangle);}
   protected:
     int         countInFile( const char * );
 };
@@ -235,6 +241,7 @@ class Quadrilateral : public SurfaceElement
     virtual void     compute_normals( int, int );
     bool     add( const char * );
     const int*       iso_polys(unsigned int);
+    int     bytes(){ return sizeof(Quadrilateral);}
   protected:
     int         countTrisInFile( const char * );
 };
@@ -275,6 +282,7 @@ class Tetrahedral : public VolElement
     virtual void     draw_out_face( int );
     virtual SurfaceElement* cut(char*,GLfloat*,Interpolator<DATA_TYPE>*&,int=0);
     const int* iso_polys( unsigned int );
+    virtual int     bytes(){ return sizeof(Tetrahedral);}
     virtual int surfaces(int [][MAX_NUM_SURF_NODES+1], int v=0);
 };
 
@@ -292,6 +300,7 @@ class Prism : public VolElement
     virtual SurfaceElement* cut(char *,GLfloat*,Interpolator<DATA_TYPE>*&,int);
     const   int*     iso_polys(unsigned int);
     virtual int surfaces(int [][MAX_NUM_SURF_NODES+1], int v=0);
+    virtual int     bytes(){ return sizeof(Prism);}
 };
 
 
@@ -309,6 +318,7 @@ class Hexahedron : public VolElement
     virtual SurfaceElement* cut(char *,GLfloat*,Interpolator<DATA_TYPE>*&,int);
     const int* iso_polys( unsigned int );
     virtual int surfaces(int [][MAX_NUM_SURF_NODES+1], int v=0);
+    virtual int     bytes(){ return sizeof(Hexahedron);}
 };
 
 class Pyramid : public VolElement
@@ -325,6 +335,7 @@ class Pyramid : public VolElement
     virtual SurfaceElement* cut(char*, GLfloat*, Interpolator<DATA_TYPE>*&,int);
     const int* iso_polys( unsigned int );
     virtual int surfaces(int [][MAX_NUM_SURF_NODES+1], int v=0);
+    virtual int      bytes(){ return sizeof(Pyramid);}
 };
 
 #endif
