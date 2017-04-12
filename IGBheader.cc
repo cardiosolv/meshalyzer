@@ -285,7 +285,6 @@ is_deprecated( char *s ) {
 
 IGBheader::IGBheader( FILE *f, bool _read, bool quiet )
 {
-  init();
   fileptr(f);
   if( _read ) 
     if( read( quiet ) )
@@ -295,60 +294,12 @@ IGBheader::IGBheader( FILE *f, bool _read, bool quiet )
 
 IGBheader::IGBheader( gzFile f, bool _read, bool quiet )
 {
-  init();
   fileptr(f);
   if( _read ) 
     if( read( quiet ) )
       throw 1;
 }
 
-
-void IGBheader::init(void)
-{
-  v_x = v_y = v_type = 0 ;
-  v_systeme = endian();
-  v_comp = v_lut = v_num = v_bin = 0 ;
-  v_trame = C8 ;
-  v_z = v_t = 1 ;
-  v_epais = 0.0 ;
-  v_inc_x = v_inc_y = v_inc_z = v_inc_t = 1.0 ;
-  v_org_x = v_org_y = v_org_z = 1;
-  v_org_t = 0.0 ;
-  v_vect_z = NULL ;
-  v_unites_x[0] = v_unites_x[40] = '\000' ;
-  v_unites_y[0] = v_unites_y[40] = '\000' ;
-  v_unites_z[0] = v_unites_z[40] = '\000' ;
-  v_unites_t[0] = v_unites_t[40] = '\000' ;
-  v_unites[0] = v_unites[40] = '\000' ;
-  v_facteur = 1.0 ;
-  v_zero = 0.0 ;
-  v_aut_name[0] = v_aut_name[40] = '\000' ;
-  v_struct_desc[0] = v_struct_desc[40] = '\000' ;
-  v_comment = (char **) malloc( NALLOC*sizeof(char *) ) ;
-  v_comment[0] = NULL ;
-  v_transparent = NULL;
-  gzipping = true;
-
-  bool_x = bool_y = bool_type = FAUX;
-  bool_z = bool_t = FAUX;
-  bool_taille = FAUX;
-  bool_num = FAUX;
-  bool_bin = FAUX;
-  bool_trame = FAUX;
-  bool_lut = FAUX;
-  bool_comp = FAUX;
-  bool_epais = FAUX;
-  bool_org_x = bool_org_y = bool_org_z = bool_org_t = FAUX;
-  bool_inc_x = bool_inc_y = bool_inc_z = bool_inc_t = FAUX;
-  bool_dim_x = bool_dim_y = bool_dim_z = bool_dim_t = FAUX;
-  bool_vect_z = FAUX;
-  bool_unites_x = bool_unites_y = bool_unites_z = bool_unites_t = FAUX;
-  bool_unites = FAUX;
-  bool_facteur = bool_zero = FAUX;
-  bool_aut_name = FAUX;
-  bool_comment = FAUX;
-  bool_transparent = FAUX;
-}
 
 IGBheader::~IGBheader()
 {}

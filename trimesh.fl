@@ -1,59 +1,60 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0303 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
-} 
+}
 
 decl {\#include <FL/gl.h>} {public local
-} 
+}
 
 decl {\#include <vector>} {private local
-} 
+}
 
 decl {class TBmeshWin;} {public local
-} 
+}
 
 decl {\#include "HDF5DataBrowser.h"} {private local
-} 
+}
 
 decl {class IsoSurface;} {public local
-} 
+}
 
 decl {class ObjProps;} {public local
-} 
+}
 
 decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {private local
-} 
+}
 
 decl {\#define TEST_VAR(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->do_callback();continue;}} {private local
-} 
+}
 
 decl {\#define TEST_RADIO(A,B,C,D) if(!strcmp(\#A,B)){if(C){A->setonly();A->do_callback(D);}continue;}} {private local
-} 
+}
 
 decl {\#define TEST_CHOICE(A,B,C) if(!strcmp(\#A,B)){A->value(C);A->mvalue()->do_callback(A);continue;}} {private local
-} 
+}
 
 decl {\#define TEST_MENUVAR(A,B,C,D) if(!strcmp(\#A,B)){if(C)A->set();else A->clear();if(A->callback())A->do_callback(D);continue;}} {private local
-} 
+}
 
 decl {\#define IGNORE_VAR(A,B) if(!strcmp(\#A,B)){continue;}} {private local
-} 
+}
 
 decl {\#define MAX_INIT_VECS 200000} {private local
-} 
+}
 
 decl {\#include "Model.h"} {public local
-} 
+}
 
 decl {\#include <set>} {private local
-} 
+}
 
 decl {\#include "colourchoice.h"} {public local
-} 
+}
 
-class Meshwin {} {
+class Meshwin {open
+} {
   Function {Meshwin()} {open
   } {
     Fl_Window winny {
@@ -71,7 +72,7 @@ winny->size_range(50,50,1600,1600,5,5,1);} {}
   }
   class UserInterface {open
   } {}
-} 
+}
 
 class Controls {open
 } {
@@ -81,7 +82,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {466 347 350 645} type Double box UP_BOX
+      xywh {466 349 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -232,7 +233,7 @@ mwtb->tmLink->window->show();}
           }
         }
         Submenu imgmenu {
-          label Image
+          label Image open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -245,6 +246,11 @@ const GLfloat* po=mwtb->model->pt_offset();
 mwtb->trackball.SetOrigin(-po[0],-po[1],-po[2]);
 mwtb->redraw();}
             xywh {0 0 100 20}
+          }
+          MenuItem {} {
+            label {Raise window}
+            callback {mwtb->parent()->show();} selected
+            xywh {0 0 33 23}
           }
           Submenu {} {
             label View
@@ -396,7 +402,7 @@ mwtb->redraw();}
             }
           }
           Submenu {} {
-            label {Randomly colour} open
+            label {Randomly colour}
             xywh {0 0 100 20}
           } {
             MenuItem {} {
@@ -529,7 +535,7 @@ mwtb->redraw();}
           }
         }
         Submenu outmenu {
-          label Output open
+          label Output
           xywh {0 0 100 20}
         } {
           Submenu {} {
@@ -584,7 +590,7 @@ mwtb->cs->output_png(fn);}
             tooltip {output the indices of the visible vertices} xywh {0 0 100 20}
           }
           Submenu recordmenu {
-            label Record selected
+            label Record
             tooltip {take an image snapshot each time something changes} xywh {0 0 100 20}
           } {
             MenuItem {} {
@@ -806,11 +812,11 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open
+          label Highlight
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1012,7 +1018,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface open
+          label Surface
           xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
@@ -1140,7 +1146,7 @@ write_surfaces(0);}
           }
         }
         Fl_Group vectorgrp {
-          label Vectors open
+          label Vectors
           xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
@@ -1976,8 +1982,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2210,8 +2215,7 @@ if( !cc ) {
 cc->window->show();
 return cc;} {}
   }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
+  Function {restore_state(const char* fname=NULL)} {} {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2595,7 +2599,7 @@ if( vd->size()/int(vecstride->value())>MAX_INIT_VECS ) {
   vd->stride(stride);
 }} {}
   }
-} 
+}
 
 class ProgInfo {} {
   Function {ProgInfo()} {open
@@ -2609,7 +2613,7 @@ class ProgInfo {} {
       }
     }
   }
-} 
+}
 
 class ObjProps {} {
   Function {ObjProps( TBmeshWin* wtb, Object_t o ):mwtb(wtb),obj(o)} {open
@@ -2706,4 +2710,4 @@ for( int i=0; i<nreg; i++ )
   }
 delete sel;} {}
   }
-} 
+}
