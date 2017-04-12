@@ -20,16 +20,21 @@
 #include <ch5/ch5.h>
 #endif
 
+pid_t master;
+static Controls *ctrl_ptr;
+static Meshwin  *win_ptr;
+
 #ifdef OSMESA
 #include <sys/mman.h>
+sem_t *new_cnt;
+
+sem_t * make_sem( string base, int val=0 ) {
+      base += to_string(master);
+      return sem_open( base.c_str(), O_CREAT, S_IRWXU, val );
+}
 #else
 #include <FL/glut.H>
 #endif
-
-static Controls *ctrl_ptr;
-static Meshwin  *win_ptr;
-pid_t master;
-
 
 sem_t *meshProcSem;               // global semaphore for temporal linking
 sem_t *linkingProcSem;            // global semaphore for process linking
@@ -48,9 +53,9 @@ void do_cleanup( int sig, siginfo_t *si, void *v )
 #ifdef OSMESA
     cerr << "Cleaning up semaphores and shm" << endl;
     stringstream nw_name("/nw_");
-    nw_name << getpid();
+    nw_name << master;
     stringstream cnt_name("/cnt_");
-    cnt_name << getpid();
+    cnt_name << master;
     sem_unlink( nw_name.str().c_str() );
     shm_unlink( cnt_name.str().c_str() );
 #endif
@@ -204,27 +209,26 @@ os_png_seq( string filename, int f0, int numf, TBmeshWin *tbwm, int size, int np
     frame.write( size, size, filename, f0 );
   } else {
 #ifdef OSMESA
-    // create 2 semaphores and shared memory needed for interprocess communication
-    stringstream nw_name("/nw_");
-    nw_name << master;
-    sem_t *nw_cnt   = sem_open( nw_name.str().c_str(), O_CREAT, S_IRWXU, 1 );
-    stringstream cnt_name("/cnt_");
-    cnt_name << master;
-    int shm = shm_open(cnt_name.str().c_str(), O_CREAT|O_RDWR, 0666);
+    // create shared memory needed for interprocess communication
+    string cnt_name("/cnt_");
+    cnt_name += to_string(master);
+    int shm = shm_open(cnt_name.c_str(), O_CREAT|O_RDWR, 0666);
     ftruncate(shm, 2*sizeof(int));
     int *nwr = (int*)mmap(NULL, 2*sizeof(int), PROT_READ|PROT_WRITE, MAP_SHARED, shm, 0 ); 
     
     int nw = frame.write( size, size, filename, f0, f1, nproc );
 
     // count the number of frames written on the way out
-    sem_wait( nw_cnt );
+    sem_wait( new_cnt );
     nwr[0] += nw;
     if( ++nwr[1]==nproc ) {
       cerr << "Wrote " << nwr[0] << " frames\n" << endl;
-      sem_unlink(nw_name.str().c_str() );
-      shm_unlink(cnt_name.str().c_str() );
-    }
-    sem_post( nw_cnt );
+      string new_name = "/nw";
+      new_name += to_string(master);
+      sem_unlink(new_name.c_str() );
+      shm_unlink(cnt_name.c_str() );
+    } else
+      sem_post( new_cnt );
 
 #else
     int nw = frame.write( size, size, filename, f0, f1 );
@@ -445,12 +449,19 @@ main( int argc, char *argv[] )
   // fork since it is too difficult to copy tbwm with all of its dynamic allocations
   int proc=0;
   master = getpid();
+#ifdef OSMESA
+  new_cnt = make_sem("/nw",1);
   for( int i=1; i<nproc;i++ ) {
     if( !fork() ) { 
       proc = i;
+      new_cnt = make_sem("/nw");
+      sem_wait( new_cnt );
+      sem_post( new_cnt );
       break;
     }
   }
+  if( !proc ) sem_post( new_cnt );
+#endif
 
   Fl::gl_visual(FL_RGB|FL_DOUBLE|FL_DEPTH|FL_ALPHA);
   Controls control;

@@ -196,7 +196,7 @@ class PolyGon : public SurfaceElement
     virtual bool read( const char * ){}
 	static const int  _zero;
     const int* iso_polys(unsigned int index){return &_zero;}
-    int     bytes(){ return sizeof(Polygon);}
+    int     bytes(){ return sizeof(PolyGon);}
 };
 
 
