@@ -15,11 +15,10 @@ namespace LinkMessage {
 	int sliderTime;
 	
     struct TrackBallState{
-      float scale; 
-      V3f trans;
-      V3f origin;
-      Quaternion qSpin;
-      Quaternion qRot;
+      float scale;          
+      V3f trans;            //!< translation normalized by model size
+      Quaternion qSpin;     //!< incremental spin from standardview
+      Quaternion qRot;      //!< rotation relative to standard view
     } trackballState;
     
     struct ColourScaleState {

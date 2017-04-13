@@ -3,7 +3,6 @@
 %\usepackage {t1enc}                                  % use DC-Font with 8 bit
 %\usepackage [latin1]{inputenc}                       % Codepage latin1
 
-
 \usepackage[centertags]{amsmath}                      % include ams-packages
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -1036,11 +1035,13 @@ Currently, linking supports the following operations:
 \item[Temporal syncing] Clicking on the ``sync'' button (beside the animation pause button)
       will set all instances to the same time. This is also achieved by pressing ``t'' in the
       model window.
-\item[Viewport syncing] Clicking ``Image/Sync/Viewport Sync'' or pressing ``v'' in the model window 
-     will transmit the current orientation, scale, and translation to all other instances.
- \item[Colour Scale] Clicking ``Image/Sync/Colour Scale Sync'', or pressing the sync button 
-     beside the colour bar 
-     will transmit the current colour map to all other instances.
+\item[Viewport syncing] Clicking ``Image/Sync/Viewport'' or pressing ``v'' in the model window 
+     will transmit the current scale, relative orientation, and relative translation to all other instances.
+     If the meshes are not oriented along the same axes, a new reference direction can be defined and then the rotation 
+     relative to this orientation will be applied. The simplest way to apply this is to put the linked meshes 
+     to their respective default views, orient one to match the other, and then click ``Image/Sync/Set Reference View''
+ \item[Colour Scale] Clicking ``Image/Sync/Colour Scale'', or pressing the sync button 
+     beside the colour bar will transmit the current colour map to all other instances.
 \end{description}
 
 \noindent

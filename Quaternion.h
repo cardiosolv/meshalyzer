@@ -39,7 +39,7 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
 switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: return z;}
       ; return w;
     }
-    friend ostream& operator<<(ostream& os, Quaternion& q )
+    friend ostream& operator<<(ostream& os, Quaternion q )
     {
       os << q.w << " " << q.x << " " << q.y << " " << q.z;
       return os;

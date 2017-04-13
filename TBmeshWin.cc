@@ -1864,14 +1864,11 @@ int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
   } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_VIEWPORT_SYNC) == 0) {
     // retrieve vals
     trackball.SetScale(msg.trackballState.scale);
-    trackball.SetTranslation(msg.trackballState.trans.X(),
-            msg.trackballState.trans.Y(),
-            msg.trackballState.trans.Z());
-    trackball.SetOrigin(msg.trackballState.origin.X(),
-            msg.trackballState.origin.Y(),
-            msg.trackballState.origin.Z());
+    V3f modtrans = msg.trackballState.trans*model->maxdim();
+    trackball.SetTranslation(modtrans.X(),
+            modtrans.Y(), modtrans.Z() );
 
-    trackball.qRot = msg.trackballState.qRot;
+    trackball.qRot = msg.trackballState.qRot*model->syncRefRot();
     trackball.qSpin = msg.trackballState.qSpin;
 
     // set the state
@@ -1915,16 +1912,14 @@ void TBmeshWin::SendViewportSyncMessage()
   // retrieve vals
   scale = trackball.GetScale();
   v3f_trans = trackball.GetTranslation();
-  p3f_origin = trackball.GetOrigin();
   qRot = trackball.GetRotation(); 
   qSpin = trackball.qSpin;
 
   LinkMessage::CommandMsg msgToSend;
   msgToSend.trackballState.scale = scale;
-  msgToSend.trackballState.trans = v3f_trans;
-  msgToSend.trackballState.origin = p3f_origin;
+  msgToSend.trackballState.trans = v3f_trans/model->maxdim();
   msgToSend.trackballState.qSpin = qSpin;
-  msgToSend.trackballState.qRot = qRot;
+  msgToSend.trackballState.qRot = qRot*model->syncRefRot().GetConjugate();
   
   strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_VIEWPORT_SYNC);
   

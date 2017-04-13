@@ -78,15 +78,14 @@ class Controls {open
 } {
   decl {friend class ObjProps;} {private local
   }
-  Function {Controls()} {open
-  } {
+  Function {Controls()} {} {
     Fl_Window window {
       label {Meshalyzer Controls} open
       xywh {466 349 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {open selected
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -479,7 +478,12 @@ mwtb->redraw();}
             }
             MenuItem {} {
               label Time
-              callback {mwtb->SendTimeSyncMessage();} selected
+              callback {mwtb->SendTimeSyncMessage();}
+              xywh {0 0 33 23}
+            }
+            MenuItem {} {
+              label {Set reference view}
+              callback {mwtb->model->syncRefRot(mwtb->trackball.GetRotation());}
               xywh {0 0 33 23}
             }
           }
@@ -1987,7 +1991,8 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {} {
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2194,6 +2199,11 @@ SAVE_WIDGET( mshzf, mwtb->deadData->deadopac );
 SAVE_WIDGET( mshzf, mwtb->deadData->showDeadData );
 mshzf << "DEAD_COLOUR = ";
 save_colour( mshzf, mwtb->cs->deadColour() );
+mshzf << endl;
+
+mshzf << "REF_SYNC_ROTATION = ";
+mshzf  << mwtb->model->syncRefRot() << endl;
+
 mshzf << endl;} {}
   }
   Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
@@ -2220,7 +2230,8 @@ if( !cc ) {
 cc->window->show();
 return cc;} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2514,7 +2525,12 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     mwtb->isosurfwin->issColor(s,r,g,b,a);
     continue;
   }
-  
+  if( !strcmp( var, "REF_SYNC_ROTATION" ) ){
+    sscanf( buf, "%*s = %f %f %f %f", &r, &g, &b, &a );
+    mwtb->model->syncRefRot(Quaternion(r,g,b,a));
+    continue;
+  }
+
   TEST_VAR( mwtb->deadData->minValid, var, val )
   TEST_VAR( mwtb->deadData->minValidVal, var, val ) 
   TEST_VAR( mwtb->deadData->maxValid, var, val )

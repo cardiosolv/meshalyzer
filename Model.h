@@ -71,6 +71,8 @@ class Model
     float size( Object_t o, int r ){ return _region[r<0?0:r]->size(o); }
     string file()const{return _file;}
     bool  twoD(){return _2D; }
+    Quaternion syncRefRot( void ) {return _refRot; }
+    Quaternion syncRefRot( const Quaternion &q  ) { _refRot = q; }
 
     PPoint             pt;
     Connection*      _cnnx=NULL;
@@ -109,6 +111,7 @@ class Model
     int              new_region_label();
     string          _file;               //!< base file name
     bool            _2D=false;
+    Quaternion      _refRot;
 };
 
 #endif
