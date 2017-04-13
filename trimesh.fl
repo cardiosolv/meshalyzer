@@ -249,7 +249,7 @@ mwtb->redraw();}
           }
           MenuItem {} {
             label {Raise window}
-            callback {mwtb->parent()->show();} selected
+            callback {mwtb->parent()->show();}
             xywh {0 0 33 23}
           }
           Submenu {} {
@@ -464,18 +464,23 @@ mwtb->redraw();}
             xywh {0 0 30 20} type Toggle
           }
           Submenu {} {
-            label Sync
+            label Sync open
             xywh {0 0 70 20}
           } {
             MenuItem {} {
-              label {Viewport Sync}
+              label Viewport
               callback {mwtb->SendViewportSyncMessage();}
               xywh {5 5 30 20}
             }
             MenuItem {} {
-              label {Colour Scale Sync}
+              label {Colour Scale}
               callback {mwtb->SendColourSyncMessage();}
               xywh {5 5 30 20}
+            }
+            MenuItem {} {
+              label Time
+              callback {mwtb->SendTimeSyncMessage();} selected
+              xywh {0 0 33 23}
             }
           }
         }

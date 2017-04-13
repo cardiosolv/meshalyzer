@@ -133,7 +133,7 @@ void animate_signal( int sig, siginfo_t *si, void *v )
  */
 void process_linkage_signal( int sig, siginfo_t *si, void *v ) 
 {
-  // if the signal is SIGALRM, it a new message queue is connected
+  // if the signal is SIGALRM, a new message queue is connected
   // to this process, create bi-directional linking
 
   // 1. call createBiDirectionalMessageQueue
@@ -141,11 +141,18 @@ void process_linkage_signal( int sig, siginfo_t *si, void *v )
     return;
   }
 
+  // temporarily block signals until this action is completed
+  sigset_t intmask;
+  sigemptyset(&intmask);
+  sigaddset(&intmask, SIGALRM);
+  sigprocmask(SIG_BLOCK, &intmask, NULL); 
+
+  sem_post( linkingProcSem );        // signal msg received
   win_ptr->trackballwin->CheckMessageQueue();  
 
-  // receive msg
-  sem_post( linkingProcSem );
+  sigprocmask(SIG_UNBLOCK, &intmask, NULL);
 }
+
 
 /** read in the version and license information
  *

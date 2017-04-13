@@ -1,53 +1,53 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
 decl {\#include <set>} {public local
-} 
+}
 
 decl {\#include <sys/types.h>} {private local
-} 
+}
 
 decl {\#include <cstdlib>} {private local
-} 
+}
 
 decl {\#include <cstdio>} {private local
-} 
+}
 
 decl {\#include <unistd.h>} {private local
-} 
+}
 
 decl {\#include <iostream>} {private local
-} 
+}
 
 decl {\#include <map>} {public global
-} 
+}
 
 decl {\#include <sys/msg.h>} {private local
-} 
+}
 
 decl {\#include <sys/ipc.h>} {private local
-} 
+}
 
 decl {\#include <semaphore.h>} {private local
-} 
+}
 
 decl {\#include <signal.h>} {private local
-} 
+}
 
 decl {\#include <LinkMessages.h>} {public global
-} 
+}
 
 decl {using namespace std;} {public global
-} 
+}
 
 class TimeLink {open
 } {
   Function {TimeLink( set<int>& lnks ):linkages_(lnks),msqId_(0),MSQ_KEY_PATH("/home")} {open
   } {
     Fl_Window window {
-      label TimeLink
-      xywh {547 23 290 410} type Double box ENGRAVED_BOX color 27 visible
+      label TimeLink open
+      xywh {1894 350 290 410} type Double box ENGRAVED_BOX color 27 hide
     } {
       Fl_Group {} {open
         xywh {10 10 270 195} box GTK_UP_BOX color 14 align 65
@@ -105,8 +105,7 @@ while( fgets( procline, 1024, in ) != NULL ) {
   }
 }
 
-pclose( in );} {selected
-    }
+pclose( in );} {}
   }
   Function {link()} {
     comment {Link the selected meshalyzer PIDs
@@ -136,7 +135,8 @@ pclose( in );} {selected
   list_links();
   list_mesh_pids();} {}
   }
-  Function {unlink()} {} {
+  Function {unlink()} {open
+  } {
     code {for( int i=linkList->size(); i>=1; i-- ){
     if( linkList->selected(i) ) {
       int pid = atoi(linkList->text(i));
@@ -171,7 +171,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   linkList->add( pidtext );
 }} {}
   }
-  Function {LinkMessageQueue(int pid)} {return_type int
+  Function {LinkMessageQueue(int pid)} {open return_type int
   } {
     code {//1. create an unique key from pid
   int temp;
@@ -231,7 +231,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
  * \\param[in] pid - unlink this meshalyzer \\a pid
  *
  * \\return int - 0 = SUCCESS, negative = fail
-} return_type int
+} open return_type int
   } {
     code {// look up the message queue id
   linkageMsqIds_.erase(pid);
@@ -292,7 +292,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
  *
  * \\return int - 0 = SUCCESS, negative = fail
  *
-} return_type int
+} open return_type int
   } {
     code {// make sure we start at zero
   int numsem;
@@ -302,13 +302,17 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   }
 
   if (kill(pid, SIGALRM)){
-    // an process doesn't exist anymore
+    // process doesn't exist anymore
     unlink(pid);    
+  } else {
+    struct timespec ts;
+    ts.tv_sec = 2;
+    ts.tv_nsec = 0.;
+    sem_timedwait(linkingProcSem,&ts);
   }
-
-  sem_wait(linkingProcSem);
-
-  return 0;} {}
+  
+  return 0;} {selected
+    }
   }
   Function {SendMsg(LinkMessage::CommandMsg& msg, int pid)} {
     comment {* \\brief Notify \\a pid a new message in queue
@@ -316,7 +320,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
  * \\param[in] pid - process id for a meshalyzer program
  *
  * \\return int - 0 = SUCCESS, negative = fail
-} return_type int
+} open return_type int
   } {
     code {int msqId = linkageMsqIds_[pid];
 
@@ -341,7 +345,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
     comment {* \\brief Send msg to all linked processes
  *
  * \\return int - 0 = SUCCESS, negative = fail
-} return_type void
+} open return_type void
   } {
     code {set<int>::iterator it = linkages_.begin();
 
@@ -394,4 +398,4 @@ for( it; it != linkages_.end(); it++) {
   }
   decl {std::map<int, int> linkageMsqIds_;} {private local
   }
-} 
+}
