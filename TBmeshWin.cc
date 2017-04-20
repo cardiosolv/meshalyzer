@@ -629,7 +629,7 @@ int TBmeshWin::handle( int event )
         }
         return 1;
         break;
-      case FL_Left:
+      case FL_Left:     
         newtm = int(contwin->tmslider->value()-
                     contwin->frameskip->value()*
                     ((Fl::event_state()&FL_SHIFT)?shift_time_scale:1));
@@ -640,20 +640,20 @@ int TBmeshWin::handle( int event )
         }
         return 1;
         break;
-      case 'o':
+      case 'o':   // optimize colour scale
         //get_data( dataBuffer->file().c_str(), contwin->tmslider );
         optimize_cs();
         contwin->mincolval->value(cs->min());
         contwin->maxcolval->value(cs->max());
         return 1;
         break;
-      case 'p':
+      case 'p':     // select a vertex
         contwin->pickvert->color(128);
         contwin->pickvert->redraw();
         select_vertex();
         return 1;
         break;
-      case 'r':
+      case 'r':    // reread data
         if( !dataBuffer ) return 1;
         fl_cursor( FL_CURSOR_WAIT );
         Fl::check();
@@ -663,8 +663,9 @@ int TBmeshWin::handle( int event )
         Fl::check();
         return 1;
         break;
-      case 'c':
+      case 'c':  // put controls on top of window
         contwin->window->hide();
+        contwin->window->position( flwin->x_root(), flwin->y_root() );
         contwin->window->show();
         return 1;
         break;
@@ -1857,11 +1858,11 @@ void TBmeshWin::CheckMessageQueue(){
 
 int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
 {
-  if (strcmp(msg.command, LinkMessage::LINK_COMMAND_LINK) == 0) {
+  if (strcmp(msg.command, LinkMessage::LINK) == 0) {
     tmLink->link(msg.senderPid);
-  } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_UNLINK) == 0) {
+  } else if(strcmp(msg.command, LinkMessage::UNLINK) == 0) {
     tmLink->unlink(msg.senderPid);
-  } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_VIEWPORT_SYNC) == 0) {
+  } else if(strcmp(msg.command, LinkMessage::VIEWPORT_SYNC) == 0) {
     // retrieve vals
     trackball.SetScale(msg.trackballState.scale);
     V3f modtrans = msg.trackballState.trans*model->maxdim();
@@ -1873,7 +1874,7 @@ int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
 
     // set the state
     redraw();
-  } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_LINK_SYNC) == 0) {
+  } else if(strcmp(msg.command, LinkMessage::LINK_SYNC) == 0) {
     int newTm = msg.sliderTime;
 
     if (newTm > contwin->tmslider->maximum()) {
@@ -1885,7 +1886,7 @@ int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
     // sync time
     contwin->tmslider->value(newTm);
     set_time(newTm);
-  } else if(strcmp(msg.command, LinkMessage::LINK_COMMAND_COLOUR_SYNC) == 0) { 
+  } else if(strcmp(msg.command, LinkMessage::COLOUR_SYNC) == 0) { 
     cs->calibrate( msg.colourState.min, msg.colourState.max );
     cs->size( msg.colourState.levels );
     contwin->mincolval->value(cs->min());
@@ -1921,7 +1922,7 @@ void TBmeshWin::SendViewportSyncMessage()
   msgToSend.trackballState.qSpin = qSpin;
   msgToSend.trackballState.qRot = qRot*model->syncRefRot().GetConjugate();
   
-  strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_VIEWPORT_SYNC);
+  strcpy(msgToSend.command, LinkMessage::VIEWPORT_SYNC);
   
   tmLink->SendMsgToAll(msgToSend);
 }
@@ -1931,7 +1932,7 @@ void TBmeshWin::SendTimeSyncMessage()
   LinkMessage::CommandMsg msgToSend;
   msgToSend.sliderTime = tm;
   
-  strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_LINK_SYNC);
+  strcpy(msgToSend.command, LinkMessage::LINK_SYNC);
   
   tmLink->SendMsgToAll(msgToSend);
 }
@@ -1939,7 +1940,7 @@ void TBmeshWin::SendTimeSyncMessage()
 void TBmeshWin::SendColourSyncMessage()
 {
   LinkMessage::CommandMsg msgToSend;
-  strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_COLOUR_SYNC);
+  strcpy(msgToSend.command, LinkMessage::COLOUR_SYNC);
 
   msgToSend.colourState.min    = cs->min();
   msgToSend.colourState.max    = cs->max();

@@ -28,11 +28,11 @@ namespace LinkMessage {
     } colourState;
   };
 
-  const char* const LINK_COMMAND_LINK = "link";
-  const char* const LINK_COMMAND_UNLINK = "unlink";
-  const char* const LINK_COMMAND_VIEWPORT_SYNC = "viewport sync";
-  const char* const LINK_COMMAND_LINK_SYNC = "link sync";
-  const char* const LINK_COMMAND_COLOUR_SYNC = "color scale sync";
+  const char* const LINK = "link";
+  const char* const UNLINK = "unlink";
+  const char* const VIEWPORT_SYNC = "viewport sync";
+  const char* const LINK_SYNC = "link sync";
+  const char* const COLOUR_SYNC = "color scale sync";
 
 }
 
