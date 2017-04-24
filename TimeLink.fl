@@ -125,7 +125,7 @@ pclose( in );} {}
       // create a message queue communication with the process
       // put a message in the queue
       LinkMessage::CommandMsg msgToSend;
-	  strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_LINK);
+	  strcpy(msgToSend.command, LinkMessage::LINK);
 
       SendMsg(msgToSend, pid);
       SignalNewMessageInQueue(pid);       
@@ -144,7 +144,7 @@ pclose( in );} {}
       // create a message queue communication with the process
       // put a message in the queue
       LinkMessage::CommandMsg msgToSend;
-      strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_UNLINK);
+      strcpy(msgToSend.command, LinkMessage::UNLINK);
 
       SendMsg(msgToSend, pid);
       SignalNewMessageInQueue(pid); 
@@ -158,7 +158,8 @@ pclose( in );} {}
   }
 
   list_links();
-  list_mesh_pids();} {}
+  list_mesh_pids();} {selected
+    }
   }
   Function {list_links()} {open
   } {
@@ -246,7 +247,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
     comment { * \\brief Create a new message queue for this process
  *
  * \\return int - 0 = SUCCESS, negative = fail
-} return_type int
+} open return_type int
   } {
     code {//1. create an unique key from pid
   int temp;
@@ -311,8 +312,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
     sem_timedwait(linkingProcSem,&ts);
   }
   
-  return 0;} {selected
-    }
+  return 0;} {}
   }
   Function {SendMsg(LinkMessage::CommandMsg& msg, int pid)} {
     comment {* \\brief Notify \\a pid a new message in queue
@@ -380,7 +380,7 @@ for( it; it != linkages_.end(); it++) {
     // create a message queue communication with the process
     // put a message in the queue
     LinkMessage::CommandMsg msgToSend;
-    strcpy(msgToSend.command, LinkMessage::LINK_COMMAND_UNLINK);
+    strcpy(msgToSend.command, LinkMessage::UNLINK);
 	  
     SendMsg(msgToSend, pid);
     SignalNewMessageInQueue(pid); 
