@@ -158,8 +158,7 @@ pclose( in );} {}
   }
 
   list_links();
-  list_mesh_pids();} {selected
-    }
+  list_mesh_pids();} {}
   }
   Function {list_links()} {open
   } {
@@ -241,7 +240,8 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   linkages_.erase(pid);
 
   list_links();
-  list_mesh_pids();} {}
+  list_mesh_pids();} {selected
+    }
   }
   Function {CreateMessageQueue()} {
     comment { * \\brief Create a new message queue for this process
@@ -306,10 +306,21 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
     // process doesn't exist anymore
     unlink(pid);    
   } else {
+  \#ifdef __APPLE__
+    int max_tm=2;
+    do {
+      int retval = sem_trywait( linkingProcSem );
+      if( retval == -1 ){
+        sleep(1);
+        max_tm--;
+      }
+    }while(max_tm>0);
+  \#else
     struct timespec ts;
     ts.tv_sec = 2;
     ts.tv_nsec = 0.;
     sem_timedwait(linkingProcSem,&ts);
+  \#endif
   }
   
   return 0;} {}
