@@ -7,12 +7,14 @@
 
 namespace LinkMessage {
   
+  enum Msgtype { LINK, UNLINK, VIEWPORT_SYNC, LINK_SYNC, COLOUR_SYNC, DIFFUSE_LINK };
+
   struct CommandMsg {
-    long mtype;
-    int senderPid;
-    int receiverPid;
-    char command[20];
-	int sliderTime;
+    pid_t   senderPid;
+    pid_t   receiverPid;
+    Msgtype command;
+	int     sliderTime;
+    int     newlink;
 	
     struct TrackBallState{
       float scale;          
@@ -27,12 +29,6 @@ namespace LinkMessage {
       int       levels;
     } colourState;
   };
-
-  const char* const LINK = "link";
-  const char* const UNLINK = "unlink";
-  const char* const VIEWPORT_SYNC = "viewport sync";
-  const char* const LINK_SYNC = "link sync";
-  const char* const COLOUR_SYNC = "color scale sync";
 
 }
 

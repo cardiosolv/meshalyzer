@@ -1858,23 +1858,20 @@ void TBmeshWin::CheckMessageQueue(){
 
 int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
 {
-  if (strcmp(msg.command, LinkMessage::LINK) == 0) {
-    tmLink->link(msg.senderPid);
-  } else if(strcmp(msg.command, LinkMessage::UNLINK) == 0) {
+  if ( msg.command == LinkMessage::LINK ) {
+    tmLink->link(msg.newlink);
+  } else if( msg.command == LinkMessage::UNLINK ) {
     tmLink->unlink(msg.senderPid);
-  } else if(strcmp(msg.command, LinkMessage::VIEWPORT_SYNC) == 0) {
-    // retrieve vals
+  } else if(  msg.command == LinkMessage::DIFFUSE_LINK ) {
+     tmLink->diffuse_link( msg.senderPid );
+  } else if( msg.command == LinkMessage::VIEWPORT_SYNC ) {
     trackball.SetScale(msg.trackballState.scale);
     V3f modtrans = msg.trackballState.trans*model->maxdim();
-    trackball.SetTranslation(modtrans.X(),
-            modtrans.Y(), modtrans.Z() );
-
+    trackball.SetTranslation(modtrans.X(), modtrans.Y(), modtrans.Z() );
     trackball.qRot = msg.trackballState.qRot*model->syncRefRot();
     trackball.qSpin = msg.trackballState.qSpin;
-
-    // set the state
     redraw();
-  } else if(strcmp(msg.command, LinkMessage::LINK_SYNC) == 0) {
+  } else if( msg.command == LinkMessage::LINK_SYNC ) {
     int newTm = msg.sliderTime;
 
     if (newTm > contwin->tmslider->maximum()) {
@@ -1886,7 +1883,7 @@ int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
     // sync time
     contwin->tmslider->value(newTm);
     set_time(newTm);
-  } else if(strcmp(msg.command, LinkMessage::COLOUR_SYNC) == 0) { 
+  } else if( msg.command == LinkMessage::COLOUR_SYNC ) { 
     cs->calibrate( msg.colourState.min, msg.colourState.max );
     cs->size( msg.colourState.levels );
     contwin->mincolval->value(cs->min());
@@ -1922,7 +1919,7 @@ void TBmeshWin::SendViewportSyncMessage()
   msgToSend.trackballState.qSpin = qSpin;
   msgToSend.trackballState.qRot = qRot*model->syncRefRot().GetConjugate();
   
-  strcpy(msgToSend.command, LinkMessage::VIEWPORT_SYNC);
+  msgToSend.command = LinkMessage::VIEWPORT_SYNC;
   
   tmLink->SendMsgToAll(msgToSend);
 }
@@ -1932,7 +1929,7 @@ void TBmeshWin::SendTimeSyncMessage()
   LinkMessage::CommandMsg msgToSend;
   msgToSend.sliderTime = tm;
   
-  strcpy(msgToSend.command, LinkMessage::LINK_SYNC);
+  msgToSend.command = LinkMessage::LINK_SYNC;
   
   tmLink->SendMsgToAll(msgToSend);
 }
@@ -1940,8 +1937,7 @@ void TBmeshWin::SendTimeSyncMessage()
 void TBmeshWin::SendColourSyncMessage()
 {
   LinkMessage::CommandMsg msgToSend;
-  strcpy(msgToSend.command, LinkMessage::COLOUR_SYNC);
-
+  msgToSend.command = LinkMessage::COLOUR_SYNC;
   msgToSend.colourState.min    = cs->min();
   msgToSend.colourState.max    = cs->max();
   msgToSend.colourState.scale  = contwin->cstype->value();

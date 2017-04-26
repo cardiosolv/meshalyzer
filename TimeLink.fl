@@ -1,45 +1,45 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
 decl {\#include <set>} {public local
-} 
+}
 
 decl {\#include <sys/types.h>} {private local
-} 
+}
 
 decl {\#include <cstdlib>} {private local
-} 
+}
 
 decl {\#include <cstdio>} {private local
-} 
+}
 
 decl {\#include <unistd.h>} {private local
-} 
+}
 
 decl {\#include <iostream>} {private local
-} 
+}
 
 decl {\#include <map>} {public global
-} 
+}
 
 decl {\#include <sys/msg.h>} {private local
-} 
+}
 
 decl {\#include <sys/ipc.h>} {private local
-} 
+}
 
 decl {\#include <semaphore.h>} {private local
-} 
+}
 
 decl {\#include <signal.h>} {private local
-} 
+}
 
 decl {\#include <LinkMessages.h>} {public global
-} 
+}
 
 decl {using namespace std;} {public global
-} 
+}
 
 class TimeLink {open
 } {
@@ -53,7 +53,7 @@ class TimeLink {open
         xywh {10 10 270 195} box GTK_UP_BOX color 14 align 65
       } {
         Fl_Browser meshList {
-          xywh {20 25 250 105} type Multi
+          xywh {20 25 250 105} type Select
         }
         Fl_Button {} {
           label {link selected}
@@ -99,41 +99,40 @@ meshList->clear();
 char procline[1024];
 
 while( fgets( procline, 1024, in ) != NULL ) {
-  int pid = atoi( procline );
+  pid_t pid = atoi( procline );
   if( getpid()!=pid && linkages_.find(pid)==linkages_.end() ) {
     meshList->add(procline);
   }
 }
 
-pclose( in );} {}
+pclose( in );
+meshList->redraw();} {}
   }
   Function {link()} {
     comment {Link the selected meshalyzer PIDs
 } open
   } {
-    code {for( int i=1; i<=meshList->size(); i++ ){
-    if( meshList->selected(i) ) {
+    code {int sel = meshList->value();
+if( !sel ) return;
 
-      int pid = atoi(meshList->text(i));
-
-      // link the message queue
-      LinkMessageQueue(pid);
-
-      // adding a new linkage to the list
-      linkages_.insert(pid);
-
-      // create a message queue communication with the process
-      // put a message in the queue
-      LinkMessage::CommandMsg msgToSend;
-	  strcpy(msgToSend.command, LinkMessage::LINK);
-
-      SendMsg(msgToSend, pid);
-      SignalNewMessageInQueue(pid);       
-    }
-  }
-
-  list_links();
-  list_mesh_pids();} {}
+int pid = atoi(meshList->text(sel)); 
+  // create a message queue communication with the process
+  // put a message in the queue
+      
+if( linkages_.size() ) { //add the new pid to the group
+  diffuse_link( pid );
+ } else { // tell someone to tell others about us
+  LinkMessageQueue(pid);
+  LinkMessage::CommandMsg msg;
+  msg.command = LinkMessage::DIFFUSE_LINK;
+  msg.newlink = getpid();
+  SendMsg( msg, pid ); 
+  SignalNewMessageInQueue( pid );
+  return;
+ }
+ 
+list_links();
+list_mesh_pids();} {}
   }
   Function {unlink()} {open
   } {
@@ -144,7 +143,7 @@ pclose( in );} {}
       // create a message queue communication with the process
       // put a message in the queue
       LinkMessage::CommandMsg msgToSend;
-      strcpy(msgToSend.command, LinkMessage::UNLINK);
+      msgToSend.command = LinkMessage::UNLINK;
 
       SendMsg(msgToSend, pid);
       SignalNewMessageInQueue(pid); 
@@ -164,7 +163,7 @@ pclose( in );} {}
   } {
     code {linkList->clear();
 
-set<int>::iterator it;
+set<pid_t>::iterator it;
 for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   char pidtext[256];
   sprintf( pidtext, "%d", *it );
@@ -194,9 +193,11 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
 
   // append the msg id to the data structure
   linkageMsqIds_[pid] = temp;
+  
+  linkages_.insert(pid);
   return 0;} {}
   }
-  Function {link(int pid)} {
+  Function {link(pid_t pid)} {
     comment {
  * \\brief Temporal linking and message queue linking with a 
  *        meshalyzer \\a pid
@@ -206,26 +207,27 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
  * \\return int - 0 = SUCCESS, negative = fail
  *
  
-} return_type int
+} open return_type int
   } {
     code {// check to see if the pid exist in the list of mesh pids
-  list_mesh_pids();
+  if( !linkages_.count(pid) && pid!=getpid() ) {
+  
+    list_mesh_pids();
 
-  for(int i = 1; i <= meshList->size(); i++){
-    int val = atoi(meshList->text(i));
-    if (val == pid){
-      // move to link list
-      LinkMessageQueue(pid);
-      linkages_.insert(pid);
+    for(int i = 1; i <= meshList->size(); i++){
+      int val = atoi(meshList->text(i));
+      if (val == pid){
+        // move to link list
+        LinkMessageQueue(pid);
+      }
     }
   }
-
   list_links();
   list_mesh_pids();
 
   return 0;} {}
   }
-  Function {unlink(int pid)} {
+  Function {unlink(pid_t pid)} {
     comment { * \\brief Unlink \\a pid from an existing linkage 
  *
  * \\param[in] pid - unlink this meshalyzer \\a pid
@@ -240,8 +242,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   // erase from linkage
   linkages_.erase(pid);
   list_links();
-  list_mesh_pids();} {selected
-    }
+  list_mesh_pids();} {}
   }
   Function {CreateMessageQueue()} {
     comment { * \\brief Create a new message queue for this process
@@ -286,7 +287,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   }
   decl {extern sem_t *linkingProcSem;} {private local
   }
-  Function {SignalNewMessageInQueue(int pid)} {
+  Function {SignalNewMessageInQueue(pid_t pid)} {
     comment {* \\brief Notify \\a pid a new message in queue
  *
  * \\param[in] pid - process id for a meshalyzer program
@@ -325,7 +326,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   
   return 0;} {}
   }
-  Function {SendMsg(LinkMessage::CommandMsg& msg, int pid)} {
+  Function {SendMsg(LinkMessage::CommandMsg& msg, pid_t pid)} {
     comment {* \\brief Notify \\a pid a new message in queue
  *
  * \\param[in] pid - process id for a meshalyzer program
@@ -333,14 +334,13 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
  * \\return int - 0 = SUCCESS, negative = fail
 } open return_type int
   } {
-    code {int msqId = linkageMsqIds_[pid];
+    code {pid_t msqId = linkageMsqIds_[pid];
 
   if (msqId < 0){
     return -1;
   }
 
   int retVal = 0;
-  msg.mtype = 1;
   msg.senderPid = getpid();
   msg.receiverPid = pid;
 
@@ -358,7 +358,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
  * \\return int - 0 = SUCCESS, negative = fail
 } open return_type void
   } {
-    code {set<int>::iterator it = linkages_.begin();
+    code {set<pid_t>::iterator it = linkages_.begin();
 
 for( it; it != linkages_.end(); it++) {
    SendMsg(msg, *it);
@@ -382,7 +382,7 @@ for( it; it != linkages_.end(); it++) {
   }
   Function {~TimeLink()} {open
   } {
-    code {set<int>::iterator it = linkages_.begin();
+    code {set<pid_t>::iterator it = linkages_.begin();
   //unlink all
   for ( it; it != linkages_.end(); it++ ){
 
@@ -391,7 +391,7 @@ for( it; it != linkages_.end(); it++) {
     // create a message queue communication with the process
     // put a message in the queue
     LinkMessage::CommandMsg msgToSend;
-    strcpy(msgToSend.command, LinkMessage::UNLINK);
+    msgToSend.command = LinkMessage::UNLINK;
 	  
     SendMsg(msgToSend, pid);
     SignalNewMessageInQueue(pid); 
@@ -401,12 +401,33 @@ for( it; it != linkages_.end(); it++) {
   // delete it's own msg queue
   DeleteMessageQueue();} {}
   }
+  Function {diffuse_link( pid_t pid )} {open
+  } {
+    code {LinkMessage::CommandMsg msg;
+msg.newlink = pid;
+msg.command = LinkMessage::LINK;
+LinkMessageQueue(pid);
+SendMsgToAll(msg);
+
+msg.newlink = getpid();
+set<pid_t>::iterator it;
+SendMsg(msg, pid);
+SignalNewMessageInQueue(pid); 
+for( it=linkages_.begin(); it!=linkages_.end(); it++ ) {
+  msg.newlink = *it;
+  SendMsg(msg, pid);
+  SignalNewMessageInQueue(pid); 
+}
+list_links();
+list_mesh_pids();} {selected
+    }
+  }
   decl {const char* MSQ_KEY_PATH;} {public local
   }
   decl {int msqId_;} {private local
   }
-  decl {set<int>& linkages_;} {private local
+  decl {set<pid_t>& linkages_;} {private local
   }
-  decl {std::map<int, int> linkageMsqIds_;} {private local
+  decl {std::map<pid_t, int> linkageMsqIds_;} {private local
   }
-} 
+}
