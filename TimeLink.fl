@@ -1,45 +1,45 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
-header_name {.h}
+version 1.0300 
+header_name {.h} 
 code_name {.cc}
 decl {\#include <set>} {public local
-}
+} 
 
 decl {\#include <sys/types.h>} {private local
-}
+} 
 
 decl {\#include <cstdlib>} {private local
-}
+} 
 
 decl {\#include <cstdio>} {private local
-}
+} 
 
 decl {\#include <unistd.h>} {private local
-}
+} 
 
 decl {\#include <iostream>} {private local
-}
+} 
 
 decl {\#include <map>} {public global
-}
+} 
 
 decl {\#include <sys/msg.h>} {private local
-}
+} 
 
 decl {\#include <sys/ipc.h>} {private local
-}
+} 
 
 decl {\#include <semaphore.h>} {private local
-}
+} 
 
 decl {\#include <signal.h>} {private local
-}
+} 
 
 decl {\#include <LinkMessages.h>} {public global
-}
+} 
 
 decl {using namespace std;} {public global
-}
+} 
 
 class TimeLink {open
 } {
@@ -118,10 +118,10 @@ if( !sel ) return;
 int pid = atoi(meshList->text(sel)); 
   // create a message queue communication with the process
   // put a message in the queue
-      
+
 if( linkages_.size() ) { //add the new pid to the group
   diffuse_link( pid );
- } else { // tell someone to tell others about us
+} else { // tell someone to tell others about us
   LinkMessageQueue(pid);
   LinkMessage::CommandMsg msg;
   msg.command = LinkMessage::DIFFUSE_LINK;
@@ -129,7 +129,7 @@ if( linkages_.size() ) { //add the new pid to the group
   SendMsg( msg, pid ); 
   SignalNewMessageInQueue( pid );
   return;
- }
+}
  
 list_links();
 list_mesh_pids();} {}
@@ -298,11 +298,8 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
 } open return_type int
   } {
     code {// make sure we start at zero
-  int numsem;
-  sem_getvalue(linkingProcSem, &numsem);
-  for (int i = 0; i < numsem; i++ ){
-    sem_wait(linkingProcSem);
-  }
+  while( sem_trywait(linkingProcSem) == 0 )
+    ;
 
   if (kill(pid, SIGALRM)){
     return -1;   // process no longer exists
@@ -324,8 +321,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   \#endif
   }
   
-  return 0;} {selected
-    }
+  return 0;} {}
   }
   Function {SendMsg(LinkMessage::CommandMsg& msg, pid_t pid)} {
     comment {* \\brief Notify \\a pid a new message in queue
@@ -333,7 +329,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
  * \\param[in] pid - process id for a meshalyzer program
  *
  * \\return int - 0 = SUCCESS, negative = fail
-} open return_type int
+} return_type int
   } {
     code {pid_t msqId = linkageMsqIds_[pid];
 
@@ -351,7 +347,8 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   retVal = msgsnd(msqId, (void *)&msg, size, IPC_NOWAIT);
   if (retVal == -1){
     return -1;
-  }} {}
+  }} {selected
+    }
   }
   Function {SendMsgToAll(LinkMessage::CommandMsg& msg)} {
     comment {* \\brief Send msg to all linked processes
@@ -375,7 +372,7 @@ for( it=broken.begin(); it != broken.end(); it++)
     comment {* \\brief Receive a new message in queue
  *
  * \\return int - 0 = SUCCESS, negative = fail
- *} open return_type int
+ *} return_type int
   } {
     code {int size = sizeof(struct LinkMessage::CommandMsg) -
                offsetof(struct LinkMessage::CommandMsg, senderPid);
@@ -386,8 +383,7 @@ for( it=broken.begin(); it != broken.end(); it++)
   }
   return 0;} {}
   }
-  Function {~TimeLink()} {open
-  } {
+  Function {~TimeLink()} {} {
     code {set<pid_t>::iterator it = linkages_.begin();
   //unlink all
   for ( it; it != linkages_.end(); it++ ){
@@ -435,4 +431,4 @@ list_mesh_pids();} {}
   }
   decl {std::map<pid_t, int> linkageMsqIds_;} {private local
   }
-}
+} 
