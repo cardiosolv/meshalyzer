@@ -617,6 +617,13 @@ main( int argc, char *argv[] )
   if (linkingProcSem == SEM_FAILED)
     perror("Message Queue inter-process communication not possible");
 
+  if( surfFile ) {
+    if( *surfFile=='\0' ) 
+        surfFile = strdup(win.trackballwin->model->file().c_str());
+    if(!compute_write_surfaces( win.trackballwin->model, surfFile ) )
+      exit(0);
+  }
+
   // just output images, no interaction
   if( PNGfile )  {
     if( frame0<0 )   frame0   = win.trackballwin->time();
@@ -624,12 +631,6 @@ main( int argc, char *argv[] )
     os_png_seq( PNGfile, frame0+proc, numframe-proc, win.trackballwin, pngsize, nproc );
   }
 
-  if( surfFile ) {
-    if( *surfFile=='\0' ) 
-        surfFile = strdup(win.trackballwin->model->file().c_str());
-    if(!compute_write_surfaces( win.trackballwin->model, surfFile ) )
-      exit(0);
-  }
   Fl::run();
 
   return 0;

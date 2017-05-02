@@ -47,13 +47,13 @@ class TimeLink {open
   } {
     Fl_Window window {
       label TimeLink open
-      xywh {1894 350 290 410} type Double box ENGRAVED_BOX color 27 hide
+      xywh {798 119 290 410} type Double box ENGRAVED_BOX color 27 visible
     } {
       Fl_Group {} {open
         xywh {10 10 270 195} box GTK_UP_BOX color 14 align 65
       } {
         Fl_Browser meshList {
-          xywh {20 25 250 105} type Select
+          xywh {20 25 250 105} type Select selection_color 88
         }
         Fl_Button {} {
           label {link selected}
@@ -276,7 +276,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
     comment { * \\brief Delete an existing message queue with \\a msqId
  *
  * \\return int - 0 = SUCCESS, negative = fail
-} return_type int
+} open return_type int
   } {
     code {if (msgctl(msqId_, IPC_RMID, NULL) == -1) {
     perror("msgctl");
@@ -292,7 +292,8 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
  *
  * \\param[in] pid - process id for a meshalyzer program
  *
- * \\return int - 0 = SUCCESS, negative = fail
+ * \\retval 0  SUCCESS
+ * \\retval <0 FAIL
  *
 } open return_type int
   } {
@@ -304,8 +305,7 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   }
 
   if (kill(pid, SIGALRM)){
-    // process doesn't exist anymore
-    unlink(pid);    
+    return -1;   // process no longer exists
   } else {
   \#ifdef __APPLE__
     int max_tm=2;
@@ -324,7 +324,8 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
   \#endif
   }
   
-  return 0;} {}
+  return 0;} {selected
+    }
   }
   Function {SendMsg(LinkMessage::CommandMsg& msg, pid_t pid)} {
     comment {* \\brief Notify \\a pid a new message in queue
@@ -359,11 +360,16 @@ for ( it=linkages_.begin() ; it != linkages_.end(); it++ ){
 } open return_type void
   } {
     code {set<pid_t>::iterator it = linkages_.begin();
+set<pid_t> broken;
 
-for( it; it != linkages_.end(); it++) {
+for( ; it != linkages_.end(); it++) {
    SendMsg(msg, *it);
-   SignalNewMessageInQueue(*it); 
-}} {}
+   if( SignalNewMessageInQueue(*it) < 0 )
+     broken.insert(*it);
+}
+
+for( it=broken.begin(); it != broken.end(); it++)
+  unlink(*it);} {}
   }
   Function {ReceiveMsg(LinkMessage::CommandMsg& msg)} {
     comment {* \\brief Receive a new message in queue
@@ -419,8 +425,7 @@ for( it=linkages_.begin(); it!=linkages_.end(); it++ ) {
   SignalNewMessageInQueue(pid); 
 }
 list_links();
-list_mesh_pids();} {selected
-    }
+list_mesh_pids();} {}
   }
   decl {const char* MSQ_KEY_PATH;} {public local
   }
