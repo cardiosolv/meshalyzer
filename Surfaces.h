@@ -42,13 +42,13 @@ class Surfaces
     PPoint   *_p;
     GLfloat  _fillcolor[4];
     GLfloat  _outlinecolor[4];
-    bool      is_visible;
-    bool     _filled;         //!< draw filled
-    bool     _outline;        //!< draw the outline
-    GLfloat* _vertnorm;   //!< vertex normals
+    bool      is_visible = true;
+    bool     _filled     = true;   //!< draw filled
+    bool     _outline    = false;  //!< draw the outline
+    GLfloat* _vertnorm   = NULL;   //!< vertex normals
     int*     _vert;       //!< vertices for which normals are computed
     vector<SurfaceElement*> _ele; //!< list of elelments to draw
-    string   _label;
+    string   _label="";
 };
 
 #endif

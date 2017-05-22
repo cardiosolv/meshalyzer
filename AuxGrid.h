@@ -16,23 +16,23 @@ class AuxGridFetcher;
 
 class AuxGrid {
     private:
-        AuxGridFetcher * _indexer;  //!< private implementation of indexer
-        bool         _display;
+        AuxGridFetcher * _indexer = NULL;  //!< private implementation of indexer
+        bool         _display   = true;
         bool         _datafied[maxobject];
-        bool         _surf_fill;  //!< if false, draw outline
-        bool         _vol_fill;   //!< if false, draw wireframe
+        bool         _surf_fill = true;  //!< if false, draw outline
+        bool         _vol_fill  = false;   //!< if false, draw wireframe
         bool         _autocol;
         bool         _show[maxobject]; //!< true to show object
         bool         _3D[maxobject+2];
         GLfloat      _color[maxobject+2][4];
         float        _size[maxobject+2];
-        bool         _plottable;    //!< true if a time series can be plotted
-        int          _hiVert;
-        bool         _hilight;
-        PlotWin*     _timeplot;
-        int          _sz_ts;        //!< size of time series
+        bool         _plottable = false;    //!< true if a time series can be plotted
+        int          _hiVert    = 0;
+        bool         _hilight   = false;
+        PlotWin*     _timeplot  = NULL;
+        int          _sz_ts;               //!< size of time series
         double*      _time_series;
-        bool         _clip;         // is is clipped?
+        bool         _clip      = false;   // is is clipped?
 
     public:
         AuxGrid( const char *fn, AuxGrid *ag=NULL );

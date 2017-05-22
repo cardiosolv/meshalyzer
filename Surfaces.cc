@@ -87,7 +87,7 @@ void Surfaces::determine_vert_norms( PPoint& pt )
     }
   }
   _vert[numvert] = -1;
-  delete tvn;
+  delete[] tvn;
 }
 
 

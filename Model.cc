@@ -1104,7 +1104,7 @@ void Model::hilight_info( HiLiteInfoWin* hinfo, int* hilight, DATA_TYPE* data )
     }
   }
   if ( numSurf() ) {
-    hinfo->add( "Attached elements:" );
+    hinfo->add( "Attached surface elements:" );
     int nglob=0;
     for ( int i=0; i<numSurf(); i++ ) {
       vector<SurfaceElement*> ele=surface(i)->ele();

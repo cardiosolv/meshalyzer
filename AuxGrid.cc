@@ -420,8 +420,6 @@ private:
  * \throw 1 if any error in input
  */
 AuxGrid::AuxGrid( const char *fn, AuxGrid *ag )
-  : _display(true), _hilight(false), _hiVert(0), _plottable(false),
-    _indexer(NULL),_timeplot(NULL),_clip(false),_surf_fill(true),_vol_fill(false)
 {
   if( strstr( fn, ".pts_t" ) )
     _indexer = new AuxGridIndexer(fn);

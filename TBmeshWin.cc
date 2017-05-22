@@ -992,7 +992,7 @@ TBmeshWin :: select_hi( int n )
       objtype=Vertex;
       obin = contwin->verthi;
       break;
-    } else if ( strstr(  hinfo->text(i), "element" ) ) {
+    } else if ( strstr(  hinfo->text(i), "surface" ) ) {
       objtype=SurfEle;
       obin = contwin->elehi;
       break;
