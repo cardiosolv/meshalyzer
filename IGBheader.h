@@ -76,6 +76,8 @@
 #define ERR_SIZE_NOT_DEFINED   7
 #define WARN_DIM_INCONSISTENT  256
 
+#ifndef PrMTYPES
+#define PrMTYPES
 /*
     Definition des types List, bytes, Char, Double, complex d_complex
     et rgba
@@ -86,31 +88,30 @@ typedef	    struct List
   char    *items;
 }
 List;
-typedef	    unsigned char	byte;
+typedef	    unsigned char	    byte;
 #ifndef __GL_GL_H__
-typedef     unsigned char	Byte;
-typedef     char		*String;
+typedef     unsigned char	    Byte;
+typedef     char		       *String;
 #endif
 typedef	    signed char	    	Char;
 typedef	    struct S_Complex	S_Complex;
-typedef	    double	    	Double;
+typedef	    double	         	Double;
 typedef     struct D_Complex	D_Complex;
-typedef     float		Float;
-typedef     int			Int;
-typedef     long		Long;
-typedef     int			Int;
+typedef     float		        Float;
+typedef     int			        Int;
+typedef     long		        Long;
 typedef     unsigned int        UInt;
-typedef     short		Short;
-typedef     int			BooleaN;
-typedef     int			Flag;
-typedef     char		*RDir;
-typedef     char		*RFile;
-typedef     char		*RWDir;
-typedef     char		*RWFile;
-typedef     char		*WDir;
-typedef     char		*WFile;
-typedef     char		**Text;
-typedef     void		Any;
+typedef     short		        Short;
+typedef     int			        BooleaN;
+typedef     int			        Flag;
+typedef     char		       *RDir;
+typedef     char		       *RFile;
+typedef     char		       *RWDir;
+typedef     char		       *RWFile;
+typedef     char		       *WDir;
+typedef     char		       *WFile;
+typedef     char		      **Text;
+typedef     void		        Any;
 struct S_Complex
 {
   Float	real, imag;
@@ -119,27 +120,13 @@ struct D_Complex
 {
   Double	real, imag;
 };
-#ifndef _COMPLEX_DEFINED
-typedef struct complex
-{
-  float   reel ;
-  float   imag ;
-}
-complex ;
-typedef struct d_complex
-{
-  Double  reel ;
-  Double  imag ;
-}
-d_complex ;
-#define _COMPLEX_DEFINED
 #endif
+
+/* Indice de chaque composante dans le vecteur b[] de l'union rgba */
 typedef union rgba {
   unsigned	long    l;
   byte		b[4];
 } rgba ;
-
-/* Indice de chaque composante dans le vecteur b[] de l'union rgba */
 #define RGBA_ROUGE 3
 #define RGBA_VERT  2
 #define RGBA_BLEU  1
@@ -196,6 +183,7 @@ class IGBheader
     char** v_comment=(char**)calloc(NALLOC,sizeof(char*));    //!< commentaires ------------------
     void*  v_transparent=NULL;	  //!< transparent value for data
     int    puts_fcn(void *, char *);
+    long    tell(void *);
 
     // boolean flags to indicate if a default value has been overridden
     bool bool_x=false, bool_y=false, bool_z=false, bool_t=false;
@@ -511,14 +499,14 @@ IGBheader::to_bin( void *buf, T d )
           CONVERT_TYPE( long, LONG_MIN, LONG_MAX, buf )
           break;
       case IGB_FLOAT:
-          CONVERT_TYPE( float, FLT_MIN, FLT_MAX, buf )
+          CONVERT_TYPE( float, (-FLT_MAX), FLT_MAX, buf )
           break;
       case IGB_VEC3_f:
       case IGB_VEC4_f:
           assert(0);
           break;
       case IGB_DOUBLE:
-          CONVERT_TYPE( double, DBL_MIN, DBL_MAX, buf )
+          CONVERT_TYPE( double, (-DBL_MAX), DBL_MAX, buf )
           break;
       case IGB_VEC3_d:
       case IGB_VEC4_d:

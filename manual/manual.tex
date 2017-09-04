@@ -242,7 +242,7 @@ Py n1 n2 n3 n4 n5 [region]
 Pr n1 n2 n3 n4 n5 n6 [region]
 Tt n1 n2 n3 n4 [region]
 Tr n1 n2 n3 [region [region_label]]
-Qd n1 n2 n3 n4 [region [regio_label]]
+Qd n1 n2 n3 n4 [region [region_label]]
 .
 .
 .
@@ -292,7 +292,7 @@ first_vertex_in_regionN last_vertex_in_regionN
 
 \subsection{Vertex Scalar Data}
 Scalar data can be associated with each vertex.
-It can be time dependent or a time independent.
+It can be time dependent or time independent.
 
 \subsubsection{Time Independent}
 A data file typically has the extension ``.dat'' or ``.out'' but these extensions
@@ -315,8 +315,8 @@ visualization program called flounder, for regularly spaced data.
 
 The file is composed of a 1024-byte long header followed by binary data.
 For irregular grids, the individual dimensions are meaningless but xdim$\times$ ydim$\times$ zdim should be equal to the number of vertices.
-The header is composed of strings of the following format, separated by
-white space:
+The header is composed of strings of the format below, separated by
+white space.
 \centerline{ \texttt{KeyWord:value} }
 Note that the header must be padded to 1024 bytes.
 The first block of key words need to be specified. The rest are optional.
@@ -356,8 +356,8 @@ The first block of key words need to be specified. The rest are optional.
 	aut\_name & string & author's name     \\
     transparent & hex & value for no data  
 \end{longtable}
-Note that for unstructured grids, $x$, $y$ and $z$ are meaningless. However, their product $xyz$ must equal the
-number of nodes in the model.
+Note that for unstructured grids, $x$, $y$ and $z$ specific values 
+are meaningless.
 
 \subsection{Vector Data}
 To display vector data, an auxiliary set of points must be 
@@ -620,6 +620,7 @@ Clicking on the ``current reg/surf'' button highlights the first
 structure of each
 type for the currently selected shell (0 if \emph{All} is chosen).
 
+\label{para:pickvertex}
 The highlighted vertex can also be selected with the mouse.
 clicking on the ``Pick Vertex'' button will enter vertex picking mode
 with the button turning red to indicate this.
@@ -627,7 +628,7 @@ A vertex can then be selected by clicking on it.
 To properly pick a vertex, it is necessary to display vertices or 
 outlined surfaces.
 If you are having trouble selecting a vertex, display points, turn off all unnecessary
-surfaces and regions, and click right on top of it.
+surfaces and regions, and click exactly on top of it.
 In the event of nearby vertices, the one closest to the viewer's eye (minimum z
 window coordinate) will be selected.
 Note that the value of the highlighted node can be changed by using the mouse wheel (ctrl and alt increase the 
@@ -1007,15 +1008,18 @@ changes the scale.
 The axes showing the orientation of the window may be displayed by clicking on the
 \emph{Axes} button.
 
-The left and right arrow keys change the displayed time, one frame per press.
-
-To recalibrate the colour scale to the optimal for the displayed data,
-press ``o''.
-
-Depressing the ``p'' key will enter vertex picking mode. It is a short cut for the
-``Pick Vertex'' button.
-
-To reread the current data file, press ``r''.
+\begin{longtable}{|c|l|}\hline
+Key & Action \\ \hline
+    $\leftarrow$ & decrement time \\
+    $\rightarrow$ & increment time \\
+    c & pop control window \\
+    o & recalibrate the colour scale to the optimal for the displayed data \\
+    p  & enter \hyperref[para:pickvertex]{vertex picking} mode\\
+    r  & reread the current data file \\
+    t & \hyperref[sec:link]{temporally sync} \\
+    v & \hyperref[sec:link]{viewport sync} \\
+    \hline
+\end{longtable}
 
 \section{Linking}
 
@@ -1038,8 +1042,10 @@ Currently, linking supports the following operations:
 \item[Viewport syncing] Clicking ``Image/Sync/Viewport'' or pressing ``v'' in the model window 
      will transmit the current scale, relative orientation, and relative translation to all other instances.
      If the meshes are not oriented along the same axes, a new reference direction can be defined and then the rotation 
-     relative to this orientation will be applied. The simplest way to apply this is to put the linked meshes 
-     to their respective default views, orient one to match the other, and then click ``Image/Sync/Set Reference View''
+     relative to this orientation will be applied. The simplest way to use this is to 
+     set the linked meshes 
+     to their respective default views, orient one a mesh to match the others, 
+     and then click ``Image/Sync/Set Reference View''
  \item[Colour Scale] Clicking ``Image/Sync/Colour Scale'', or pressing the sync button 
      beside the colour bar will transmit the current colour map to all other instances.
 \end{description}
@@ -1069,7 +1075,8 @@ specified.
 
 The simplest way to use offscreen rendering is to interactively 
 set up meshalyzer in a suitable state and then save it. The model,
-data and state files are then specified as normal on the command line and the additional PNG related options added.
+data and state files are then specified normally on the command line
+and the additional PNG related options added.
 A simple example might be something like
 \begin{verbatim}
 meshalyzer --PNGfile=movie --numfr=10 --frame=5 myopurk.

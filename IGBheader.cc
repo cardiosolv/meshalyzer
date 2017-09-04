@@ -747,7 +747,7 @@ int IGBheader::read( bool quiet )
 
     /* --- lit la ligne dans le fichier --- */
     int i = 0 ;
-    int bytes_read = gztell((gzFile)file);
+    int bytes_read = tell(file);
     if( bytes_read<0 )
       return 2;
 
@@ -796,7 +796,7 @@ int IGBheader::read( bool quiet )
         if (!Header_Quiet)
           fprintf(stderr,
                   "\nERREUR caract. non imprim. 0x%.2X dans "
-                  "l'entete at byte number %ld\n", in, gztell((gzFile)file) );
+                  "l'entete at byte number %ld\n", in, tell(file) );
         sprintf(Header_Message,
                 "\nERREUR caract. non imprim. 0x%.2X dans l'entete !\n", in );
         return ERR_UNPRINTABLE_CHAR;
@@ -1188,11 +1188,11 @@ int IGBheader::read( bool quiet )
     }
   }
 
-  if (gztell((gzFile)file)!=1024) {
+  if (tell(file)!=1024) {
     gzseek( (gzFile)file, 1024, SEEK_SET );
     if (!Header_Quiet) {
       fprintf(stderr,
-              "\nATTENTION: etiquette de grandeur non-standard: %ld \n", gztell((gzFile)file));
+              "\nATTENTION: etiquette de grandeur non-standard: %ld \n", tell(file));
     }
     sprintf(Header_Message,
             "\nATTENTION: etiquette de grandeur non-standard \n");
@@ -1272,6 +1272,16 @@ void IGBheader::type( char *datatype )
     exit(1);
   }
   bool_type = true;
+}
+
+
+// simple wrapper for ftell/gztell
+long IGBheader::tell( void *f )
+{
+    if( gzipping ) 
+      return gztell( (gzFile)f );
+    else
+      return ftell( (FILE*)f );
 }
 
 
