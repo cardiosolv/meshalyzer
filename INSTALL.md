@@ -4,9 +4,12 @@ Meshalyzer is regularly used on Linux and Mac machines. It has worked under Wind
 
 ## Prerequisities ##
 
-1. [FLTK 1.3](http://www.fltk.org/) Manually downloadad and installed is better since the prepackaged versions often have issues with fltk-config.
-2. glut
-3. To make a windowless version, OSMesa
+1. [libpng](http://libpng.org)
+2. [FLTK 1.3](http://www.fltk.org/). Manually downloadad and installed is better since the prepackaged versions often have issues with fltk-config.
+2. [glut](https://www.opengl.org/resources/libraries/glut/)
+3. To make the "windowless" rendering version, [OSMesa](https://www.mesa3d.org/osmesa.html)
+
+Except for fltk, using your package manager is recommended for installing these packages if possible.
 
 ## Compiling ##
 
