@@ -58,10 +58,12 @@ class Meshwin {open
   Function {Meshwin()} {open
   } {
     Fl_Window winny {
-      label trimesh open
-      xywh {400 840 455 455} type Double hide resizable hotspot
+      label meshalyzer
+      callback {if( fl_ask("Really quit?") )exit(0);} open selected
+      xywh {174 813 455 455} type Double resizable hotspot visible
     } {
       Fl_Box trackballwin {
+        callback {if( fl_ask("Really quit?" ) ) exit(0);}
         xywh {0 0 455 455}
         code0 {\#include "TBmeshWin.h"}
         class TBmeshWin
@@ -81,11 +83,11 @@ class Controls {open
   Function {Controls()} {} {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {466 349 350 645} type Double box UP_BOX
+      xywh {279 131 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open selected
+      Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {

@@ -698,8 +698,7 @@ void  TBmeshWin::set_windows( Fl_Window *flwindow, const char *modname )
   ptDrawn.resize(model->pt.num());
 
   flwin = flwindow;
-  flwintitle = "meshalyzer";
-  flwintitle += modname;
+  flwintitle = modname;
   flwin->label( flwintitle.c_str() );
 
   // set the dimensions for the trackball
@@ -758,6 +757,7 @@ void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt,
   string wintitle =  fnt;
   string::size_type  i0=wintitle.rfind("/");
   if ( i0 < string::npos ) wintitle= wintitle.substr(i0+1,string::npos);
+  if (wintitle.rfind(".pts") == wintitle.size()-4 ) wintitle=wintitle.substr(0,wintitle.size()-4);
 
   set_windows( flwindow, wintitle.c_str() );
 }
