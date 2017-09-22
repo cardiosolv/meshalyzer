@@ -35,6 +35,7 @@ void PlotWin :: set_data( int n, int id, double *d, int t, float dt,
 
   _id = id;
   highlight( t );
+  window->label(_datafile.c_str() );
 }
 
 
@@ -70,6 +71,7 @@ void PlotWin :: set_data( int id, int n, float *d, int t, float dt, float torg,
 
   _id = id;
   highlight( t );
+  window->label(_datafile.c_str() );
 }
 
 

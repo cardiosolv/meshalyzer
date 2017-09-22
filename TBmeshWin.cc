@@ -942,7 +942,10 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
   
   isosurfwin->islDirty(true);
   isosurfwin->issDirty(true);
-  if ( timeplotter->window->shown() ) timeplot();
+
+  timeplotter->datafile( fn );
+  if ( timeplotter->window->shown() ) 
+    timeplot();
 
   redraw();
 }

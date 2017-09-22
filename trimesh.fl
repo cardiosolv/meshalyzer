@@ -59,11 +59,11 @@ class Meshwin {open
   } {
     Fl_Window winny {
       label meshalyzer
-      callback {if( fl_ask("Really quit?") )exit(0);} open selected
+      callback {if( fl_choice("Really quit?","No","Yes",0) )exit(0);} open
       xywh {174 813 455 455} type Double resizable hotspot visible
     } {
       Fl_Box trackballwin {
-        callback {if( fl_ask("Really quit?" ) ) exit(0);}
+        callback {if( fl_choice("Really quit?","No","Yes",0 ) ) exit(0);} selected
         xywh {0 0 455 455}
         code0 {\#include "TBmeshWin.h"}
         class TBmeshWin
@@ -91,7 +91,7 @@ class Controls {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File
+          label File open
           xywh {0 0 100 20}
         } {
           MenuItem {} {

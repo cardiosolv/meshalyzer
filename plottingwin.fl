@@ -1,12 +1,12 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
 decl {\#include "Graph.h"} {private local
-} 
+}
 
 decl {using namespace std;} {private local
-} 
+}
 
 class PlotWin {open
 } {
@@ -38,16 +38,18 @@ class PlotWin {open
   }
   decl {void writedata();} {private local
   }
+  decl {string _datafile = "time series";} {private local
+  }
   Function {PlotWin(  string title )} {open
   } {
     Fl_Window window {
       label {Time plot}
       user_data this
       callback {this->window->hide();} open
-      xywh {1319 344 525 195} type Double box UP_BOX resizable
+      xywh {720 259 520 200} type Double box UP_BOX hide resizable
       code0 {\#include <cstring>}
       code1 {\#include <string>}
-      code2 {using namespace std;} visible
+      code2 {using namespace std;}
     } {
       Fl_Box graph {
         xywh {5 5 515 165} resizable
@@ -55,7 +57,7 @@ class PlotWin {open
         class Graph
       }
       Fl_Group button_grp {open
-        xywh {5 170 515 30} box ENGRAVED_BOX color 52
+        xywh {5 170 510 25} box ENGRAVED_BOX color 52
       } {
         Fl_Return_Button {} {
           label Close
@@ -95,8 +97,7 @@ tm = 0;
 datasize = -1;
 rotated = false;
 window->label(strdup(title.c_str()));
-window->user_data(this);} {selected
-    }
+window->user_data(this);} {}
   }
   decl {~PlotWin()} {public local
   }
@@ -104,4 +105,14 @@ window->user_data(this);} {selected
   } {
     code {graph->autoscale(a);} {}
   }
-} 
+  Function {datafile(string d)} {open
+  } {
+    code {int i0 = d.rfind("/");
+if ( i0 < string::npos )
+  _datafile= d.substr(i0+1,string::npos);
+else
+  _datafile = d;
+window->label( _datafile.c_str() );} {selected
+    }
+  }
+}
