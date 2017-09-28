@@ -147,6 +147,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      SendViewportSyncMessage();
     void      SendTimeSyncMessage();
     void      SendColourSyncMessage();
+    void      SendClipSyncMessage();
     int       read_dynamic_pts( const char *, Myslider * );
     bool      compat_tm( int t ){ return (t==1 || max_time()==0 || max_time()==t-1); }
     int       max_time( GridType g=NoDataGrid );

@@ -440,9 +440,10 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
 {
   int stride = 1;
 
-  if ( Fl::event_state(FL_BUTTON1|FL_BUTTON2|FL_BUTTON3)  &&
+  if ( (Fl::event_button1()||Fl::event_button2()||Fl::event_button3()) &&
+       Fl::focus()==flwin &&
        (sf->num()>MAX_SURFELE_REALTIME))
-    stride =  (sf->num())/MAX_SURFELE_REALTIME;
+    stride =  (sf->num())/MAX_SURFELE_REALTIME+1;
 
   glPushAttrib(GL_POLYGON_BIT);
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
@@ -1111,13 +1112,13 @@ TBmeshWin::illuminate( GLfloat max )
   }
   glEnable(GL_RESCALE_NORMAL);
 
-  GLfloat diffuseb [] = { 0.8, 0.8, 0.8, 1.0 };
-  GLfloat specularb [] = { 0.8, 0.8, 0.8, 1.0 };
-  GLfloat shininessb [] = { 50.0 };
+  GLfloat diffusef [] = { 0.8, 0.8, 0.8, 1.0 };
+  GLfloat specularf [] = { 0.8, 0.8, 0.8, 1.0 };
+  GLfloat shininessf [] = { 50.0 };
   float k = contwin->backintensityslide->value();
-  GLfloat diffusef [] = {diffuseb[0]*k, diffuseb[1]*k, diffuseb[2]*k, 1.0};
-  GLfloat specularf [] = {specularb[0]*k,specularb[1]*k,specularb[2]*k,1.0};
-  GLfloat shininessf [] = { shininessb[0]*k };
+  GLfloat diffuseb [] = {diffusef[0]*k, diffusef[1]*k, diffusef[2]*k, 1.0};
+  GLfloat specularb [] = {specularf[0]*k,specularf[1]*k,specularf[2]*k,1.0};
+  GLfloat shininessb [] = { shininessf[0]*k };
 
   // Define material properties of specular color and degree of
   // shininess.  Since this is only done once in this particular
@@ -1851,7 +1852,6 @@ void TBmeshWin::CheckMessageQueue(){
   while ((tmLink->ReceiveMsg(msg) == 0) &&
 	   (numberOfMsgRead < MAX_MESSAGES_READ)) {
 	
-	// process a msg
 	ProcessLinkMessage(msg);
 
 	numberOfMsgRead++;
