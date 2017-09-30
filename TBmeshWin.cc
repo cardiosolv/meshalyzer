@@ -1112,12 +1112,17 @@ TBmeshWin::illuminate( GLfloat max )
   }
   glEnable(GL_RESCALE_NORMAL);
 
-  GLfloat diffusef [] = { 0.8, 0.8, 0.8, 1.0 };
-  GLfloat specularf [] = { 0.8, 0.8, 0.8, 1.0 };
-  GLfloat shininessf [] = { 50.0 };
-  float k = contwin->backintensityslide->value();
-  GLfloat diffuseb [] = {diffusef[0]*k, diffusef[1]*k, diffusef[2]*k, 1.0};
-  GLfloat specularb [] = {specularf[0]*k,specularf[1]*k,specularf[2]*k,1.0};
+  const GLfloat diff_intensity = contwin->diffuseslide->value();
+  const GLfloat spec_intensity = contwin->specularslide->value();
+  const GLfloat am             = contwin->ambientslide->value();
+  const GLfloat shine          = contwin->shinyslide->value();
+  float k                      = contwin->backintensityslide->value();
+
+  GLfloat diffusef []   = { diff_intensity, diff_intensity, diff_intensity, 1.0 };
+  GLfloat specularf []  = { spec_intensity, spec_intensity, spec_intensity, 1.0 };
+  GLfloat shininessf [] = { shine*100. };
+  GLfloat diffuseb []   = {diffusef[0]*k, diffusef[1]*k, diffusef[2]*k, 1.0};
+  GLfloat specularb []  = {specularf[0]*k,specularf[1]*k,specularf[2]*k,1.0};
   GLfloat shininessb [] = { shininessf[0]*k };
 
   // Define material properties of specular color and degree of
@@ -1151,16 +1156,13 @@ TBmeshWin::illuminate( GLfloat max )
   GLfloat ambient0[] = { 0., 0., 0., 1. };
   glLightfv(GL_LIGHT1, GL_AMBIENT, ambient0);
   glLightfv(GL_LIGHT2, GL_AMBIENT, ambient0);
-  const GLfloat diff_intensity = contwin->diffuseslide->value();
   GLfloat diffuse0[] = { diff_intensity, diff_intensity, diff_intensity, 1. };
   glLightfv(GL_LIGHT1, GL_DIFFUSE, diffuse0);
   glLightfv(GL_LIGHT2, GL_DIFFUSE, diffuse0);
-  const GLfloat spec_intensity = contwin->specularslide->value();
   GLfloat specular0[] = { spec_intensity, spec_intensity, spec_intensity, 1. };
   glLightfv(GL_LIGHT1, GL_SPECULAR, specular0);
   glLightfv(GL_LIGHT2, GL_SPECULAR, specular0);
 
-  const GLfloat am= contwin->ambientslide->value();
   GLfloat modamb[] = { am, am, am, 1. };
   glLightModelfv( GL_LIGHT_MODEL_AMBIENT, modamb );
   glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, 0 );
