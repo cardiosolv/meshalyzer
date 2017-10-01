@@ -1120,7 +1120,7 @@ TBmeshWin::illuminate( GLfloat max )
 
   GLfloat diffusef []   = { diff_intensity, diff_intensity, diff_intensity, 1.0 };
   GLfloat specularf []  = { spec_intensity, spec_intensity, spec_intensity, 1.0 };
-  GLfloat shininessf [] = { shine*100. };
+  GLfloat shininessf [] = { shine*100.f };
   GLfloat diffuseb []   = {diffusef[0]*k, diffusef[1]*k, diffusef[2]*k, 1.0};
   GLfloat specularb []  = {specularf[0]*k,specularf[1]*k,specularf[2]*k,1.0};
   GLfloat shininessb [] = { shininessf[0]*k };

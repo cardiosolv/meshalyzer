@@ -828,7 +828,7 @@ objprops[Cable]->win->show();}
       } {
         Fl_Group hilightgrp {
           label Highlight
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -943,8 +943,8 @@ mwtb->select_vertex();}
           }
         }
         Fl_Group lightgrp {
-          label Lights open selected
-          xywh {10 295 330 185} color 188 labelfont 1 labelsize 10 labelcolor 188
+          label Lights open
+          xywh {10 295 330 185} color 188 labelfont 1 labelsize 10 labelcolor 188 hide
         } {
           Fl_Value_Slider lightx {
             label {X direction}
@@ -1998,8 +1998,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2079,6 +2078,7 @@ SAVE_WIDGET(mshzf,lightz);
 SAVE_WIDGET(mshzf,ambientslide);
 SAVE_WIDGET(mshzf,specularslide);
 SAVE_WIDGET(mshzf,diffuseslide);
+SAVE_WIDGET(mshzf,shinyslide);
 SAVE_WIDGET(mshzf,backintensityslide);
 SAVE_WIDGET(mshzf,showLightDir);
 SAVE_WIDGET(mshzf,facetshadBut);
@@ -2436,7 +2436,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( lightz, var, val ) 
   TEST_VAR( ambientslide, var, val ) 
   TEST_VAR( specularslide, var, val ) 
-  TEST_VAR( diffuseslide, var, val ) 
+  TEST_VAR( diffuseslide, var, val )
+  TEST_VAR( shinyslide, var, val ) 
   TEST_VAR( backintensityslide, var, val ) 
   TEST_VAR( showLightDir, var, int(val) ) 
   TEST_VAR( facetshadBut, var, int(val) ) 
@@ -2558,7 +2559,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {}
+mwtb->lights(illBut->value());} {selected
+    }
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
