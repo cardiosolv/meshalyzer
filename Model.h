@@ -55,6 +55,8 @@ class Model
                          { return (_region[s<0?0:s]->get_color(Surface))[3]; }
     GLfloat* get_color( Object_t obj, int s=0 );
     void  set_color( Object_t obj, int s, float r, float g, float b, float a );
+    void  set_mat( int s, float d, float sp, float sh, float b=0.5 );
+    void  get_mat( int s, float &d, float &sp, float &sh, float &b );
     void  visibility( int, bool a );
     void  opacity( int s, float opac );
     void  randomize_color( Object_t obj );

@@ -143,7 +143,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     bool      transBgd( ){ return bgd_trans; }
     void      norot(bool a){_norot=a;}
     void      CheckMessageQueue();
-    int       ProcessLinkMessage(const LinkMessage::CommandMsg& msg);
+    int       ProcessLinkMessage(const LinkMessage::CmdMsg& msg);
     void      SendViewportSyncMessage();
     void      SendTimeSyncMessage();
     void      SendColourSyncMessage();

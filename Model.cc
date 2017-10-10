@@ -960,6 +960,24 @@ GLfloat* Model::get_color( Object_t obj, int s )
 }
 
 
+void Model::get_mat( int s, float &diff, float &spec, float &shine, float &back )
+{
+  diff  = _surface[s]->diffuse( );
+  spec  = _surface[s]->specular( );
+  shine = _surface[s]->shiny( );
+  back  = _surface[s]->backlight( );
+}
+
+
+void Model::set_mat( int s, float diff, float spec, float shine, float back )
+{
+  _surface[s]->diffuse( diff );
+  _surface[s]->specular( spec );
+  _surface[s]->shiny( shine );
+  _surface[s]->backlight( back );
+}
+
+
 void Model::set_color( Object_t obj, int s, float r, float g, float b, float a )
 {
   if ( obj==Surface) {

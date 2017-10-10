@@ -12,6 +12,28 @@ Surfaces::Surfaces( PPoint *pl ) : _p(pl), is_visible(true),_filled(true),
 }
 
 
+/**
+ * @brief  set the material colour properties
+ */
+void
+Surfaces :: set_material()
+{
+  GLfloat diffuseb[4], specularb[4];
+
+  CSET( diffuseb,  _diffuse[0]*_backlight,  _diffuse[3]  );
+  CSET( specularb, _specular[0]*_backlight, _specular[3] );
+
+  glDisable(GL_COLOR_MATERIAL);
+  glMaterialfv(GL_FRONT, GL_SPECULAR,  _specular         );
+  glMaterialf (GL_FRONT, GL_SHININESS, _shiny            );
+  glMaterialfv(GL_FRONT, GL_DIFFUSE,   _diffuse          );
+  glMaterialfv(GL_BACK,  GL_SPECULAR,  specularb         );
+  glMaterialf (GL_BACK,  GL_SHININESS, _shiny*_backlight );
+  glMaterialfv(GL_BACK,  GL_DIFFUSE,   diffuseb          );
+  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  glEnable(GL_COLOR_MATERIAL);
+}
+
 
 void Surfaces :: fillcolor( float r, float g, float b, float a )
 {

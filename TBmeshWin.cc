@@ -281,6 +281,8 @@ void TBmeshWin :: draw()
 
     if ( !sf->visible() ) continue;
 
+    sf->set_material();
+
     if ( sf->filled() && model->numSurf() ) {
       draw_surfaces(sf);
     }
@@ -1115,32 +1117,6 @@ TBmeshWin::illuminate( GLfloat max )
   const GLfloat diff_intensity = contwin->diffuseslide->value();
   const GLfloat spec_intensity = contwin->specularslide->value();
   const GLfloat am             = contwin->ambientslide->value();
-  const GLfloat shine          = contwin->shinyslide->value();
-  float k                      = contwin->backintensityslide->value();
-
-  GLfloat diffusef []   = { diff_intensity, diff_intensity, diff_intensity, 1.0 };
-  GLfloat specularf []  = { spec_intensity, spec_intensity, spec_intensity, 1.0 };
-  GLfloat shininessf [] = { shine*100.f };
-  GLfloat diffuseb []   = {diffusef[0]*k, diffusef[1]*k, diffusef[2]*k, 1.0};
-  GLfloat specularb []  = {specularf[0]*k,specularf[1]*k,specularf[2]*k,1.0};
-  GLfloat shininessb [] = { shininessf[0]*k };
-
-  // Define material properties of specular color and degree of
-  // shininess.  Since this is only done once in this particular
-  // example, it applies to all objects.  Material properties can
-  // be set for individual objects, individual faces of the objects,
-  // individual vertices of the faces, etc...
-  glMaterialfv(GL_FRONT, GL_SPECULAR, specularf);
-  glMaterialfv(GL_FRONT, GL_SHININESS, shininessf);
-  glMaterialfv(GL_FRONT, GL_DIFFUSE, diffusef);
-  glMaterialfv(GL_BACK, GL_SPECULAR, specularb);
-  glMaterialfv(GL_BACK, GL_SHININESS, shininessb);
-  glMaterialfv(GL_BACK, GL_DIFFUSE, diffuseb);
-
-  // Set the GL_AMBIENT_AND_DIFFUSE color state variable to be the
-  // one referred to by all following calls to glColor
-  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-  glEnable(GL_COLOR_MATERIAL);
 
   // Create a Directional Light Source
   GLfloat dir[] = { (GLfloat)contwin->lightx->value(),
@@ -1149,7 +1125,7 @@ TBmeshWin::illuminate( GLfloat max )
   normalize( dir );
   if ( headlamp_mode ) {
     glLightfv(GL_LIGHT2, GL_POSITION, dir);
-    for ( int i=0; i<4; i++ ) dir[i] = -dir[i];
+    for ( int i=0; i<3; i++ ) dir[i] = -dir[i];
   }
   glLightfv(GL_LIGHT1, GL_POSITION, dir);
 
@@ -1847,7 +1823,7 @@ TBmeshWin::draw_iso_lines()
 
 void TBmeshWin::CheckMessageQueue(){
   
-  LinkMessage::CommandMsg msg;
+  LinkMessage::CmdMsg msg;
   
   unsigned int numberOfMsgRead = 0;
    
@@ -1861,7 +1837,7 @@ void TBmeshWin::CheckMessageQueue(){
 }
 
 
-int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
+int TBmeshWin::ProcessLinkMessage(const LinkMessage::CmdMsg& msg)
 {
   if ( msg.command == LinkMessage::LINK ) {
     tmLink->link(msg.newlink);
@@ -1870,11 +1846,11 @@ int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
   } else if(  msg.command == LinkMessage::DIFFUSE_LINK ) {
      tmLink->diffuse_link( msg.senderPid );
   } else if( msg.command == LinkMessage::VIEWPORT_SYNC ) {
-    trackball.SetScale(msg.trackballState.scale);
-    V3f modtrans = msg.trackballState.trans*model->maxdim();
+    trackball.SetScale(msg.trackball.scale);
+    V3f modtrans = msg.trackball.trans*model->maxdim();
     trackball.SetTranslation(modtrans.X(), modtrans.Y(), modtrans.Z() );
-    trackball.qRot = msg.trackballState.qRot*model->syncRefRot();
-    trackball.qSpin = msg.trackballState.qSpin;
+    trackball.qRot = msg.trackball.qRot*model->syncRefRot();
+    trackball.qSpin = msg.trackball.qSpin;
     redraw();
   } else if( msg.command == LinkMessage::LINK_SYNC ) {
     int newTm = msg.sliderTime;
@@ -1889,12 +1865,12 @@ int TBmeshWin::ProcessLinkMessage(const LinkMessage::CommandMsg& msg)
     contwin->tmslider->value(newTm);
     set_time(newTm);
   } else if( msg.command == LinkMessage::COLOUR_SYNC ) { 
-    cs->calibrate( msg.colourState.min, msg.colourState.max );
-    cs->size( msg.colourState.levels );
+    cs->calibrate( msg.colour.min, msg.colour.max );
+    cs->size( msg.colour.levels );
     contwin->mincolval->value(cs->min());
     contwin->maxcolval->value(cs->max());
     contwin->numcolev->value(cs->size());
-    contwin->cstype->value( msg.colourState.scale );
+    contwin->cstype->value( msg.colour.scale );
     contwin->cstype->mvalue()->do_callback(contwin->cstype);
     redraw();
   } else {
@@ -1918,11 +1894,11 @@ void TBmeshWin::SendViewportSyncMessage()
   qRot = trackball.GetRotation(); 
   qSpin = trackball.qSpin;
 
-  LinkMessage::CommandMsg msgToSend;
-  msgToSend.trackballState.scale = scale;
-  msgToSend.trackballState.trans = v3f_trans/model->maxdim();
-  msgToSend.trackballState.qSpin = qSpin;
-  msgToSend.trackballState.qRot = qRot*model->syncRefRot().GetConjugate();
+  LinkMessage::CmdMsg msgToSend;
+  msgToSend.trackball.scale = scale;
+  msgToSend.trackball.trans = v3f_trans/model->maxdim();
+  msgToSend.trackball.qSpin = qSpin;
+  msgToSend.trackball.qRot = qRot*model->syncRefRot().GetConjugate();
   
   msgToSend.command = LinkMessage::VIEWPORT_SYNC;
   
@@ -1931,7 +1907,7 @@ void TBmeshWin::SendViewportSyncMessage()
 
 void TBmeshWin::SendTimeSyncMessage()
 {
-  LinkMessage::CommandMsg msgToSend;
+  LinkMessage::CmdMsg msgToSend;
   msgToSend.sliderTime = tm;
   
   msgToSend.command = LinkMessage::LINK_SYNC;
@@ -1941,12 +1917,12 @@ void TBmeshWin::SendTimeSyncMessage()
 
 void TBmeshWin::SendColourSyncMessage()
 {
-  LinkMessage::CommandMsg msgToSend;
-  msgToSend.command = LinkMessage::COLOUR_SYNC;
-  msgToSend.colourState.min    = cs->min();
-  msgToSend.colourState.max    = cs->max();
-  msgToSend.colourState.scale  = contwin->cstype->value();
-  msgToSend.colourState.levels = cs->size();
+  LinkMessage::CmdMsg msgToSend;
+  msgToSend.command       = LinkMessage::COLOUR_SYNC;
+  msgToSend.colour.min    = cs->min();
+  msgToSend.colour.max    = cs->max();
+  msgToSend.colour.scale  = contwin->cstype->value();
+  msgToSend.colour.levels = cs->size();
   
   tmLink->SendMsgToAll(msgToSend);
 }

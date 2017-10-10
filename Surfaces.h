@@ -7,6 +7,7 @@
 #include <string>
 #include <fstream>
 
+#define  CSET(V,C,A)  V[0]=C;V[1]=C;V[2]=C;V[3]=A;
 class Surfaces
 {
   public:
@@ -38,6 +39,15 @@ class Surfaces
     void   correct_branch_elements( GLdouble *, DATA_TYPE *, 
                           Colourscale *, int, dataOpac * );
     void  to_file( ofstream &of );
+    void diffuse( GLfloat c, GLfloat a=1. ) { CSET(_diffuse,c,a) }
+    void specular( GLfloat c, GLfloat a=1. ) { CSET(_specular,c,a) }
+    void shiny( GLfloat s ) { _shiny=s; }
+    void backlight( GLfloat b ) { _backlight=b; }
+    GLfloat diffuse( void ){ return _diffuse[0]; }
+    GLfloat specular( void ){ return _specular[0]; }
+    GLfloat shiny( void ) { return _shiny; }
+    GLfloat backlight( void ) { return _backlight; }
+    void set_material( void );
   protected:
     PPoint   *_p;
     GLfloat  _fillcolor[4];
@@ -49,6 +59,10 @@ class Surfaces
     int*     _vert;       //!< vertices for which normals are computed
     vector<SurfaceElement*> _ele; //!< list of elelments to draw
     string   _label="";
+    GLfloat  _diffuse[4]  = {0.6,0.6,0.6,1.};
+    GLfloat  _specular[4] = {0.75,0.75,0.75,1.};
+    GLfloat  _shiny       = {80.};
+    GLfloat  _backlight   = 0.5;
 };
 
 #endif

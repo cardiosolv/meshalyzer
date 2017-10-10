@@ -123,7 +123,7 @@ if( linkages_.size() ) { //add the new pid to the group
   diffuse_link( pid );
 } else { // tell someone to tell others about us
   LinkMessageQueue(pid);
-  LinkMessage::CommandMsg msg;
+  LinkMessage::CmdMsg msg;
   msg.command = LinkMessage::DIFFUSE_LINK;
   msg.newlink = getpid();
   SendMsg( msg, pid ); 
@@ -141,7 +141,7 @@ list_mesh_pids();} {}
 
       // create a message queue communication with the process
       // put a message in the queue
-      LinkMessage::CommandMsg msgToSend;
+      LinkMessage::CmdMsg msgToSend;
       msgToSend.command = LinkMessage::UNLINK;
 
       SendMsg(msgToSend, pid);
@@ -285,7 +285,7 @@ return 0;} {}
   }
   decl {extern sem_t *linkingProcSem;} {private local
   }
-  Function {SendMsg(LinkMessage::CommandMsg& msg, pid_t pid)} {
+  Function {SendMsg(LinkMessage::CmdMsg& cmd, pid_t pid)} {
     comment {* \\brief Notify \\a pid a new message in queue
  *
  * \\param[in] pid - process id for a meshalyzer program
@@ -300,18 +300,20 @@ if (msqId < 0){
   return -1;
 }
 
-msg.senderPid = getpid();
-msg.receiverPid = pid;
+cmd.senderPid = getpid();
+cmd.receiverPid = pid;
 
-int size = sizeof(struct LinkMessage::CommandMsg) -
-    offsetof(struct  LinkMessage::CommandMsg, senderPid);
+
+int size = sizeof(LinkMessage::CmdMsg);
+
+LinkMessage::MsgBuf msg = {1, cmd };
 
 if( msgsnd(msqId, (void *)&msg, size, IPC_NOWAIT)==-1 ){
+  perror( "Send Msg");
   return -1;
 }
   
 // now, signal process to read the message
- 
 // make sure we start at zero
 while( sem_trywait(linkingProcSem) == 0 )
   ;
@@ -338,9 +340,10 @@ if (kill(pid, SIGALRM)){
 \#endif
 }
   
-return 0;} {}
+return 0;} {selected
+    }
   }
-  Function {SendMsgToAll(LinkMessage::CommandMsg& msg)} {
+  Function {SendMsgToAll(LinkMessage::CmdMsg& msg)} {
     comment {* \\brief Send msg to all linked processes
  *
  * \\return int - 0 = SUCCESS, negative = fail
@@ -357,18 +360,18 @@ for( ; it != linkages_.end(); it++) {
 for( it=broken.begin(); it != broken.end(); it++)
   unlink(*it);} {}
   }
-  Function {ReceiveMsg(LinkMessage::CommandMsg& msg)} {
+  Function {ReceiveMsg(LinkMessage::CmdMsg& cmd)} {
     comment {* \\brief Receive a new message in queue
  *
  * \\return int - 0 = SUCCESS, negative = fail
  *} open return_type int
   } {
-    code {int size = sizeof(struct LinkMessage::CommandMsg) -
-               offsetof(struct LinkMessage::CommandMsg, senderPid);
-
+    code {int size = sizeof(LinkMessage::CmdMsg);
+LinkMessage::MsgBuf msg;
 if (msgrcv(msqId_, (void *)&msg, size, 0, MSG_NOERROR | IPC_NOWAIT) == -1) {
   return -1;
 }
+cmd = msg.cmdmsg;
 return 0;} {}
   }
   Function {~TimeLink()} {open
@@ -381,7 +384,7 @@ for ( it; it != linkages_.end(); it++ ){
 
   // create a message queue communication with the process
   // put a message in the queue
-  LinkMessage::CommandMsg msgToSend;
+  LinkMessage::CmdMsg msgToSend;
   msgToSend.command = LinkMessage::UNLINK;
 	  
   SendMsg(msgToSend, pid);
@@ -389,12 +392,11 @@ for ( it; it != linkages_.end(); it++ ){
 }
 
 // delete it's own msg queue
-DeleteMessageQueue();} {selected
-    }
+DeleteMessageQueue();} {}
   }
   Function {diffuse_link( pid_t pid )} {open
   } {
-    code {LinkMessage::CommandMsg msg;
+    code {LinkMessage::CmdMsg msg;
 msg.newlink = pid;
 msg.command = LinkMessage::LINK;
 LinkMessageQueue(pid);
