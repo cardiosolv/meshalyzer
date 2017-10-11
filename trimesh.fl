@@ -83,7 +83,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {279 131 350 645} type Double box UP_BOX
+      xywh {1096 64 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -827,7 +827,7 @@ objprops[Cable]->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight selected
+          label Highlight
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -2117,7 +2117,6 @@ SAVE_WIDGET(mshzf,tmslider);
 SAVE_WIDGET(mshzf,frameskip);
 SAVE_WIDGET(mshzf,animdelay);
 
-
 mshzf << "SURFACE_COLOURS = " << mwtb->model->numSurf() << endl;
 for( int i=0; i<mwtb->model->numSurf(); i++ ) {
   save_colour( mshzf, mwtb->model->surface(i)->fillcolor() );
@@ -2126,6 +2125,10 @@ for( int i=0; i<mwtb->model->numSurf(); i++ ) {
   mshzf << " " << mwtb->model->surface(i)->visible();
   mshzf << " " << mwtb->model->surface(i)->filled();
   mshzf << " " << mwtb->model->surface(i)->outline();
+  mshzf << " " << mwtb->model->surface(i)->diffuse();
+  mshzf << " " << mwtb->model->surface(i)->specular();
+  mshzf << " " << mwtb->model->surface(i)->shiny();
+  mshzf << " " << mwtb->model->surface(i)->backlight(); 
   mshzf << endl;
 }
 
@@ -2206,7 +2209,7 @@ mshzf << endl;} {}
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, string winlab, surfColourChoice *cc=NULL)} {open return_type {surfColourChoice *}
+  Function {pick_surf_color(Object_t ot, string winlab, surfColourChoice *cc=NULL)} {open selected return_type {surfColourChoice *}
   } {
     code {int msz = surflist->nitems();
 
@@ -2288,21 +2291,32 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   } 
   if( !strcmp( var, "SURFACE_COLOURS" ) ) {
     for( int i=0; i<val; i++ ) {
+      mshzf.getline(buf, BUFLEN);
       if( i >= mwtb->model->numSurf() ){
-        mshzf.getline(buf, BUFLEN);
         continue;
       }
-      mshzf >> r >> g >> b >> a;
+      istringstream slin(buf);
+      slin >> r >> g >> b >> a;
       mwtb->model->surface(i)->fillcolor(r,g,b,a);
-      mshzf >> r >> g >> b >> a;
+      slin >> r >> g >> b >> a;
       mwtb->model->surface(i)->outlinecolor(r,g,b,a);
-      mshzf >> r >> g >> b;
+      slin >> r >> g >> b;
       mwtb->model->surface(i)->visible(int(r));
       mwtb->model->surface(i)->filled(int(g));
       mwtb->model->surface(i)->outline(int(b));
-      mshzf.getline(buf, BUFLEN);
-	}
-	continue;
+      slin >> r >> g >> b >> a;
+      if( slin.fail() ) {
+       r = 0.7;
+       g = 0.8;
+       b = 64;
+       a = 0.5;
+      } 
+      mwtb->model->surface(i)->diffuse(r);
+      mwtb->model->surface(i)->specular(g);
+      mwtb->model->surface(i)->shiny(b);
+      mwtb->model->surface(i)->backlight(a);
+    }
+    continue;
   } 
   if( !strcmp( var, "REGION_COLOURS" ) ) {
     bool  v;
