@@ -17,6 +17,7 @@ class Quaternion
     float w,x,y,z;
     Quaternion() : w(1),x(0),y(0),z(0) { }
     Quaternion(float inw, float inx, float iny, float inz) : w(inw),x(inx),y(iny),z(inz) { }
+    template<class T> Quaternion( const Vector3D<T> &a) : w(0.),x(a.e[0]),y(a.e[1]),z(a.e[2]) {}
     inline void operator () (float inw, float inx, float iny, float inz) { w=inw; x=inx; y=iny; z=inz; }
 
     inline float operator [] (int index)
@@ -79,6 +80,10 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
       w = tw; x=tx; y=ty; z=tz;
     }
 
+    inline Quaternion Rotate( const Quaternion &v ) { return *this * v * this->GetConjugate(); }
+    template<class T> 
+    inline Vector3D<T> Rotate( const Vector3D<T> &v ) {Quaternion qv(v); qv = *this * qv * this->GetConjugate(); return V3f(qv.x,qv.y,qv.z); }
+
     inline const M4f GetRotationMatrix() const
     {
       return M4f(w*w + x*x - y*y - z*z, 2*(x*y+w*z),           2*(x*z-w*y),                0,
@@ -109,5 +114,22 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
     }
 }
 ; // class Quaternion
+
+template<class T>
+Quaternion
+shortest_arc( Vector3D<T> a, Vector3D<T> b ) 
+{
+  Quaternion q;
+  T dp = a.Dot(b);
+  if( dp >=  0.9999 ) { return Quaternion( 1,0,0,0 ); }
+  if( dp <= -0.9999 ) { return Quaternion( 0,1,0,0 ); }
+  Vector3D<T> cp = a.Cross(b);
+  q.x = cp.X();
+  q.y = cp.Y();
+  q.z = cp.Z();
+  q.w = sqrt((a.SquareLength()) * (b.SquareLength())) + dp;
+  q.Normalize();
+  return q;
+}
 
 #endif // _Quaternion_h_

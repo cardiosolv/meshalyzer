@@ -1852,16 +1852,13 @@ int TBmeshWin::ProcessLinkMessage(const LinkMessage::CmdMsg& msg)
     trackball.qRot = msg.trackball.qRot*model->syncRefRot();
     trackball.qSpin = msg.trackball.qSpin;
     redraw();
-  } else if( msg.command == LinkMessage::LINK_SYNC ) {
+  } else if( msg.command == LinkMessage::TIME_SYNC ) {
     int newTm = msg.sliderTime;
-
     if (newTm > contwin->tmslider->maximum()) {
       newTm = contwin->tmslider->maximum();
     } else if (newTm < 0) {
       newTm = 0;
     }
-
-    // sync time
     contwin->tmslider->value(newTm);
     set_time(newTm);
   } else if( msg.command == LinkMessage::COLOUR_SYNC ) { 
@@ -1873,11 +1870,39 @@ int TBmeshWin::ProcessLinkMessage(const LinkMessage::CmdMsg& msg)
     contwin->cstype->value( msg.colour.scale );
     contwin->cstype->mvalue()->do_callback(contwin->cstype);
     redraw();
+  } else if( msg.command == LinkMessage::CLIP_SYNC ) {
+    stringstream cpinfo;
+    Quaternion Qrefinv = model->syncRefRot().GetConjugate();
+    for( int i=0; i<6; i++ ) {
+      V3f cn = Qrefinv.Rotate(msg.clip.cnorm[i]);
+      cpinfo << cn.X() << " " << cn.Y() << " " << cn.Z() << " " 
+             << msg.clip.inter[i] << " " << msg.clip.state[i] << endl;
+    }
+    cplane->set_CPs( cpinfo );
+    redraw();
   } else {
     return -1;
   }
-	return 0;
+  return 0;
 }
+
+void TBmeshWin::SendClipSyncMessage()
+{
+  stringstream cpinfo;
+  LinkMessage::CmdMsg msg;
+
+  cplane->get_CPs( cpinfo );
+  for( int i=0; i<6; i++ ) {
+    V3f cpnorm;
+    cpinfo >> cpnorm;
+    msg.clip.cnorm[i]  = model->syncRefRot().Rotate(cpnorm);
+    cpinfo >> msg.clip.inter[i];
+    cpinfo >> msg.clip.state[i];
+  }
+  msg.command = LinkMessage::CLIP_SYNC;
+  tmLink->SendMsgToAll(msg);
+}
+
 
 void TBmeshWin::SendViewportSyncMessage()
 {
@@ -1910,7 +1935,7 @@ void TBmeshWin::SendTimeSyncMessage()
   LinkMessage::CmdMsg msgToSend;
   msgToSend.sliderTime = tm;
   
-  msgToSend.command = LinkMessage::LINK_SYNC;
+  msgToSend.command = LinkMessage::TIME_SYNC;
   
   tmLink->SendMsgToAll(msgToSend);
 }

@@ -83,7 +83,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1096 64 350 645} type Double box UP_BOX
+      xywh {2008 91 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -481,6 +481,17 @@ mwtb->redraw();}
             MenuItem {} {
               label Time
               callback {mwtb->SendTimeSyncMessage();}
+              xywh {0 0 33 23}
+            }
+            MenuItem {} {
+              label Clipping
+              callback {mwtb->SendClipSyncMessage();} selected
+              xywh {0 0 33 23} divider
+            }
+            MenuItem {} {
+              label {Reference view}
+              callback {mwtb->trackball.qRot=mwtb->model->syncRefRot();
+mwtb->redraw();}
               xywh {0 0 33 23}
             }
             MenuItem {} {
@@ -2209,7 +2220,7 @@ mshzf << endl;} {}
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
-  Function {pick_surf_color(Object_t ot, string winlab, surfColourChoice *cc=NULL)} {open selected return_type {surfColourChoice *}
+  Function {pick_surf_color(Object_t ot, string winlab, surfColourChoice *cc=NULL)} {open return_type {surfColourChoice *}
   } {
     code {int msz = surflist->nitems();
 

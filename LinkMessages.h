@@ -7,7 +7,7 @@
 
 namespace LinkMessage {
 
-  enum Msgtype { LINK, UNLINK, VIEWPORT_SYNC, LINK_SYNC, COLOUR_SYNC, DIFFUSE_LINK };
+  enum Msgtype { LINK, UNLINK, VIEWPORT_SYNC, TIME_SYNC, COLOUR_SYNC, DIFFUSE_LINK, CLIP_SYNC };
 
   struct TrackBallState{
     float scale;          
@@ -23,10 +23,9 @@ namespace LinkMessage {
   };
 
   struct ClipState {
-    GLfloat    norm[6][3];
-    GLfloat    inter[6];
-    int        state[6];
-    Quaternion ref;
+    V3f        cnorm[6]; //!< rotations from ref direction to clipping plane normal 
+    GLfloat    inter[6]; //!< clipping plane intercept
+    int        state[6]; //!< display state
   };
 
   struct CmdMsg {

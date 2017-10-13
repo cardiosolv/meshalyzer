@@ -1,24 +1,24 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {public local
-} 
+}
 
 decl {\#include <math.h>} {public local
-} 
+}
 
 decl {\#define SAVE_CP(A) xdir\#\#A->value()<<" "<<ydir\#\#A->value()<<" "<<zdir\#\#A->value()<<" "<<intercept\#\#A->value()<<" "<<dispas\#\#A->value()} {private local
-} 
+}
 
 decl {\#define READ_CP(A,S) {double val; S>>val; xdir\#\#A->value(val); S>>val; ydir\#\#A->value(val); S>>val; zdir\#\#A->value(val);S>>val; intercept\#\#A->value(val); S>>val; dispas\#\#A->value(int(val));}} {private local
-} 
+}
 
 decl {\#define CHECK_CP(A) {int val=dispas\#\#A->value();if(val==3||val==4)tbmw->determine_cutplane(A);}} {private local
-} 
+}
 
 decl {class Orienter;} {public global
-} 
+}
 
 class ClipPlane {open
 } {
@@ -26,7 +26,7 @@ class ClipPlane {open
   } {
     Fl_Window window {
       label {Clipping Plane} open
-      xywh {405 23 575 685} type Double visible
+      xywh {405 64 575 685} type Double visible
     } {
       Fl_Box cporienter {
         label Box
@@ -497,39 +497,44 @@ tbmw->redraw();}
         }
       }
       Fl_Group {} {
-        label {Clipping plane} open
-        xywh {105 520 70 160} box SHADOW_BOX
+        label {Clipping plane}
+        xywh {70 520 70 160} box SHADOW_BOX
       } {
         Fl_Round_Button {} {
           label 1
           callback {select_cp(0);}
-          xywh {115 530 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {80 530 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
         Fl_Round_Button {} {
           label 2
           callback {select_cp(1);}
-          xywh {115 555 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {80 555 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
         Fl_Round_Button {} {
           label 3
           callback {select_cp(2);}
-          xywh {115 580 45 15} type Radio down_box ROUND_DOWN_BOX value 1 labelsize 18
+          xywh {80 580 45 15} type Radio down_box ROUND_DOWN_BOX value 1 labelsize 18
         }
         Fl_Round_Button {} {
           label 4
           callback {select_cp(3);}
-          xywh {115 605 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {80 605 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
         Fl_Round_Button {} {
           label 5
           callback {select_cp(4);}
-          xywh {115 630 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {80 630 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
         Fl_Round_Button {} {
           label 6
-          callback {select_cp(5);} selected
-          xywh {115 650 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          callback {select_cp(5);}
+          xywh {80 650 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
+      }
+      Fl_Button {} {
+        label {Sync Clipping Planes}
+        callback {tbmw->SendClipSyncMessage();} selected
+        image {sync-icon.png} xywh {430 550 75 75} labelsize 12 align 128
       }
     }
     code {tbmw = tb;
@@ -560,26 +565,104 @@ window->user_data(this);} {}
   }
   decl {float ctr_intercept[6];} {private local
   }
-  Function {on(int cp)} {return_type bool
+  Function {calc_intercept( int i )} {open private
   } {
-    code {if( cp==0 )
-  return dispas0->value()>0;
+    code {const GLfloat* ctr = tbmw->model->pt_offset();
+ctr_intercept[i] = -(ctr[0]*x[i][0]+ctr[1]*x[i][1]+ctr[2]*x[i][2]);} {}
+  }
+  Function {calc_intercepts()} {open
+  } {
+    code {for( int i=0; i<6; i++ ){
+  calc_intercept(i);
+  normcb(i);
+}} {}
+  }
+  Function {datafied( int cp )} {return_type bool
+  } {
+    code {if( !cp )
+  return dispas0->value()==4;
 else if( cp==1 )
-  return dispas1->value()>0;
+  return dispas1->value()==4;
 else if( cp==2 )
-  return dispas2->value()>0;
+  return dispas2->value()==4;
 else if( cp==3 )
-  return dispas3->value()>0;
+  return dispas3->value()==4;
 else if( cp==4 )
-  return dispas4->value()>0;
+  return dispas4->value()==4;
 else if( cp==5 )
-  return dispas5->value()>0;} {}
+  return dispas5->value()==4;} {}
   }
-  Function {plane(int cp)} {open return_type {GLdouble*}
+  Function {darken_bgs()} {} {
+    code {Clip0->color(FL_GRAY);
+Clip1->color(FL_GRAY);
+Clip2->color(FL_GRAY);
+Clip3->color(FL_GRAY);
+Clip4->color(FL_GRAY);
+Clip5->color(FL_GRAY);
+Clip0->redraw();
+Clip1->redraw();
+Clip2->redraw();
+Clip3->redraw();
+Clip4->redraw();
+Clip5->redraw();} {}
+  }
+  Function {drawIntercept( int cp, bool b )} {private
   } {
-    code {return x[cp];} {}
+    code {intercept[cp] = b;} {}
   }
-  Function {normcb( int cp)} {return_type void
+  Function {drawIntercept( int cp )} {return_type bool
+  } {
+    code {return intercept[cp];} {}
+  }
+  Function {flip(int cp)} {private return_type void
+  } {
+    code {if( cp==0 ) {
+  xdir0->value(-xdir0->value());
+  ydir0->value(-ydir0->value());
+  zdir0->value(-zdir0->value());
+  intercept0->value(-intercept0->value());
+} else if( cp==1 ){
+  xdir1->value(-xdir1->value());
+  ydir1->value(-ydir1->value());
+  zdir1->value(-zdir1->value());
+  intercept1->value(-intercept1->value());
+} else if( cp==2 ){
+  xdir2->value(-xdir2->value());
+  ydir2->value(-ydir2->value());
+  zdir2->value(-zdir2->value());
+  intercept2->value(-intercept2->value());
+}else if( cp==3 ){
+  xdir3->value(-xdir3->value());
+  ydir3->value(-ydir3->value());
+  zdir3->value(-zdir3->value());
+  intercept3->value(-intercept3->value());
+} else if( cp==4 ){
+  xdir4->value(-xdir4->value());
+  ydir4->value(-ydir4->value());
+  zdir4->value(-zdir4->value());
+  intercept4->value(-intercept4->value());
+}else if( cp==5 ){
+  xdir5->value(-xdir5->value());
+  ydir5->value(-ydir5->value());
+  zdir5->value(-zdir5->value());
+  intercept5->value(-intercept5->value());
+}
+normcb(cp);
+if( cp==cporienter->cp() ){
+  cporienter->cp(cp);
+  cporienter->redraw();
+}} {}
+  }
+  Function {get_CPs( iostream &ofs )} {open
+  } {
+    code {ofs << SAVE_CP(0) << endl;
+ofs << SAVE_CP(1) << endl;
+ofs << SAVE_CP(2) << endl;
+ofs << SAVE_CP(3) << endl;
+ofs << SAVE_CP(4) << endl;
+ofs << SAVE_CP(5) << endl;} {}
+  }
+  Function {normcb( int cp)} {open return_type void
   } {
     code {if( !cp ) {
   x[cp][0] = xdir0->value();
@@ -631,111 +714,27 @@ else if( cp==5 )
   if( dispas5->value()>0 ) tbmw->redraw();
 }} {}
   }
-  Function {set_dim( float d)} {return_type void
-  } {
-    code {dim = d;} {}
-  }
-  Function {unitize(Fl_Value_Input* x, Fl_Value_Input* y,Fl_Value_Input* z)} {return_type void
-  } {
-    code {double va = x->value();
-double vb = y->value();
-double vc = z->value();
-double mag = sqrt(va*va+vb*vb+vc*vc);
-x->value(va/mag);
-y->value(vb/mag);
-z->value(vc/mag);} {}
-  }
-  Function {visible(int cp)} {return_type bool
+  Function {on(int cp)} {return_type bool
   } {
     code {if( cp==0 )
-  return dispas0->value()==2;
+  return dispas0->value()>0;
 else if( cp==1 )
-  return dispas1->value()==2;
+  return dispas1->value()>0;
 else if( cp==2 )
-  return dispas2->value()==2;
+  return dispas2->value()>0;
 else if( cp==3 )
-  return dispas3->value()==2;
+  return dispas3->value()>0;
 else if( cp==4 )
-  return dispas4->value()==2;
+  return dispas4->value()>0;
 else if( cp==5 )
-  return dispas5->value()==2;} {}
+  return dispas5->value()>0;} {}
   }
-  Function {flip(int cp)} {private return_type void
+  Function {plane(int cp)} {return_type {GLdouble*}
   } {
-    code {if( cp==0 ) {
-  xdir0->value(-xdir0->value());
-  ydir0->value(-ydir0->value());
-  zdir0->value(-zdir0->value());
-  intercept0->value(-intercept0->value());
-} else if( cp==1 ){
-  xdir1->value(-xdir1->value());
-  ydir1->value(-ydir1->value());
-  zdir1->value(-zdir1->value());
-  intercept1->value(-intercept1->value());
-} else if( cp==2 ){
-  xdir2->value(-xdir2->value());
-  ydir2->value(-ydir2->value());
-  zdir2->value(-zdir2->value());
-  intercept2->value(-intercept2->value());
-}else if( cp==3 ){
-  xdir3->value(-xdir3->value());
-  ydir3->value(-ydir3->value());
-  zdir3->value(-zdir3->value());
-  intercept3->value(-intercept3->value());
-} else if( cp==4 ){
-  xdir4->value(-xdir4->value());
-  ydir4->value(-ydir4->value());
-  zdir4->value(-zdir4->value());
-  intercept4->value(-intercept4->value());
-}else if( cp==5 ){
-  xdir5->value(-xdir5->value());
-  ydir5->value(-ydir5->value());
-  zdir5->value(-zdir5->value());
-  intercept5->value(-intercept5->value());
-}
-normcb(cp);
-if( cp==cporienter->cp() ){
-  cporienter->cp(cp);
-  cporienter->redraw();
-}} {}
+    code {return x[cp];} {}
   }
-  Function {drawIntercept( int cp, bool b )} {private
+  Function {read(istream& ifs)} {open
   } {
-    code {intercept[cp] = b;} {}
-  }
-  Function {drawIntercept( int cp )} {return_type bool
-  } {
-    code {return intercept[cp];} {}
-  }
-  Function {datafied( int cp )} {return_type bool
-  } {
-    code {if( !cp )
-  return dispas0->value()==4;
-else if( cp==1 )
-  return dispas1->value()==4;
-else if( cp==2 )
-  return dispas2->value()==4;
-else if( cp==3 )
-  return dispas3->value()==4;
-else if( cp==4 )
-  return dispas4->value()==4;
-else if( cp==5 )
-  return dispas5->value()==4;} {}
-  }
-  Function {save(ostream& ofs)} {} {
-    code {ofs << SAVE_CP(0) << endl;
-ofs << SAVE_CP(1) << endl;
-ofs << SAVE_CP(2) << endl;
-ofs << SAVE_CP(3) << endl;
-ofs << SAVE_CP(4) << endl;
-ofs << SAVE_CP(5) << endl;
-for( int i=0; i<6; i++ ) {
-  for( int j=0; j<4; j++ )
-    ofs << x[i][j] << " ";
-  ofs << intercept[i] << endl;
-}} {}
-  }
-  Function {read(istream& ifs)} {} {
     code {READ_CP(0,ifs);
 READ_CP(1,ifs);
 READ_CP(2,ifs);
@@ -754,16 +753,76 @@ CHECK_CP(3);
 CHECK_CP(4);
 CHECK_CP(5);} {}
   }
-  Function {calc_intercepts()} {} {
-    code {for( int i=0; i<6; i++ ){
-  calc_intercept(i);
-  normcb(i);
+  Function {save(ostream& ofs)} {} {
+    code {ofs << SAVE_CP(0) << endl;
+ofs << SAVE_CP(1) << endl;
+ofs << SAVE_CP(2) << endl;
+ofs << SAVE_CP(3) << endl;
+ofs << SAVE_CP(4) << endl;
+ofs << SAVE_CP(5) << endl;
+for( int i=0; i<6; i++ ) {
+  for( int j=0; j<4; j++ )
+    ofs << x[i][j] << " ";
+  ofs << intercept[i] << endl;
 }} {}
   }
-  Function {calc_intercept( int i )} {private
+  Function {select_cp( int cp )} {} {
+    code {darken_bgs();
+cporienter->cp(cp);
+if( cp==0 ) {
+  Clip0->color(FL_LIGHT2);
+  Clip0->redraw();
+} else if( cp==1 ) {
+  Clip1->color(FL_LIGHT2);
+  Clip1->redraw();
+} else if( cp==2 ) {
+  Clip2->color(FL_LIGHT2);
+  Clip2->redraw();
+} else if( cp==3 ) {
+  Clip3->color(FL_LIGHT2);
+  Clip3->redraw();
+} else if( cp==4 ) {
+  Clip4->color(FL_LIGHT2);
+  Clip4->redraw();
+} else if( cp==5 ) {
+  Clip5->color(FL_LIGHT2);
+  Clip5->redraw();
+}
+cporienter->redraw();} {}
+  }
+  Function {set_CPs( iostream &ifs )} {open
   } {
-    code {const GLfloat* ctr = tbmw->model->pt_offset();
-ctr_intercept[i] = -(ctr[0]*x[i][0]+ctr[1]*x[i][1]+ctr[2]*x[i][2]);} {}
+    code {READ_CP(0,ifs)
+READ_CP(1,ifs)
+READ_CP(2,ifs)
+READ_CP(3,ifs)
+READ_CP(4,ifs)
+READ_CP(5,ifs)
+CHECK_CP(0);
+CHECK_CP(1);
+CHECK_CP(2);
+CHECK_CP(3);
+CHECK_CP(4);
+CHECK_CP(5);
+calc_intercepts();} {}
+  }
+  Function {set_dim( float d)} {return_type void
+  } {
+    code {dim = d;} {}
+  }
+  Function {setView( Quaternion r )} {} {
+    code {if( cporienter->setView( r ) )
+  cporienter->redraw();} {}
+  }
+  Function {unitize(Fl_Value_Input* x, Fl_Value_Input* y,Fl_Value_Input* z)} {return_type void
+  } {
+    code {double va = x->value();
+double vb = y->value();
+double vc = z->value();
+double mag = sqrt(va*va+vb*vb+vc*vc);
+x->value(va/mag);
+y->value(vb/mag);
+z->value(vc/mag);} {}
   }
   Function {update_dir( double x, double y, double z, int cp)} {} {
     code {if( cp==0 ) {
@@ -793,46 +852,19 @@ ctr_intercept[i] = -(ctr[0]*x[i][0]+ctr[1]*x[i][1]+ctr[2]*x[i][2]);} {}
 }
 normcb(cp);} {}
   }
-  Function {darken_bgs()} {} {
-    code {Clip0->color(FL_GRAY);
-Clip1->color(FL_GRAY);
-Clip2->color(FL_GRAY);
-Clip3->color(FL_GRAY);
-Clip4->color(FL_GRAY);
-Clip5->color(FL_GRAY);
-Clip0->redraw();
-Clip1->redraw();
-Clip2->redraw();
-Clip3->redraw();
-Clip4->redraw();
-Clip5->redraw();} {}
+  Function {visible(int cp)} {return_type bool
+  } {
+    code {if( cp==0 )
+  return dispas0->value()==2;
+else if( cp==1 )
+  return dispas1->value()==2;
+else if( cp==2 )
+  return dispas2->value()==2;
+else if( cp==3 )
+  return dispas3->value()==2;
+else if( cp==4 )
+  return dispas4->value()==2;
+else if( cp==5 )
+  return dispas5->value()==2;} {}
   }
-  Function {setView( Quaternion r )} {} {
-    code {if( cporienter->setView( r ) )
-  cporienter->redraw();} {}
-  }
-  Function {select_cp( int cp )} {} {
-    code {darken_bgs();
-cporienter->cp(cp);
-if( cp==0 ) {
-  Clip0->color(FL_LIGHT2);
-  Clip0->redraw();
-} else if( cp==1 ) {
-  Clip1->color(FL_LIGHT2);
-  Clip1->redraw();
-} else if( cp==2 ) {
-  Clip2->color(FL_LIGHT2);
-  Clip2->redraw();
-} else if( cp==3 ) {
-  Clip3->color(FL_LIGHT2);
-  Clip3->redraw();
-} else if( cp==4 ) {
-  Clip4->color(FL_LIGHT2);
-  Clip4->redraw();
-} else if( cp==5 ) {
-  Clip5->color(FL_LIGHT2);
-  Clip5->redraw();
 }
-cporienter->redraw();} {}
-  }
-} 
