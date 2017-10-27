@@ -485,7 +485,7 @@ mwtb->redraw();}
             }
             MenuItem {} {
               label Clipping
-              callback {mwtb->SendClipSyncMessage();} selected
+              callback {mwtb->SendClipSyncMessage();}
               xywh {0 0 33 23} divider
             }
             MenuItem {} {
@@ -1739,8 +1739,10 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {
-        xywh {10 490 330 60} box ENGRAVED_BOX
+      Fl_Group colorscalegrp {open selected
+        xywh {10 490 330 60} box ENGRAVED_BOX when 0
+        code0 {\#include "ColourGroup.h"}
+        class ColourGroup
       } {
         Fl_Button {} {
           label optimal

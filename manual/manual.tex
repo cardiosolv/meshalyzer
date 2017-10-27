@@ -692,6 +692,7 @@ The intensity of the different lighting components can be adjusted with
 the sliders.
 With ``facet shading'' enabled, Gouraud shading is turned off and lines
 are not antialiased. This may speed up rendering on slow platforms.
+Note that surface material properties may also be set which depend on lighting. See  \S\ref{sec:surface}.
 
 \subsubsection{Scalar Data}
 
@@ -714,6 +715,8 @@ time changes.
 It is equivalent to pressing ``optimal'' every time that time is changed.
 The values corresponding to the minimum and maximum colour values are 
 available for editing.
+Pressing mouse button 3 pops up a small menu to reverse the colour scale, or make the colour scale symmetric about 0 based 
+on either the maximum or minimum data value.
 
 Different structures may be coloured according to the data.
 The ``Data on:'' choice widget selects which structure types are coloured according
@@ -775,10 +778,13 @@ data sets from the file which may be viewed on the current grid.
 
 \subsubsection{Surfaces}
 
+\label{sec:surface}
 Only surfaces checked in the list are affected by operations.
 The fill colour of the elements composing surfaces can be selected as well
 as the outline colour. Outlining and filling the elements can also be
 controlled. 
+The opacity value selected under the surface colour applies when data is present as well.
+Lighting properties can also be set for individual surfaces.
 Surfaces can also be randomly coloured by Image/Randomly Color/Surfaces.
 Surfaces are renamed with the ``Rename'' button. You will be prompted if you
 want to overwrite the surface file with the new label.
@@ -1042,12 +1048,17 @@ Currently, linking supports the following operations:
 \item[Viewport syncing] Clicking ``Image/Sync/Viewport'' or pressing ``v'' in the model window 
      will transmit the current scale, relative orientation, and relative translation to all other instances.
      If the meshes are not oriented along the same axes, a new reference direction can be defined and then the rotation 
-     relative to this orientation will be applied. The simplest way to use this is to 
+     relative to this orientation will be applied. 
+     The simplest way to use this is to 
      set the linked meshes 
      to their respective default views, orient one a mesh to match the others, 
-     and then click ``Image/Sync/Set Reference View''
+     and then click ``Image/Sync/Set reference view''.
+     Clicking ``Image/Sync/Reference view'' will put the mesh in the reference view.
  \item[Colour Scale] Clicking ``Image/Sync/Colour Scale'', or pressing the sync button 
      beside the colour bar will transmit the current colour map to all other instances.
+ \item[Clipping planes]  Clicking ``Image/Sync/Clip'' or pressing the button on the clipping plane dialogue widget
+     will send the clipping plane info to the linked instances. As with viewport suncing, the clipping is performed 
+     relative to the reference view.
 \end{description}
 
 \noindent

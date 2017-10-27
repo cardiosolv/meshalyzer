@@ -21,7 +21,7 @@
 #endif
 
 pid_t master;
-static Controls *ctrl_ptr;
+Controls *ctrl_ptr;
 static Meshwin  *win_ptr;
 
 #ifdef OSMESA
