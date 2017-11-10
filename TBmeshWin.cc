@@ -983,6 +983,7 @@ TBmeshWin :: select_hi( int n )
 {
   if ( !n ) return;
   const char *txt = hinfo->text(n);
+  Fl::copy( txt, strlen(txt), 2 );
 
   // only process selected line if first character is a number
   int d;
