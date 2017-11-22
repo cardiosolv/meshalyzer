@@ -83,7 +83,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {2008 91 350 645} type Double box UP_BOX
+      xywh {2069 102 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -167,8 +167,12 @@ if( fn && !mwtb->readAuxGrid(tmslider,fn) ) {
   if( mwtb->auxGrid->highlight_vertex(0,val))
      auxvertval->value(val);
    else
-     auxvertval->value(0);
+     auxvertval->value(0); 
+   mwtb->auxGrid->optimize_cs(0);
    auxhivert->value(0);
+   auxmincolval->value(mwtb->auxGrid->cs.min());
+   auxmaxcolval->value(mwtb->auxGrid->cs.max());
+   mwtb->auxGrid->autocolor(auxautocalibratebut->value());
 }}
             xywh {0 0 100 20}
           }
@@ -838,7 +842,7 @@ objprops[Cable]->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
+          label Highlight selected
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1374,7 +1378,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid}
+          label {Aux Grid} open
           xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
@@ -1739,7 +1743,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {open selected
+      Fl_Group colorscalegrp {open
         xywh {10 490 330 60} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup
