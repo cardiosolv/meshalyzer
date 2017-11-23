@@ -641,7 +641,11 @@ int AuxGrid::num_vert()
 
 /** specify a vertex to highlight
  *
- * \return true val is valid
+ *  \param      n           vertex
+ *  \param[out] val         data value at vertex
+ *  \param      update_plot whether to update time series
+ *
+ * \return true if there is data
  * \post \p val contains the node data value
  */
 bool AuxGrid :: highlight_vertex( int n, float &val, bool update_plot )

@@ -87,7 +87,7 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -164,15 +164,18 @@ if( fn && !mwtb->readAuxGrid(tmslider,fn) ) {
   auxgridgrp->activate();
   tabwidget->value(auxgridgrp);
   float val;
-  if( mwtb->auxGrid->highlight_vertex(0,val))
+  if( mwtb->auxGrid->highlight_vertex(0,val)) {
      auxvertval->value(val);
-   else
+     auxDataGrp->activate();
+     mwtb->auxGrid->optimize_cs(0);
+     auxmincolval->value(mwtb->auxGrid->cs.min());
+     auxmaxcolval->value(mwtb->auxGrid->cs.max());
+     mwtb->auxGrid->autocolor(auxautocalibratebut->value());
+   } else { 
      auxvertval->value(0); 
-   mwtb->auxGrid->optimize_cs(0);
+     auxDataGrp->deactivate();auxvertval->value(0); 
+   } 
    auxhivert->value(0);
-   auxmincolval->value(mwtb->auxGrid->cs.min());
-   auxmaxcolval->value(mwtb->auxGrid->cs.max());
-   mwtb->auxGrid->autocolor(auxautocalibratebut->value());
 }}
             xywh {0 0 100 20}
           }
@@ -238,7 +241,7 @@ mwtb->tmLink->window->show();}
           }
         }
         Submenu imgmenu {
-          label Image open
+          label Image
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -958,7 +961,7 @@ mwtb->select_vertex();}
           }
         }
         Fl_Group lightgrp {
-          label Lights open
+          label Lights
           xywh {10 295 330 185} color 188 labelfont 1 labelsize 10 labelcolor 188 hide
         } {
           Fl_Value_Slider lightx {
@@ -1039,7 +1042,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface open
+          label Surface
           xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
@@ -1387,116 +1390,129 @@ mwtb->redraw();}
 mwtb->redraw();}
             xywh {25 310 35 20} value 1 labelsize 10
           }
-          Fl_Button {} {
-            label optimal
-            callback {mwtb->auxGrid->optimize_cs(tmslider->value());
+          Fl_Group auxDataGrp {open
+            xywh {20 310 310 55}
+          } {
+            Fl_Button {} {
+              label optimal
+              callback {mwtb->auxGrid->optimize_cs(tmslider->value());
 auxmincolval->value(mwtb->auxGrid->cs.min());
 auxmaxcolval->value(mwtb->auxGrid->cs.max());
 mwtb->redraw();}
-            tooltip {calibrate for current time} xywh {100 310 45 20} box ROUND_UP_BOX labelsize 10
-          }
-          Fl_Choice auxcstype {
-            label {colour scale}
-            xywh {195 345 90 20} down_box BORDER_BOX labelsize 10 align 2
-            code0 {\#include "Colourscale.h"}
-            code1 {o->value(1);}
-          } {
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_RAINBOW);
-mwtb->redraw();}
-              image {rainbow.xpm} xywh {10 10 100 20}
+              tooltip {calibrate for current time} xywh {100 310 45 20} box ROUND_UP_BOX labelsize 10
             }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_BL_RAINBOW);
+            Fl_Choice auxcstype {
+              label {colour scale}
+              xywh {195 345 90 20} down_box BORDER_BOX labelsize 10 align 2
+              code0 {\#include "Colourscale.h"}
+              code1 {o->value(1);}
+            } {
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_RAINBOW);
 mwtb->redraw();}
-              image {blrainbow.xpm} xywh {10 10 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_HOT);
+                image {rainbow.xpm} xywh {10 10 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_BL_RAINBOW);
 mwtb->redraw();}
-              image {hot.xpm} xywh {10 10 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_COLD_HOT);
+                image {blrainbow.xpm} xywh {10 10 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_HOT);
 mwtb->redraw();}
-              image {coldhot.xpm} xywh {10 10 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_GREY);
+                image {hot.xpm} xywh {10 10 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_COLD_HOT);
 mwtb->redraw();}
-              image {blwhite.xpm} xywh {10 10 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_CG);
+                image {coldhot.xpm} xywh {10 10 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_GREY);
 mwtb->redraw();}
-              image {cg.xpm} xywh {10 10 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_MATLAB);
+                image {blwhite.xpm} xywh {10 10 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_CG);
 mwtb->redraw();}
-              image {matlab.xpm} xywh {10 10 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_RGREY);
+                image {cg.xpm} xywh {10 10 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_MATLAB);
+mwtb->redraw();}
+                image {matlab.xpm} xywh {10 10 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_RGREY);
                 mwtb->redraw();}
-              image {blred.xpm} xywh {20 20 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_GGREY);
+                image {blred.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_GGREY);
                 mwtb->redraw();}
-              image {blgreen.xpm} xywh {20 20 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_BGREY);
+                image {blgreen.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_BGREY);
                 mwtb->redraw();}
-              image {blblue.xpm} xywh {20 20 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_ACID);
+                image {blblue.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_ACID);
                 mwtb->redraw();}
-              image {acid_trip.xpm} xywh {20 20 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_P2G);
+                image {acid_trip.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_P2G);
                 mwtb->redraw();}
-              image {Pink2Green.xpm} xywh {20 20 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_VIRIDIS);
+                image {Pink2Green.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_VIRIDIS);
                 mwtb->redraw();}
-              image {viridis.xpm} xywh {20 20 100 20}
-            }
-            MenuItem {} {
-              callback {mwtb->auxGrid->cs.scale(CS_VIRIDIS_LIGHT);
+                image {viridis.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_VIRIDIS_LIGHT);
                 mwtb->redraw();}
-              image {viridis_light.xpm} xywh {20 20 100 20}
+                image {viridis_light.xpm} xywh {20 20 100 20}
+              }
             }
-          }
-          Fl_Value_Input auxmincolval {
-            label min
-            callback {mwtb->auxGrid->cs.calibrate(o->value(),mwtb->auxGrid->cs.max());
+            Fl_Value_Input auxmincolval {
+              label min
+              callback {mwtb->auxGrid->cs.calibrate(o->value(),mwtb->auxGrid->cs.max());
 mwtb->redraw();}
-            xywh {20 345 65 20} labelsize 10 align 2 when 4 textsize 10
-          }
-          Fl_Value_Input auxmaxcolval {
-            label max
-            callback {mwtb->auxGrid->cs.calibrate(mwtb->auxGrid->cs.min(),o->value());
+              xywh {20 345 65 20} labelsize 10 align 2 when 4 textsize 10
+            }
+            Fl_Value_Input auxmaxcolval {
+              label max
+              callback {mwtb->auxGrid->cs.calibrate(mwtb->auxGrid->cs.min(),o->value());
 mwtb->redraw();}
-            xywh {90 345 65 20} labelsize 10 align 2 when 4 textsize 10
-          }
-          Fl_Value_Input auxnumcolev {
-            label levels
-            callback {mwtb->auxGrid->cs.size((int)(o->value()));
+              xywh {90 345 65 20} labelsize 10 align 2 when 4 textsize 10
+            }
+            Fl_Value_Input auxnumcolev {
+              label levels
+              callback {mwtb->auxGrid->cs.size((int)(o->value()));
 mwtb->redraw();}
-            tooltip {colourmap size} xywh {160 345 30 20} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
-          }
-          Fl_Light_Button auxautocalibratebut {
-            label auto
-            callback {mwtb->auxGrid->autocolor(o->value());}
-            tooltip {autoscale every timestep} xywh {290 345 40 20} labelsize 10 align 16
+              tooltip {colourmap size} xywh {160 345 30 20} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
+            }
+            Fl_Light_Button auxautocalibratebut {
+              label auto
+              callback {mwtb->auxGrid->autocolor(o->value());}
+              tooltip {autoscale every timestep} xywh {290 345 40 20} labelsize 10 align 16
+            }
+            Fl_Button plotAuxTS {
+              label Plot
+              callback {mwtb->auxGrid->plot(tmslider->value());}
+              tooltip {show time series for highlighted point} xywh {305 310 25 20} labelsize 10 deactivate
+            }
+            Fl_Value_Output auxvertval {
+              label {hi value:}
+              tooltip {value of highlighted vertex} xywh {195 311 70 18} color 17 selection_color 0 labelsize 10 align 2 textsize 10
+            }
           }
           Fl_Group {} {
-            label Vertex open
+            label Vertex
             xywh {65 375 255 30} labelsize 12 align 4
           } {
             Fl_Button auxptcolor {
@@ -1547,7 +1563,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Lines open
+            label Lines
             xywh {65 405 255 25} labelsize 12 align 4
           } {
             Fl_Button auxlinecolor {
@@ -1596,7 +1612,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Surface open
+            label Surface
             xywh {65 430 265 20} labelsize 12 align 4
           } {
             Fl_Button auxsurfcolor {
@@ -1646,7 +1662,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label VoxEle open
+            label VoxEle
             xywh {65 454 245 22} labelsize 12 align 4
           } {
             Fl_Button auxvolcolor {
@@ -1695,11 +1711,6 @@ mwtb->redraw();}
               }
             }
           }
-          Fl_Button plotAuxTS {
-            label Plot
-            callback {mwtb->auxGrid->plot(tmslider->value());}
-            tooltip {show time series for highlighted point} xywh {305 310 25 20} labelsize 10 deactivate
-          }
           Fl_Light_Button hiAuxVert {
             label Hi
             callback {mwtb->auxGrid->highlight(o->value());
@@ -1731,10 +1742,6 @@ mwtb->redraw();}
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
-          Fl_Value_Output auxvertval {
-            label {hi value:}
-            tooltip {value of highlighted vertex} xywh {195 311 70 18} color 17 selection_color 0 labelsize 10 align 2 textsize 10
-          }
           Fl_Light_Button {} {
             label Clip
             callback {mwtb->auxGrid->clip(o->value());
@@ -1743,7 +1750,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {open
+      Fl_Group colorscalegrp {
         xywh {10 490 330 60} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup
