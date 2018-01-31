@@ -21,7 +21,7 @@ class AuxGrid {
         bool         _datafied[maxobject];
         bool         _surf_fill = true;  //!< if false, draw outline
         bool         _vol_fill  = false;   //!< if false, draw wireframe
-        bool         _autocol=False;
+        bool         _autocol=false;
         bool         _show[maxobject]; //!< true to show object
         bool         _3D[maxobject+2];
         GLfloat      _color[maxobject+2][4];
