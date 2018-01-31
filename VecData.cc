@@ -315,7 +315,7 @@ void
 VecData::draw(int tm, float maxdim)
 {
   if ( !_disp ) return;
-  if ( tm >= numtm ) tm=numtm;								// for now
+  if ( tm >= numtm ) tm=numtm-1;							// for now
   _last_tm = tm;
 
   int    offset = tm*numpt;
