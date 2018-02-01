@@ -28,7 +28,7 @@ const GLenum CLIP_PLANE[] =
     GL_CLIP_PLANE3, GL_CLIP_PLANE4, GL_CLIP_PLANE5
   };
 
-void translucency( bool b );
+bool translucency( bool b );
 int intcomp( const void *a, const void *b );
 
 
@@ -392,6 +392,8 @@ void TBmeshWin::draw_iso_surfaces()
 {
   if( have_data == NoData ) return;
 
+  bool on_tr;
+
   if( isosurfwin->isoOn0->value() ) {
     bool dirty =  isosurfwin->issDirty(0);
     glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -406,9 +408,12 @@ void TBmeshWin::draw_iso_surfaces()
         reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
                 reg->ele_membership(), tm, _branch_cut?_branch_range:NULL );
       reg->_iso0->color( isosurfwin->issColor(0) );
-      translucency( reg->_iso0->color()[3]<OPAQUE_LIMIT );
+      on_tr = translucency( reg->_iso0->color()[3]<OPAQUE_LIMIT );
       reg->_iso0->draw();
+      if( on_tr ) translucency( false );
     } 
+    
+    glPopAttrib();
   }
 
   if( !isosurfwin->isoOn1->value() ) return;
@@ -426,14 +431,12 @@ void TBmeshWin::draw_iso_surfaces()
 	  reg->_iso1 = new IsoSurface( model, data, isosurfwin->isoval1->value(),
 			  reg->ele_membership(), tm, _branch_cut?_branch_range:NULL );
 	reg->_iso1->color( isosurfwin->issColor(1) );
-
-    translucency( reg->_iso1->color()[3]<OPAQUE_LIMIT );
-
+    on_tr = translucency( reg->_iso1->color()[3]<OPAQUE_LIMIT );
 	reg->_iso1->draw();
+    if( on_tr ) translucency( false );
   } 
 
   glPopAttrib();
- glPopAttrib();
 }
 
 
@@ -454,9 +457,9 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
   if ( !(datadst&Surface_flg) || have_data==NoData )
     showData = false;
 
-  if (  dataopac->dop[Surface].on() ||
-        (!showData&&sf->fillcolor()[3]<OPAQUE_LIMIT) )
-    translucency(true);
+  bool on_tr = ( dataopac->dop[Surface].on() ||
+                 (!showData&&sf->fillcolor()[3]<OPAQUE_LIMIT) );
+  if( on_tr ) translucency(true);
 
   sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride, 
  		dataopac->dop+Surface, 
@@ -469,7 +472,7 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
     sf->correct_branch_elements( _branch_range, data, cs, stride, dataopac->dop+Surface );
 #endif
 
-  if ( dataopac->dop[Surface].on() ) translucency(false);
+  if ( on_tr ) translucency(false);
   glPopAttrib();
   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 }
@@ -501,11 +504,11 @@ void TBmeshWin::draw_cables(RRegion* sf)
     glPushAttrib(GL_POLYGON_BIT);
     model->_cable->size( sf->size(Cable) );
     model->_cable->threeD( sf->threeD(Cable) );
-    if ( dataopac->dop[Cable].on() ) translucency(true);
+    bool on_tr = translucency( dataopac->dop[Cable].on() );
     model->_cable->draw( 0, model->_cable->num()-1, sf->get_color(Cable),
                          cs, datadst&Cable_flg?data:NULL,
                          model->stride(Cable), dataopac->dop+Cable );
-    if ( dataopac->dop[Cable].on() ) translucency(false);
+    if ( on_tr ) translucency(false);
     glPopAttrib();
   } else
     model->_cable->register_vertices(0,model->_cable->num()-1,ptDrawn);
@@ -1566,9 +1569,9 @@ void TBmeshWin::region_vis( int *region, int nr, bool* on )
  *
  * \param b true for on
  */
-void translucency( bool b )
+bool translucency( bool b )
 {
-  if ( b==true ) {
+  if ( b ) {
     glPushAttrib(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glDepthMask(GL_FALSE);
     gl2psEnable(GL2PS_BLEND);
@@ -1579,6 +1582,7 @@ void translucency( bool b )
     if ( sd ) glPopAttrib();
     gl2psDisable(GL2PS_BLEND);
   }
+  return b;
 }
 
 
@@ -1675,12 +1679,11 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   if( isosurfwin->isolineOn->value() )
     glEnable(GL_POLYGON_OFFSET_FILL );
 
-
   bool showData=true;
   if ( !(datadst&Surface_flg) || have_data==NoData )
     showData = false;
 
-  if ( dataopac->dop[Surface].on() ) translucency(true);
+  bool on_tr = dataopac->dop[Surface].on();
 
   for ( int i=0; i<NUM_CP; i++ ) {
     if ( cplane->drawIntercept(i) ) {
@@ -1712,7 +1715,7 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
     }
   }
 
-  if ( dataopac->dop[Surface].on() ) translucency(false);
+  if ( on_tr ) translucency(false);
   if( isosurfwin->isolineOn->value() )
     glDisable(GL_POLYGON_OFFSET_FILL );
 
