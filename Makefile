@@ -40,6 +40,17 @@ LIBS         =  $(FLTK_LD_FLAGS) $(COMMON_LIBS)
 CPPFLAGS     =  $(FLTK_INC) $(COMMON_INC)
 CXXFLAGS     = -std=c++11 -g -O$(DEBUG_LEVEL) $(OMP_FLAG) -MMD -DNOMINMAX  
 
+# VTK
+VTK=1
+ifdef VTK
+COMMON_INC    += -DUSE_VTK -I/usr/include/vtk-8.1
+VTK_LSLIBS       = $(shell ls /usr/lib64/libvtk*.so|grep -v Python|grep -v Java |grep -v TCL)
+a               = $(subst /usr/lib64/lib,-l,$(VTK_LSLIBS) )
+VTK_LIBS        = $(subst .so,,$(a) )
+$(warning $(VTK_LIBS))
+LIBS          += $(VTK_LIBS)
+endif
+
 ifdef ENABLE_LOGGING
 CPPFLAGS += -DLOGGING_ENABLED
 endif

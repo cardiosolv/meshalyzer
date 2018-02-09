@@ -28,6 +28,9 @@ class Model
     bool         read(hid_t hdf_file, bool base1, bool no_elems);
     bool         read_instance( hid_t, unsigned int, unsigned int, float *& );
 #endif
+#ifdef USE_VTK
+    bool         read_vtu(const char* filename, bool no_elem );
+#endif
     bool         read_instance( gzFile, gzFile );
     int          add_surface_from_tri( const char * );
     int          add_surface_from_surf( const char * );

@@ -18,6 +18,12 @@
 #include<omp.h>
 #endif
 
+#ifdef USE_VTK
+#include <vtkSmartPointer.h>
+#include<vtkUnstructuredGrid.h>
+#include<vtkXMLUnstructuredGridReader.h>
+#endif
+
 struct Face {
   int nsort[MAX_NUM_SURF_NODES];  //!< sorted nodes
   int norig[MAX_NUM_SURF_NODES];  //!< nodes in original order
@@ -274,6 +280,7 @@ bool Model::read(hid_t hdf_file, bool base1, bool no_elem)
   return true;
 }
 
+
 void Model::add_surfaces(hid_t hdf_file) {
   int *elements;
   ch5_dataset dset_info;
@@ -392,6 +399,29 @@ void Model::add_surfaces(int *elements, int count, int max_width, char *name) {
   }
 }
 #endif // USE_HDF5
+
+#ifdef USE_VTK
+bool 
+Model::read_vtu( const char* filename, bool no_elem ) 
+{
+  vtkSmartPointer<vtkXMLUnstructuredGridReader> reader =
+    vtkSmartPointer<vtkXMLUnstructuredGridReader>::New();
+  reader->SetFileName(filename);
+  reader->Update();
+  vtkUnstructuredGrid* grid = reader->GetOutput();
+  int np = grid->GetNumberOfPoints();
+
+  GLfloat  *p = new GLfloat[np*3];
+  double *x;
+  for( int i=0;i<np; i++ ){
+    x = grid->GetPoint(i);
+    for( int j=0; j<3; j++ )
+      p[3*i+j] = x[j];
+  }
+  pt.add( p, np );
+}
+#endif
+
 
 void Model::find_max_dim_and_bounds()
 {

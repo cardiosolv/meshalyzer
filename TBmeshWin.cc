@@ -754,13 +754,18 @@ void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt,
       fprintf(stderr, "No file selected.  Exiting.\n");
       exit(0);
     }
-    else
-      fnt = strdup( fnt );
   }
 
-  if ( !model->read( fnt, base1, no_elems ) ) return;
+#ifdef USE_VTK
+  if ( strlen(fnt)>5 && !strcmp(fnt+strlen(fnt)-4,".vtu" ))
+    {
+      if ( !model->read_vtu( fnt, no_elems ) ) return;
+    }
+  else
+#endif
+    {if ( !model->read( fnt, base1, no_elems ) ) return;}
 
-  string wintitle =  fnt;
+  string wintitle =  strdup(fnt);
   string::size_type  i0=wintitle.rfind("/");
   if ( i0 < string::npos ) wintitle= wintitle.substr(i0+1,string::npos);
   if (wintitle.rfind(".pts") == wintitle.size()-4 ) wintitle=wintitle.substr(0,wintitle.size()-4);
