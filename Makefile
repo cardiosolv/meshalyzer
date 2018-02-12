@@ -43,11 +43,12 @@ CXXFLAGS     = -std=c++11 -g -O$(DEBUG_LEVEL) $(OMP_FLAG) -MMD -DNOMINMAX
 # VTK
 #VTK=1
 ifdef VTK
-COMMON_INC    += -DUSE_VTK -I/usr/include/vtk-8.1
-VTK_LSLIBS       = $(shell ls /usr/lib64/libvtk*.so|grep -v Python|grep -v Java |grep -v TCL)
-a               = $(subst /usr/lib64/lib,-l,$(VTK_LSLIBS) )
-VTK_LIBS        = $(subst .so,,$(a) )
-$(warning $(VTK_LIBS))
+VTK_LIBDIR     =/usr/lib64
+VTK_INCDIR     =/usr/include/vtk-8.1
+COMMON_INC    += -DUSE_VTK -I$(VTK_INCDIR)
+VTK_LSLIBS     = $(shell ls $(VTK_LIBDIR)/libvtk*.so|grep -v Python|grep -v Java |grep -v TCL)
+a              = $(subst $(VTK_LIBDIR)/lib,-l,$(VTK_LSLIBS) )
+VTK_LIBS       = $(subst .so,,$(a) )
 LIBS          += $(VTK_LIBS)
 endif
 

@@ -13,15 +13,15 @@
 #include "logger.hpp"
 #include <algorithm>
 #include <queue>
-
-#ifdef _OPENMP
-#include<omp.h>
-#endif
-
 #ifdef USE_VTK
 #include <vtkSmartPointer.h>
 #include<vtkUnstructuredGrid.h>
 #include<vtkXMLUnstructuredGridReader.h>
+#endif
+
+
+#ifdef _OPENMP
+#include<omp.h>
 #endif
 
 struct Face {
@@ -216,10 +216,8 @@ bool Model::read( const char* fnt, bool base1, bool no_elems )
   }
 
   read_region_file( in, fn );
-  //LOG_TIMER("read_region_file()");
 
   determine_regions();
-  //LOG_TIMER("determine_regions()");
   
   LOG_TIMER_RESET;
   add_surface_from_elem( fn );
@@ -401,6 +399,124 @@ void Model::add_surfaces(int *elements, int count, int max_width, char *name) {
 #endif // USE_HDF5
 
 #ifdef USE_VTK
+
+const char *VTK2CARP_etype[] = {
+  " ",      // VTK_EMPTY_CELL       = 0,
+  "Pt",     // VTK_VERTEX           = 1,
+  "PP",     // VTK_POLY_VERTEX      = 2,
+  "Ln",     // VTK_LINE             = 3,
+  "Ca",     // VTK_POLY_LINE        = 4,
+  "Tr",     // VTK_TRIANGLE         = 5,
+  "TS",     // VTK_TRIANGLE_STRIP   = 6,
+  "PG",     // VTK_POLYGON          = 7,
+  "Px",     // VTK_PIXEL            = 8,
+  "Qd",     // VTK_QUAD             = 9,
+  "Tt",     // VTK_TETRA            = 10,
+  "Vx",     // VTK_VOXEL            = 11,
+  "Hx",     // VTK_HEXAHEDRON       = 12,
+  "Wd",     // VTK_WEDGE            = 13,
+  "Py",     // VTK_PYRAMID          = 14,
+  "Pr",     // VTK_PENTAGONAL_PRISM = 15,
+  "HP",     // VTK_HEXAGONAL_PRISM  = 16,
+};
+
+
+bool
+Model::add_surfaces( vtkUnstructuredGrid* grid )
+{
+  Surfaces *newSurf = new Surfaces(&pt);
+  newSurf->num(0);
+  newSurf->label("default");
+  _surface.push_back(newSurf);
+  int numCell = grid->GetNumberOfCells();
+  newSurf->num(numCell-_numVol);
+
+  int e=0;
+  for( int i=0; i<numCell; i++ ) {
+    const char *eletype = VTK2CARP_etype[grid->GetCellType(i)];
+
+    if( !strcmp( eletype, "Tr" ) ) 
+	  _surface[0]->addele(e, new Triangle( &pt ));
+    else if( !strcmp( eletype, "Qd" )  ) 
+	  _surface[0]->addele(e, new Quadrilateral( &pt ));
+    else 
+      continue;
+
+    vtkIdType np, *cpt;
+    grid->GetCellPoints( i, np, cpt );
+    int ipt[4];
+    if( !strcmp( eletype, "Tr" ) ) {
+      ipt[0] = cpt[0];
+      ipt[1] = cpt[2];
+      ipt[2] = cpt[1];
+    } else if( !strcmp( eletype, "Qd" )  ) {
+      ipt[0] = cpt[0];
+      ipt[1] = cpt[3];
+      ipt[2] = cpt[2];
+      ipt[3] = cpt[1];
+    }
+	newSurf->ele(e)->define(ipt);
+	newSurf->ele(e)->compute_normals(0,0);
+    e++;
+  }
+}
+
+
+/** read in volume elements 
+ *
+ * \return true if surface elements present
+ */
+bool
+Model:: read_elements(vtkUnstructuredGrid* grid)
+{
+  int numCell = grid->GetNumberOfCells();
+  _numVol = numCell;
+  _vol = new VolElement*[_numVol];
+
+  int ne=0;
+  int surfe=0;
+  int n[10];
+  int nonvol=0;
+  for( int i=0; i<numCell; i++ ) {
+    const char *eletype = VTK2CARP_etype[grid->GetCellType(i)];
+    vtkIdType *nvtk, nn;
+    grid->GetCellPoints( i, nn, nvtk );
+    for( int j=0; j<nn; j++ )
+      n[j] = nvtk[j];
+    int reg = 0;
+
+    if( !strcmp( eletype, "Tt" ) ) {
+      _vol[ne] = new Tetrahedral( &pt );
+      _vol[ne]->add( n, reg );
+      ne++;
+    } else if( !strcmp( eletype, "Hx" ) ) {
+      _vol[ne] = new Hexahedron( &pt );
+      _vol[ne]->add( n, reg );
+      ne++;
+    } else if( !strcmp( eletype, "Py" ) ) {
+      _vol[ne] = new Pyramid( &pt );
+      _vol[ne]->add( n, reg );
+      ne++;
+    } else if( !strcmp( eletype, "Pr" ) ) {
+      _vol[ne] = new Prism( &pt );
+      _vol[ne]->add( n, reg );
+      ne++;
+    } else if( !strcmp( eletype, "Ln" ) ) {
+      _cnnx->add( 1,n );
+    } else if( !strcmp( eletype, "Tr" ) || !strcmp( eletype, "Qd" )  ) {
+      // surface elements ignored
+      nonvol++;
+      surfe++;
+    } else {
+      fprintf(stderr, "Unsupported element type: %s\n", eletype);
+      nonvol++;
+    }
+  }
+  _numVol -= nonvol;
+  return nonvol>0;
+}
+
+
 bool 
 Model::read_vtu( const char* filename, bool no_elem ) 
 {
@@ -419,7 +535,27 @@ Model::read_vtu( const char* filename, bool no_elem )
       p[3*i+j] = x[j];
   }
   pt.add( p, np );
+
+  allvis.resize(pt.num());
+  allvis.assign(pt.num(), true );
+
+  _file = filename;
+  _file.erase(_file.size()-4);
+
+  _cnnx   = new Connection( &pt );
+  _cable  = new ContCable( &pt );
+  
+  if(!no_elem) 
+    if( read_elements(grid) )
+      add_surfaces(grid);
+ 
+  determine_regions();
+  
+  find_max_dim_and_bounds();
+  return true;
 }
+
+
 #endif
 
 
@@ -434,6 +570,7 @@ void Model::find_max_dim_and_bounds()
       if ( fabs(p[i+j]-offset[j])>_maxdim ) 
         _maxdim = fabs(p[i+j]-offset[j]);
       
+  if( _vertnrml != NULL ) delete _vertnrml;
   _vertnrml= new GLfloat[3*pt.num()];
 
   int i=0;
@@ -550,7 +687,7 @@ void Model::determine_regions()
 /** add surface by selecting 2D elements from .elem file
  *
  *  A surface will be created for each different region specified.
- *  Also, all elements withoyut a region specified will form a surface.
+ *  Also, all elements without a region specified will form a surface.
  *
  *  \param base model name
  */

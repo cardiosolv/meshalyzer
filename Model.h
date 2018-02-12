@@ -14,6 +14,9 @@
 #ifdef USE_HDF5
 #include <ch5/ch5.h>
 #endif
+#ifdef USE_VTK
+class vtkUnstructuredGrid;
+#endif
 
 
 class DataOpacity;
@@ -104,6 +107,10 @@ class Model
     void             add_regions(hid_t hdf_file);
     void             add_surfaces(hid_t hdf_file);
     void             add_surfaces(int *elements, int count, int max_width, char *name);
+#endif
+#ifdef USE_VTK
+    bool             read_elements( vtkUnstructuredGrid* grid );
+    bool             add_surfaces( vtkUnstructuredGrid* grid );
 #endif
     
     RRegion**        _region=NULL;

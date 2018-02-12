@@ -182,14 +182,13 @@ bool PPoint :: read(hid_t hdf_file)
   }
   
   // Centre model on origin
-  float min[3], max[3];
   for (int i = 0; i < _n * 3; i += 3) {
     for (int j = 0; j < 3; j++) {
-      if (i == 0 || _pts[i+j] > max[j]) max[j] = _pts[i+j];
-      if (i == 0 || _pts[i+j] < min[j]) min[j] = _pts[i+j];
+      if (i == 0 || _pts[i+j] > _max[j]) _max[j] = _pts[i+j];
+      if (i == 0 || _pts[i+j] < _min[j]) _min[j] = _pts[i+j];
     }
   }
-  for (int i = 0; i < 3; i++) _offset[i] = (min[i]+max[i])/2;
+  for (int i = 0; i < 3; i++) _offset[i] = (_min[i]+_max[i])/2;
   
   _allvis.resize(info.count);
   _allvis.assign(info.count, true );
@@ -210,6 +209,16 @@ PPoint :: add( GLfloat *p, int n )
   _n += n;
   _pts = (GLfloat *)realloc( _pts, _n*3*sizeof(GLfloat) );
   memcpy( _pts+3*(_n-n), p, n*3*sizeof(GLfloat) );
+  
+  // Centre model on origin
+  for (int i = (_n-n)*3; i < _n * 3; i += 3) {
+    for (int j = 0; j < 3; j++) {
+      if (i == 0 || _pts[i+j] > _max[j]) _max[j] = _pts[i+j];
+      if (i == 0 || _pts[i+j] < _min[j]) _min[j] = _pts[i+j];
+    }
+  }
+  for (int i = 0; i < 3; i++) _offset[i] = (_min[i]+_max[i])/2;
+
   _allvis.resize( _n );
   _allvis.assign( _n, true );
   setVis( true );

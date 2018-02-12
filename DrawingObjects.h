@@ -83,6 +83,8 @@ class PPoint: public DrawingObj
     vector<bool>_allvis;	  //!< all true
     int         _maxtm;       //!< maximum time
     int         _tm;          //!< current time
+    GLfloat  _min[3]={0,0,0},
+             _max[3]={0,0,0};//!< bounding box
     DataClass<float>* _dynPt; //!< dynamic point data
 };
 
