@@ -1,6 +1,9 @@
 HOSTMACHINE := $(shell uname)
 include make.conf
 
+#VTK_LIBDIR     =/usr/local/lib
+#VTK_INCDIR     =/usr/local/include/vtk-8.1
+
 FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)
 COMMON_INC    := -I. -DOBJ_CLASS -D_REENTRANT
@@ -24,15 +27,17 @@ endif
 
 # MAC vs Linux differences
 ifeq ($(HOSTMACHINE), Darwin)
-  GLUT_LIB = -framework GLUT 
+  GLUT_LIB  = -framework GLUT 
   FLTK_INC += /usr/X11/include
+  LIB_EXT   = .dylib
 else
-  GLUT_LIB = -lglut
+  GLUT_LIB  = -lglut
   OMP_FLAG := -fopenmp
-  LDFLAGS += $(OMP_FLAG)
+  LDFLAGS  += $(OMP_FLAG)
 ifeq (,$(findstring -lGL,$(FLTK_LD_FLAGS)))
   FLTK_LD_FLAGS += -lGL -lGLU
 endif
+  LIB_EXT   = .so
 endif
 
 COMMON_LIBS  = -lpng -lpthread -lm -lz $(LIB_HDF5) 
@@ -41,14 +46,11 @@ CPPFLAGS     =  $(FLTK_INC) $(COMMON_INC)
 CXXFLAGS     = -std=c++11 -g -O$(DEBUG_LEVEL) $(OMP_FLAG) -MMD -DNOMINMAX  
 
 # VTK
-#VTK=1
-ifdef VTK
-VTK_LIBDIR     =/usr/lib64
-VTK_INCDIR     =/usr/include/vtk-8.1
+ifdef VTK_LIBDIR
 COMMON_INC    += -DUSE_VTK -I$(VTK_INCDIR)
-VTK_LSLIBS     = $(shell ls $(VTK_LIBDIR)/libvtk*.so|grep -v Python|grep -v Java |grep -v TCL)
+VTK_LSLIBS     = $(shell ls $(VTK_LIBDIR)/libvtk*$(LIB_EXT)|grep -v Python|grep -v Java |grep -v TCL)
 a              = $(subst $(VTK_LIBDIR)/lib,-l,$(VTK_LSLIBS) )
-VTK_LIBS       = $(subst .so,,$(a) )
+VTK_LIBS       = $(subst $(LIB_EXT),,$(a) )
 LIBS          += $(VTK_LIBS)
 endif
 
