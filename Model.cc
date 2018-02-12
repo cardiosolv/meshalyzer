@@ -12,6 +12,7 @@
 #include "gzFileBuffer.h"
 #include "logger.hpp"
 #include <algorithm>
+#include <utility>
 #include <queue>
 #ifdef USE_VTK
 #include <vtkSmartPointer.h>
@@ -459,6 +460,8 @@ Model::add_surfaces( vtkUnstructuredGrid* grid )
 	newSurf->ele(e)->compute_normals(0,0);
     e++;
   }
+  newSurf->determine_vert_norms( pt );
+  newSurf->label( "0" );
 }
 
 
@@ -490,6 +493,7 @@ Model:: read_elements(vtkUnstructuredGrid* grid)
       _vol[ne]->add( n, reg );
       ne++;
     } else if( !strcmp( eletype, "Hx" ) ) {
+      swap( n[5], n[7] );
       _vol[ne] = new Hexahedron( &pt );
       _vol[ne]->add( n, reg );
       ne++;
@@ -498,6 +502,7 @@ Model:: read_elements(vtkUnstructuredGrid* grid)
       _vol[ne]->add( n, reg );
       ne++;
     } else if( !strcmp( eletype, "Pr" ) ) {
+      swap( n[1], n[2] );
       _vol[ne] = new Prism( &pt );
       _vol[ne]->add( n, reg );
       ne++;
