@@ -16,3 +16,7 @@ It uses its own file formats which are simple and easily converted to/from more 
 * link multiple instances to maintain view, colour scale, etc. across them
 * can display time-dependent scalar and vector data
 * display auxiliary grids
+
+## VTU format
+
+Preliminary support for reading the VTK format for unstructured grids, VTU, has been included. You need to edit the Makefile manually to specify the directory containing the dynamically linked libraries (`VTK_LIBDIR`) and the directory with the VTK header files (`VTK_INCDIR`)
