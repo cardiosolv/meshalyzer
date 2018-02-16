@@ -426,7 +426,6 @@ bool
 Model::add_surfaces( vtkUnstructuredGrid* grid )
 {
   Surfaces *newSurf = new Surfaces(&pt);
-  newSurf->num(0);
   newSurf->label("default");
   _surface.push_back(newSurf);
   int numCell = grid->GetNumberOfCells();
@@ -460,8 +459,14 @@ Model::add_surfaces( vtkUnstructuredGrid* grid )
 	newSurf->ele(e)->compute_normals(0,0);
     e++;
   }
+  if( !e ) {
+    _surface.pop_back();
+    return false;
+  }
+  newSurf->num(e);
   newSurf->determine_vert_norms( pt );
   newSurf->label( "0" );
+  return true;
 }
 
 
