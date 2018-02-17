@@ -33,6 +33,7 @@ class Model
 #endif
 #ifdef USE_VTK
     bool         read_vtu(const char* filename, bool no_elem );
+    bool         read_objects(vtkUnstructuredGrid* grid, bool no_elem );
 #endif
     bool         read_instance( gzFile, gzFile );
     int          add_surface_from_tri( const char * );

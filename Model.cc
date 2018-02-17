@@ -422,108 +422,112 @@ const char *VTK2CARP_etype[] = {
 };
 
 
-bool
-Model::add_surfaces( vtkUnstructuredGrid* grid )
-{
-  Surfaces *newSurf = new Surfaces(&pt);
-  newSurf->label("default");
-  _surface.push_back(newSurf);
-  int numCell = grid->GetNumberOfCells();
-  newSurf->num(numCell-_numVol);
-
-  int e=0;
-  for( int i=0; i<numCell; i++ ) {
-    const char *eletype = VTK2CARP_etype[grid->GetCellType(i)];
-
-    if( !strcmp( eletype, "Tr" ) ) 
-	  _surface[0]->addele(e, new Triangle( &pt ));
-    else if( !strcmp( eletype, "Qd" )  ) 
-	  _surface[0]->addele(e, new Quadrilateral( &pt ));
-    else 
-      continue;
-
-    vtkIdType np, *cpt;
-    grid->GetCellPoints( i, np, cpt );
-    int ipt[4];
-    if( !strcmp( eletype, "Tr" ) ) {
-      ipt[0] = cpt[0];
-      ipt[1] = cpt[2];
-      ipt[2] = cpt[1];
-    } else if( !strcmp( eletype, "Qd" )  ) {
-      ipt[0] = cpt[0];
-      ipt[1] = cpt[3];
-      ipt[2] = cpt[2];
-      ipt[3] = cpt[1];
-    }
-	newSurf->ele(e)->define(ipt);
-	newSurf->ele(e)->compute_normals(0,0);
-    e++;
-  }
-  if( !e ) {
-    _surface.pop_back();
-    return false;
-  }
-  newSurf->num(e);
-  newSurf->determine_vert_norms( pt );
-  newSurf->label( "0" );
-  return true;
-}
-
-
-/** read in volume elements 
+/** read in all types of elements 
+ *
+ * \param grid     VTU mesh
+ * \param no_velem do not read volum elements
  *
  * \return true if surface elements present
  */
 bool
-Model:: read_elements(vtkUnstructuredGrid* grid)
+Model:: read_objects(vtkUnstructuredGrid* grid, bool no_velem )
 {
   int numCell = grid->GetNumberOfCells();
-  _numVol = numCell;
-  _vol = new VolElement*[_numVol];
+  int ns=0;
 
-  int ne=0;
-  int surfe=0;
-  int n[10];
-  int nonvol=0;
+  // count the element types
   for( int i=0; i<numCell; i++ ) {
-    const char *eletype = VTK2CARP_etype[grid->GetCellType(i)];
-    vtkIdType *nvtk, nn;
-    grid->GetCellPoints( i, nn, nvtk );
-    for( int j=0; j<nn; j++ )
-      n[j] = nvtk[j];
-    int reg = 0;
 
-    if( !strcmp( eletype, "Tt" ) ) {
-      _vol[ne] = new Tetrahedral( &pt );
-      _vol[ne]->add( n, reg );
-      ne++;
-    } else if( !strcmp( eletype, "Hx" ) ) {
-      swap( n[5], n[7] );
-      _vol[ne] = new Hexahedron( &pt );
-      _vol[ne]->add( n, reg );
-      ne++;
-    } else if( !strcmp( eletype, "Py" ) ) {
-      _vol[ne] = new Pyramid( &pt );
-      _vol[ne]->add( n, reg );
-      ne++;
-    } else if( !strcmp( eletype, "Pr" ) ) {
-      swap( n[1], n[2] );
-      _vol[ne] = new Prism( &pt );
-      _vol[ne]->add( n, reg );
-      ne++;
-    } else if( !strcmp( eletype, "Ln" ) ) {
-      _cnnx->add( 1,n );
-    } else if( !strcmp( eletype, "Tr" ) || !strcmp( eletype, "Qd" )  ) {
-      // surface elements ignored
-      nonvol++;
-      surfe++;
+    const char *eletype = VTK2CARP_etype[grid->GetCellType(i)];
+
+    if(  !strcmp( eletype, "Tt" ) || !strcmp( eletype, "Hx" ) || 
+         !strcmp( eletype, "Py" ) || !strcmp( eletype, "Pr" )   )
+      _numVol++;
+    else if( !strcmp( eletype, "Tr" ) ||  !strcmp( eletype, "Qd" ) )
+      ns++;
+    else if( !strcmp( eletype, "Ln" ) ) {
     } else {
       fprintf(stderr, "Unsupported element type: %s\n", eletype);
-      nonvol++;
     }
   }
-  _numVol -= nonvol;
-  return nonvol>0;
+
+  if( no_velem ) _numVol=0;
+  _vol = new VolElement*[_numVol];
+  _numVol = 0;
+
+  if( ns ) {
+    Surfaces *newSurf = new Surfaces(&pt);
+    newSurf->label("default");
+    _surface.push_back(newSurf);
+    newSurf->num(ns);
+    ns = 0;
+  }
+
+  vector<int> cnnx;
+
+  // read in elements
+  for( int i=0; i<numCell; i++ ) {
+
+    const char *eletype = VTK2CARP_etype[grid->GetCellType(i)];
+
+    // convert points to int
+    vtkIdType *nvtk, nn;
+    grid->GetCellPoints( i, nn, nvtk );
+    int n[10];
+    for( int j=0; j<nn; j++ )
+      n[j] = nvtk[j];
+
+    int reg = 0;
+
+    if( !no_velem && !strcmp( eletype, "Tt" ) ) {
+      _vol[_numVol] = new Tetrahedral( &pt );
+      _vol[_numVol]->add( n, reg );
+      _numVol++;
+    } else if( !no_velem && !strcmp( eletype, "Hx" ) ) {
+      swap( n[5], n[7] );
+      _vol[_numVol] = new Hexahedron( &pt );
+      _vol[_numVol]->add( n, reg );
+      _numVol++;
+    } else if( !no_velem && !strcmp( eletype, "Py" ) ) {
+      _vol[_numVol] = new Pyramid( &pt );
+      _vol[_numVol]->add( n, reg );
+      _numVol++;
+    } else if( !no_velem && !strcmp( eletype, "Pr" ) ) {
+      swap( n[1], n[2] );
+      _vol[_numVol] = new Prism( &pt );
+      _vol[_numVol]->add( n, reg );
+      _numVol++;
+    } else if( !strcmp( eletype, "Tr" ) ) {
+     swap( n[1], n[2] );
+	  _surface[0]->addele(ns, new Triangle( &pt ));
+	  _surface[0]->ele(ns)->define(n);
+  	  _surface[0]->ele(ns)->compute_normals(0,0);
+      ns++;
+    } else if ( !strcmp( eletype, "Qd" )  ) {
+      swap( n[1], n[3] );
+	  _surface[0]->addele(ns, new Quadrilateral( &pt ));
+      _surface[0]->ele(ns)->define(n);
+      _surface[0]->ele(ns)->compute_normals(0,0);
+      ns++;
+    } else if( !strcmp( eletype, "Ln" ) ) {
+      cnnx.push_back(n[0]);
+      cnnx.push_back(n[1]);
+    } 
+  }
+
+  // add any connections found
+  if( cnnx.size() )
+    _cnnx->add( cnnx.size()/2., cnnx.data() );
+
+  // add any surface elements found
+  if( ns ) {
+    _surface[0]->num(ns);
+    _surface[0]->determine_vert_norms( pt );
+    _surface[0]->label( "0" );
+    return true;
+  }
+
+  return false;
 }
 
 
@@ -555,9 +559,7 @@ Model::read_vtu( const char* filename, bool no_elem )
   _cnnx   = new Connection( &pt );
   _cable  = new ContCable( &pt );
   
-  if(!no_elem) 
-    if( read_elements(grid) )
-      add_surfaces(grid);
+  read_objects(grid, no_elem );
  
   determine_regions();
   
