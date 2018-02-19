@@ -18,6 +18,7 @@
 #include <vtkSmartPointer.h>
 #include<vtkUnstructuredGrid.h>
 #include<vtkXMLUnstructuredGridReader.h>
+#include<vtkCellData.h>
 #endif
 
 
@@ -433,19 +434,19 @@ bool
 Model:: read_objects(vtkUnstructuredGrid* grid, bool no_velem )
 {
   int numCell = grid->GetNumberOfCells();
-  int ns=0;
+  int nsurf=0,
+      ncnnx=0;
 
   // count the element types
   for( int i=0; i<numCell; i++ ) {
-
     const char *eletype = VTK2CARP_etype[grid->GetCellType(i)];
-
     if(  !strcmp( eletype, "Tt" ) || !strcmp( eletype, "Hx" ) || 
          !strcmp( eletype, "Py" ) || !strcmp( eletype, "Pr" )   )
       _numVol++;
     else if( !strcmp( eletype, "Tr" ) ||  !strcmp( eletype, "Qd" ) )
-      ns++;
+      nsurf++;
     else if( !strcmp( eletype, "Ln" ) ) {
+      ncnnx++;
     } else {
       fprintf(stderr, "Unsupported element type: %s\n", eletype);
     }
@@ -455,15 +456,17 @@ Model:: read_objects(vtkUnstructuredGrid* grid, bool no_velem )
   _vol = new VolElement*[_numVol];
   _numVol = 0;
 
-  if( ns ) {
+  if( nsurf ) {
     Surfaces *newSurf = new Surfaces(&pt);
     newSurf->label("default");
     _surface.push_back(newSurf);
-    newSurf->num(ns);
-    ns = 0;
+    newSurf->num(nsurf);
+    nsurf = 0;
   }
 
+  vtkDataArray* regdata = grid->GetCellData()->GetArray("Regions");
   vector<int> cnnx;
+  int reg = 0;
 
   // read in elements
   for( int i=0; i<numCell; i++ ) {
@@ -477,7 +480,7 @@ Model:: read_objects(vtkUnstructuredGrid* grid, bool no_velem )
     for( int j=0; j<nn; j++ )
       n[j] = nvtk[j];
 
-    int reg = 0;
+    if( regdata ) reg = (int)( regdata->GetTuple1(i) );
 
     if( !no_velem && !strcmp( eletype, "Tt" ) ) {
       _vol[_numVol] = new Tetrahedral( &pt );
@@ -499,16 +502,16 @@ Model:: read_objects(vtkUnstructuredGrid* grid, bool no_velem )
       _numVol++;
     } else if( !strcmp( eletype, "Tr" ) ) {
      swap( n[1], n[2] );
-	  _surface[0]->addele(ns, new Triangle( &pt ));
-	  _surface[0]->ele(ns)->define(n);
-  	  _surface[0]->ele(ns)->compute_normals(0,0);
-      ns++;
+	  _surface[0]->addele(nsurf, new Triangle( &pt ));
+	  _surface[0]->ele(nsurf)->define(n);
+  	  _surface[0]->ele(nsurf)->compute_normals(0,0);
+      nsurf++;
     } else if ( !strcmp( eletype, "Qd" )  ) {
       swap( n[1], n[3] );
-	  _surface[0]->addele(ns, new Quadrilateral( &pt ));
-      _surface[0]->ele(ns)->define(n);
-      _surface[0]->ele(ns)->compute_normals(0,0);
-      ns++;
+	  _surface[0]->addele(nsurf, new Quadrilateral( &pt ));
+      _surface[0]->ele(nsurf)->define(n);
+      _surface[0]->ele(nsurf)->compute_normals(0,0);
+      nsurf++;
     } else if( !strcmp( eletype, "Ln" ) ) {
       cnnx.push_back(n[0]);
       cnnx.push_back(n[1]);
@@ -520,8 +523,8 @@ Model:: read_objects(vtkUnstructuredGrid* grid, bool no_velem )
     _cnnx->add( cnnx.size()/2., cnnx.data() );
 
   // add any surface elements found
-  if( ns ) {
-    _surface[0]->num(ns);
+  if( nsurf ) {
+    _surface[0]->num(nsurf);
     _surface[0]->determine_vert_norms( pt );
     _surface[0]->label( "0" );
     return true;

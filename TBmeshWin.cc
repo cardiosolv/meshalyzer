@@ -757,7 +757,7 @@ void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt,
   }
 
 #ifdef USE_VTK
-  if ( strlen(fnt)>5 && !strcmp(fnt+strlen(fnt)-4,".vtu" ))
+  if ( strlen(fnt)>4 && !strcmp(fnt+strlen(fnt)-4,".vtu" ))
     {
       if ( !model->read_vtu( fnt, no_elems ) ) return;
     }
