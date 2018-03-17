@@ -158,7 +158,7 @@ int viridis_light[][3] = {
 void Colourscale :: scale( CScale_t cs )
 {
   int i;
-  float intrvl;
+  float intrvl,step,val;
 
   float ispan = static_cast<float>(n);
   scaletype = cs;
@@ -186,20 +186,22 @@ void Colourscale :: scale( CScale_t cs )
       }
       break;
     case CS_HOT:
-      intrvl = roundf(ispan/3.);
-      for ( i=0; i<intrvl; i++ ) {
-        cmap[i][0] = (float)(i)/(intrvl-1);
-        cmap[i][1] = cmap[i][2] = 0;
-      }
-      for ( ; i<2*intrvl; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = (float)(i-intrvl)/(intrvl-1);
-        cmap[i][2] = 0;
-      }
-      for ( ; i<n; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = 1;
-        cmap[i][2] = (float)(i-2*intrvl)/(n-2*intrvl-1);
+      intrvl = ispan/3.;
+      step   = ispan/(ispan-1.);
+      for( i=0; i<n; i++  ) {
+        val = i*step;
+        if ( val<intrvl ) {
+          cmap[i][0] = val/intrvl;
+          cmap[i][1] = cmap[i][2] = 0;
+        } else if ( val<2*intrvl ) {
+          cmap[i][0] = 1;
+          cmap[i][1] = (val-intrvl)/intrvl;
+          cmap[i][2] = 0;
+        } else { 
+          cmap[i][0] = 1;
+          cmap[i][1] = 1;
+          cmap[i][2] = (val-2*intrvl)/intrvl;
+        }
       }
       break;
     case CS_RAINBOW:
@@ -237,13 +239,16 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_COLD_HOT:
       intrvl = ispan/2.;
-      for ( i=0; i<0+intrvl; i++ ) {
-        cmap[i][2] =  1;
-        cmap[i][0] =  cmap[i][1] = (float)(i)/intrvl ;
-      }
-      for ( ; i<n; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] =  cmap[i][2] = (float)(n-1-i)/intrvl ;
+      step   = ispan/(ispan-1.);
+      for( i=0; i<n; i++  ) {
+        val = i*step;
+        if ( val<intrvl ) {
+          cmap[i][2] =  1;
+          cmap[i][0] =  cmap[i][1] = val/intrvl ;
+        } else {
+          cmap[i][0] = 1;
+          cmap[i][1] =  cmap[i][2] = (2*intrvl-val)/intrvl ;
+        }
       }
       break;
     case CS_CG:
@@ -328,46 +333,48 @@ void Colourscale :: scale( CScale_t cs )
     case CS_BL_RAINBOW:
     default:
       intrvl = ispan/6.;
-      for ( i=0; i<intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = 0;
-        cmap[i][2] = (float)(i)/intrvl ;
-      }
-      for ( ; i<2*intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = (float)(i-intrvl)/intrvl;
-        cmap[i][2] = 1;
-      }
-      for ( ; i<3*intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = 1;
-        cmap[i][2] = (float)(3*intrvl-i)/intrvl;
-      }
-      for ( ; i<4*intrvl; i++ ) {
-        cmap[i][0] = (float)(i-intrvl*3)/intrvl;
-        cmap[i][1] = 1;
-        cmap[i][2] = 0;
-      }
-      for ( ; i<5*intrvl; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = (float)(5*intrvl-i)/intrvl;
-        cmap[i][2] = 0;
-      }
-      for ( ; i<n; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = float(i-5*intrvl)/intrvl;
-        cmap[i][2] = float(i-5*intrvl)/intrvl;
+      step   = ispan/(ispan-1.);
+      for( i=0; i<n; i++  ) {
+        val = i*step;
+        if ( val<intrvl ) {
+          cmap[i][0] = 0;
+          cmap[i][1] = 0;
+          cmap[i][2] = val/intrvl ;
+        } else if( val<2.*intrvl ) {
+          cmap[i][0] = 0;
+          cmap[i][1] = (val-intrvl)/intrvl;
+          cmap[i][2] = 1;
+        } else if( val<3*intrvl ) {
+          cmap[i][0] = 0;
+          cmap[i][1] = 1;
+          cmap[i][2] = (3.*intrvl-val)/intrvl;
+        } else if( val<4*intrvl ) {
+          cmap[i][0] = (val-intrvl*3.)/intrvl;
+          cmap[i][1] = 1;
+          cmap[i][2] = 0;
+        } else if ( val<5*intrvl ) {
+          cmap[i][0] = 1;
+          cmap[i][1] = (5.*intrvl-val)/intrvl;
+          cmap[i][2] = 0;
+        } else {
+          cmap[i][0] = 1;
+          cmap[i][1] = (val-5*intrvl)/intrvl;
+          cmap[i][2] = (val-5*intrvl)/intrvl;
+        }
       }
       break;
     case CS_ACID:
       intrvl = ispan/2.;
-      for ( i=0; i<0+intrvl; i++ ) {
-        cmap[i][0] = cmap[i][2] = 1.0;
-        cmap[i][1] = (float)(i)/intrvl ;
-  }
-      for ( ; i<n; i++ ) {
-        cmap[i][0] = cmap[i][1] = 1.0;
-        cmap[i][2] = (float)(n-1-i)/intrvl ;
+      step   = ispan/(ispan-1.);
+      for( i=0; i<n; i++  ) {
+        val = i*step;
+        if ( val<intrvl ) {
+          cmap[i][0] = cmap[i][2] = 1.0;
+          cmap[i][1] = val/intrvl ;
+        } else {
+          cmap[i][0] = cmap[i][1] = 1.0;
+          cmap[i][2] = (float)(n-1-val)/intrvl ;
+        }
       }
       break;
     case CS_P2G:
@@ -378,17 +385,17 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_VIRIDIS:
       for ( i = 0; i < n; i++ ) {
-        cmap[i][0] = ((float) viridis[INTERP(i,n,255)][0] / 255.0);
-        cmap[i][1] = ((float) viridis[INTERP(i,n,255)][1] / 255.0);
-        cmap[i][2] = ((float) viridis[INTERP(i,n,255)][2] / 255.0);
+        cmap[i][0] = ((float) viridis[INTERP(i,n-1,254)][0] / 255.0);
+        cmap[i][1] = ((float) viridis[INTERP(i,n-1,254)][1] / 255.0);
+        cmap[i][2] = ((float) viridis[INTERP(i,n-1,254)][2] / 255.0);
       }
       break;
     case CS_VIRIDIS_LIGHT:
       for ( i = 0; i < n; i++ ) {
-        cmap[i][0] = ((float) viridis_light[INTERP(i,n,255)][0] / 255.0);
-        cmap[i][1] = ((float) viridis_light[INTERP(i,n,255)][1] / 255.0);
-        cmap[i][2] = ((float) viridis_light[INTERP(i,n,255)][2] / 255.0);
-  }
+        cmap[i][0] = ((float) viridis_light[INTERP(i,n-1,254)][0] / 255.0);
+        cmap[i][1] = ((float) viridis_light[INTERP(i,n-1,254)][1] / 255.0);
+        cmap[i][2] = ((float) viridis_light[INTERP(i,n-1,254)][2] / 255.0);
+    }
       break;
   }
 }
