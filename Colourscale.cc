@@ -155,6 +155,8 @@ int viridis_light[][3] = {
 };
 
 #define INTERP(a,b,c) ( (int) (((float) (a) / (float) (b)) * (c)) )
+
+
 void Colourscale :: scale( CScale_t cs )
 {
   int i;
@@ -401,34 +403,12 @@ void Colourscale :: scale( CScale_t cs )
 }
 #undef INTERP
 
-void Colourscale :: colourize( float val )
-{
-  if( ( _deadRange==DEAD_MIN && val<_deadMin ) ||
-      ( _deadRange==DEAD_MAX && val>_deadMax ) ||
-      ( _deadRange==DEAD_RANGE && (val<_deadMin||val>_deadMax) ) ) {
-    glColor4fv( _deadColour );
-    return;
-  } 
-  int indx=int(a*val+b);
-  if ( indx<0 ) indx = 0;
-  else if ( indx>=n ) indx = n-1;
-  glColor3fv( cmap[indx] );
-}
-
 
 void Colourscale :: colourize( float val, float alpha )
 {
-  if( ( _deadRange==DEAD_MIN && val<_deadMin ) ||
-      ( _deadRange==DEAD_MAX && val>_deadMax ) ||
-      ( _deadRange==DEAD_RANGE && (val<_deadMin||val>_deadMax) ) ) {
-    glColor4fv( _deadColour );
-    return;
-  } 
-  int indx=int(a*val+b);
-  if ( indx<0 ) indx = 0;
-  else if ( indx>=n ) indx = n-1;
-  cmap[indx][3] = alpha;
-  glColor4fv( cmap[indx] );
+  GLfloat *col = colorvec( val );
+  col[3] = alpha;
+  glColor4fv( col );
 }
 
 void Colourscale :: size( int s )
@@ -448,6 +428,7 @@ void Colourscale :: size( int s )
   scale( scaletype );
 }
 
+
 GLfloat* Colourscale :: colorvec( double val )
 {
   if( ( _deadRange==DEAD_MIN && val<_deadMin ) ||
@@ -455,7 +436,7 @@ GLfloat* Colourscale :: colorvec( double val )
       ( _deadRange==DEAD_RANGE && (val<_deadMin||val>_deadMax) ) ) {
     return _deadColour;
   }
-  int indx=int(rint(a*val+b));
+  int indx=int(a*val+b);
   if ( indx<0 ) indx = 0;
   else if ( indx>=n ) indx = n-1;
   return cmap[indx];

@@ -1672,7 +1672,7 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   GLfloat elecol[]  = {1,0,0,1};
   GLfloat linecol[] = {0,0,0,1};
 
-  glPushAttrib( GL_POLYGON_BIT|GL_COLOR_BUFFER_BIT );
+  glPushAttrib( GL_ALL_ATTRIB_BITS );
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   glEnable(GL_BLEND);
   glShadeModel(GL_SMOOTH);
@@ -1721,8 +1721,6 @@ TBmeshWin::draw_cut_planes( RRegion *reg )
   }
 
   if ( on_tr ) translucency(false);
-  if( isosurfwin->isolineOn->value() )
-    glDisable(GL_POLYGON_OFFSET_FILL );
 
   glPopAttrib();
 }

@@ -27,7 +27,7 @@ class Colourscale
     void   calibrate( double, double ); 	// set range
     inline float min(){return mindat;}		// return minimum data value
     inline float max(){return maxdat;}		// return maximum data value
-    void colourize( float );				// colour vector for data value
+    void colourize( float c ){glColor3fv(colorvec(c));}   // colour vector for data value
     void colourize( float, float );			// same as above, specify alpha
     inline int size(){ return n; }			// get the size
     void     size( int );	    				// set the size
