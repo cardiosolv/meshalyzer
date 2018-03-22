@@ -1,5 +1,5 @@
 #include "Colourscale.h"
-
+#include <iostream>
 Colourscale :: Colourscale( int ts, CScale_t tcs ) : scaletype(tcs)
 {
   size( ts );
@@ -167,23 +167,23 @@ void Colourscale :: scale( CScale_t cs )
   switch ( cs ) {
     case CS_GREY: 							/* bw */
       for ( i=0; i<n; i++ )
-        cmap[i][0] = cmap[i][1] = cmap[i][2] = ((float)i)/ispan;
+        cmap[i][0] = cmap[i][1] = cmap[i][2] = ((float)i)/(ispan-1.);
       break;
-    case CS_RGREY: 							/* bw */
+    case CS_RGREY: 							/* red */
       for ( i=0; i<n; i++ ) {
-        cmap[i][0] = ((float)i)/ispan;
+        cmap[i][0] = ((float)i)/(ispan-1.);
         cmap[i][1] = cmap[i][2] = 0;
       }
       break;
-    case CS_GGREY: 							/* bw */
+    case CS_GGREY: 							/* green */
       for ( i=0; i<n; i++ ) {
-        cmap[i][1] = ((float)i)/ispan;
+        cmap[i][1] = ((float)i)/(ispan-1.);
         cmap[i][0] = cmap[i][2] = 0;
       }
       break;
-    case CS_BGREY: 							/* bw */
+    case CS_BGREY: 							/* blue */
       for ( i=0; i<n; i++ ) {
-        cmap[i][2] = ((float)i)/ispan;
+        cmap[i][2] = ((float)i)/(ispan-1.);
         cmap[i][0] = cmap[i][1] = 0;
       }
       break;
@@ -208,35 +208,34 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_RAINBOW:
       intrvl = ispan/6.;
-      for ( i=0; i<intrvl; i++ ) {
-        cmap[i][0] =  1-(float)(i)/intrvl;
-        cmap[i][1] = 0;
-        cmap[i][2] = 1l;
-      }
-      for ( ; i<2*intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = (float)(i-intrvl)/intrvl;
-        cmap[i][2] = 1;
-      }
-      for ( ; i<3*intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = 1;
-        cmap[i][2] = 1-(float)(i-2*intrvl)/intrvl;
-      }
-      for ( ; i<4*intrvl; i++ ) {
-        cmap[i][0] = (float)(i-3*intrvl)/intrvl;
-        cmap[i][1] = 1;
-        cmap[i][2] = 0;
-      }
-      for ( ; i<5*intrvl; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = 1-(float)(i-4*intrvl)/intrvl;
-        cmap[i][2] = 0;
-      }
-      for ( ; i<n; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = 0;
-        cmap[i][2] =  (float)(i-5*intrvl)/intrvl;
+      step   = ispan/(ispan-1.);
+      for( i=0; i<n; i++  ) {
+        val = i*step;
+        if( i<intrvl ) {
+          cmap[i][0] =  1-val/intrvl;
+          cmap[i][1] = 0;
+          cmap[i][2] = 1;
+        } else if( val<2*intrvl ) {
+          cmap[i][0] = 0;
+          cmap[i][1] = (val-intrvl)/intrvl;
+          cmap[i][2] = 1;
+        } else if( val<3*intrvl ) {
+          cmap[i][0] = 0;
+          cmap[i][1] = 1;
+          cmap[i][2] = 1-(val-2*intrvl)/intrvl;
+        } else if( val<4*intrvl ) {
+          cmap[i][0] = (val-3*intrvl)/intrvl;
+          cmap[i][1] = 1;
+          cmap[i][2] = 0;
+        } else if( val<5*intrvl ) {
+          cmap[i][0] = 1;
+          cmap[i][1] = 1-(val-4*intrvl)/intrvl;
+          cmap[i][2] = 0;
+        } else {
+          cmap[i][0] = 1;
+          cmap[i][1] = 0;
+          cmap[i][2] =(val-5*intrvl)/intrvl;
+        }
       }
       break;
     case CS_COLD_HOT:
@@ -255,81 +254,54 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_CG:
       intrvl = ispan/4.;
-      for ( i=0; i<intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = (float)(i)/intrvl;
-        cmap[i][2] = 1;
-      }
-      for ( ; i<2*intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = 1;
-        cmap[i][2] = (float)(2*intrvl-i)/intrvl;
-      }
-      for ( ; i<3*intrvl; i++ ) {
-        cmap[i][0] = (float)(i-2*intrvl)/intrvl;
-        cmap[i][1] = 1;
-        cmap[i][2] = 0;
-      }
-      for ( ; i<n; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = (float)(4*intrvl-i)/intrvl;
-        cmap[i][2] = 0;
+      step   = ispan/(ispan-1.);
+      for( i=0; i<n; i++  ) {
+        val = i*step;
+        if ( val<intrvl ) {
+          cmap[i][0] = 0;
+          cmap[i][1] = val/intrvl;
+          cmap[i][2] = 1;
+        } else if ( val<2*intrvl ) {
+          cmap[i][0] = 0;
+          cmap[i][1] = 1;
+          cmap[i][2] = (2*intrvl-val)/intrvl;
+        } else if ( val<3*intrvl ) {
+          cmap[i][0] = (val-2*intrvl)/intrvl;
+          cmap[i][1] = 1;
+          cmap[i][2] = 0;
+        } else {
+          cmap[i][0] = 1;
+          cmap[i][1] = (4*intrvl-val)/intrvl;
+          cmap[i][2] = 0;
+        }
       }
       break;
     case CS_MATLAB: // should be CS_MATLAB_REV according controls window
       intrvl = ispan/8.;
-      for ( i=0; i<intrvl; i++ ) {
-        cmap[i][0] = 0.5 + (float)(i)/(2*intrvl);
-        cmap[i][1] = 0;
-        cmap[i][2] = 0;
-      }
-      for ( ; i<3*intrvl; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = (float)(i-intrvl)/(2*intrvl);
-        cmap[i][2] = 0;
-      }
-      for ( ; i<5*intrvl; i++ ) {
-        cmap[i][0] = (float)(5*intrvl-i)/(2*intrvl);
-        cmap[i][1] = 1;
-        cmap[i][2] = (float)(i-3*intrvl)/(2*intrvl);
-      }
-      for ( ; i<7*intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = (float)(7*intrvl-i)/(2*intrvl);
-        cmap[i][2] = 1;
-      }
-      for ( ; i<n; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = 0;
-        cmap[i][2] = (float)(9*intrvl-i)/(2*intrvl);;
-      }
-      break;
-    case CS_MATLAB_REV: // should be CS_MATLAB
-      intrvl = ispan/8.;
-      for ( i=0; i<intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = 0;
-        cmap[i][2] = 0.5 + (float)(i+1)/(2*intrvl);
-      }
-      for ( ; i<3*intrvl; i++ ) {
-        cmap[i][0] = 0;
-        cmap[i][1] = (float)(i-intrvl+1)/(2*intrvl);
-        cmap[i][2] = 1;
-      }
-      for ( ; i<5*intrvl; i++ ) {
-        cmap[i][0] = (float)(i-3*intrvl+1)/(2*intrvl);
-        cmap[i][1] = 1;
-        cmap[i][2] = (float)(5*intrvl-i-1)/(2*intrvl);
-      }
-      for ( ; i<7*intrvl; i++ ) {
-        cmap[i][0] = 1;
-        cmap[i][1] = (float)(7*intrvl-i-1)/(2*intrvl);
-        cmap[i][2] = 0;
-      }
-      for ( ; i<n; i++ ) {
-        cmap[i][0] = 0.5 + (float)(8*intrvl-i-1)/(2*intrvl);
-        cmap[i][1] = 0;
-        cmap[i][2] = 0;
+      step   = ispan/(ispan-1.);
+      for( i=0; i<n; i++  ) {
+        val = i*step;
+        if ( val<intrvl ) {
+          cmap[i][0] = 0.5 + val/(2*intrvl);
+          cmap[i][1] = 0;
+          cmap[i][2] = 0;
+        } else if ( val<3*intrvl ) {
+          cmap[i][0] = 1;
+          cmap[i][1] = (val-intrvl)/(2*intrvl);
+          cmap[i][2] = 0;
+        } else if ( val<5*intrvl ) {
+          cmap[i][0] = (5*intrvl-val)/(2*intrvl);
+          cmap[i][1] = 1;
+          cmap[i][2] = (val-3*intrvl)/(2*intrvl);
+        } else if ( val<7*intrvl ) {
+          cmap[i][0] = 0;
+          cmap[i][1] = (7*intrvl-val)/(2*intrvl);
+          cmap[i][2] = 1;
+        }else {
+          cmap[i][0] = 0;
+          cmap[i][1] = 0;
+          cmap[i][2] = (9*intrvl-val)/(2*intrvl);;
+        }
       }
       break;
     case CS_BL_RAINBOW:
@@ -337,31 +309,31 @@ void Colourscale :: scale( CScale_t cs )
       intrvl = ispan/6.;
       step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
-        val = i*step;
+        val = i*step/intrvl;
         if ( val<intrvl ) {
           cmap[i][0] = 0;
           cmap[i][1] = 0;
-          cmap[i][2] = val/intrvl ;
-        } else if( val<2.*intrvl ) {
+          cmap[i][2] = val ;
+        } else if( val<2. ) {
           cmap[i][0] = 0;
-          cmap[i][1] = (val-intrvl)/intrvl;
+          cmap[i][1] = val-1;
           cmap[i][2] = 1;
-        } else if( val<3*intrvl ) {
+        } else if( val<3 ) {
           cmap[i][0] = 0;
           cmap[i][1] = 1;
-          cmap[i][2] = (3.*intrvl-val)/intrvl;
-        } else if( val<4*intrvl ) {
-          cmap[i][0] = (val-intrvl*3.)/intrvl;
+          cmap[i][2] = 3.-val;
+        } else if( val<4 ) {
+          cmap[i][0] = val-3.;
           cmap[i][1] = 1;
           cmap[i][2] = 0;
-        } else if ( val<5*intrvl ) {
+        } else if ( val<5 ) {
           cmap[i][0] = 1;
-          cmap[i][1] = (5.*intrvl-val)/intrvl;
+          cmap[i][1] = 5.-val;
           cmap[i][2] = 0;
         } else {
           cmap[i][0] = 1;
-          cmap[i][1] = (val-5*intrvl)/intrvl;
-          cmap[i][2] = (val-5*intrvl)/intrvl;
+          cmap[i][1] = val-5.;
+          cmap[i][2] = val-5.;
         }
       }
       break;
@@ -369,35 +341,35 @@ void Colourscale :: scale( CScale_t cs )
       intrvl = ispan/2.;
       step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
-        val = i*step;
-        if ( val<intrvl ) {
+        val = i*step/intrvl;
+        if ( val<1. ) {
           cmap[i][0] = cmap[i][2] = 1.0;
-          cmap[i][1] = val/intrvl ;
+          cmap[i][1] = val ;
         } else {
           cmap[i][0] = cmap[i][1] = 1.0;
-          cmap[i][2] = (float)(n-1-val)/intrvl ;
+          cmap[i][2] = 2-val;
         }
       }
       break;
     case CS_P2G:
       for ( i = 0; i < n; i++ ) {
-        cmap[i][0] = cmap[i][2] = (1.0 - (((float)i)/ispan));
-        cmap[i][1] = ((float)i)/ispan;
+        cmap[i][0] = cmap[i][2] = 1.0 - (((float)i)/(ispan-1.));
+        cmap[i][1] = ((float)i)/(ispan-1);
       }
       break;
     case CS_VIRIDIS:
       for ( i = 0; i < n; i++ ) {
-        cmap[i][0] = ((float) viridis[INTERP(i,n-1,254)][0] / 255.0);
-        cmap[i][1] = ((float) viridis[INTERP(i,n-1,254)][1] / 255.0);
-        cmap[i][2] = ((float) viridis[INTERP(i,n-1,254)][2] / 255.0);
+        cmap[i][0] = ((float) viridis[INTERP(i,n-1,255)][0] / 255.0);
+        cmap[i][1] = ((float) viridis[INTERP(i,n-1,255)][1] / 255.0);
+        cmap[i][2] = ((float) viridis[INTERP(i,n-1,255)][2] / 255.0);
       }
       break;
     case CS_VIRIDIS_LIGHT:
       for ( i = 0; i < n; i++ ) {
-        cmap[i][0] = ((float) viridis_light[INTERP(i,n-1,254)][0] / 255.0);
-        cmap[i][1] = ((float) viridis_light[INTERP(i,n-1,254)][1] / 255.0);
-        cmap[i][2] = ((float) viridis_light[INTERP(i,n-1,254)][2] / 255.0);
-    }
+        cmap[i][0] = ((float) viridis_light[INTERP(i,n-1,255)][0] / 255.0);
+        cmap[i][1] = ((float) viridis_light[INTERP(i,n-1,255)][1] / 255.0);
+        cmap[i][2] = ((float) viridis_light[INTERP(i,n-1,255)][2] / 255.0);
+      }
       break;
   }
 }
