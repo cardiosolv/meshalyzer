@@ -159,10 +159,11 @@ int viridis_light[][3] = {
 
 void Colourscale :: scale( CScale_t cs )
 {
-  int i;
-  float intrvl,step,val;
-
+  int   i;
+  float intrvl, val;
   float ispan = static_cast<float>(n);
+  float step  = ispan/(ispan-1.);
+
   scaletype = cs;
   switch ( cs ) {
     case CS_GREY: 							/* bw */
@@ -189,26 +190,24 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_HOT:
       intrvl = ispan/3.;
-      step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
-        val = i*step;
-        if ( val<intrvl ) {
-          cmap[i][0] = val/intrvl;
+        val = i*step/intrvl;
+        if ( val<1. ) {
+          cmap[i][0] = val;
           cmap[i][1] = cmap[i][2] = 0;
-        } else if ( val<2*intrvl ) {
+        } else if ( val<2 ) {
           cmap[i][0] = 1;
-          cmap[i][1] = (val-intrvl)/intrvl;
+          cmap[i][1] = val-1.0;
           cmap[i][2] = 0;
         } else { 
           cmap[i][0] = 1;
           cmap[i][1] = 1;
-          cmap[i][2] = (val-2*intrvl)/intrvl;
+          cmap[i][2] = val-2;
         }
       }
       break;
     case CS_RAINBOW:
       intrvl = ispan/6.;
-      step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
         val = i*step;
         if( i<intrvl ) {
@@ -240,7 +239,6 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_COLD_HOT:
       intrvl = ispan/2.;
-      step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
         val = i*step;
         if ( val<intrvl ) {
@@ -254,7 +252,6 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_CG:
       intrvl = ispan/4.;
-      step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
         val = i*step;
         if ( val<intrvl ) {
@@ -278,7 +275,6 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_MATLAB: // should be CS_MATLAB_REV according controls window
       intrvl = ispan/8.;
-      step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
         val = i*step;
         if ( val<intrvl ) {
@@ -307,10 +303,9 @@ void Colourscale :: scale( CScale_t cs )
     case CS_BL_RAINBOW:
     default:
       intrvl = ispan/6.;
-      step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
         val = i*step/intrvl;
-        if ( val<1 ) {
+        if ( val<1. ) {
           cmap[i][0] = 0;
           cmap[i][1] = 0;
           cmap[i][2] = val ;
@@ -339,7 +334,6 @@ void Colourscale :: scale( CScale_t cs )
       break;
     case CS_ACID:
       intrvl = ispan/2.;
-      step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
         val = i*step/intrvl;
         if ( val<1. ) {
