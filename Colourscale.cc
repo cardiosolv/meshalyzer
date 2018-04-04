@@ -310,7 +310,7 @@ void Colourscale :: scale( CScale_t cs )
       step   = ispan/(ispan-1.);
       for( i=0; i<n; i++  ) {
         val = i*step/intrvl;
-        if ( val<intrvl ) {
+        if ( val<1 ) {
           cmap[i][0] = 0;
           cmap[i][1] = 0;
           cmap[i][2] = val ;
