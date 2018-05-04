@@ -2073,3 +2073,18 @@ TBmeshWin :: branch_cut(double min, double max, float tol)
 
   redraw();
 }
+
+
+/**
+ * @brief center view on specified vertex
+ *
+ * @param vtx index of vertex
+ */
+void
+TBmeshWin :: ctr_on_vtx( int vtx )
+{
+  const GLfloat *p = model->pt.pt(vtx);
+  trackball.SetOrigin( -p[0], -p[1], -p[2] );
+  trackball.SetTranslation( 0., 0., 0. );
+  redraw();
+}

@@ -80,7 +80,8 @@ class Controls {open
 } {
   decl {friend class ObjProps;} {private local
   }
-  Function {Controls()} {} {
+  Function {Controls()} {open
+  } {
     Fl_Window window {
       label {Meshalyzer Controls} open
       xywh {2069 102 350 645} type Double box UP_BOX
@@ -841,11 +842,11 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
+          label Highlight open selected
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -958,6 +959,11 @@ mwtb->select_vertex();}
             label {Time series}
             callback {mwtb->timeplot();}
             xywh {100 435 85 25} color 124
+          }
+          Fl_Button {} {
+            label {Center Vertex}
+            callback {mwtb->ctr_on_vtx((int)(verthi->value()));}
+            tooltip {center view on highlighted vertex} xywh {15 460 80 25} color 246 labelsize 12
           }
         }
         Fl_Group lightgrp {
@@ -1916,8 +1922,7 @@ memset( objprops, 0, sizeof(ObjProps*)*maxobject );} {}
 if( mwtb->model->twoD() ) {
   illBut->value(0);
   illBut->do_callback();
-}} {selected
-    }
+}} {}
   }
   decl {TBmeshWin *mwtb;} {private local
   }

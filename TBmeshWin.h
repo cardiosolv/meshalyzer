@@ -153,6 +153,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     int       max_time( GridType g=NoDataGrid );
     void      forceThreadData(bool a){forcedThreaded=a;}
     void      branch_cut(double,double,float);
+    void      ctr_on_vtx( int vtx );
     friend class Controls;
     friend class HDF5DataBrowser;
     friend class Frame;
