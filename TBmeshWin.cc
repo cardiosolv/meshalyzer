@@ -734,6 +734,8 @@ void  TBmeshWin::set_windows( Fl_Window *flwindow, const char *modname )
 void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt, 
 		bool no_elems, bool base1 )
 {
+  string fname;
+
   if ( fnt == NULL || !strlen(fnt) ) {
       
     // if available, go to the first Model Dir directory
@@ -749,23 +751,23 @@ void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt,
     while( modchooser.shown() )
       Fl::wait();
 
-    fnt = modchooser.value();
-    if (fnt == NULL) {
+    fname = modchooser.value();
+    if (fname == "") {
       fprintf(stderr, "No file selected.  Exiting.\n");
       exit(0);
     }
   }
 
 #ifdef USE_VTK
-  if ( strlen(fnt)>4 && !strcmp(fnt+strlen(fnt)-4,".vtu" ))
+  if ( fname.len()>4 && fname.substr(fname>len()-4) == ".vtu" )
     {
-      if ( !model->read_vtu( fnt, no_elems ) ) return;
+      if ( !model->read_vtu( fnt.c_str(), no_elems ) ) return;
     }
   else
 #endif
-    {if ( !model->read( fnt, base1, no_elems ) ) return;}
+    {if ( !model->read( fname.c_str(), base1, no_elems ) ) return;}
 
-  string wintitle =  strdup(fnt);
+  string wintitle =  fnt;
   string::size_type  i0=wintitle.rfind("/");
   if ( i0 < string::npos ) wintitle= wintitle.substr(i0+1,string::npos);
   if (wintitle.rfind(".pts") == wintitle.size()-4 ) wintitle=wintitle.substr(0,wintitle.size()-4);
