@@ -734,9 +734,9 @@ void  TBmeshWin::set_windows( Fl_Window *flwindow, const char *modname )
 void TBmeshWin::read_model( Fl_Window *flwindow, const char* fnt, 
 		bool no_elems, bool base1 )
 {
-  string fname;
+  string fname = fnt;
 
-  if ( fnt == NULL || !strlen(fnt) ) {
+  if ( fnt == NULL || !fname.length() ) {
       
     // if available, go to the first Model Dir directory
     char  *moddir=NULL;
