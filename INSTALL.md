@@ -8,10 +8,13 @@ Meshalyzer is regularly used on Linux and Mac machines. It has worked under Wind
 2. [FLTK 1.3](http://www.fltk.org/). Manually downloadad and installed is better since the prepackaged versions often have issues with fltk-config.
 2. [glut](https://www.opengl.org/resources/libraries/glut/)
 3. To make the "windowless" rendering version, [OSMesa](https://www.mesa3d.org/osmesa.html)
+4. To read in VTK VTU format meshes, install [VTK](https://www.vtk.org/) development files
 
 Except for fltk, using your package manager is recommended for installing these packages if possible.
 
 ## Compiling ##
+
+1. If VTK is installed, update the `VTK_INC` and `VTK_DIR` variables to point to the directories containing the header files and libraries, respectively. Comment them out otherwise.
 
 1. Type "make"
 
