@@ -31,7 +31,7 @@ class Surfaces
     void num(int a){_ele.resize(a);}
     vector<SurfaceElement*>& ele(){return _ele;}
     void draw(GLfloat*,Colourscale*,DATA_TYPE*,int,
-              dataOpac*,const GLfloat*);
+              dataOpac*,const GLfloat*,bool sort=false);
     void   register_vertices( vector<bool>& );
     void   label( string s ){ _label=s; }
     string label( void ) { return _label; }
@@ -56,8 +56,8 @@ class Surfaces
     bool     _filled     = true;   //!< draw filled
     bool     _outline    = false;  //!< draw the outline
     GLfloat* _vertnorm   = NULL;   //!< vertex normals
-    int*     _vert;       //!< vertices for which normals are computed
-    vector<SurfaceElement*> _ele; //!< list of elelments to draw
+    int*     _vert;                //!< vertices for which normals are computed
+    vector<SurfaceElement*> _ele;  //!< list of elelments to draw
     string   _label="";
     GLfloat  _diffuse[4]  = {0.6,0.6,0.6,1.};
     GLfloat  _specular[4] = {0.75,0.75,0.75,1.};

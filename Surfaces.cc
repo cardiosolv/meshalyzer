@@ -1,6 +1,39 @@
 #include "Surfaces.h"
 #include <string.h>
 #include "VecData.h"
+#include <algorithm>
+#include <vector>
+#include <iterator>
+
+struct vtx_z {
+  int i;       //!< point index
+  float z;     //!< z depth
+};
+
+bool vtx_sort( vtx_z a, vtx_z b ) { return a.z < b.z; }
+
+/** find the z depth of a point
+ *
+ * \param m projection matrix
+ * \param v vertex (x,y,z)
+ *
+ * \return the z depth buffer coordinate
+ */
+GLfloat 
+z_proj( const GLfloat* m, const GLfloat *v )
+{
+  GLfloat z=0;
+#define ROW_MAJOR
+#ifdef ROW_MAJOR
+  for( int i=0; i<3; i++ ) z += m[8+i]*v[i];
+  z += m[11];
+#else
+  for( int i=0; i<3; i++ ) z += m[2+4*i]*v[i];
+  z += m[14];
+#endif
+  return z;
+}
+
 
 Surfaces::Surfaces( PPoint *pl ) : _p(pl), is_visible(true),_filled(true),
     _outline(false),_vertnorm(NULL)
@@ -120,23 +153,54 @@ void Surfaces::determine_vert_norms( PPoint& pt )
  *  \param stride   draw every n'th element
  *  \param dataopac data opacity
  *  \param ptnrml   vertex normals (NULL for none)
+ *  \param sort     draw from back tofront
  */
 void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
-                     int stride, dataOpac* dataopac, const GLfloat*ptnrml )
+                     int stride, dataOpac* dataopac, const GLfloat*ptnrml,
+                     bool sort )
 {
   GLboolean lightson;
   glGetBooleanv( GL_LIGHTING, &lightson );
 
-  glBegin(GL_TRIANGLES);
-  for ( int i=0; i<_ele.size(); i+=stride )
-    if( _ele[i]->ptsPerObj() == 3 )
-      _ele[i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
-  glEnd();
-  glBegin(GL_QUADS);
-  for ( int i=0; i<_ele.size(); i+=stride )
-    if( _ele[i]->ptsPerObj() == 4 )
-      _ele[i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
-  glEnd();
+  if( sort ) {
+    vector<vtx_z> zlist( (_ele.size()+stride-1)/stride );
+    GLfloat projmat[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, projmat );
+    
+    for ( int i=0; i<_ele.size(); i+=stride ){
+      const PPoint *pts = _ele[i]->pt();
+      int           j   = i/stride;
+      zlist[j].i = i;
+      zlist[j].z = 0.;
+      const int *nn = _ele[i]->obj();
+      for( int j=0; j<3; j++ )
+        zlist[j].z += z_proj(projmat,pts->pt(nn[j]));
+    }
+    std::sort( zlist.begin(), zlist.end(), vtx_sort );
+
+    glBegin(GL_TRIANGLES);
+      for ( vector<vtx_z>::iterator a=zlist.begin(); a!=zlist.end(); a++ ) 
+        if( _ele[(*a).i]->ptsPerObj() == 3 )
+          _ele[(*a).i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+      glEnd();
+      glBegin(GL_QUADS);
+      for ( vector<vtx_z>::iterator a=zlist.begin(); a!=zlist.end(); a++ ) 
+        if( _ele[(*a).i]->ptsPerObj() == 4 )
+          _ele[(*a).i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+      glEnd();
+ 
+  } else {
+      glBegin(GL_TRIANGLES);
+      for ( int i=0; i<_ele.size(); i+=stride )
+        if( _ele[i]->ptsPerObj() == 3 )
+          _ele[i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+      glEnd();
+      glBegin(GL_QUADS);
+      for ( int i=0; i<_ele.size(); i+=stride )
+        if( _ele[i]->ptsPerObj() == 4 )
+          _ele[i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+      glEnd();
+  }
 }
 
 /** redraw elements through which the branch cut passes with flat shading 

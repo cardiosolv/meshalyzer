@@ -463,7 +463,7 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
 
   sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride, 
  		dataopac->dop+Surface, 
-		facetshading?NULL:model->vertex_normals(sf) );
+		facetshading?NULL:model->vertex_normals(sf), on_tr );
 
 #if 0
   int shade_model;
