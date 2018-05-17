@@ -23,7 +23,7 @@ GLfloat
 z_proj( const GLfloat* m, const GLfloat *v )
 {
   GLfloat z=0;
-#define ROW_MAJOR
+//#define ROW_MAJOR
 #ifdef ROW_MAJOR
   for( int i=0; i<3; i++ ) z += m[8+i]*v[i];
   z += m[11];
@@ -173,8 +173,8 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
       zlist[j].i = i;
       zlist[j].z = 0.;
       const int *nn = _ele[i]->obj();
-      for( int j=0; j<3; j++ )
-        zlist[j].z += z_proj(projmat,pts->pt(nn[j]));
+      for( int k=0; k<3; k++ )
+        zlist[j].z += z_proj(projmat,pts->pt(nn[k]));
     }
     std::sort( zlist.begin(), zlist.end(), vtx_sort );
 
