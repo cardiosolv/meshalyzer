@@ -452,13 +452,12 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
 
   glPushAttrib(GL_POLYGON_BIT);
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-  //glEnable(GL_BLEND);
   bool showData=true;
   if ( !(datadst&Surface_flg) || have_data==NoData )
     showData = false;
 
-  bool on_tr = ( dataopac->dop[Surface].on() ||
-                 (!showData&&sf->fillcolor()[3]<OPAQUE_LIMIT) );
+  bool on_tr = dataopac->dop[Surface].on() || 
+               sf->fillcolor()[3]<OPAQUE_LIMIT;
   if( on_tr ) translucency(true);
 
   sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride, 

@@ -180,13 +180,13 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
 
     glBegin(GL_TRIANGLES);
       for ( vector<vtx_z>::iterator a=zlist.begin(); a!=zlist.end(); a++ ) 
-        if( _ele[(*a).i]->ptsPerObj() == 3 )
-          _ele[(*a).i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+        if( _ele[a->i]->ptsPerObj() == 3 )
+          _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
       glEnd();
       glBegin(GL_QUADS);
       for ( vector<vtx_z>::iterator a=zlist.begin(); a!=zlist.end(); a++ ) 
-        if( _ele[(*a).i]->ptsPerObj() == 4 )
-          _ele[(*a).i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+        if( _ele[a->i]->ptsPerObj() == 4 )
+          _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
       glEnd();
  
   } else {
