@@ -5,11 +5,6 @@
 #include <vector>
 #include <iterator>
 
-struct vtx_z {
-  int i;       //!< point index
-  float z;     //!< z depth
-};
-
 bool vtx_sort( vtx_z a, vtx_z b ) { return a.z < b.z; }
 
 /** find the z depth of a point
@@ -163,28 +158,34 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
   glGetBooleanv( GL_LIGHTING, &lightson );
 
   if( sort ) {
-    vector<vtx_z> zlist( (_ele.size()+stride-1)/stride );
     GLfloat projmat[16];
     glGetFloatv(GL_PROJECTION_MATRIX, projmat );
     
-    for ( int i=0; i<_ele.size(); i+=stride ){
-      const PPoint *pts = _ele[i]->pt();
-      int           j   = i/stride;
-      zlist[j].i = i;
-      zlist[j].z = 0.;
-      const int *nn = _ele[i]->obj();
-      for( int k=0; k<3; k++ )
-        zlist[j].z += z_proj(projmat,pts->pt(nn[k]));
+    if( memcmp(projmat, _oldproj, sizeof(projmat) ) ) {
+      
+      memcpy( _oldproj, projmat, sizeof(projmat) );
+      if( !_zlist.size() ) _zlist.resize( _ele.size() );
+
+#pragma omp parallel for 
+      for ( int i=0; i<_ele.size(); i+=stride ){
+        const PPoint *pts = _ele[i]->pt();
+        int           j   = i/stride;
+        _zlist[j].i = i;
+        _zlist[j].z = 0.;
+        const int *nn = _ele[i]->obj();
+        for( int k=0; k<3; k++ )
+          _zlist[j].z += z_proj(projmat,pts->pt(nn[k]));
+      }
+      std::sort( _zlist.begin(), _zlist.end(), vtx_sort );
     }
-    std::sort( zlist.begin(), zlist.end(), vtx_sort );
 
     glBegin(GL_TRIANGLES);
-      for ( vector<vtx_z>::iterator a=zlist.begin(); a!=zlist.end(); a++ ) 
+      for ( vector<vtx_z>::iterator a=_zlist.begin(); a!=_zlist.end(); a++ ) 
         if( _ele[a->i]->ptsPerObj() == 3 )
           _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
       glEnd();
       glBegin(GL_QUADS);
-      for ( vector<vtx_z>::iterator a=zlist.begin(); a!=zlist.end(); a++ ) 
+      for ( vector<vtx_z>::iterator a=_zlist.begin(); a!=_zlist.end(); a++ ) 
         if( _ele[a->i]->ptsPerObj() == 4 )
           _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
       glEnd();
