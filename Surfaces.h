@@ -7,6 +7,11 @@
 #include <string>
 #include <fstream>
 
+struct vtx_z {
+  int i;       //!< point index
+  float z;     //!< z depth
+};
+
 #define  CSET(V,C,A)  V[0]=C;V[1]=C;V[2]=C;V[3]=A;
 class Surfaces
 {
@@ -63,6 +68,8 @@ class Surfaces
     GLfloat  _specular[4] = {0.75,0.75,0.75,1.};
     GLfloat  _shiny       = {80.};
     GLfloat  _backlight   = 0.5;
+    vector<vtx_z> _zlist;
+    GLfloat  _oldproj[16]{};
 };
 
 #endif
