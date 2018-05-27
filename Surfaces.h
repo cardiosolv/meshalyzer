@@ -7,6 +7,8 @@
 #include <string>
 #include <fstream>
 
+#define USE_MVPMAT
+
 struct vtx_z {
   int i;       //!< point index
   float z;     //!< z depth
@@ -69,7 +71,11 @@ class Surfaces
     GLfloat  _shiny       = {80.};
     GLfloat  _backlight   = 0.5;
     vector<vtx_z> _zlist;
+#ifdef USE_MVPMAT
+    GLfloat  _oldmvp[4]{};
+#else
     GLfloat  _oldproj[16]{};
+#endif
 };
 
 #endif

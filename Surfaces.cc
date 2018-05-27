@@ -18,15 +18,15 @@ GLfloat
 z_proj( const GLfloat* m, const GLfloat *v )
 {
   GLfloat z=0;
-//#define ROW_MAJOR
-#ifdef ROW_MAJOR
-  for( int i=0; i<3; i++ ) z += m[8+i]*v[i];
-  z += m[11];
+#define USE_MVPMAT
+#ifdef USE_MVPMAT
+  for( int i=0; i<4; i++ ) z += m[i]*v[i];
+  return z;
 #else
   for( int i=0; i<3; i++ ) z += m[2+4*i]*v[i];
   z += m[14];
-#endif
   return z;
+#endif
 }
 
 
@@ -160,10 +160,24 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
   if( sort ) {
     GLfloat projmat[16];
     glGetFloatv(GL_PROJECTION_MATRIX, projmat );
-    
-    if( memcmp(projmat, _oldproj, sizeof(projmat) ) ) {
-      
+#ifdef USE_MVPMAT
+    // build modelview projection matrix row to compute z
+    GLfloat mv[16];
+    glGetFloatv(GL_MODELVIEW_MATRIX, mv );
+    GLfloat mvp[4]{};
+    for( int i=0; i<4; i++ )
+      for(int j=0; j<4; j++ )
+        mvp[i] += mv[2+j*4]*projmat[4*i+j];
+#endif
+
+#ifdef USE_MVPMAT
+    if( memcmp(mvp, _oldmvp, sizeof(mvp) ) ) {
+      memcpy( _oldmvp, mvp, sizeof(mvp) );
+#else
+    if( memcmp(projmat, _oldproj, sizeof(mvp) ) ) {
       memcpy( _oldproj, projmat, sizeof(projmat) );
+#endif
+      
       if( !_zlist.size() ) _zlist.resize( _ele.size() );
 
 #pragma omp parallel for 
@@ -174,7 +188,11 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
         _zlist[j].z = 0.;
         const int *nn = _ele[i]->obj();
         for( int k=0; k<3; k++ )
+#ifdef USE_MVPMAT
+          _zlist[j].z += z_proj(mvp,pts->pt(nn[k]));
+#else
           _zlist[j].z += z_proj(projmat,pts->pt(nn[k]));
+#endif
       }
       std::sort( _zlist.begin(), _zlist.end(), vtx_sort );
     }
