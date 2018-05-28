@@ -150,23 +150,20 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
   GLboolean lightson;
   glGetBooleanv( GL_LIGHTING, &lightson );
 
+  if( stride != _oldstride ) _zlist.resize( (_ele.size()+stride-1)/stride );
+
   if( sort ) {
-    GLfloat projmat[16];
-    glGetFloatv(GL_PROJECTION_MATRIX, projmat );
+
     // build modelview projection matrix - only compute row to determine z
-    GLfloat mv[16];
+    GLfloat projmat[16], mv[16],mvp[4]{};
+    glGetFloatv(GL_PROJECTION_MATRIX, projmat );
     glGetFloatv(GL_MODELVIEW_MATRIX, mv );
-    GLfloat mvp[4]{};
     for( int i=0; i<4; i++ )
       for(int j=0; j<4; j++ )
         mvp[i] += mv[2+j*4]*projmat[4*i+j];
 
     if( memcmp(mvp, _oldmvp, sizeof(mvp) ) || stride != _oldstride) {
       memcpy( _oldmvp, mvp, sizeof(mvp) );
-      _oldstride = stride;
-      
-      if( !_zlist.size() ) _zlist.resize( _ele.size() );
-
 #pragma omp parallel for 
       for ( int i=0; i<_ele.size(); i+=stride ){
         const PPoint *pts = _ele[i]->pt();
@@ -178,29 +175,22 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
       std::sort( _zlist.begin(), _zlist.end(), vtx_sort );
     }
 
-    glBegin(GL_TRIANGLES);
-      for ( vector<vtx_z>::iterator a=_zlist.begin(); a!=_zlist.end(); a++ ) 
-        if( _ele[a->i]->ptsPerObj() == 3 )
-          _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
-      glEnd();
-      glBegin(GL_QUADS);
-      for ( vector<vtx_z>::iterator a=_zlist.begin(); a!=_zlist.end(); a++ ) 
-        if( _ele[a->i]->ptsPerObj() == 4 )
-          _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
-      glEnd();
- 
-  } else {
-      glBegin(GL_TRIANGLES);
-      for ( int i=0; i<_ele.size(); i+=stride )
-        if( _ele[i]->ptsPerObj() == 3 )
-          _ele[i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
-      glEnd();
-      glBegin(GL_QUADS);
-      for ( int i=0; i<_ele.size(); i+=stride )
-        if( _ele[i]->ptsPerObj() == 4 )
-          _ele[i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
-      glEnd();
-  }
+  } else if( stride != _oldstride )
+    for ( int i=0; i<_ele.size(); i+=stride )
+      _zlist[i/stride].i = i;
+
+  _oldstride = stride;
+
+  glBegin(GL_TRIANGLES);
+  for ( vector<vtx_z>::iterator a=_zlist.begin(); a!=_zlist.end(); a++ ) 
+    if( _ele[a->i]->ptsPerObj() == 3 )
+      _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+  glEnd();
+  glBegin(GL_QUADS);
+  for ( vector<vtx_z>::iterator a=_zlist.begin(); a!=_zlist.end(); a++ ) 
+    if( _ele[a->i]->ptsPerObj() == 4 )
+      _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+  glEnd();
 }
 
 /** redraw elements through which the branch cut passes with flat shading 
