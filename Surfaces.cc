@@ -20,8 +20,8 @@ z_proj( const GLfloat* m, const GLfloat *v )
   GLfloat z=0;
 #define USE_MVPMAT
 #ifdef USE_MVPMAT
-  for( int i=0; i<4; i++ ) z += m[i]*v[i];
-  return z;
+  for( int i=0; i<3; i++ ) z += m[i]*v[i];
+  return z+m[3];
 #else
   for( int i=0; i<3; i++ ) z += m[2+4*i]*v[i];
   z += m[14];
@@ -171,12 +171,13 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
 #endif
 
 #ifdef USE_MVPMAT
-    if( memcmp(mvp, _oldmvp, sizeof(mvp) ) ) {
+    if( memcmp(mvp, _oldmvp, sizeof(mvp) ) || stride != _oldstride) {
       memcpy( _oldmvp, mvp, sizeof(mvp) );
 #else
-    if( memcmp(projmat, _oldproj, sizeof(mvp) ) ) {
+    if( memcmp(projmat, _oldproj, sizeof(mvp) || stride != _oldstride) ) {
       memcpy( _oldproj, projmat, sizeof(projmat) );
 #endif
+      _oldstride = stride;
       
       if( !_zlist.size() ) _zlist.resize( _ele.size() );
 
@@ -189,7 +190,7 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
         const int *nn = _ele[i]->obj();
         for( int k=0; k<3; k++ )
 #ifdef USE_MVPMAT
-          _zlist[j].z += z_proj(mvp,pts->pt(nn[k]));
+          _zlist[j].z += -z_proj(mvp,pts->pt(nn[k]));
 #else
           _zlist[j].z += z_proj(projmat,pts->pt(nn[k]));
 #endif
