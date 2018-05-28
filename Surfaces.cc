@@ -5,11 +5,11 @@
 #include <vector>
 #include <iterator>
 
-bool vtx_sort( vtx_z a, vtx_z b ) { return a.z < b.z; }
+bool vtx_sort( vtx_z a, vtx_z b ) { return a.z > b.z; }
 
-/** find the z depth of a point
+/** find the z depth of a point (assume w=1)
  *
- * \param m projection matrix
+ * \param m projection matrix or row of the ModelViewProjection 
  * \param v vertex (x,y,z)
  *
  * \return the z depth buffer coordinate
@@ -18,15 +18,8 @@ GLfloat
 z_proj( const GLfloat* m, const GLfloat *v )
 {
   GLfloat z=0;
-#define USE_MVPMAT
-#ifdef USE_MVPMAT
   for( int i=0; i<3; i++ ) z += m[i]*v[i];
   return z+m[3];
-#else
-  for( int i=0; i<3; i++ ) z += m[2+4*i]*v[i];
-  z += m[14];
-  return z;
-#endif
 }
 
 
@@ -160,23 +153,16 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
   if( sort ) {
     GLfloat projmat[16];
     glGetFloatv(GL_PROJECTION_MATRIX, projmat );
-#ifdef USE_MVPMAT
-    // build modelview projection matrix row to compute z
+    // build modelview projection matrix - only compute row to determine z
     GLfloat mv[16];
     glGetFloatv(GL_MODELVIEW_MATRIX, mv );
     GLfloat mvp[4]{};
     for( int i=0; i<4; i++ )
       for(int j=0; j<4; j++ )
         mvp[i] += mv[2+j*4]*projmat[4*i+j];
-#endif
 
-#ifdef USE_MVPMAT
     if( memcmp(mvp, _oldmvp, sizeof(mvp) ) || stride != _oldstride) {
       memcpy( _oldmvp, mvp, sizeof(mvp) );
-#else
-    if( memcmp(projmat, _oldproj, sizeof(mvp) || stride != _oldstride) ) {
-      memcpy( _oldproj, projmat, sizeof(projmat) );
-#endif
       _oldstride = stride;
       
       if( !_zlist.size() ) _zlist.resize( _ele.size() );
@@ -184,16 +170,10 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
 #pragma omp parallel for 
       for ( int i=0; i<_ele.size(); i+=stride ){
         const PPoint *pts = _ele[i]->pt();
-        int           j   = i/stride;
-        _zlist[j].i = i;
-        _zlist[j].z = 0.;
-        const int *nn = _ele[i]->obj();
+        _zlist[i/stride]  = {i,0};
+        const int *nn     = _ele[i]->obj();
         for( int k=0; k<3; k++ )
-#ifdef USE_MVPMAT
-          _zlist[j].z += -z_proj(mvp,pts->pt(nn[k]));
-#else
-          _zlist[j].z += z_proj(projmat,pts->pt(nn[k]));
-#endif
+          _zlist[i/stride].z += z_proj(mvp,pts->pt(nn[k]));
       }
       std::sort( _zlist.begin(), _zlist.end(), vtx_sort );
     }

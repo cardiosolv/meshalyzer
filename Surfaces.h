@@ -7,7 +7,6 @@
 #include <string>
 #include <fstream>
 
-#define USE_MVPMAT
 
 struct vtx_z {
   int i;       //!< point index
@@ -72,11 +71,7 @@ class Surfaces
     GLfloat  _backlight   = 0.5;
     vector<vtx_z> _zlist;
     int _oldstride        = 0;
-#ifdef USE_MVPMAT
     GLfloat  _oldmvp[4]{};
-#else
-    GLfloat  _oldproj[16]{};
-#endif
 };
 
 #endif
