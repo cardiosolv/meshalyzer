@@ -62,7 +62,7 @@ class Surfaces
     bool     _filled     = true;   //!< draw filled
     bool     _outline    = false;  //!< draw the outline
     GLfloat* _vertnorm   = NULL;   //!< vertex normals
-    int*     _vert;                //!< vertices for which normals are computed
+    vector<int>_vert;              //!< vertices for which normals are computed
     vector<SurfaceElement*> _ele;  //!< list of elelments to draw
     string   _label="";
     GLfloat  _diffuse[4]  = {0.6,0.6,0.6,1.};
@@ -70,7 +70,7 @@ class Surfaces
     GLfloat  _shiny       = {80.};
     GLfloat  _backlight   = 0.5;
     vector<vtx_z> _zlist;
-    int _oldstride        = 0;
+    int      _oldstride        = 0;
     GLfloat  _oldmvp[4]{};
 };
 
