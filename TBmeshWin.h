@@ -103,7 +103,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void output_pdf( char *fn, bool PS );
     void revdraworder( bool a ){ revDrawOrder=a; redraw(); }
     void animate_delay(float a){ frame_delay = a; }
-    void animate_skip( int a, void * );
+    void animate_skip( int a, void *, bool = false );
     bool set_time(int a);
     int  time(){return tm;}
     void autocolour( bool a ){autocol = a;}
@@ -154,6 +154,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      forceThreadData(bool a){forcedThreaded=a;}
     void      branch_cut(double,double,float);
     void      ctr_on_vtx( int vtx );
+    bool      anim_loop = false;
     friend class Controls;
     friend class HDF5DataBrowser;
     friend class Frame;

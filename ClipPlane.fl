@@ -26,7 +26,7 @@ class ClipPlane {open
   } {
     Fl_Window window {
       label {Clipping Plane} open
-      xywh {405 64 575 685} type Double visible
+      xywh {405 64 575 685} type Double hide
     } {
       Fl_Box cporienter {
         label Box
@@ -534,7 +534,7 @@ tbmw->redraw();}
       Fl_Button {} {
         label {Sync Clipping Planes}
         callback {tbmw->SendClipSyncMessage();} selected
-        image {sync-icon.png} xywh {430 550 75 75} labelsize 12 align 128
+        image {broadcast.png} xywh {430 550 75 75} labelsize 12 align 128
       }
     }
     code {tbmw = tb;

@@ -20,7 +20,6 @@
 
 unsigned int TBmeshWin::MAX_MESSAGES_READ = 100;
 
-
 const int   NUM_CP = 6;
 const GLenum CLIP_PLANE[] =
   {
@@ -29,18 +28,6 @@ const GLenum CLIP_PLANE[] =
   };
 
 bool translucency( bool b );
-int intcomp( const void *a, const void *b );
-
-
-int intcomp( const void *a, const void *b )
-{
-  if ( *((int *)a) < *((int *)b) )
-    return -1;
-  else if ( *((int *)a) > *((int *)b) )
-    return 1;
-  else
-    return 0;
-}
 
 void animate_cb( void *v )
 {
@@ -48,13 +35,19 @@ void animate_cb( void *v )
   Controls* ctrl = (Controls *)(((void **)v)[1]);
   if ( mw->frame_skip == 0 )
     return;
+
   int ntm = mw->tm + mw->frame_skip;
-  if ( ntm<0 || ntm>ctrl->tmslider->maximum() ) {
+  if ( !mw->anim_loop && (ntm<0 || ntm>ctrl->tmslider->maximum()) ) {
     ntm -= mw->frame_skip;
     mw->frame_skip = 0;
-  } else
-    mw->signal_links( 1 );
+  } else {
+    if ( ntm<0 ) 
+      ntm = ctrl->tmslider->maximum();
+    else if( ntm>ctrl->tmslider->maximum() )
+      ntm = 0;
 
+    mw->signal_links( 1 );
+  }
   mw->set_time( ntm );
   Fl::add_timeout( mw->frame_delay, animate_cb, v );
 }
@@ -62,7 +55,7 @@ void animate_cb( void *v )
 
 // determine the action if the play button is pressed on the control widget
 void
-TBmeshWin::animate_skip( int fs, void *ctrl )
+TBmeshWin::animate_skip( int fs, void *ctrl, bool repeat )
 {
   static void* vp[2];
 
@@ -79,6 +72,7 @@ TBmeshWin::animate_skip( int fs, void *ctrl )
   vp[0] = this;
   vp[1] = ctrl;
   frame_skip = fs;
+  anim_loop = repeat;
 
   if ( tm+frame_skip >= contwin->tmslider->maximum() )
     tm = -frame_skip;

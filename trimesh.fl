@@ -846,7 +846,7 @@ objprops[Cable]->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open selected
+          label Highlight open
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1766,7 +1766,7 @@ mwtb->redraw();}
           callback {mwtb->optimize_cs();
 mincolval->value(mwtb->cs->min());
 maxcolval->value(mwtb->cs->max());}
-          tooltip {calibrate for current time} xywh {15 495 45 20} box ROUND_UP_BOX labelsize 10
+          tooltip {calibrate for current time} xywh {15 500 45 20} box ROUND_UP_BOX labelsize 10
         }
         Fl_Choice cstype {
           label {colour scale}
@@ -1866,46 +1866,51 @@ mwtb->redraw();}
         Fl_Light_Button autocalibratebut {
           label auto
           callback {mwtb->autocolour(o->value());}
-          tooltip {autoscale every timestep} xywh {15 520 45 15} labelsize 10 align 16
+          tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
         }
         Fl_Button {} {
           callback {mwtb->SendColourSyncMessage();}
-          image {sync-icon.png} xywh {315 525 20 20}
+          image {broadcast.png} xywh {315 525 20 20}
         }
       }
-      Fl_Group animate_group {
+      Fl_Group animate_group {open
         xywh {10 555 330 85} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
           label time
           callback {mwtb->set_time(int(o->value()));}
-          tooltip {time displayed} xywh {15 570 220 25} box UP_BOX align 1
+          tooltip {time displayed} xywh {17 570 220 25} box UP_BOX align 1
           code0 {\#include "Myslider.h"}
           class Myslider
         }
         Fl_Button {} {
-          label {@>>}
+          label {@>|}
           callback {mwtb->animate_skip( int(frameskip->value()),this );}
-          tooltip {start animation} xywh {245 560 25 35} labelcolor 71
+          tooltip {start playing animation until end} xywh {245 560 25 35} labelcolor 71
         }
         Fl_Button {} {
           label {@||}
           callback {mwtb->animate_skip(0,this);}
-          tooltip {stop animation} xywh {275 560 25 35} labelcolor 1
+          tooltip {stop animation} xywh {276 560 25 35} labelcolor 1
         }
         Fl_Counter frameskip {
           label {\#frames}
           callback {mwtb->animate_skip(int(frameskip->value()),NULL);}
-          tooltip {\#frames to  increment} xywh {75 605 130 20} align 4 step 1 value 1
+          tooltip {\#frames to  increment} xywh {71 605 130 20} align 4 step 1 value 1
         }
         Fl_Value_Input animdelay {
           label {delay:}
           callback {mwtb->animate_delay(o->value()/1000.);}
-          tooltip {delay between frames (ms )} xywh {260 606 70 20} maximum 2000 step 5 value 10
+          tooltip {delay between frames (ms )} xywh {250 606 55 20} maximum 2000 step 5 value 10
         }
         Fl_Button tsync_but {
           callback {mwtb->SendTimeSyncMessage();}
-          image {sync-icon.png} xywh {305 560 25 35} resizable
+          image {broadcast.png} xywh {309 600 26 30} resizable
+        }
+        Fl_Button {} {
+          label {@>>}
+          callback {mwtb->animate_skip( int(frameskip->value()),this,true );} selected
+          tooltip {start looping animation} xywh {306 560 25 35} labelcolor 71
         }
       }
     }

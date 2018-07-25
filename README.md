@@ -28,3 +28,6 @@ and then
     VTK_LIBDIR = /usr/local/lib
     VTK_INCDIR = /usr/local/include/vtk-<version>
 
+#### Acknowledgement
+
+The broadcast symbol was provided by [oNline Web Fonts](http://www.onlinewebfonts.com).
