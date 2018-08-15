@@ -7,7 +7,7 @@
 
 /** find the z depth of a point (assume w=1)
  *
- * \param m projection matrix or row of the ModelViewProjection 
+ * \param m row of the ModelViewProjection 
  * \param v vertex (x,y,z)
  *
  * \return the z depth buffer coordinate
@@ -15,9 +15,9 @@
 GLfloat 
 z_proj( const GLfloat* m, const GLfloat *v )
 {
-  GLfloat z=0;
+  GLfloat z=m[3];
   for( int i=0; i<3; i++ ) z += m[i]*v[i];
-  return z+m[3];
+  return z;
 }
 
 
@@ -26,8 +26,6 @@ Surfaces::Surfaces( PPoint *pl ) : _p(pl), is_visible(true),_filled(true),
 {
   fillcolor( 1., 0.5, 0.1 );
   outlinecolor( 0.125, 0.8, 0.7 );
-  _vert = (int *)malloc( sizeof(int) );
-  _vert[0] = -1;
 }
 
 
@@ -80,12 +78,8 @@ void Surfaces :: outlinecolor( float r, float g, float b, float a )
  */
 void Surfaces::get_vert_norms( GLfloat *vn )
 {
-  int i=0;
-
-  while ( _vert[i] >= 0 ) {
+  for ( int i=0; i<_vert.size(); i++  ) 
     memcpy( vn+_vert[i]*3, _vertnorm+i*3, 3*sizeof(GLfloat) );
-    i++;
-  }
 }
 
 
@@ -118,7 +112,7 @@ void Surfaces::determine_vert_norms( PPoint& pt )
     numvert++;
   }
 
-  _vert = (int *)realloc(_vert, sizeof(int)*(numvert+1));
+  _vert.resize(numvert);
   _vertnorm = new GLfloat[3*numvert];
   numvert = 0;
   for ( int i=0; i<pt.num(); i++ ) {
@@ -127,7 +121,6 @@ void Surfaces::determine_vert_norms( PPoint& pt )
       _vert[numvert++] = i;
     }
   }
-  _vert[numvert] = -1;
   delete[] tvn;
 }
 
@@ -139,7 +132,7 @@ void Surfaces::determine_vert_norms( PPoint& pt )
  *  \param stride   draw every n'th element
  *  \param dataopac data opacity
  *  \param ptnrml   vertex normals (NULL for none)
- *  \param sort     draw from back tofront
+ *  \param sort     draw from back to front
  */
 void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
                      int stride, dataOpac* dataopac, const GLfloat*ptnrml,
@@ -158,7 +151,7 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
     glGetFloatv(GL_MODELVIEW_MATRIX, modview );
     for( int i=0; i<4; i++ )
       for(int j=0; j<4; j++ )
-        mvp[i] += modview[2+j*4]*proj[4*i+j];
+        mvp[i] += modview[2+j*4]*proj[4*i+j]; // column major order
 
     if( memcmp(mvp, _oldmvp, sizeof(mvp) ) || stride != _oldstride) {
       memcpy( _oldmvp, mvp, sizeof(mvp) );
@@ -181,14 +174,14 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
   _oldstride = stride;
 
   glBegin(GL_TRIANGLES);
-  for ( vector<vtx_z>::iterator a=_zlist.begin(); a!=_zlist.end(); a++ ) 
-    if( _ele[a->i]->ptsPerObj() == 3 )
-      _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+  for ( auto a :_zlist ) 
+    if( _ele[a.i]->ptsPerObj() == 3 )
+      _ele[a.i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
   glEnd();
   glBegin(GL_QUADS);
-  for ( vector<vtx_z>::iterator a=_zlist.begin(); a!=_zlist.end(); a++ ) 
-    if( _ele[a->i]->ptsPerObj() == 4 )
-      _ele[a->i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+  for ( auto a :_zlist ) 
+    if( _ele[a.i]->ptsPerObj() == 4 )
+      _ele[a.i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
   glEnd();
 }
 
@@ -210,6 +203,8 @@ Surfaces ::correct_branch_elements( GLdouble *range, DATA_TYPE *data,
   int shade;
   glGetIntegerv(GL_SHADE_MODEL, &shade );
   glShadeModel( GL_FLAT );
+  GLboolean lightson;
+  glGetBooleanv( GL_LIGHTING, &lightson );
 
   DATA_TYPE d[MAX_NUM_SURF_NODES*2];
   for ( int i=0; i<_ele.size(); i+=stride ) {
@@ -217,7 +212,7 @@ Surfaces ::correct_branch_elements( GLdouble *range, DATA_TYPE *data,
     for( int j=0; j<_ele[i]->ptsPerObj(); j++ )
       d[j] = data[n[j]];
     if( cross_branch( d, _ele[i]->ptsPerObj(), range[0], range[1], BRANCH_TOL ) )
-      _ele[i]->draw( i, i, _fillcolor, cs, data, stride, opac, _vertnorm );
+      _ele[i]->draw( i, _fillcolor, cs, data, opac, _vertnorm, lightson );
   }
 
   glShadeModel( shade );
@@ -231,18 +226,15 @@ Surfaces ::correct_branch_elements( GLdouble *range, DATA_TYPE *data,
  */
 void Surfaces::register_vertices( vector<bool>& vb )
 {
-  for ( int i=0; i<_ele.size(); i++ )
-    _ele[i]->register_vertices( 0, 0, vb );
+  for( auto e : _ele ) 
+    e->register_vertices( 0, 0, vb );
 }
 
 /** flip the normals
  */
 void Surfaces :: flip_norms()
 {
-  int numvert=0;;
-  while( _vert[numvert] != -1 ) numvert++;
-
-  for( int i=0; i<3*(numvert-1); i++ )
+  for( int i=0; i<3*(_vert.size()); i++ )
     _vertnorm[i] *=-1;
 }
 
@@ -255,8 +247,7 @@ Surfaces :: to_file( ofstream &of )
 {
     of << num() << "  " << label() << endl;
  
-    for( int j=0; j<num();j++ ) {
-      SurfaceElement *e = ele(j);
+    for( auto e : _ele ) {
       const int* n=e->obj();
       if( e->ptsPerObj()==3 ) 
         of << "Tr";
