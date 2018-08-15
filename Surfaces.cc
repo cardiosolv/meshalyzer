@@ -5,8 +5,6 @@
 #include <vector>
 #include <iterator>
 
-bool vtx_sort( vtx_z a, vtx_z b ) { return a.z > b.z; }
-
 /** find the z depth of a point (assume w=1)
  *
  * \param m projection matrix or row of the ModelViewProjection 
@@ -155,12 +153,12 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
   if( sort ) {
 
     // build modelview projection matrix - only compute row to determine z
-    GLfloat projmat[16], mv[16],mvp[4]{};
-    glGetFloatv(GL_PROJECTION_MATRIX, projmat );
-    glGetFloatv(GL_MODELVIEW_MATRIX, mv );
+    GLfloat proj[16], modview[16], mvp[4]{};
+    glGetFloatv(GL_PROJECTION_MATRIX, proj );
+    glGetFloatv(GL_MODELVIEW_MATRIX, modview );
     for( int i=0; i<4; i++ )
       for(int j=0; j<4; j++ )
-        mvp[i] += mv[2+j*4]*projmat[4*i+j];
+        mvp[i] += modview[2+j*4]*proj[4*i+j];
 
     if( memcmp(mvp, _oldmvp, sizeof(mvp) ) || stride != _oldstride) {
       memcpy( _oldmvp, mvp, sizeof(mvp) );
@@ -172,7 +170,8 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
         for( int k=0; k<3; k++ )
           _zlist[i/stride].z += z_proj(mvp,pts->pt(nn[k]));
       }
-      std::sort( _zlist.begin(), _zlist.end(), vtx_sort );
+      std::sort( _zlist.begin(), _zlist.end(), 
+              [](const vtx_z a, const vtx_z b){return a.z>b.z;} );
     }
 
   } else if( stride != _oldstride )
