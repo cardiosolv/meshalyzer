@@ -7,7 +7,7 @@
 
 /** find the z depth of a point (assume w=1)
  *
- * \param m projection matrix or row of the ModelViewProjection 
+ * \param m row of the ModelViewProjection 
  * \param v vertex (x,y,z)
  *
  * \return the z depth buffer coordinate
@@ -164,7 +164,7 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
           _zlist[i/stride].z += z_proj(mvp,pts->pt(nn[k]));
       }
       std::sort( _zlist.begin(), _zlist.end(), 
-                    [](const vtx_z a, const vtx_z b ){return a.z > b.z;} );
+              [](const vtx_z a, const vtx_z b){return a.z>b.z;} );
     }
 
   } else if( stride != _oldstride )
