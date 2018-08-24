@@ -155,6 +155,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      branch_cut(double,double,float);
     void      ctr_on_vtx( int vtx );
     bool      anim_loop = false;
+    bool      axes( int v ) { _axes = v; redraw(); }
     friend class Controls;
     friend class HDF5DataBrowser;
     friend class Frame;
@@ -227,6 +228,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     bool   _branch_cut = false;
     double _branch_range[2];
     DeadDataGUI *deadData;
+    bool   _axes=false;
 };
 
 #include "DataOpacity.h"

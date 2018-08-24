@@ -152,9 +152,10 @@ void IsoLine::auxMesh( const char *fname )
   fprintf( dout, "1\n%d\n", numpt );
   for( int i=0; i<_polygon.size(); i++ ) {
     fprintf( eout, "%s", _polygon[i]->ptsPerObj()==2?"Ln":"Qd" );
-    for( int j=0;j<_polygon[i]->ptsPerObj();j++ ) 
+    for( int j=0;j<_polygon[i]->ptsPerObj();j++ )  {
       fprintf( eout," %d", ptoff++ );
-    fprintf( dout," %f\n", _val[i] );
+      fprintf( dout," %f\n", _val[i] );
+    }
     fprintf( eout,"\n" );
   }
   fclose( eout );

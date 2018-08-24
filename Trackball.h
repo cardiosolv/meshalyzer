@@ -82,7 +82,6 @@ class Trackball
     void  read( const char * );
     void  save( ofstream& );
     void  read( ifstream& );
-
 }
 ; // Trackball
 

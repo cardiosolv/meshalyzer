@@ -28,6 +28,32 @@ and then
     VTK_LIBDIR = /usr/local/lib
     VTK_INCDIR = /usr/local/include/vtk-<version>
 
+## Run-time issues
+
+* Most of the time, a bad mesh or bad data file is responsible for crashes.
+    Ensure that
+    1. node indexing start at 0 and the number of nodes is correct
+    2. there are no gaps in numbering
+    3. the data file did not get truncated. Use  
+    `igbhead --jive`  
+    to correct if necessary.
+    4. file formats are respected.
+
+* It is possible that internally, a bad memory operation is performed. Try setting   
+`export MALLOC_CHECK_=1`  
+and see if it disappears.
+
+* Make sure the proper dynamic libraries are getting linked. There can be conflicts with *fltk* or *vtk* if
+  multiple versions are installed. In these cases a simple solution ids to write a wrapper script which 
+  properly sets the environment variables like below:
+
+  ```bash
+  #!/bin/bash
+  export LD_LIBRARY_PATH=/path_to_dylib1_dir:/path_to_dylib2_dir
+  /path_to_meshalyzer/meshalyzer $*
+  ```
+
+
 #### Acknowledgement
 
 The broadcast symbol was provided by [oNline Web Fonts](http://www.onlinewebfonts.com).

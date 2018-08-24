@@ -359,7 +359,7 @@ void TBmeshWin :: draw()
   for (int i=0;i<NUM_CP;i++)
     if (cplane->on(i)&&cplane->visible(i)) draw_clip_plane(i);
 
-  if ( contwin->draw_axes->value() ) draw_axes( model->pt.offset() );
+  if ( _axes ) TBmeshWin::draw_axes( model->pt.offset() );
 
   glDepthMask(GL_TRUE);
   gl2psEnable(GL2PS_BLEND);

@@ -180,8 +180,9 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
   glEnd();
   glBegin(GL_QUADS);
   for ( auto a :_zlist ) 
-    if( _ele[a.i]->ptsPerObj() == 4 )
+    if( _ele[a.i]->ptsPerObj() == 4 ){
       _ele[a.i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+    }
   glEnd();
 }
 
