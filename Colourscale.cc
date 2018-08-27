@@ -372,8 +372,7 @@ void Colourscale :: scale( CScale_t cs )
 
 void Colourscale :: colourize( float val, float alpha )
 {
-  GLfloat *col = colorvec( val );
-  col[3] = alpha;
+  GLfloat *col = colorvec( val, alpha );
   glColor4fv( col );
 }
 
@@ -395,16 +394,19 @@ void Colourscale :: size( int s )
 }
 
 
-GLfloat* Colourscale :: colorvec( double val )
+GLfloat* Colourscale :: colorvec( double val, float alpha )
 {
-  if( ( _deadRange==DEAD_MIN && val<_deadMin ) ||
-      ( _deadRange==DEAD_MAX && val>_deadMax ) ||
-      ( _deadRange==DEAD_RANGE && (val<_deadMin||val>_deadMax) ) ) {
+  if( !NO_DEAD && (
+           ( _deadRange&DEAD_MIN && val<_deadMin ) ||
+           ( _deadRange&DEAD_MAX && val>_deadMax ) ||
+           ( _deadRange&DEAD_NaN && isnan(val) ) 
+                  )                                  ){
     return _deadColour;
   }
   int indx=int(a*val+b);
   if ( indx<0 ) indx = 0;
   else if ( indx>=n ) indx = n-1;
+  cmap[indx][3] = alpha;
   return cmap[indx];
 }
 
@@ -444,9 +446,10 @@ Colourscale::deadColour( GLfloat *dc, GLfloat dopac )
 }
 
 void
-Colourscale::deadRange( double min, double max, DeadRange dr )
+Colourscale::deadRange( double min, double max, bool nan, DeadRange dr )
 {
-  _deadMin = min;
-  _deadMax = max;
+  _deadMin   = min;
+  _deadMax   = max;
+  _deadNaN   = nan;
   _deadRange = dr;
 }

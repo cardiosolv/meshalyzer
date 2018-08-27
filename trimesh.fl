@@ -736,7 +736,7 @@ voldisp->uncheck();}
       }
       Fl_Light_Button draw_axes {
         label Axes
-        callback {mwtb->axes(o->value());} selected
+        callback {mwtb->axes(o->value());}
         tooltip {toggle axs display} xywh {10 85 65 25}
       }
       Fl_Button voxeleColor {
@@ -2233,6 +2233,7 @@ SAVE_WIDGET( mshzf, mwtb->deadData->minValidVal );
 SAVE_WIDGET( mshzf, mwtb->deadData->maxValid );
 SAVE_WIDGET( mshzf, mwtb->deadData->maxValidVal );
 SAVE_WIDGET( mshzf, mwtb->deadData->deadopac );
+SAVE_WIDGET( mshzf, mwtb->deadData->nan );
 SAVE_WIDGET( mshzf, mwtb->deadData->showDeadData );
 mshzf << "DEAD_COLOUR = ";
 save_colour( mshzf, mwtb->cs->deadColour() );
@@ -2283,7 +2284,8 @@ cc->opacity->value(col[3]);
 cc->window->show();
 return cc;} {}
   }
-  Function {restore_state(const char* fname=NULL)} {} {
+  Function {restore_state(const char* fname=NULL)} {open
+  } {
     code {ifstream mshzf;
 if( fname==NULL ) {
   char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
@@ -2598,6 +2600,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   TEST_VAR( mwtb->deadData->maxValid, var, val )
   TEST_VAR( mwtb->deadData->maxValidVal, var, val )
   TEST_VAR( mwtb->deadData->deadopac, var, val )
+  TEST_VAR( mwtb->deadData->nan, var, val )
   TEST_VAR( mwtb->deadData->showDeadData, var, val )
   if( !strcmp( var, "DEAD_COLOUR" ) ){
     sscanf( buf, "%*s = %f %f %f %f", &r, &g, &b, &a );
@@ -2613,7 +2616,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {}
+mwtb->lights(illBut->value());} {selected
+    }
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
@@ -2698,8 +2702,7 @@ class ProgInfo {} {
   }
 }
 
-class ObjProps {open
-} {
+class ObjProps {} {
   Function {ObjProps( TBmeshWin* wtb, Object_t o ):mwtb(wtb),obj(o)} {open
   } {
     Fl_Window win {open

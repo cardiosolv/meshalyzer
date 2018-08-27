@@ -15,7 +15,7 @@ typedef enum {
 } CScale_t;
 
 typedef enum {
-  NO_DEAD, DEAD_MIN, DEAD_MAX, DEAD_RANGE
+  NO_DEAD=0, DEAD_MIN=1, DEAD_MAX=2, DEAD_NaN=4
 } DeadRange;
 
 class Colourscale
@@ -32,11 +32,11 @@ class Colourscale
     inline int size(){ return n; }			// get the size
     void     size( int );	    				// set the size
     inline   GLfloat* entry(int a){return cmap[a];}	// return an entry
-    GLfloat *colorvec( double );
+    GLfloat *colorvec( double, float alpha=1 );
     void     output_png( const char * );            // output the map
     void     deadColour( GLfloat *, GLfloat );
     GLfloat *deadColour(){return _deadColour;}
-    void     deadRange( double min, double max, DeadRange dr=DEAD_RANGE );
+    void     deadRange( double min, double max, bool nan, DeadRange dr );
     void     deadRange( void ){_deadRange=NO_DEAD;};
     void     get_deadRange( double &min, double &max, DeadRange &dr )
                           { min=_deadMin;max=_deadMax;dr=_deadRange;}
@@ -48,6 +48,7 @@ class Colourscale
     double    mindat=0., maxdat=1.;
     DeadRange _deadRange=NO_DEAD;             // what to ignore
     double    _deadMin=0, _deadMax=1.;        // ignore below and above these values
+    bool      _deadNaN=false;                 // ignore NaN's
     GLfloat   _deadColour[4]={0.,0.,0.,1.};   // how to colour dead data
 };
 
