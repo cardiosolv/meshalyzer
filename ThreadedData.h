@@ -342,6 +342,7 @@ void* ThreadedData<T>::minimax( void* _sthread )
   }
   sthr->mthread->maxmin->v_bit_abs = true;
   delete sthr;
+  return NULL;
 }
 
 
@@ -357,6 +358,7 @@ void* ThreadedData<T>::tmsrCollector( void* _sthread )
     sthr->datareader->tmsr();
     sem_post( &sthr->done );
   }
+  return NULL;
 }
 
 

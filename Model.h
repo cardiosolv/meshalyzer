@@ -81,7 +81,7 @@ class Model
     string file()const{return _file;}
     bool  twoD(){return _2D; }
     Quaternion syncRefRot( void ) {return _refRot; }
-    Quaternion syncRefRot( const Quaternion &q  ) { _refRot = q; }
+    void       syncRefRot( const Quaternion &q  ) { _refRot = q; }
 
     PPoint             pt;
     Connection*      _cnnx=NULL;

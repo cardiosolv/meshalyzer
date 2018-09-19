@@ -64,7 +64,7 @@ class PPoint: public DrawingObj
     void    setVis( bool v ){ if (v) _visible=&_allvis; }
     void    setVis( vector<bool>* v ){ _visible=v; }
     bool    vis( int n ) const { return (*_visible)[n]; }
-    bool    vis( int n, bool b ) const { (*_visible)[n]=b; }
+    void    vis( int n, bool b ) const { (*_visible)[n]=b; }
     const   vector<bool>* vis() const { return _visible; }
     const   GLfloat* offset() const { return _offset; }
     void    offset( const GLfloat*o )  { memcpy(_offset,o,sizeof(GLfloat)*3); }
@@ -124,7 +124,7 @@ class Connection : public MultiPoint
     virtual void     draw( int, GLfloat*, float size=1 );
     virtual void     draw( int, int, GLfloat*, Colourscale*, DATA_TYPE*,
                            int stride=1, dataOpac* dopac=NULL );
-    virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){}
+    virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){return NULL;}
     virtual bool     read( const char * );
     virtual int      bytes(){return sizeof(Connection);}
 #ifdef USE_HDF5
@@ -195,7 +195,7 @@ class PolyGon : public SurfaceElement
                            int stride=1, dataOpac* dopac=NULL );
     virtual void draw( int, GLfloat*, Colourscale*, DATA_TYPE*,
                            dataOpac* dopac, const GLfloat *, bool lightson ){}
-    virtual bool read( const char * ){}
+    virtual bool read( const char * ){return true;}
 	static const int  _zero;
     const int* iso_polys(unsigned int index){return &_zero;}
     int     bytes(){ return sizeof(PolyGon);}
@@ -217,7 +217,7 @@ class Triangle : public SurfaceElement
                            dataOpac* dopac, const GLfloat *, bool lightson );
     virtual bool     read( const char * );
     virtual void     compute_normals( int, int );
-    virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){}
+    virtual DrawingObj *isosurf( DATA_TYPE *d, DATA_TYPE val ){return NULL;}
     bool     add( const char * );
     const int*       iso_polys(unsigned int);
     int     bytes(){ return sizeof(Triangle);}

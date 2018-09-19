@@ -78,7 +78,7 @@ void FileSeqCGreader<T>::reader()
   if ( in!=NULL )gzclose( in );
   in = gzopen( CGp->second.c_str(), "r" );
 
-  gzgets(in, buff, bufsize) == Z_NULL; //throw away first line
+  gzgets(in, buff, bufsize); //throw away first line
 
   if ( gzgets(in, buff, bufsize) == Z_NULL );
   if ( sscanf(buff, scanner.c_str(), data) != 1) return;
