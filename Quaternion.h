@@ -59,6 +59,18 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
     inline const Quaternion GetConjugate() const {
       return Quaternion(w,-x,-y,-z); 
     }
+    inline const Quaternion operator + (const Quaternion & q) const 
+    { 
+      return Quaternion(w+q.w,x+q.x,y+q.y,z+q.z);
+    }
+    inline const Quaternion operator - (const Quaternion & q) const 
+    { 
+      return Quaternion(w-q.w,x-q.x,y-q.y,z-q.z);
+    }
+    inline const Quaternion operator * (double a) const 
+    { 
+      return Quaternion(a*w,a*x,a*y,a*z);
+    }
     inline const Quaternion operator * (const Quaternion & q) const 
     { 
       return Muliply(q); 
@@ -111,6 +123,38 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
       m[1]=   2.*(x*y+w*z); m[5]=1.-2.*(x*x+z*z); m[ 9]=   2.*(y*z-w*x); m[13]=0.;
       m[2]=   2.*(x*z-w*y); m[6]=   2.*(y*z+w*x); m[10]=1.-2.*(x*x+y*y); m[14]=0.;
       m[3]=0.;              m[7]=0.;              m[11]=0.;              m[15]=1.;
+    }
+    inline Quaternion Slurp( Quaternion &final, float t )
+    {
+      if( t<0 or t>1 ) return *this;
+
+      Quaternion v0 = *this;
+      Quaternion v1 = final;
+      v0.Normalize();
+      v1.Normalize();
+      
+      // this is from Wikipedia
+      double dot = v0.w*v1.w+v0.x*v1.x+v0.y*v1.y+v0.z*v1.z;
+      if (dot < 0.0f) {
+        v1 = v1*-1;
+        dot = -dot;
+      }  
+      const double DOT_THRESHOLD = 0.9995;
+      if (dot > DOT_THRESHOLD) {
+        Quaternion result = v0 + (v1-v0)*t;
+        result.Normalize();
+        return result*((1-t)*Length() + t*final.Length());
+      }
+      double theta_0     = acos(dot);  
+      double theta       = theta_0*t;    
+      double sin_theta   = sin(theta);
+      double sin_theta_0 = sin(theta_0);
+      double s0 = cos(theta) - dot * sin_theta / sin_theta_0;
+      double s1 = sin_theta / sin_theta_0;
+
+      Quaternion on_sph =(v0*s0) + (v1*s1);
+
+      return on_sph*((1-t)*Length() + t*final.Length());
     }
 }
 ; // class Quaternion

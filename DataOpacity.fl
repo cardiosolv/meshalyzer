@@ -1,24 +1,24 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0300 
-header_name {.h} 
+version 1.0304
+header_name {.h}
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {private local
-} 
+}
 
 decl {\#include<iostream>} {public local
-} 
+}
 
 decl {\#include "objects.h"} {public local
-} 
+}
 
 decl {using namespace std;} {public local
-} 
+}
 
 decl {\#define NUM_OBJ 7} {public local
-} 
+}
 
 decl {class TBmeshWin;} {public local
-} 
+}
 
 class dataOpac {open
 } {
@@ -54,7 +54,7 @@ return omin+(data-dmin*ofactor);} {}
   } {
     code {return _on;} {}
   }
-} 
+}
 
 class DataOpacity {open
 } {
@@ -122,7 +122,7 @@ maxdatval->value(dop[a].dmax);onbut->value(dop[a]._on);} open
           xywh {0 0 100 20}
         }
         MenuItem {} {
-          label SurfEle selected
+          label SurfEle
           xywh {0 0 100 20}
         }
         MenuItem {} {
@@ -148,13 +148,13 @@ return SurfEle;
 else if( a==3 )
 return Cable;} {}
   }
-  Function {save(ofstream& ofs)} {open
+  Function {save(ostream& ofs)} {open selected
   } {
     code {for( int i=0; i<NUM_OBJ; i++ ) {
   ofs << dop[i];
 }} {}
   }
-  Function {read(ifstream &ifs)} {open
+  Function {read(istream &ifs)} {open
   } {
     code {for( int i=0; i<NUM_OBJ; i++ ) {
   ifs >> dop[i];
@@ -167,16 +167,16 @@ mindatval->value(dop[Vertex].dmin);
 maxdatval->value(dop[Vertex].dmax);
 onbut->value(dop[Vertex]._on);} {}
   }
-} 
+}
 
 Function {operator<<(ostream&ofs,dataOpac&dop)} {open return_type {ostream&}
 } {
   code {ofs<<dop.dmin<<" "<<dop.dmax<<" "<<dop.omin<<" "<<dop.omax<<" "<<dop._on<<endl;
 return ofs;} {}
-} 
+}
 
 Function {operator>>(istream&ifs,dataOpac&dop)} {open return_type {istream&}
 } {
   code {ifs>>dop.dmin>>dop.dmax>>dop.omin>>dop.omax>>dop._on;
 return ifs;} {}
-} 
+}

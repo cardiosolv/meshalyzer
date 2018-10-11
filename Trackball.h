@@ -72,6 +72,7 @@ class Trackball
     inline void  Rotation(Quaternion spin) { qRot = spin*qRot; }
     inline const Quaternion & GetRotation( ) { return qRot; }
     // trackball/scene translation
+    inline void  SetTranslation( V3f trans ) { v3f_trans = trans; }
     inline void  SetTranslation(float x, float y, float z) { v3f_trans(x, y, z); }
     inline const V3f & GetTranslation( )                   { return v3f_trans;   }
     void DoTransform();
@@ -80,8 +81,8 @@ class Trackball
     float DepthOnSphere(float x, float y);
     void  save( const char * );
     void  read( const char * );
-    void  save( ofstream& );
-    void  read( ifstream& );
+    void  save( ostream& );
+    void  read( istream& );
 }
 ; // Trackball
 

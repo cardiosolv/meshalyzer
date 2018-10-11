@@ -1,8 +1,8 @@
 HOSTMACHINE := $(shell uname)
 include make.conf
 
-VTK_LIBDIR     =/usr/lib64
-VTK_INCDIR     =/usr/include/vtk-8.1
+#VTK_LIBDIR     =/usr/lib64
+#VTK_INCDIR     =/usr/include/vtk-8.1
 
 FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)

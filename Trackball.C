@@ -166,7 +166,7 @@ void Trackball::save( const char *fn )
 }
 
 // save the transform into a file
-void Trackball::save( ofstream& xfrmfile )
+void Trackball::save( ostream& xfrmfile )
 {
   xfrmfile << scale << endl;
   xfrmfile << v3f_trans.X() <<" "<<v3f_trans.Y() <<" " <<v3f_trans.Z()<< endl;
@@ -185,7 +185,7 @@ void Trackball::read( const char *fn )
 }
 
 // read the tranform from a file
-void Trackball::read( ifstream& xfrmfile )
+void Trackball::read( istream& xfrmfile )
 {
   xfrmfile >> scale;
   xfrmfile >> v3f_trans;

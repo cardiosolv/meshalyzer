@@ -5,6 +5,7 @@
 #ifndef _Vector3D_h_	// prevent multiple includes
 #define _Vector3D_h_
 
+#include <math.h>
 #include "Global.h"
 #include <sstream>
 #include <iostream>

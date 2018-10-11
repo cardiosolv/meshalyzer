@@ -53,8 +53,10 @@ decl {\#include <set>} {private local
 decl {\#include "colourchoice.h"} {public local
 }
 
-class Meshwin {open
-} {
+decl {\#include "FlyBy.h"} {public global
+}
+
+class Meshwin {} {
   Function {Meshwin()} {open
   } {
     Fl_Window winny {
@@ -84,15 +86,15 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {830 259 350 645} type Double box UP_BOX
+      xywh {323 45 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -565,11 +567,11 @@ mwtb->redraw();}
           }
         }
         Submenu outmenu {
-          label Output
+          label Output open
           xywh {0 0 100 20}
         } {
           Submenu {} {
-            label PNG open
+            label PNG
             xywh {5 5 100 20}
           } {
             MenuItem {} {
@@ -613,6 +615,13 @@ mwtb->output_pdf( fn, false );}
 if( fn!=NULL)
 mwtb->cs->output_png(fn);}
             tooltip {output the colour bar as an image file} xywh {0 0 34 20}
+          }
+          MenuItem {} {
+            label {Fly By}
+            callback {if( !flyby ) 
+  flyby = new FlyBy( mwtb, this );
+flyby->fb_win->show();}
+            xywh {0 0 31 20}
           }
           MenuItem {} {
             label {Visible vertices}
@@ -842,7 +851,7 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
@@ -1873,7 +1882,7 @@ mwtb->redraw();}
           image {broadcast.png} xywh {315 525 20 20}
         }
       }
-      Fl_Group animate_group {open
+      Fl_Group animate_group {
         xywh {10 555 330 85} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
@@ -1921,7 +1930,7 @@ hdfreadbut->deactivate();
 \#endif
 memset( objprops, 0, sizeof(ObjProps*)*maxobject );} {}
   }
-  Function {outputwin( TBmeshWin *w )} {open return_type void
+  Function {outputwin( TBmeshWin *w )} {return_type void
   } {
     code {mwtb = w;
 if( mwtb->model->twoD() ) {
@@ -1934,6 +1943,8 @@ if( mwtb->model->twoD() ) {
   decl {Fl_Window* proginfo;} {public local
   }
   decl {ObjProps *objprops[maxobject];} {private local
+  }
+  decl {FlyBy *flyby=NULL;} {private local
   }
   Function {pickcolor(Object_t obj, const char* wintitle, colourChoice *cc=NULL )} {return_type {colourChoice *}
   } {
@@ -2027,14 +2038,59 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_state()} {} {
+  Function {save_colour( ostream&ofs, const GLfloat *col )} {selected
+  } {
+    code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
+ofs << col[3];} {}
+  }
+  Function {pick_surf_color(Object_t ot, string winlab, surfColourChoice *cc=NULL)} {return_type {surfColourChoice *}
+  } {
+    code {int msz = surflist->nitems();
+
+if( !msz || !surflist->nchecked()) return cc;
+
+GLfloat *col;
+GLfloat matprop[4];
+bool one=false;
+
+for( int mi=0; mi<surflist->nitems(); mi++ ) 
+ if( surflist->checked(mi+1) ) {
+       one = true;
+       winlab += mwtb->model->surface(mi)->label();
+       winlab += " ";
+       col = mwtb->get_color(ot, mi);
+       mwtb->model->get_mat( mi, matprop[0], matprop[1], matprop[2], matprop[3] );
+       break;
+  }
+  
+if( !one ) return cc;
+ 
+if( !cc ) {
+  cc = new surfColourChoice( col, matprop, surflist, ot, mwtb );
+  
+  cc->window->label(winlab.c_str());
+}
+
+cc->rgb_choice->rgb( col[0], col[1], col[2] );
+cc->rgb_choice->do_callback();
+cc->rgb_choice->redraw();
+cc->opacity->value(col[3]);
+
+cc->window->show();
+return cc;} {}
+  }
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
 if( xfn.rfind(".mshz") == string::npos ) xfn += ".mshz";
 ofstream mshzf( xfn.c_str() );
-
-mshzf << "TRACKBALL ======" << endl;
+save_state( mshzf );} {}
+  }
+  Function {save_state( ostream &mshzf )} {open
+  } {
+    code {mshzf << "TRACKBALL ======" << endl;
 mwtb->trackball.save(mshzf);
 mshzf << "CLIPPING ======" << endl;
 mwtb->cplane->save(mshzf);
@@ -2244,57 +2300,21 @@ mshzf  << mwtb->model->syncRefRot() << endl;
 
 mshzf << endl;} {}
   }
-  Function {save_colour( ofstream&ofs, const GLfloat *col )} {} {
-    code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
-ofs << col[3];} {}
-  }
-  Function {pick_surf_color(Object_t ot, string winlab, surfColourChoice *cc=NULL)} {return_type {surfColourChoice *}
-  } {
-    code {int msz = surflist->nitems();
+  Function {restore_state( const char* fname = NULL)} {} {
+    code {const char *fn;
 
-if( !msz || !surflist->nchecked()) return cc;
-
-GLfloat *col;
-GLfloat matprop[4];
-bool one=false;
-
-for( int mi=0; mi<surflist->nitems(); mi++ ) 
- if( surflist->checked(mi+1) ) {
-       one = true;
-       winlab += mwtb->model->surface(mi)->label();
-       winlab += " ";
-       col = mwtb->get_color(ot, mi);
-       mwtb->model->get_mat( mi, matprop[0], matprop[1], matprop[2], matprop[3] );
-       break;
-  }
-  
-if( !one ) return cc;
- 
-if( !cc ) {
-  cc = new surfColourChoice( col, matprop, surflist, ot, mwtb );
-  
-  cc->window->label(winlab.c_str());
-}
-
-cc->rgb_choice->rgb( col[0], col[1], col[2] );
-cc->rgb_choice->do_callback();
-cc->rgb_choice->redraw();
-cc->opacity->value(col[3]);
-
-cc->window->show();
-return cc;} {}
-  }
-  Function {restore_state(const char* fname=NULL)} {open
-  } {
-    code {ifstream mshzf;
 if( fname==NULL ) {
-  char *fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
-  if( fn==NULL) return;
-  mshzf.open(fn);
+  fn=fl_file_chooser("Meshalyzer state file", "*.mshz", NULL );
+  if(fn==NULL) return;
 } else
-  mshzf.open(fname);
+  fn = fname;
 
-int BUFLEN=1024;
+
+ifstream mfin(fn);
+restore_state( mfin );} {}
+  }
+  Function {restore_state(istream &mshzf)} {} {
+    code {int BUFLEN=1024;
 char buf[BUFLEN];
 float r, g, b, a;
 
@@ -2616,8 +2636,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {selected
-    }
+mwtb->lights(illBut->value());} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();

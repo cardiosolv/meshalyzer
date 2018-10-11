@@ -1,0 +1,249 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0304
+header_name {.h}
+code_name {.cc}
+decl {\#include "TBmeshWin.h"} {private global
+}
+
+decl {\#include "Frame.h"} {private local
+}
+
+decl {using namespace std;} {private local
+}
+
+decl {\#include <vector>} {public global
+}
+
+decl {\#include <algorithm>} {private local
+}
+
+decl {\#include <sstream>} {private local
+}
+
+decl {class Controls;} {public global
+}
+
+decl {\#include "Vector3D.h"} {public global
+}
+
+decl {\#include "Quaternion.h"} {public global
+}
+
+decl {class TBmeshWin;} {public global
+}
+
+class FlyBy {open
+} {
+  Function {FlyBy( TBmeshWin *tb, Controls* cw )} {open
+  } {
+    Fl_Window fb_win {
+      label FlyBy open
+      xywh {1055 488 340 325} type Double align 4 visible
+    } {
+      Fl_Browser fb_list {
+        callback {if( o->value() )
+  fb_steps->value(steps[o->value()]);}
+        xywh {15 15 205 155} type Hold
+      }
+      Fl_Button fb_load {
+        label {@reload}
+        callback {int currstate = fb_list->value();
+if( !currstate ) return;
+stringstream sstr(state[currstate]->str());
+controls->restore_state( sstr );}
+        tooltip {load selected state} xywh {15 180 95 35} color 127
+      }
+      Fl_Button fb_add {
+        label {@+}
+        callback {static int sval=0;
+
+stringstream newlabel;
+newlabel << "view " << sval++;
+
+int selstate=fb_list->value();
+if( !selstate ) selstate=fb_list->size();
+
+stringstream *sstr = new stringstream;
+controls->save_state( *sstr );
+state.emplace(state.begin()+selstate+1,sstr);
+fb_list->insert(selstate+1, newlabel.str().c_str());
+steps.insert(steps.begin()+selstate+1,steps[selstate]);
+qRot.insert(qRot.begin()+selstate+1,tbwm->trackball.qRot);
+translate.insert(translate.begin()+selstate+1,tbwm->trackball.GetTranslation());
+scale.insert(scale.begin()+selstate+1,tbwm->trackball.GetScale());
+
+if( fb_list->size() >= 2 ) {
+  fb_play->activate();
+  fb_rec->activate();
+}}
+        tooltip {add current state to list} xywh {127 180 95 35} color 222
+      }
+      Fl_Spinner fb_steps {
+        label {\#steps}
+        callback {int currstate=fb_list->value();
+if( !currstate ) return;
+steps[currstate] = o->value();} selected
+        tooltip {number of frames to interpolate to next state} xywh {235 30 90 25} align 1 maximum 1000 value 10
+      }
+      Fl_Button fb_play {
+        label {@>|}
+        callback {fly();}
+        tooltip {play flyby} xywh {10 275 95 35} deactivate
+      }
+      Fl_Button fb_rec {
+        label {@circle}
+        callback {string base = fb_fname->value();
+auto dp = base.find_last_of( "." );
+if( dp != string::npos ) {
+  base.erase(dp,string::npos);
+  fb_fname->value(base.c_str());
+}
+
+fly( base );}
+        tooltip {play and record flyby} xywh {125 275 95 35} labelcolor 1 deactivate
+      }
+      Fl_Return_Button fb_close {
+        label close
+        callback {fb_win->hide();}
+        tooltip {close this dialogue} xywh {235 275 95 35}
+      }
+      Fl_Menu_Button fb_del {
+        label Delete open
+        tooltip {delete selected state from list} xywh {235 180 95 35} color 90 labelcolor 7 textcolor 7
+      } {
+        MenuItem {} {
+          label really
+          callback {int selstate = fb_list->value();
+if( !selstate ) return;
+fb_list->remove(selstate);
+state[selstate]->str("");
+delete state[selstate];
+steps.erase(steps.begin()+selstate);
+state.erase(state.begin()+selstate);
+qRot.erase(qRot.begin()+selstate);
+translate.erase(translate.begin()+selstate);}
+          xywh {0 0 31 20}
+        }
+      }
+      Fl_Button {} {
+        label {@8}
+        callback {int curpos = fb_list->value();
+if( curpos<2 ) return;
+fb_list->move(curpos-1, curpos);
+swap(state[curpos-1],state[curpos]);
+swap(steps[curpos-1],steps[curpos]);
+swap(qRot[curpos-1],qRot[curpos]);
+swap(translate[curpos-1],translate[curpos]);
+swap(scale[curpos-1],scale[curpos]);}
+        tooltip {move selected state up} xywh {235 60 30 30}
+      }
+      Fl_Button {} {
+        label {@2}
+        callback {int curpos = fb_list->value();
+if( !curpos or curpos==fb_list->size() ) return;
+fb_list->move(curpos+1, curpos);
+swap(state[curpos+1], state[curpos]);
+swap(steps[curpos+1], steps[curpos]);
+swap(qRot[curpos+1], qRot[curpos]);
+swap(translate[curpos+1], translate[curpos]);
+swap(scale[curpos+1], scale[curpos]);}
+        tooltip {move selected state down} xywh {235 95 30 30}
+      }
+      Fl_Button {} {
+        label rename
+        callback {int selstate = fb_list->value();
+if( !selstate ) return;
+const char *curname = fb_list->text(selstate);
+const char *newname = fl_input("rename state",curname);
+if( newname ) fb_list->text(selstate,newname);}
+        tooltip {rename selected state} xywh {270 70 55 40} color 94
+      }
+      Fl_Value_Input fb_delay {
+        label {delay:}
+        tooltip {frame delay in ms when playing flyby} xywh {280 147 45 27} minimum 1 maximum 1000 value 100
+      }
+      Fl_File_Input fb_fname {
+        label {output file name base:}
+        xywh {10 238 230 29} align 1
+      }
+      Fl_Button {} {
+        label browse
+        callback {const char* fn=fl_file_chooser("Choose output file name base", "*.png",fb_fname->value() );
+if( fn != NULL ) fb_fname->value(fn);}
+        tooltip {select new file name base} xywh {250 236 75 29}
+      }
+      Fl_Check_Button fb_tmadv {
+        label {adv time}
+        tooltip {advance time with position} xywh {240 120 55 30} down_box DOWN_BOX
+      }
+    }
+    code {tbwm = tb;
+controls = cw;
+qRot.resize(2);
+state.resize(2);
+translate.resize(2);
+steps.resize(2,10);
+scale.resize(2);
+fb_fname->value("flyby");} {}
+  }
+  decl {TBmeshWin *tbwm;} {private local
+  }
+  decl {Controls* controls;} {private local
+  }
+  decl {vector<stringstream*> state;} {private local
+  }
+  decl {vector<int> steps;} {private local
+  }
+  decl {vector<Quaternion> qRot;} {private local
+  }
+  decl {vector<V3f> translate;} {private local
+  }
+  decl {vector<float> scale;} {private local
+  }
+  decl {const char *ofile="flyby";} {private local
+  }
+  decl {const char *odir=".";} {private local
+  }
+  Function {fly( string fbase = string("") )} {open
+  } {
+    code {unsigned int frameno=0;
+stringstream sstr(state[1]->str());
+controls->restore_state( sstr );
+int start_tm = tbwm->time();
+
+for( int i=2; i<=fb_list->size(); i++ ) {
+  Quaternion start = qRot[i-1];
+  Quaternion end   = qRot[i];
+  for( int j=0; j<steps[i-1]; j++ ){
+    float t= float(j)/float(steps[i-1]-1);
+    tbwm->trackball.qRot = start.Slurp(end, t);
+    V3f trans = (1-t)*translate[i-1] + t*translate[i];
+    tbwm->trackball.SetTranslation(trans);
+    tbwm->trackball.SetScale(  (1-t)*scale[i-1] + t*scale[i] );
+    if( fb_tmadv->value() ) {
+      if ( !tbwm->set_time( start_tm++ ) )
+        tbwm->set_time( start_tm=0 );
+    }
+    tbwm->redraw();
+    Fl::flush();
+    if( fbase.size() ) {
+      char framename[1024];
+      sprintf( framename, "%s%06d.png", fbase.c_str(), frameno++ );
+      Frame frame( tbwm );
+      frame.write( tbwm->w(), tbwm->h(), framename, tbwm->time() );
+    } else 
+      usleep( fb_delay->value()*1000 );
+  }
+  stringstream s2str(state[i]->str());
+  controls->restore_state( s2str );
+}
+tbwm->redraw();
+Fl::flush(); 
+if( fbase.size() ) {
+  char framename[1024];
+  sprintf( framename, "%s%06d.png", fbase.c_str(), frameno++ );
+  Frame frame( tbwm );
+  frame.write( tbwm->w(), tbwm->h(), framename, tbwm->time());
+}} {}
+  }
+}

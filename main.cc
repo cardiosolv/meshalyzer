@@ -510,7 +510,7 @@ main( int argc, char *argv[] )
   string defstate = getenv("HOME");
   defstate += "/.default.mshz";
   struct stat buf;
-  if( !stat( defstate.c_str(), &buf) )
+  if( !stat( defstate.c_str(), &buf) ) 
     control.restore_state( defstate.c_str() );
 
   if( !PNGfile ) {

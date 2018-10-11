@@ -1,12 +1,8 @@
 #include "PNGwrite.h"
 #include <stdlib.h>
 
-PNGwrite :: PNGwrite( FILE *out ) : 
-            width(0),height(0),ctype(PNG_COLOR_TYPE_RGB),
-            interlace_type(PNG_INTERLACE_NONE),colour_depth(8)
+PNGwrite :: PNGwrite( FILE *out ) : fp(out)
 {
-  fp = out;
-
   png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL );
 
   if (png_ptr == NULL) {

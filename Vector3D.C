@@ -2,8 +2,8 @@
 // (c) Ingmar Bitter '96-'99
 // $Id: Vector3D.C,v 1.2 2005/09/21 20:08:05 vigmond Exp $
 
+#include <math.h>
 #include "Vector3D.h"
-#include "math.h"
 #include <sstream>
 
 template<>

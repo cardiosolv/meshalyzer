@@ -43,10 +43,10 @@ class PNGwrite
     png_infop   info_ptr;
     png_colorp  cpalette;
     FILE *fp;
-    png_uint_32 width;
-    png_uint_32 height;
-    int ctype;
-    int interlace_type;
-    int colour_depth;
+    png_uint_32 width=0;
+    png_uint_32 height=0;
+    int ctype=PNG_COLOR_TYPE_RGB;
+    int interlace_type=PNG_INTERLACE_NONE;
+    int colour_depth=8;
 };
 #endif
