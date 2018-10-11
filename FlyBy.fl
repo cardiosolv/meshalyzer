@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {private global
@@ -38,7 +38,7 @@ class FlyBy {open
   } {
     Fl_Window fb_win {
       label FlyBy open
-      xywh {1055 488 340 325} type Double align 4 visible
+      xywh {845 240 340 325} type Double align 4 visible
     } {
       Fl_Browser fb_list {
         callback {if( o->value() )
@@ -82,7 +82,7 @@ if( fb_list->size() >= 2 ) {
         label {\#steps}
         callback {int currstate=fb_list->value();
 if( !currstate ) return;
-steps[currstate] = o->value();} selected
+steps[currstate] = o->value();}
         tooltip {number of frames to interpolate to next state} xywh {235 30 90 25} align 1 maximum 1000 value 10
       }
       Fl_Button fb_play {
@@ -121,7 +121,11 @@ delete state[selstate];
 steps.erase(steps.begin()+selstate);
 state.erase(state.begin()+selstate);
 qRot.erase(qRot.begin()+selstate);
-translate.erase(translate.begin()+selstate);}
+translate.erase(translate.begin()+selstate);
+if( fb_list->size() < 2 ) {
+  fb_rec->deactivate();
+  fb_play->deactivate();
+}}
           xywh {0 0 31 20}
         }
       }

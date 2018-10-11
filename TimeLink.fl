@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include <set>} {public local
@@ -52,8 +52,8 @@ class TimeLink {open
       Fl_Group {} {open
         xywh {10 10 270 195} box GTK_UP_BOX color 14 align 65
       } {
-        Fl_Browser meshList {
-          xywh {20 25 250 105} type Select selection_color 88
+        Fl_Browser meshList {selected
+          xywh {20 25 250 105} type Hold selection_color 88
         }
         Fl_Button {} {
           label {link selected}
@@ -340,8 +340,7 @@ if (kill(pid, SIGALRM)){
 \#endif
 }
   
-return 0;} {selected
-    }
+return 0;} {}
   }
   Function {SendMsgToAll(LinkMessage::CmdMsg& msg)} {
     comment {* \\brief Send msg to all linked processes
