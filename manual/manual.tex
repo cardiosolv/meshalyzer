@@ -9,6 +9,7 @@
 \usepackage{amsthm}
 \usepackage{longtable}
 \usepackage{array}
+\usepackage{float}
 \usepackage{overcite}                                 % superscript notation of references
 
 \usepackage[pdftex]{graphicx}                  % Grafikpaket für Bilder laden
@@ -1071,6 +1072,33 @@ SIGUSR2 & go backwards by the frame increment \\ \hline
 
 If you wish to have different masters controlling different groups of slaves, you need
 to specify a groupID on the command line for each group. The default is ``0''. 
+
+\section{FlyBy's}
+\label{sec:flyby}
+FlyBy's are animated views of the model. They are defined as occurring between two different model states. As implemented in \meshal, the 
+model is put into the start start and then the view is transformed in a sequence of steps,
+using \emph{Slerp}, until it matches the view corresponding to the second state, at which point the second state is loaded.
+FlyBy's are made with the dialogue \texttt{Options/Fly By}.
+
+\begin{figure}[H]
+       \centerline{ \includegraphics[width=5cm]{flyby.png}}
+       \caption{FlyBy dialogue widget. The play and record buttons (bottom row of buttons)
+       only activate when two or more states are in the list.}
+\end{figure}
+
+To make a FlyBy, at least two states need to be defined.
+To define a state, adjust the model to get the desired view, data, lighting, etc. and then press the \texttt{+} button to add it to the list.
+As many states as desired can be added.
+States can be deleted from the list with the \texttt{Delete} button and reordered with the Up/Down arrow buttons. 
+To see a particular state, select it in the list, and press the load (circular arrow) button.
+States can also be renamed to be more informative.
+
+To view the FlyBy, press the play button. The time between frames is controlled by the \texttt{delay} value in milliseconds.
+If data is present, the \texttt{adv time} button can be checked so that the time advances with every view change.
+To record the FlyBy, set the output base name and click on the record (red dot) button.
+A series of PNG files will be produced with the base name and then the frame number (00000,00001, $\ldots$) appended.
+
+Remember that the  \texttt{\#steps} refers to the number of transition to go from the selected state to the next one.
 
 \section{Offscreen Rendering}
 \label{sec:offscreen}
