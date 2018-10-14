@@ -44,6 +44,7 @@ template <class T> class Vector3D
     inline Vector3D<T> & operator << (const char * str);
     inline friend ostream & operator << (ostream & os, const Vector3D<T> & v) { return v.asOstream(os); }
     ostream & asOstream (ostream & os) const;
+    ostream & asOstream_1 (ostream & os) const;
 
     double Norm  ( )       const { return sqrt(X()*X() + Y()*Y() + Z()*Z()); }
     double SquareLength( ) const { return     (X()*X() + Y()*Y() + Z()*Z()); }
@@ -132,6 +133,12 @@ template <class T> Vector3D<T> & Vector3D<T>::operator << (const char * str)
 } // operator <<
 
 template <class T> ostream & Vector3D<T>::asOstream (ostream & o) const
+{
+  o << X()<< " " << Y() << " " << Z();
+  return o;
+}
+
+template <class T> ostream & Vector3D<T>::asOstream_1 (ostream & o) const
 {
   o<<"(";
   o.width(2); o<<X()<<",";

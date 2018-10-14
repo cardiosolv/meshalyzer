@@ -99,7 +99,7 @@ TBmeshWin ::TBmeshWin(int x, int y, int w, int h, const char *l )
     hinfo(new HiLiteInfoWin(this)), dataopac(new DataOpacity( this )),
     cplane(new ClipPlane( this )), hitbuffer(HITBUFSIZE),
     timeplotter(new PlotWin("Time series")), _cutsurface(new CutSurfaces*[NUM_CP] ),
-    isosurfwin(new IsosurfControl(this)), deadData(new DeadDataGUI(this)) 
+    isosurfwin(new IsosurfControl(this)), deadData(new DeadDataGUI(this))
 {
   model = new Model();
   memset( hilight, 0, sizeof(int)*maxobject );

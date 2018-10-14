@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {private global
@@ -60,7 +60,7 @@ scale     = sc;} {}
 
 class FlyBy {open
 } {
-  Function {FlyBy( TBmeshWin *tb, Controls* cw )} {open
+  Function {FlyBy( TBmeshWin *tb, Controls *c )} {open
   } {
     Fl_Window fb_win {
       label FlyBy open
@@ -81,16 +81,14 @@ controls->restore_state( sstr );}
       }
       Fl_Button fb_add {
         label {@+}
-        callback {static int sval=0;
-
-stringstream newlabel;
-newlabel << "view " << sval++;
+        callback {stringstream newlabel;
+newlabel << "view " << viewno++;
 
 int selstate=fb_list->value();
 if( !selstate ) selstate=fb_list->size();
 
 stringstream *sstr = new stringstream;
-controls->save_state( *sstr );
+controls->save_state( *sstr, false );
 
 int sts;
 if( selstate>1 ) 
@@ -139,7 +137,7 @@ fly( base );}
         tooltip {close this dialogue} xywh {235 275 95 35}
       }
       Fl_Menu_Button fb_del {
-        label Delete open
+        label Delete
         tooltip {delete selected state from list} xywh {235 180 95 35} color 90 labelcolor 7 textcolor 7
       } {
         MenuItem {} {
@@ -178,7 +176,10 @@ fb_list->move(curpos+1, curpos);}
 if( !selstate ) return;
 const char *curname = fb_list->text(selstate);
 const char *newname = fl_input("rename state",curname);
-if( newname ) fb_list->text(selstate,newname);}
+string nname = newname;
+// '$' is not allowed in name
+std:replace( nname.begin(), nname.end(), '$', '&' ); 
+if( newname ) fb_list->text(selstate,nname.c_str());} selected
         tooltip {rename selected state} xywh {270 70 55 40} color 94
       }
       Fl_Value_Input fb_delay {
@@ -201,8 +202,9 @@ if( fn != NULL ) fb_fname->value(fn);}
       }
     }
     code {tbwm = tb;
-controls = cw;
-fb_fname->value("flyby");} {}
+controls = c;
+fb_fname->value("flyby");
+viewno = 0;} {}
   }
   decl {TBmeshWin *tbwm;} {private local
   }
@@ -212,8 +214,9 @@ fb_fname->value("flyby");} {}
   }
   decl {const char *odir=".";} {private local
   }
-  Function {fly( string fbase = string("") )} {open
-  } {
+  decl {int viewno;} {private local
+  }
+  Function {fly( string fbase = string("") )} {} {
     code {unsigned int frameno=0;
 
 FlyByData *fbdat_e = static_cast<FlyByData*>(fb_list->data(1));
@@ -258,7 +261,52 @@ if( fbase.size() ) {
   sprintf( framename, "%s%06d.png", fbase.c_str(), frameno++ );
   Frame frame( tbwm );
   frame.write( tbwm->w(), tbwm->h(), framename, tbwm->time());
-}} {selected
-    }
+}} {}
+  }
+  Function {save( ostream &ostr )} {open
+  } {
+    code {for( int i=1; i<=fb_list->size(); i++ ) {
+  FlyByData *fbd = static_cast<FlyByData *>(fb_list->data(i));
+  string state = fbd->state->str();
+  std:replace( state.begin(), state.end(), '\\n', '$' );
+  ostr << fbd->steps << " " << fbd->qRot << " " << 
+          fbd->scale << " " << fbd->translate << 
+          " " << fb_list->text(i) << endl;
+  ostr << state << endl;
+}} {}
+  }
+  Function {restore( istream &istr, int newno )} {open
+  } {
+    code {for( int i=1; i<=fb_list->size(); i++ ) {
+  delete static_cast<FlyByData *>(fb_list->data(i));
+}
+fb_list->clear();
+
+int s=0;
+for( int i=1; i<=newno; i++ ) { 
+  int steps;
+  float scale;
+  Quaternion qrot;
+  V3f trans;
+  istr >> steps >> qrot >> scale >> trans;
+  string label;
+  std::getline( istr, label );
+  string state; 
+  std::getline( istr, state );
+  std:replace( state.begin(), state.end(), '$', '\\n' );
+  stringstream *sstr = new stringstream(state);
+  FlyByData *fbd = new FlyByData(steps,sstr,qrot,trans,scale);
+  fb_list->add(label.substr(1).c_str(), fbd);
+}
+
+viewno = newno;
+
+if( fb_list->size() >= 2 ) {
+  fb_rec->activate();
+  fb_play->activate();
+} else {
+  fb_rec->deactivate();
+  fb_play->deactivate();
+}} {}
   }
 }

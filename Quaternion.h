@@ -45,6 +45,11 @@ switch (index) { case 0: return w; case 1: return x; case 2: return y; case 3: r
       os << q.w << " " << q.x << " " << q.y << " " << q.z;
       return os;
     }
+    friend istream& operator>>(istream& os, Quaternion &q )
+    {
+      os >> q.w >> q.x >> q.y >> q.z;
+      return os;
+    }
     inline float Length() { return sqrt(w*w + x*x + y*y + z*z); }
     inline Quaternion & Normalize() { 
       float l=Length(); w/=l; x/=l; y/=l; z/=l;return *this; 

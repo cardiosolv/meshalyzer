@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -9,6 +9,9 @@ decl {\#include <FL/gl.h>} {public local
 }
 
 decl {\#include <vector>} {private local
+}
+
+decl {\#include <algorithm>} {private local
 }
 
 decl {class TBmeshWin;} {public local
@@ -61,7 +64,7 @@ class Meshwin {} {
   } {
     Fl_Window winny {
       label meshalyzer
-      callback {if( fl_choice("Really quit?","No","Yes",0) )exit(0);} open
+      callback {if( fl_choice("Really quit?","No","Yes",0) )exit(0);}
       xywh {174 592 455 455} type Double hide resizable hotspot
     } {
       Fl_Box trackballwin {
@@ -86,7 +89,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {323 45 350 645} type Double box UP_BOX
+      xywh {912 105 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -618,9 +621,7 @@ mwtb->cs->output_png(fn);}
           }
           MenuItem {} {
             label {Fly By}
-            callback {if( !flyby ) 
-  flyby = new FlyBy( mwtb, this );
-flyby->fb_win->show();}
+            callback {flyby->fb_win->show();}
             xywh {0 0 31 20}
           }
           MenuItem {} {
@@ -1930,21 +1931,22 @@ hdfreadbut->deactivate();
 \#endif
 memset( objprops, 0, sizeof(ObjProps*)*maxobject );} {}
   }
-  Function {outputwin( TBmeshWin *w )} {return_type void
+  Function {outputwin( TBmeshWin *w )} {open return_type void
   } {
     code {mwtb = w;
 if( mwtb->model->twoD() ) {
   illBut->value(0);
   illBut->do_callback();
-}} {}
+}
+flyby = new FlyBy( mwtb, this );} {}
   }
   decl {TBmeshWin *mwtb;} {private local
   }
   decl {Fl_Window* proginfo;} {public local
   }
-  decl {ObjProps *objprops[maxobject];} {private local
+  decl {FlyBy *flyby;} {private local
   }
-  decl {FlyBy *flyby=NULL;} {private local
+  decl {ObjProps *objprops[maxobject];} {private local
   }
   Function {pickcolor(Object_t obj, const char* wintitle, colourChoice *cc=NULL )} {return_type {colourChoice *}
   } {
@@ -2038,8 +2040,7 @@ for( int i=1; i<=reglist->nitems(); i++ )
   sel[i-1] = reglist->checked(i);
 return sel;} {}
   }
-  Function {save_colour( ostream&ofs, const GLfloat *col )} {selected
-  } {
+  Function {save_colour( ostream&ofs, const GLfloat *col )} {} {
     code {for( int c=0; c<3; c++ ) ofs << col[c] << " ";
 ofs << col[3];} {}
   }
@@ -2079,8 +2080,7 @@ cc->opacity->value(col[3]);
 cc->window->show();
 return cc;} {}
   }
-  Function {save_state()} {open
-  } {
+  Function {save_state()} {} {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2088,7 +2088,7 @@ if( xfn.rfind(".mshz") == string::npos ) xfn += ".mshz";
 ofstream mshzf( xfn.c_str() );
 save_state( mshzf );} {}
   }
-  Function {save_state( ostream &mshzf )} {open
+  Function {save_state( ostream &mshzf, bool save_flyby = true )} {open selected
   } {
     code {mshzf << "TRACKBALL ======" << endl;
 mwtb->trackball.save(mshzf);
@@ -2298,9 +2298,15 @@ mshzf << endl;
 mshzf << "REF_SYNC_ROTATION = ";
 mshzf  << mwtb->model->syncRefRot() << endl;
 
-mshzf << endl;} {}
+if( save_flyby ) {
+  mshzf << "FLYBY_STATES = " << flyby->fb_list->size() << endl;
+  flyby->save( mshzf );
+  SAVE_WIDGET( mshzf, flyby->fb_delay );
+  SAVE_WIDGET( mshzf, flyby->fb_tmadv );
+}} {}
   }
-  Function {restore_state( const char* fname = NULL)} {} {
+  Function {restore_state( const char* fname = NULL)} {open
+  } {
     code {const char *fn;
 
 if( fname==NULL ) {
@@ -2313,7 +2319,8 @@ if( fname==NULL ) {
 ifstream mfin(fn);
 restore_state( mfin );} {}
   }
-  Function {restore_state(istream &mshzf)} {} {
+  Function {restore_state(istream &mshzf)} {open
+  } {
     code {int BUFLEN=1024;
 char buf[BUFLEN];
 float r, g, b, a;
@@ -2630,9 +2637,19 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     continue;
   }
 
- TEST_VAR( mwtb->deadData->minValid, var, val )
+  TEST_VAR( mwtb->deadData->minValid, var, val )
  
-  if( !strcmp( "BGD_COLOUR", var )) { mwtb->bgd(val); continue; }
+  if( !strcmp( "BGD_COLOUR", var )) { 
+    mwtb->bgd(val); 
+    continue; 
+  }
+  
+  if( !strcmp( var, "FLYBY_STATES" ) ){
+    flyby->restore( mshzf, val );
+    continue;
+  }
+  TEST_VAR( flyby->fb_delay, var, val )
+  TEST_VAR( flyby->fb_tmadv, var, val )
 
   cerr << "Unknown variable specified: " << var << endl;
 }
