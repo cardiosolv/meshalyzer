@@ -97,10 +97,10 @@ void Surfaces::determine_vert_norms( PPoint& pt )
 
   const GLfloat* n;
 
-  for ( int i=0; i<_ele.size(); i++ ) {
-    if ( (n=_ele[i]->nrml(0)) == NULL ) continue;
-    const int *pnt = _ele[i]->obj();
-    for ( int j=0; j<_ele[i]->ptsPerObj(); j++ ) {
+  for ( auto ele : _ele ) {
+    if ( (n=ele->nrml(0)) == NULL ) continue;
+    const int *pnt = ele->obj();
+    for ( int j=0; j<ele->ptsPerObj(); j++ ) {
       for ( int k=0; k<3; k++ ) tvn[3*pnt[j]+k] += n[k];
       has_norm[pnt[j]] = true;
     }
@@ -108,8 +108,10 @@ void Surfaces::determine_vert_norms( PPoint& pt )
   // count \# nodes in surface
   int numvert = 0;
   for ( int i=0; i<pt.num(); i++ ) {
-    if ( has_norm[i] ) normalize(tvn+i*3);
-    numvert++;
+    if ( has_norm[i] ) {
+      normalize(tvn+i*3);
+      numvert++;
+    }
   }
 
   _vert.resize(numvert);
@@ -121,7 +123,7 @@ void Surfaces::determine_vert_norms( PPoint& pt )
       _vert[numvert++] = i;
     }
   }
-  delete[] tvn;
+  delete tvn;
 }
 
 
