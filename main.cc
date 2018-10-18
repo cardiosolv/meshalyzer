@@ -126,6 +126,7 @@ void animate_signal( int sig, siginfo_t *si, void *v )
   sem_post( meshProcSem );
 }
 
+
 /** animate in response to a signal received: SIGUSR1 for forward, 
  *  SIGUSR2 for backward
  *
@@ -169,6 +170,41 @@ read_version_info( Fl_Text_Display *txt )
     txt->insert( line.c_str() );
     txt->insert( "\n" );
   }
+}
+
+
+/* output a flyby sequence offscreen 
+ *
+ * \param flyby basename including directory
+ * \param tbmw  trackball widget
+ * \param pngsz image size
+ */
+void
+os_flyby( string filebase, TBmeshWin *tbmw, int pngsz )
+{
+#ifndef OSMESA
+  // need to create an OpenGL context
+  int   argc = 1;
+  char *argv = strdup("-iconic");
+  glutInit(&argc, &argv);
+  glutInitWindowSize(1,1);
+  glutCreateWindow("Take it eaze");
+#endif
+
+  tbmw->transBgd(false);
+  tbmw->resize(0,0,pngsz,pngsz);
+
+  // maybe need to create directory
+  size_t slash = filebase.rfind('/');
+  if( slash != string::npos ) {
+    string dirname = filebase.substr(0,slash);
+    if( mkdir( dirname.c_str(), 0744 )==-1 && errno!=EEXIST ) {
+      cerr << "Exiting: Cannot create directory " << dirname << endl;
+      exit(1);
+    }
+  }
+  ctrl_ptr->flyby->fly(filebase);  
+  exit(0);
 }
 
 
@@ -358,8 +394,8 @@ void process_h5_format(char *fin, Meshwin *w, Controls *control, bool no_elems)
 void
 print_usage(void) 
 {
-  cout << "meshalyzer [options] model_base[.[pts]] [file.igb|file.dat|file.datH5:nodal/#] [file.xfrm] [file.mshz] "
-          "[file.vpts]"<<endl;
+  cout << "meshalyzer [options] model_base[.[pts]] [file.igb|file.dat|file.datH5:nodal/#] [file.EXT] " << endl;
+  cout << "           EXT in {xfrm,mshz,vpts,pts_t,dynpt}" << endl;
   cout << "with options: " << endl;
   cout << "--iconifycontrols|-i  iconify controls on startup" << endl;
   cout << "--no_elem        |-n  do not read element info" << endl;
@@ -371,6 +407,7 @@ print_usage(void)
   cout << "--numframe=num   |-N  number of frames to output (default=1)" << endl;
   cout << "--size=num       |-s  output size of PNG in pixels (default=512)" << endl;
   cout << "--nproc=num      |-p  #parallel procs for PNG sequences" << endl;
+  cout << "--flyby=file     |-F  perform a flyby" << endl;
   cout << "--compSurf=(+)?[file] compute surfaces, +=do not exit after" << endl;
   exit(0);
 }
@@ -387,6 +424,7 @@ static struct option longopts[] = {
   { "numframe"       , 1          , NULL, 'N' },
   { "size"           , 1          , NULL, 's' },
   { "nproc"          , 1          , NULL, 'p' },
+  { "flyby"          , 1          , NULL, 'F' },
   { "compSurf"       , 2          , NULL, 'S' },
   { NULL             , 0          , NULL, 0   }
 };
@@ -399,16 +437,17 @@ main( int argc, char *argv[] )
   H5Eset_auto1(NULL, NULL);// silence HDF errors
 #endif
 
-  bool iconcontrols   = false;
-  bool no_elems       = false;
-  bool threadedReader = false;
-  char *PNGfile       = NULL;
-  int   pngsize        = 512;
+  bool   iconcontrols   = false;
+  bool   no_elems       = false;
+  bool   threadedReader = false;
+  char  *PNGfile       = NULL;
+  int    pngsize        = 512;
   const char *grpID   = "0";
   int    frame0   = -1,
          numframe =  1;
   int    nproc    =  1;
-  char *surfFile  = NULL;
+  char  *surfFile  = NULL;
+  string flyby; 
 
   int ch;
   while( (ch=getopt_long(argc, argv, "ing:hP:N:f:p:ts:S::", longopts, NULL)) != -1 )
@@ -433,6 +472,9 @@ main( int argc, char *argv[] )
 			break;
 		case 'f':
 			frame0 = atoi(optarg);
+			break;
+		case 'F':
+			flyby = optarg;
 			break;
 		case 'p':
 			nproc = atoi(optarg);
@@ -513,7 +555,7 @@ main( int argc, char *argv[] )
   if( !stat( defstate.c_str(), &buf) ) 
     control.restore_state( defstate.c_str() );
 
-  if( !PNGfile ) {
+  if( !PNGfile && !flyby.size() ) {
 #ifdef OSMESA
     cerr << "PNGfile must be specified with mesalyzer!" << endl;
     exit(1);
@@ -571,7 +613,7 @@ main( int argc, char *argv[] )
   control.maxcolval->value(win.trackballwin->cs->max());
   control.set_tet_region( win.trackballwin->model );
 
-  if( !PNGfile )
+  if( !PNGfile && !flyby.size() )
     control.window->show();
 
   if ( win.trackballwin->auxGrid ) control.auxgridgrp->activate();
@@ -629,6 +671,8 @@ main( int argc, char *argv[] )
     if( frame0<0 )   frame0   = win.trackballwin->time();
     if( numframe<0 ) numframe = win.trackballwin->max_time()-frame0+1;
     os_png_seq( PNGfile, frame0+proc, numframe-proc, win.trackballwin, pngsize, nproc );
+  } else if( flyby.size() ) {
+    os_flyby( flyby, win.trackballwin, pngsize );
   }
 
   Fl::run();

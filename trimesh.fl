@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0400
+version 1.0304
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -89,7 +89,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {912 105 350 645} type Double box UP_BOX
+      xywh {1328 84 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -1944,7 +1944,7 @@ flyby = new FlyBy( mwtb, this );} {}
   }
   decl {Fl_Window* proginfo;} {public local
   }
-  decl {FlyBy *flyby;} {private local
+  decl {FlyBy *flyby;} {selected public local
   }
   decl {ObjProps *objprops[maxobject];} {private local
   }
@@ -2088,7 +2088,7 @@ if( xfn.rfind(".mshz") == string::npos ) xfn += ".mshz";
 ofstream mshzf( xfn.c_str() );
 save_state( mshzf );} {}
   }
-  Function {save_state( ostream &mshzf, bool save_flyby = true )} {open selected
+  Function {save_state( ostream &mshzf, bool save_flyby = true )} {open
   } {
     code {mshzf << "TRACKBALL ======" << endl;
 mwtb->trackball.save(mshzf);
