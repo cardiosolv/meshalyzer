@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {private global
@@ -79,7 +79,7 @@ if( fbdat ) fb_steps->value(fbdat->steps);}
 if( !fbdat ) return;
 stringstream sstr(fbdat->state->str());
 controls->restore_state( sstr );}
-        tooltip {load selected state} xywh {15 180 95 35} color 127
+        tooltip {load selected state} xywh {15 180 65 35} color 127
       }
       Fl_Button fb_add {
         label {@+}
@@ -102,12 +102,14 @@ FlyByData *fbdat = new FlyByData( sts, sstr,tbwm->trackball.qRot,
           tbwm->trackball.GetTranslation(),tbwm->trackball.GetScale() );
           
 fb_list->insert( selstate+1, newlabel.str().c_str(), fbdat );
+fb_list->select( selstate+1 );
+last_added=selstate+1;
 
 if( fb_list->size() >= 2 ) {
   fb_play->activate();
   fb_rec->activate();
 }}
-        tooltip {add current state to list} xywh {127 180 95 35} color 222
+        tooltip {add current state to list} xywh {90 180 58 35} color 222
       }
       Fl_Spinner fb_steps {
         label {\#steps}
@@ -165,7 +167,7 @@ if( curpos<2 ) return;
 fb_list->select(curpos,0);
 fb_list->move(curpos-1, curpos);
 fb_list->select(curpos-1);
-fb_list->redraw();} selected
+fb_list->redraw();}
         tooltip {move selected state up} xywh {235 60 30 30}
       }
       Fl_Button {} {
@@ -208,6 +210,33 @@ if( fn != NULL ) fb_fname->value(fn);}
         label {adv time}
         tooltip {advance time with position} xywh {240 120 55 30} down_box DOWN_BOX
       }
+      Fl_Button fb_spin {
+        label Spin
+        callback {const char* axis = fl_input("Rotation axis", "0 0 1");
+if( !axis ) return;
+
+V3f rotaxis;
+istringstream axis_str(axis);
+axis_str >> rotaxis.X() >> rotaxis.Y() >> rotaxis.Z();
+Quaternion rot;
+rot.SetRotationAboutAxis(2*M_PI/3., rotaxis );
+if( !fb_list->size() ) {
+  fb_add->do_callback();
+  stringstream label;
+  label << "spin (" << axis << ") 0";
+  fb_list->text(last_added, label.str().c_str() );
+}
+for( int i=0; i<3; i++ ) {
+  tbwm->trackball.Rotation(rot);
+  fb_add->do_callback();
+  stringstream label;
+  label << "spin (" << axis << ") " << (i+1)*120;
+  cout << last_added << endl;
+  fb_list->text(last_added, label.str().c_str());
+}}
+        comment {Spin completely about an axis} selected
+        tooltip {add complete spin about an axis} xywh {165 180 58 35} color 173
+      }
     }
     code {tbwm = tb;
 controls = c;
@@ -221,6 +250,8 @@ viewno = 0;} {}
   decl {const char *ofile="flyby";} {private local
   }
   decl {const char *odir=".";} {private local
+  }
+  decl {int last_added=0;} {private local
   }
   decl {int viewno;} {private local
   }
