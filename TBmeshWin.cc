@@ -89,6 +89,7 @@ void TBmeshWin::highlight( Object_t obj, int a )
   if ( hinfo->window->visible() ) hiliteinfo();
   if ( obj == Vertex ) {
     if( timeplotter->window->shown() ) timeplot();
+    if( timeplotter->graph->crvi_vis() )static_curve_info_cb(timeplotter->graph);
     if( have_data != NoData) contwin->vertvalout->value( data[a] );
   }
 }

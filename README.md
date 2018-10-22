@@ -46,7 +46,7 @@ and then
 and see if it disappears.
 
 * Make sure the proper dynamic libraries are getting linked. There can be conflicts with *fltk* or *vtk* if
-  multiple versions are installed. In these cases a simple solution ids to write a wrapper script which 
+  multiple versions are installed. In these cases a simple solution is to write a wrapper script which 
   properly sets the environment variables like below:
 
   ```bash

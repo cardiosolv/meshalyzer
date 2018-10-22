@@ -98,9 +98,27 @@ close_graph_cb( Fl_Widget *w, void *p )
 
 
 void
+static_curve_info_cb( Fl_Widget *w ) 
+{
+  Graph* g = (Graph *)w;
+  if( !g->crvi ) g->crvi = new CurveInfo;
+  g->crvi->win->show();
+  g->crvi->info->clear();
+  for(int i=0; i<g->n(); i++) {
+    if( g->id(i) < 0 ) continue;
+    stringstream legend;
+    int txtclr = (setcolour[i]==FL_YELLOW || setcolour[i]==FL_GRAY)? FL_BLACK : FL_WHITE;
+    legend << "@B" << setcolour[i] << "@C" << txtclr << "@b@l@c"<<g->id(i);
+    g->crvi->add_line( legend.str() );
+  }
+}
+
+void
 clear_curves_cb( Fl_Widget *w )
 {
-  ((Graph *)w)->clear_curves();
+  Graph* g = (Graph *)w;
+  g->clear_curves();
+  if( g->crvi && g->crvi_vis() ) static_curve_info_cb(g);
 }
 
 
@@ -109,6 +127,7 @@ Fl_Menu_Item graph_pop_menu[] = {
   { "zero Y-axis", 'z', (Fl_Callback *)zero_yaxis_cb, 0, 0, 0, 0, 14, 56 },
   { "X range", 'x',  (Fl_Callback *)xrange_cb, 0, 0, 0, 0, 14, 56  },
   { "Y range", 'y',  (Fl_Callback *)yrange_cb, 0, 0, 0, 0, 14, 56  },
+  { "curve legend", 's',  (Fl_Callback *)static_curve_info_cb, 0, 0, 0, 0, 14, 56  },
   { "toggle button display", 'b',  (Fl_Callback *)but_disp_toggle_cb, 0, 0, 0, 0, 14, 56  },
   { "clear static curves", 'c',  (Fl_Callback *)clear_curves_cb, 0, 0, 0, 0, 14, 56  },
   { "close", 'c',  (Fl_Callback *)close_graph_cb, 0, 0, 0, 0, 14, 56  },

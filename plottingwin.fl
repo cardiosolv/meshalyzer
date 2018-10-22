@@ -2,10 +2,40 @@
 version 1.0304
 header_name {.h}
 code_name {.cc}
-decl {\#include "Graph.h"} {private local
+decl {\#include "plottingwin.h"} {private local
 }
 
 decl {using namespace std;} {private local
+}
+
+decl {\#include "Graph.h"} {private local
+}
+
+decl {\#include <string>} {public global
+}
+
+class CurveInfo {open
+} {
+  Function {CurveInfo()} {open
+  } {
+    Fl_Window win {
+      label {Curve Legend} open
+      xywh {1095 64 225 220} type Single visible
+    } {
+      Fl_Browser info {selected
+        xywh {0 0 225 185}
+      }
+      Fl_Return_Button {} {
+        label close
+        callback {win->hide();}
+        xywh {0 185 225 35}
+      }
+    }
+  }
+  Function {add_line( std::string s )} {open
+  } {
+    code {info->add( s.c_str() );} {}
+  }
 }
 
 class PlotWin {open
@@ -85,7 +115,9 @@ class PlotWin {open
         }
         Fl_Button {} {
           label Hold
-          callback {graph->copy_curve(0);}
+          callback {graph->copy_curve(0);
+if( graph->crvi_vis() )
+  static_curve_info_cb(graph);}
           xywh {360 175 70 15} labelsize 10
         }
       }
@@ -112,7 +144,6 @@ if ( i0 < string::npos )
   _datafile= d.substr(i0+1,string::npos);
 else
   _datafile = d;
-window->label( _datafile.c_str() );} {selected
-    }
+window->label( _datafile.c_str() );} {}
   }
 }

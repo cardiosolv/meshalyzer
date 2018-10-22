@@ -53,6 +53,7 @@
 #include <FL/Fl_Double_Window.H>
 #include <FL/fl_draw.H>
 #include <ostream>
+#include "plottingwin.h"
 
 const int max_num_sets=10;
 const int num_labels=7;
@@ -72,7 +73,7 @@ class Graph : public Fl_Widget
      * \param dc number of dynamic curves
      */
     Graph(int X,int Y,int W,int H) : Fl_Widget(X,Y,W,H),
-            v_autoscale(true), zero_yaxis(false),numset(0){} 
+            v_autoscale(true), zero_yaxis(false),numset(0){}
     int  set_2d_data(const double *, const double *, int n, int c, int id=-1 );
     void reset_view( void );
     void range( double &, double &, double &, double& );
@@ -88,6 +89,8 @@ class Graph : public Fl_Widget
     int  id( int a ){ if(a<numset)return _id[a]; }
     void num_dynamic( int a ){ num_dyn=a; }
     void toggle_zero_yaxis(){ zero_yaxis=!zero_yaxis;}
+    bool crvi_vis(){return crvi && crvi->win->visible();}
+    friend void static_curve_info_cb( Fl_Widget *w );
   private:
     const double *xv[max_num_sets], *yv[max_num_sets];
     double  x0, x1, y0, y1;					// data range being plotted
@@ -101,6 +104,8 @@ class Graph : public Fl_Widget
     bool    v_autoscale;				    // autoscale with set change
     int     num_dyn;                        //!< \# non-static curves 
     bool    zero_yaxis;
+  public:
+    CurveInfo *crvi=NULL;
 };
 
 #endif
