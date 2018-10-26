@@ -48,7 +48,7 @@ class DrawingObj
 class PPoint: public DrawingObj
 {
   public:
-    PPoint() : _pts(NULL), _base1(false),_dynPt(NULL), _tm(-1) {}
+    PPoint() {}
     virtual ~PPoint() { if ( _pts ) free(_pts); _pts = 0; }
 
     virtual void     draw( int, GLfloat*, float size=1 );
@@ -74,18 +74,19 @@ class PPoint: public DrawingObj
     void    time( int a );
     int     time(){ return _tm; }
     int     dynamic( const char *, int );
+    bool    dynamic( void ){return _dynPt != NULL;}
     int     num_tm(){ return _dynPt? _dynPt->max_tm()+1:0; }
   private:
-    GLfloat*     _pts;		  //!< point list
-    vector<bool>*_visible;    //!< points which get drawn
-    GLfloat      _offset[3];  //!< centering offset
-    bool         _base1;      //!< true for base 1
-    vector<bool>_allvis;	  //!< all true
-    int         _maxtm;       //!< maximum time
-    int         _tm;          //!< current time
+    GLfloat*     _pts=NULL;	       //!< point list
+    vector<bool>*_visible;         //!< points which get drawn
+    GLfloat      _offset[3];       //!< centering offset
+    bool         _base1=false;     //!< true for base 1
+    vector<bool>_allvis;	       //!< all true
+    int         _maxtm;            //!< maximum time
+    int         _tm=-1;            //!< current time
     GLfloat  _min[3]={0,0,0},
              _max[3]={0,0,0};//!< bounding box
-    DataClass<float>* _dynPt; //!< dynamic point data
+    DataClass<float>* _dynPt=NULL; //!< dynamic point data
 };
 
 
