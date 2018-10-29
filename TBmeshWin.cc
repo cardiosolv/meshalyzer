@@ -2004,6 +2004,9 @@ TBmeshWin:: set_time(int a)
   }
   if( model->pt.num_tm() )
     model->pt.time(tm);
+  if( model->pt.dynamic() )
+    for( int i=0; i<6; i++ )
+        if(cplane->drawIntercept(i)) determine_cutplane(i);
   return true;
 }
 

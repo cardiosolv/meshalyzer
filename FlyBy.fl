@@ -108,7 +108,7 @@ last_added=selstate+1;
 if( fb_list->size() >= 2 ) {
   fb_play->activate();
   fb_rec->activate();
-}}
+}} selected
         tooltip {add current state to list} xywh {90 180 58 35} color 222
       }
       Fl_Spinner fb_steps {
@@ -231,10 +231,9 @@ for( int i=0; i<3; i++ ) {
   fb_add->do_callback();
   stringstream label;
   label << "spin (" << axis << ") " << (i+1)*120;
-  cout << last_added << endl;
   fb_list->text(last_added, label.str().c_str());
 }}
-        comment {Spin completely about an axis} selected
+        comment {Spin completely about an axis}
         tooltip {add complete spin about an axis} xywh {165 180 58 35} color 173
       }
     }
