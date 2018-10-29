@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -93,7 +93,7 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -570,7 +570,7 @@ mwtb->redraw();}
           }
         }
         Submenu outmenu {
-          label Output open
+          label Output
           xywh {0 0 100 20}
         } {
           Submenu {} {
@@ -852,7 +852,7 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
@@ -873,6 +873,13 @@ objprops[Cable]->win->show();}
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
+          Fl_Value_Input cnnxhi {
+            label {Connection:}
+            callback {mwtb->highlight(Cnnx,static_cast<int>(o->value()));}
+            xywh {100 375 85 25} step 1
+            code0 {\#include "MyValueInput.h"}
+            class MyValueInput
+          }
           Fl_Value_Input cabhi {
             label {:Cable}
             callback {mwtb->highlight(Cable,static_cast<int>(o->value()));}
@@ -884,13 +891,6 @@ objprops[Cable]->win->show();}
             label {Vertex:}
             callback {mwtb->highlight(Vertex,int(o->value()));}
             xywh {100 405 85 25} step 1
-            code0 {\#include "MyValueInput.h"}
-            class MyValueInput
-          }
-          Fl_Value_Input cnnxhi {
-            label {Connection:}
-            callback {mwtb->highlight(Cnnx,static_cast<int>(o->value()));}
-            xywh {100 375 85 25} step 1
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
@@ -1766,7 +1766,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {
+      Fl_Group colorscalegrp {open
         xywh {10 490 330 60} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup
@@ -1778,8 +1778,31 @@ mincolval->value(mwtb->cs->min());
 maxcolval->value(mwtb->cs->max());}
           tooltip {calibrate for current time} xywh {15 500 45 20} box ROUND_UP_BOX labelsize 10
         }
+        Fl_Value_Input mincolval {
+          label min
+          callback {mwtb->cs->calibrate(o->value(),mwtb->cs->max());
+mwtb->redraw();}
+          xywh {65 500 65 25} labelsize 10 align 2 when 4 textsize 12
+        }
+        Fl_Value_Input maxcolval {
+          label max
+          callback {mwtb->cs->calibrate(mwtb->cs->min(),o->value());
+mwtb->redraw();}
+          xywh {130 500 65 25} labelsize 10 align 2 when 4 textsize 12
+        }
+        Fl_Value_Input numcolev {
+          label levels
+          callback {mwtb->cs->size((int)(o->value()));
+mwtb->redraw();}
+          tooltip {colourmap size} xywh {195 500 30 25} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
+        }
+        Fl_Light_Button autocalibratebut {
+          label auto
+          callback {mwtb->autocolour(o->value());}
+          tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
+        }
         Fl_Choice cstype {
-          label {colour scale}
+          label {colour scale} selected
           xywh {230 500 105 25} down_box BORDER_BOX labelsize 10 align 2
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
@@ -1855,29 +1878,6 @@ mwtb->redraw();}
             tooltip {Viridis Bright} image {viridis_light.xpm} xywh {20 20 100 20}
           }
         }
-        Fl_Value_Input mincolval {
-          label min
-          callback {mwtb->cs->calibrate(o->value(),mwtb->cs->max());
-mwtb->redraw();}
-          xywh {65 500 65 25} labelsize 10 align 2 when 4 textsize 12
-        }
-        Fl_Value_Input maxcolval {
-          label max
-          callback {mwtb->cs->calibrate(mwtb->cs->min(),o->value());
-mwtb->redraw();}
-          xywh {130 500 65 25} labelsize 10 align 2 when 4 textsize 12
-        }
-        Fl_Value_Input numcolev {
-          label levels
-          callback {mwtb->cs->size((int)(o->value()));
-mwtb->redraw();}
-          tooltip {colourmap size} xywh {195 500 30 25} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
-        }
-        Fl_Light_Button autocalibratebut {
-          label auto
-          callback {mwtb->autocolour(o->value());}
-          tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
-        }
         Fl_Button {} {
           callback {mwtb->SendColourSyncMessage();}
           image {broadcast.png} xywh {315 525 20 20}
@@ -1944,7 +1944,7 @@ flyby = new FlyBy( mwtb, this );} {}
   }
   decl {Fl_Window* proginfo;} {public local
   }
-  decl {FlyBy *flyby;} {selected public local
+  decl {FlyBy *flyby;} {public local
   }
   decl {ObjProps *objprops[maxobject];} {private local
   }
