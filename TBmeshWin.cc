@@ -241,11 +241,7 @@ void TBmeshWin :: draw()
     // display regions
     for ( int s=0; s<model->_numReg; s++ ) {
 
-      RRegion *reg;
-      if ( revDrawOrder )
-        reg = model->region(model->_numReg-s-1);
-      else
-        reg = model->region(s);
+      RRegion *reg = model->region(revDrawOrder ? model->_numReg-s-1 : s);
 
       if ( !reg->visible() ) continue;
 
@@ -265,14 +261,10 @@ void TBmeshWin :: draw()
   draw_iso_surfaces( );
 
   // draw surfaces
-  Surfaces *sf;
   model->pt.setVis( true );
   for ( int s=0; s<model->numSurf(); s++ ) {
 
-    if ( revDrawOrder )
-      sf = model->surface(model->numSurf()-s-1);
-    else
-      sf = model->surface(s);
+    Surfaces *sf = model->surface(revDrawOrder ? model->numSurf()-s-1 : s);
 
     if ( !sf->visible() ) continue;
 
@@ -350,11 +342,11 @@ void TBmeshWin :: draw()
       model->surface(lsurf)->ele(lele)->draw( 0, hiele_color );
     }
     if ( model->_cable->num() )
-      model->_cable->draw( hilight[Cable], hicable_color, 2 );
+      model->_cable->draw( hilight[Cable], hicable_color,  model->max_size(Cable)+2  );
     if ( model->_cnnx->num() )
-      model->_cnnx->draw( hilight[Cnnx], hicnnx_color, 2 );
-    if ( model->pt.num() )
-      model->pt.draw( hilight[Vertex], hipt_color, 10 );
+      model->_cnnx->draw( hilight[Cnnx], hicnnx_color,  model->max_size(Cnnx)+2  );
+    if ( model->pt.num() ) 
+      model->pt.draw( hilight[Vertex], hipt_color, model->max_size(Vertex)+2 );
   }
 
   for (int i=0;i<NUM_CP;i++)

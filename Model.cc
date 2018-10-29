@@ -1857,6 +1857,22 @@ Model::check_element( SurfaceElement *e )
 }
 
 
+/** get maximum size of object in model 
+ *
+ * \param o object
+ *
+ * \return maximum size
+ */
+float
+Model::max_size( Object_t o )
+{
+  float ms = _region[0]->size(o);
+  for( int i=1; i<_numReg; i++ ) 
+    if( _region[0]->size(o)>ms ) ms = _region[0]->size(o);
+  return ms;
+}
+
+
 #ifdef USE_HDF5
 /** read in one instant in time which is part of a element  time file
  *

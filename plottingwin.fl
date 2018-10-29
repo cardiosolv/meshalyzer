@@ -11,6 +11,9 @@ decl {using namespace std;} {private local
 decl {\#include "Graph.h"} {private local
 }
 
+decl {\#include "FL/fl_ask.H"} {private local
+}
+
 decl {\#include <string>} {public global
 }
 
@@ -22,8 +25,18 @@ class CurveInfo {open
       label {Curve Legend} open
       xywh {1095 64 225 220} type Single visible
     } {
-      Fl_Browser info {selected
-        xywh {0 0 225 185}
+      Fl_Browser info {
+        callback {int sel  = o-> value();
+string label = o->text(sel);
+const char *str = fl_input( "enter new label" );
+if( str ) {
+  std::string::size_type endform = label.find("@.")+2;
+  string newlabel = label.substr(0, endform );
+  newlabel += str;
+  o->text(sel,newlabel.c_str() );
+  
+}} selected
+        xywh {0 0 225 185} type Select
       }
       Fl_Return_Button {} {
         label close

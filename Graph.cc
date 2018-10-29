@@ -108,7 +108,7 @@ static_curve_info_cb( Fl_Widget *w )
     if( g->id(i) < 0 ) continue;
     stringstream legend;
     int txtclr = (setcolour[i]==FL_YELLOW || setcolour[i]==FL_GRAY)? FL_BLACK : FL_WHITE;
-    legend << "@B" << setcolour[i] << "@C" << txtclr << "@b@l@c"<<g->id(i);
+    legend << "@B" << setcolour[i] << "@C" << txtclr << "@b@l@c@."<<g->id(i);
     g->crvi->add_line( legend.str() );
   }
 }

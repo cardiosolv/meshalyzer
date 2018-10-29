@@ -21,14 +21,6 @@ z_proj( const GLfloat* m, const GLfloat *v )
 }
 
 
-Surfaces::Surfaces( PPoint *pl ) : _p(pl), is_visible(true),_filled(true),
-    _outline(false),_vertnorm(NULL)
-{
-  fillcolor( 1., 0.5, 0.1 );
-  outlinecolor( 0.125, 0.8, 0.7 );
-}
-
-
 /**
  * @brief  set the material colour properties
  */
