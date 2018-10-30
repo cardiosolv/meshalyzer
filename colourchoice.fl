@@ -86,14 +86,14 @@ class surfColourChoice {open
   } {
     Fl_Window window {
       label {Choose colour} open
-      xywh {2005 213 225 425} type Double labelsize 12 align 2 visible
+      xywh {636 679 225 425} type Double labelsize 12 align 2 visible
     } {
       Fl_Box rgb_choice {
         callback {uchar ri = o->r()*255.;
 uchar bi = o->b()*255.;
 uchar gi = o->g()*255.;
 opacity->selection_color(fl_rgb_color(ri,gi,bi));
-opacity->redraw();} selected
+opacity->redraw();}
         xywh {0 0 225 175}
         code0 {\#include <FL/Fl_Color_Chooser.H>}
         class Fl_Color_Chooser
@@ -102,10 +102,20 @@ opacity->redraw();} selected
         label Done
         callback {apbut->do_callback();
 window->hide();}
-        xywh {125 233 90 30}
+        xywh {145 234 70 30}
+      }
+      Fl_Button apOPbut {
+        label Opacity
+        callback {for( int r=0; r<ch_br->nitems(); r++ )
+  if( ch_br->checked(r+1) ) {
+    const GLfloat* c = tbmw->get_color( obj, r );
+    tbmw->set_color( obj, r, c[0], c[1], c[2], opacity->value() );
+  }
+tbmw->redraw();} selected
+        xywh {82 234 55 30}
       }
       Fl_Button apbut {
-        label Apply
+        label {Apply All}
         callback {GLfloat col[4];
 col[0] = rgb_choice->r();
 col[1] = rgb_choice->g();
@@ -118,7 +128,7 @@ for( int r=0; r<ch_br->nitems(); r++ )
                           shiny->value(), back->value() );
   }
 tbmw->redraw();}
-        xywh {10 234 95 30}
+        xywh {10 234 65 30}
       }
       Fl_Value_Slider shiny {
         label {shiny:}
