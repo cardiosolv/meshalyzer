@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0400
+version 1.0304
 header_name {.h}
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {private global
@@ -18,6 +18,15 @@ decl {\#include <algorithm>} {private local
 }
 
 decl {\#include <sstream>} {private local
+}
+
+decl {\#include <unistd.h>} {private local
+}
+
+decl {\#include <sys/stat.h>} {private local
+}
+
+decl {\#include <sys/types.h>} {private local
 }
 
 decl {class Controls;} {public global
@@ -71,7 +80,7 @@ class FlyBy {open
       Fl_Browser fb_list {
         callback {FlyByData* fbdat = static_cast<FlyByData*>(fb_list->data(fb_list->value()));
 if( fbdat ) fb_steps->value(fbdat->steps);}
-        xywh {15 15 205 155} type Hold
+        xywh {15 15 205 155} type Hold when 4
       }
       Fl_Button fb_load {
         label {@reload}
@@ -121,7 +130,7 @@ fbdat->steps = o->value();}
       Fl_Button fb_play {
         label {@>|}
         callback {fly();}
-        tooltip {play flyby} xywh {10 275 95 35} deactivate
+        tooltip {play flyby from selected state} xywh {10 275 95 35} deactivate
       }
       Fl_Button fb_rec {
         label {@circle}
@@ -256,16 +265,20 @@ viewno = 0;} {}
   }
   Function {fly( string fbase = string("") )} {open
   } {
-    code {unsigned int frameno=0;
+    code {int start = fb_list->value();
+if( !start ) start = 1;
 
-FlyByData *fbdat_e = static_cast<FlyByData*>(fb_list->data(1));
+unsigned int frameno=start;
+
+FlyByData *fbdat_e = static_cast<FlyByData*>(fb_list->data(start));
 FlyByData *fbdat_s;
 
 stringstream sstr(fbdat_e->state->str());
 controls->restore_state( sstr );
 int start_tm = tbwm->time();
+bool first   = true;
 
-for( int i=2; i<=fb_list->size(); i++ ) {
+for( int i=start+1; i<=fb_list->size(); i++ ) {
   fbdat_s = fbdat_e;
   fbdat_e = static_cast<FlyByData*>(fb_list->data(i));
   Quaternion start = fbdat_s->qRot;
@@ -285,6 +298,15 @@ for( int i=2; i<=fb_list->size(); i++ ) {
     if( fbase.size() ) {
       char framename[1024];
       sprintf( framename, "%s%05d.png", fbase.c_str(), frameno++ );
+      if( first ) {
+      	first = false;
+        struct stat buffer;
+        cout << framename << endl;   
+        if(!stat(framename, &buffer) ) {  // file exists
+          if( fl_choice("Overwrite image files?", "No", "Yes", 0 ) == 0 )
+            return;
+        } 
+      }
       Frame frame( tbwm );
       frame.write( tbwm->w(), tbwm->h(), framename, tbwm->time() );
     } else 

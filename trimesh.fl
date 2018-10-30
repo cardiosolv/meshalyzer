@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0400
+version 1.0304
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -857,7 +857,7 @@ objprops[Cable]->win->show();}
       } {
         Fl_Group hilightgrp {
           label Highlight open
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -1058,8 +1058,8 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
+          label Surface open
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90
         } {
           Fl_Light_Button surfvisbut {
             label Visible
@@ -1086,13 +1086,13 @@ mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
             label {Outline colour}
             callback {static surfColourChoice *cc=NULL;
 cc=pick_surf_color( SurfEle, "Outline Colour",cc );}
-            xywh {140 355 90 30} labelsize 12
+            tooltip {change colour and opacity} xywh {140 355 90 30} labelsize 12
           }
           Fl_Button {} {
             label {Fill colour}
             callback {static surfColourChoice *cc=NULL;
 cc=pick_surf_color( Surface, "Surface colour",cc );}
-            xywh {240 355 90 30} labelsize 12
+            tooltip {change colour and opacity} xywh {240 355 90 30} labelsize 12
           }
           Fl_Check_Browser surflist {
             label {apply to}
@@ -1181,8 +1181,8 @@ refresh_surflist(0);
 
 surflist->set_checked(sel+1);
 
-write_surfaces(0);}
-            xywh {200 395 60 30} labelsize 12
+write_surfaces(0);} selected
+            tooltip {rename surface} xywh {200 395 60 30} labelsize 12
           }
         }
         Fl_Group vectorgrp {
@@ -1802,7 +1802,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
         }
         Fl_Choice cstype {
-          label {colour scale} selected
+          label {colour scale}
           xywh {230 500 105 25} down_box BORDER_BOX labelsize 10 align 2
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
@@ -1880,10 +1880,10 @@ mwtb->redraw();}
         }
         Fl_Button {} {
           callback {mwtb->SendColourSyncMessage();}
-          image {broadcast.png} xywh {315 525 20 20}
+          tooltip {sync colours} image {broadcast.png} xywh {315 525 20 20}
         }
       }
-      Fl_Group animate_group {
+      Fl_Group animate_group {open
         xywh {10 555 330 85} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
@@ -1915,7 +1915,7 @@ mwtb->redraw();}
         }
         Fl_Button tsync_but {
           callback {mwtb->SendTimeSyncMessage();}
-          image {broadcast.png} xywh {309 600 26 30} resizable
+          tooltip {sync time} image {broadcast.png} xywh {309 600 26 30} resizable
         }
         Fl_Button {} {
           label {@>>}

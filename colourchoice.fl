@@ -86,7 +86,7 @@ class surfColourChoice {open
   } {
     Fl_Window window {
       label {Choose colour} open
-      xywh {636 679 225 425} type Double labelsize 12 align 2 visible
+      xywh {636 679 225 425} type Double labelsize 12 align 2 hide
     } {
       Fl_Box rgb_choice {
         callback {uchar ri = o->r()*255.;
@@ -102,7 +102,7 @@ opacity->redraw();}
         label Done
         callback {apbut->do_callback();
 window->hide();}
-        xywh {145 234 70 30}
+        tooltip {update colours, opacity and close window} xywh {145 234 70 30}
       }
       Fl_Button apOPbut {
         label Opacity
@@ -111,8 +111,8 @@ window->hide();}
     const GLfloat* c = tbmw->get_color( obj, r );
     tbmw->set_color( obj, r, c[0], c[1], c[2], opacity->value() );
   }
-tbmw->redraw();} selected
-        xywh {82 234 55 30}
+tbmw->redraw();}
+        tooltip {update only opacity} xywh {82 234 55 30}
       }
       Fl_Button apbut {
         label {Apply All}
@@ -128,7 +128,7 @@ for( int r=0; r<ch_br->nitems(); r++ )
                           shiny->value(), back->value() );
   }
 tbmw->redraw();}
-        xywh {10 234 65 30}
+        tooltip {update colours and opacity} xywh {10 234 65 30}
       }
       Fl_Value_Slider shiny {
         label {shiny:}
@@ -171,8 +171,8 @@ tbmw->redraw();}
         xywh {65 388 150 27} type Horizontal labelsize 12 align 4 value 0.5 textsize 14
       }
       Fl_Value_Slider opacity {
-        label Opacity
-        xywh {10 196 210 28} type {Horz Fill} color 47 selection_color 86 align 1 value 1 textsize 14
+        label Opacity selected
+        tooltip {opacity value} xywh {10 196 210 28} type {Horz Fill} color 47 selection_color 86 align 1 value 1 textsize 14
       }
     }
     code {obj = o;
