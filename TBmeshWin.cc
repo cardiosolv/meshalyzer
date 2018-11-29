@@ -439,9 +439,7 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
 
   glPushAttrib(GL_POLYGON_BIT);
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-  bool showData=true;
-  if ( !(datadst&Surface_flg) || have_data==NoData )
-    showData = false;
+  bool showData=datadst&Surface_flg && have_data!=NoData; 
 
   bool on_tr = dataopac->dop[Surface].on() || 
                sf->fillcolor()[3]<OPAQUE_LIMIT;
@@ -450,13 +448,6 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
   sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride, 
  		dataopac->dop+Surface, 
 		facetshading?NULL:model->vertex_normals(sf), on_tr );
-
-#if 0
-  int shade_model;
-  glGetIntegerv( GL_SHADE_MODEL, &shade_model );
-  if( _branch_cut && showData && shade_model==GL_SMOOTH )
-    sf->correct_branch_elements( _branch_range, data, cs, stride, dataopac->dop+Surface );
-#endif
 
   if ( on_tr ) translucency(false);
   glPopAttrib();

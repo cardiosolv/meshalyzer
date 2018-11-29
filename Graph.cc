@@ -9,6 +9,7 @@
 #include <FL/Fl_Menu_Item.H>
 #include <FL/fl_ask.H>
 #include <sstream>
+#include <math.h>
 
 const int setcolour[]=
   {
@@ -143,7 +144,7 @@ Fl_Menu_Item graph_mouse_pos[] =  {
 // plot the entire data set
 void Graph::reset_view(void)
 {
-  x0=xmin;x1=xmax;y0=ymin;y1=ymax;
+  set_range( xmin, xmax, ymin, ymax, true );
   make_labels();
   redraw();
 }
@@ -198,7 +199,7 @@ void Graph::change_view( int nx, int ny, int nw, int nh )
   to_world( nx, ny, x0n, y1n );
   to_world( nx+nw, ny+nh, x1n, y0n );
 
-  set_range( x0n, x1n, y0n, y1n );
+  set_range( x0n, x1n, y0n, y1n, true );
   redraw();
 }
 
@@ -337,8 +338,9 @@ void Graph::scale()
         ymax = yv[s][i];
     }
 
-  if ( v_autoscale == true )
-    set_range( xmin, xmax, ymin, ymax );
+  if ( v_autoscale == true ) {
+    set_range( xmin, xmax, ymin, ymax, true );
+  }
 
   make_labels();
 }
@@ -427,12 +429,13 @@ void Graph::range( double& a, double& b, double& c, double& d )
 
 /** set the range to plot
  *
- * \param a  minimum x value
- * \param b  maximum x value
- * \param c  minimum y value
- * \param d  maximum y value
+ * \param a     minimum x value
+ * \param b     maximum x value
+ * \param c     minimum y value
+ * \param d     maximum y value
+ * \param round round axis limits
 */
-void Graph::set_range( double a, double b, double c, double d )
+void Graph::set_range( double a, double b, double c, double d, bool round )
 {
   if ( a<b ) {
     x0 = a; x1 = b;
@@ -444,6 +447,11 @@ void Graph::set_range( double a, double b, double c, double d )
   } else {
     y0 = d; y1 = c;
   }
+  if( round ) {
+    round_axis_limits( x0, x1 );
+    round_axis_limits( y0, y1 );
+  }
+
   make_labels();
 }
 
@@ -478,3 +486,100 @@ Graph :: to_world( int xn, int yn, double &wx, double &wy )
   double  dy = h()*ploth;
   wy = y0 + (y1-y0)*double(yy0-yn)/dy;
 }
+
+
+#define NICE_FLOOR -1
+#define NICE_CEIL  +1
+
+/**
+ * @brief generate rounded limit for axes
+ *
+ * @param[inout] amin minimum value
+ * @param[inout] amax maximum value
+ *
+ * @return nothing
+ */
+void
+Graph ::  round_axis_limits(double &amin, double &amax )
+{
+  // this routine stolen from grace
+  int nrange;
+
+  if (amin == amax) {
+    if( amin == 0 ) {
+      amin = -1.0;
+      amax = +1.0;
+    } else if( amin>0 )  {
+      amin /= 2.0;
+      amax *= 2.0;
+    } else if( amin<0 )  {
+      amin *= 2.0;
+      amax /= 2.0;
+    }
+  } 
+
+  if (amin*amax>0) {
+    nrange = -rint(log10(fabs(2*(amax - amin)/(amax + amin))));
+    nrange = std::max(0, nrange);
+  } else {
+    nrange = 0;
+  }
+  amin = nicenum(amin, nrange, NICE_FLOOR);
+  amax = nicenum(amax, nrange, NICE_CEIL);
+  if (amin*amax>0) {
+    if (amax/amin > 5.0) {
+      amin = 0.0;
+    } else if (amin/amax > 5.0) {
+      amax = 0.0;
+    }
+  }
+}
+
+
+/**
+ * @brief round off number
+ *
+ * @param x      the number
+ * @param nrange range to search
+ * @param round  how to round, -1=floor,1=ceiling
+ *
+ * @return the nice number
+ */
+double
+Graph :: nicenum(double x, int nrange, int round)
+{
+  // this routine stolen from grace
+
+  if (x == 0.0) return(0.0);
+
+  int xsign = x>0 ? 1 : -1;
+
+  x = fabs(x);
+
+  double fexp = floor(log10(x)) - nrange;
+  double sx = x/pow(10.0, fexp)/10.0;            /* scaled x */
+  double rx = floor(sx);                         /* rounded x */
+  double f = 10*(sx - rx);                       /* fraction between 0 and 10 */
+
+  double y;
+  if ((round == NICE_FLOOR && xsign == +1) ||
+      (round == NICE_CEIL  && xsign == -1)) {
+    y = (int) floor(f);
+  } else if ((round == NICE_FLOOR && xsign == -1) ||
+             (round == NICE_CEIL  && xsign == +1)) {
+    y = (int) ceil(f);
+  } else {    /* round == NICE_ROUND */
+    if (f < 1.5)
+      y = 1;
+    else if (f < 3.)
+      y = 2;
+    else if (f < 7.)
+      y = 5;
+    else
+      y = 10;
+  }
+  sx = rx + (double) y/10.0;
+
+  return (xsign*sx*10.0*pow(10.0, fexp));
+}
+

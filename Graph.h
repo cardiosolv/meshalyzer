@@ -77,7 +77,7 @@ class Graph : public Fl_Widget
     int  set_2d_data(const double *, const double *, int n, int c, int id=-1 );
     void reset_view( void );
     void range( double &, double &, double &, double& );
-    void set_range( double, double, double, double );
+    void set_range( double, double, double, double, bool=false );
     void autoscale( bool a ){ v_autoscale=a; }
     void copy_curve(int);
     void clear_curves();
@@ -104,6 +104,8 @@ class Graph : public Fl_Widget
     bool    v_autoscale;				    // autoscale with set change
     int     num_dyn;                        //!< \# non-static curves 
     bool    zero_yaxis;
+    double  nicenum( double, int, int );
+    void    round_axis_limits(double &amin, double &amax);
   public:
     CurveInfo *crvi=NULL;
 };

@@ -89,7 +89,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1328 84 350 645} type Double box UP_BOX
+      xywh {1526 202 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -856,8 +856,8 @@ objprops[Cable]->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          label Highlight open selected
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -1059,7 +1059,7 @@ mwtb->redraw();}
         }
         Fl_Group surfgrp {
           label Surface open
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90
+          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label Visible
@@ -1181,7 +1181,7 @@ refresh_surflist(0);
 
 surflist->set_checked(sel+1);
 
-write_surfaces(0);} selected
+write_surfaces(0);}
             tooltip {rename surface} xywh {200 395 60 30} labelsize 12
           }
         }
@@ -1528,7 +1528,7 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Vertex
+            label Vertex open
             xywh {65 375 255 30} labelsize 12 align 4
           } {
             Fl_Button auxptcolor {
@@ -1550,7 +1550,7 @@ mwtb->redraw();}
               label {size:}
               callback {mwtb->auxGrid->size(Vertex,o->value());
 mwtb->redraw();}
-              xywh {205 380 55 20} labelsize 12 maximum 1e+06 step 5 value 50
+              xywh {205 380 55 20} labelsize 12 maximum 1e+06 step 5 value 5
             }
             Fl_Choice auxptstyle {
               xywh {260 380 50 20} down_box BORDER_BOX labelsize 10 align 8
@@ -1599,7 +1599,7 @@ mwtb->redraw();}
               label {size:}
               callback {mwtb->auxGrid->size(Cnnx,o->value());
 mwtb->redraw();}
-              xywh {205 405 55 20} labelsize 12 maximum 10000 step 5 value 100
+              xywh {205 405 55 20} labelsize 12 maximum 10000 step 5 value 5
             }
             Fl_Choice auxlinestyle {open
               xywh {260 405 50 20} down_box BORDER_BOX labelsize 12 align 8
