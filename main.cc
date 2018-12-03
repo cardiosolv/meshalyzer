@@ -570,6 +570,7 @@ main( int argc, char *argv[] )
     control.read_threaded->clear( );
 
   // deal with command line files specified
+  int mshz_pos=-1;
   for ( int i=model_index+1; i<argc; i++ ) {
     if ( argv[i][0] == '-' ) 
       continue;
@@ -587,7 +588,7 @@ main( int argc, char *argv[] )
     else if ( strstr( argv[i], ".xfrm" ) != NULL )
       win.trackballwin->trackball.read( argv[i] );
     else if ( strstr( argv[i], ".mshz" ) != NULL )
-      control.restore_state( argv[i] );
+      mshz_pos = i;
     else if ( strstr( argv[i], ".vpts" )    != NULL ||
               strstr( argv[i], ":vector/" ) != NULL )
       vectordata = !win.trackballwin->getVecData(control.tmslider, argv[i]);
@@ -600,6 +601,7 @@ main( int argc, char *argv[] )
     else
       win.trackballwin->get_data(argv[i], control.tmslider );
   }
+  if( mshz_pos >= 0 ) control.restore_state( argv[mshz_pos] );
 
   win.trackballwin->cplane->calc_intercepts();
   win.trackballwin->show();
