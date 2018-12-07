@@ -81,8 +81,7 @@ winny->size_range(50,50,1600,1600,5,5,1);} {}
   } {}
 }
 
-class Controls {open
-} {
+class Controls {} {
   decl {friend class ObjProps;} {private local
   }
   Function {Controls()} {open
@@ -771,7 +770,7 @@ cc=pickcolor(VolEle, "Voxele colour",cc);}
         }
       }
       Fl_Group regiondisp {
-        label Region
+        label Region open
         xywh {10 120 330 145} box ENGRAVED_BOX align 17
       } {
         Fl_Light_Button vertbut {
@@ -856,7 +855,7 @@ objprops[Cable]->win->show();}
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open selected
+          label Highlight open
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1931,7 +1930,7 @@ hdfreadbut->deactivate();
 \#endif
 memset( objprops, 0, sizeof(ObjProps*)*maxobject );} {}
   }
-  Function {outputwin( TBmeshWin *w )} {open return_type void
+  Function {outputwin( TBmeshWin *w )} {return_type void
   } {
     code {mwtb = w;
 if( mwtb->model->twoD() ) {
@@ -2088,8 +2087,7 @@ if( xfn.rfind(".mshz") == string::npos ) xfn += ".mshz";
 ofstream mshzf( xfn.c_str() );
 save_state( mshzf );} {}
   }
-  Function {save_state( ostream &mshzf, bool save_flyby = true )} {open
-  } {
+  Function {save_state( ostream &mshzf, bool save_flyby = true )} {} {
     code {mshzf << "TRACKBALL ======" << endl;
 mwtb->trackball.save(mshzf);
 mshzf << "CLIPPING ======" << endl;
@@ -2305,8 +2303,7 @@ if( save_flyby ) {
   SAVE_WIDGET( mshzf, flyby->fb_tmadv );
 }} {}
   }
-  Function {restore_state( const char* fname = NULL)} {open
-  } {
+  Function {restore_state( const char* fname = NULL)} {} {
     code {const char *fn;
 
 if( fname==NULL ) {
@@ -2319,8 +2316,7 @@ if( fname==NULL ) {
 ifstream mfin(fn);
 restore_state( mfin );} {}
   }
-  Function {restore_state(istream &mshzf)} {open
-  } {
+  Function {restore_state(istream &mshzf)} {} {
     code {int BUFLEN=1024;
 char buf[BUFLEN];
 float r, g, b, a;
@@ -2738,7 +2734,8 @@ class ProgInfo {} {
   }
 }
 
-class ObjProps {} {
+class ObjProps {open
+} {
   Function {ObjProps( TBmeshWin* wtb, Object_t o ):mwtb(wtb),obj(o)} {open
   } {
     Fl_Window win {open
@@ -2804,10 +2801,10 @@ delete sel;}
         xywh {5 205 125 30} color 133
       }
     }
-    code {string lab = objnames[obj];
-win->label(lab.c_str());
+    code {win->label(objnames[obj]);
 nreg = mwtb->contwin->reglist->nitems();
-update();} {}
+update();} {selected
+    }
   }
   decl {TBmeshWin *mwtb;} {private local
   }

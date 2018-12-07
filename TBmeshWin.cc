@@ -196,7 +196,7 @@ void TBmeshWin :: draw()
   // moving the trackball
   Display_t actual_disp;
   if ( disp==asTetMesh && Fl::event_state(FL_BUTTON1|FL_BUTTON2|FL_BUTTON3) )
-    actual_disp = asSurface;
+    actual_disp = disp; //asSurface;
   else
     actual_disp = disp;
 
