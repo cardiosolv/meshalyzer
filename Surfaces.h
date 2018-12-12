@@ -9,8 +9,9 @@
 
 
 struct vtx_z {
-  int i;       //!< point index
+  int   i;     //!< point index
   float z;     //!< z depth
+  short s;     //!< surface
 };
 
 #define  CSET(V,C,A)  V[0]=C;V[1]=C;V[2]=C;V[3]=A;
@@ -28,15 +29,18 @@ class Surfaces
     inline void filled( bool a ){ _filled=a; }
     inline bool outline( void ){  return _outline; }
     inline void outline( bool a ){ _outline=a; }
-    void get_vert_norms( GLfloat *vn );
+    void get_vert_norms( GLfloat *&vn ){ vn = _vertnorm; }
     void determine_vert_norms( PPoint & );
     SurfaceElement*& ele( int a ){ return _ele[a]; }
     void addele(int a,SurfaceElement*e){_ele[a]=e;}
     int  num() const {return _ele.size();}
     void num(int a){_ele.resize(a);}
     vector<SurfaceElement*>& ele(){return _ele;}
-    void draw(GLfloat*,Colourscale*,DATA_TYPE*,int,
-              dataOpac*,const GLfloat*,bool sort=false);
+    void draw(GLfloat*,Colourscale*,DATA_TYPE*,
+              dataOpac*,const GLfloat*);
+    void draw_elem(int, GLfloat*,Colourscale*,DATA_TYPE*,
+              dataOpac*,const GLfloat*, bool &);
+    void sort( int, bool, short s=0 );
     void   register_vertices( vector<bool>& );
     void   label( string s ){ _label=s; }
     string label( void ) { return _label; }
@@ -53,6 +57,9 @@ class Surfaces
     GLfloat shiny( void ) { return _shiny; }
     GLfloat backlight( void ) { return _backlight; }
     void set_material( void );
+    vector<vtx_z>::iterator zl_begin() { return _zlist.begin(); }
+    vector<vtx_z>::iterator zl_end() { return _zlist.end(); }
+    int  zl_sz(void){ return _zlist.size();}
   protected:
     PPoint   *_p;
     GLfloat  _fillcolor[4]    = { 1., 0.5, 0.1, 1 };
@@ -68,9 +75,9 @@ class Surfaces
     GLfloat  _specular[4] = {0.75,0.75,0.75,1.};
     GLfloat  _shiny       = {80.};
     GLfloat  _backlight   = 0.5;
-    vector<vtx_z> _zlist;
     int      _oldstride   = 0;
     GLfloat  _oldmvp[4]{};
+    vector<vtx_z> _zlist;
 };
 
 #endif

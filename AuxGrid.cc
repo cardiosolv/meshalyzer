@@ -536,9 +536,10 @@ AuxGrid :: draw( int t )
     }
     
     GLfloat r[]={0,1,1,1};
+    m->surface(0)->sort(1,false);
     m->surface(0)->draw( color(SurfEle), &cs, 
 	          (_indexer->_data && _datafied[SurfEle]) ? _indexer->_data : NULL,
-                                  1, NULL, m->vertex_normals(m->surface(0)) );
+                                  NULL, m->vertex_normals(m->surface(0)) );
     glPopAttrib();
   }
 

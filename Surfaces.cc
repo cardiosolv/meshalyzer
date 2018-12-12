@@ -63,18 +63,6 @@ void Surfaces :: outlinecolor( float r, float g, float b, float a )
 }
 
 
-/** get the vertex normals for the surface
- *
- * \param vm vector of normals for all points
- *
- */
-void Surfaces::get_vert_norms( GLfloat *vn )
-{
-  for ( int i=0; i<_vert.size(); i++  ) 
-    memcpy( vn+_vert[i]*3, _vertnorm+i*3, 3*sizeof(GLfloat) );
-}
-
-
 /** set the vertex normals for the surface
  *
  * \param pt all points
@@ -106,6 +94,9 @@ void Surfaces::determine_vert_norms( PPoint& pt )
     }
   }
 
+  _vertnorm = tvn;
+
+      /*
   _vert.resize(numvert);
   _vertnorm = new GLfloat[3*numvert];
   numvert = 0;
@@ -116,29 +107,22 @@ void Surfaces::determine_vert_norms( PPoint& pt )
     }
   }
   delete tvn;
+  */
 }
 
 
-/** draw the surface
- *  \param fill     fill colour
- *  \param cs       colour scale
- *  \param dat      nodal data (NULL for nodata display)
- *  \param stride   draw every n'th element
- *  \param dataopac data opacity
- *  \param ptnrml   vertex normals (NULL for none)
- *  \param sort     draw from back to front
+/**
+ * @brief sort elements by z depth
+ *
+ * @param stride element drawing stride
+ * @param sort   do we really sort?
+ * @param s      surface number
  */
-void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
-                     int stride, dataOpac* dataopac, const GLfloat*ptnrml,
-                     bool sort )
+void Surfaces::sort( int stride, bool sort, short s )
 {
-  GLboolean lightson;
-  glGetBooleanv( GL_LIGHTING, &lightson );
-
   if( stride != _oldstride ) _zlist.resize( (_ele.size()+stride-1)/stride );
 
   if( sort ) {
-
     // build modelview projection matrix - only compute row to determine z
     GLfloat proj[16], modview[16], mvp[4]{};
     glGetFloatv(GL_PROJECTION_MATRIX, proj );
@@ -152,13 +136,12 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
 #pragma omp parallel for 
       for ( int i=0; i<_ele.size(); i+=stride ){
         const PPoint *pts = _ele[i]->pt();
-        _zlist[i/stride]  = {i,0};
+        _zlist[i] = {i,0,s};
         const int *nn     = _ele[i]->obj();
         for( int k=0; k<3; k++ )
-          _zlist[i/stride].z += z_proj(mvp,pts->pt(nn[k]));
+          _zlist[i].z += z_proj(mvp,pts->pt(nn[k]));
       }
-      std::sort( _zlist.begin(), _zlist.end(), 
-              [](const vtx_z a, const vtx_z b){return a.z>b.z;} );
+      std::sort( _zlist.begin(), _zlist.end(),[](const vtx_z a, const vtx_z b){return a.z<b.z;} );
     }
 
   } else if( stride != _oldstride )
@@ -166,19 +149,73 @@ void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
       _zlist[i/stride].i = i;
 
   _oldstride = stride;
+}
+
+/** draw an element in the surface
+ * \param  ele      the element index
+ *  \param fill     fill colour
+ *  \param cs       colour scale
+ *  \param dat      nodal data (NULL for nodata display)
+ *  \param dataopac data opacity
+ *  \param ptnrml   vertex normals (NULL for none)
+ *  \param tris[inout] drawing tringles? else quads
+ *
+ *  \pre the elements need to have been sorted by calling ::sort()
+ */
+void Surfaces::draw_elem( int ele, GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
+                     dataOpac* dataopac, const GLfloat*ptnrml, bool &tris )
+{
+  if( _ele[ele]->ptsPerObj() == 3 ) {
+    if( !tris ) {
+      glEnd();
+      tris = true;
+      glBegin(GL_TRIANGLES);
+    }
+  } else if( tris ) {
+    glEnd();
+    tris = false;
+    glBegin(GL_QUADS);
+  }
+  _ele[ele]->draw( 0, fill, cs, dat, dataopac, ptnrml, ptnrml!=NULL );
+}
+
+
+
+/** draw the surface
+ *  \param fill     fill colour
+ *  \param cs       colour scale
+ *  \param dat      nodal data (NULL for nodata display)
+ *  \param dataopac data opacity
+ *  \param ptnrml   vertex normals (NULL for none)
+ *  \param sort     draw from back to front
+ *
+ *  \pre the elements need to have been sorted by calling ::sort()
+ */
+void Surfaces::draw( GLfloat *fill, Colourscale *cs, DATA_TYPE *dat,
+                     dataOpac* dataopac, const GLfloat*ptnrml )
+{
+  GLboolean lightson;
+  glGetBooleanv( GL_LIGHTING, &lightson );
 
   glBegin(GL_TRIANGLES);
-  for ( auto a :_zlist ) 
-    if( _ele[a.i]->ptsPerObj() == 3 )
-      _ele[a.i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
-  glEnd();
-  glBegin(GL_QUADS);
-  for ( auto a :_zlist ) 
-    if( _ele[a.i]->ptsPerObj() == 4 ){
-      _ele[a.i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+  bool tris = true;
+  for ( auto &a :_zlist ) {
+    if( _ele[a.i]->ptsPerObj() == 3 ) {
+      if( !tris ) {
+        glEnd();
+        tris = true;
+        glBegin(GL_TRIANGLES);
+      }
+    } else if( tris ) {
+      glEnd();
+      tris = false;
+      glBegin(GL_QUADS);
     }
+    _ele[a.i]->draw( 0, fill, cs, dat, dataopac, ptnrml, lightson );
+  }
   glEnd();
 }
+
 
 /** redraw elements through which the branch cut passes with flat shading 
  *
@@ -242,7 +279,7 @@ Surfaces :: to_file( ofstream &of )
 {
     of << num() << "  " << label() << endl;
  
-    for( auto e : _ele ) {
+    for( auto &e : _ele ) {
       const int* n=e->obj();
       if( e->ptsPerObj()==3 ) 
         of << "Tr";

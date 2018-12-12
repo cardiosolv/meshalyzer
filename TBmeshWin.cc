@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 #include <set>
+#include <algorithm>
+#include <vector>
 #ifdef __WIN32__
 #  include <GL/glext.h>
 #endif
@@ -262,21 +264,33 @@ void TBmeshWin :: draw()
 
   // draw surfaces
   model->pt.setVis( true );
+  vector<vtx_z> trans_elems;
   for ( int s=0; s<model->numSurf(); s++ ) {
 
-    Surfaces *sf = model->surface(revDrawOrder ? model->numSurf()-s-1 : s);
+    short sindex = revDrawOrder ? model->numSurf()-s-1 : s;
+    Surfaces *sf = model->surface(sindex);
 
     if ( !sf->visible() ) continue;
 
     sf->set_material();
 
     if ( sf->filled() && model->numSurf() ) {
-      draw_surfaces(sf);
+      if( draw_surfaces(sf, sindex) ) {
+        // merge elements into list keeping order
+        int te_sz = trans_elems.size();
+        trans_elems.resize( te_sz+sf->zl_sz() );
+        std::copy( sf->zl_begin(), sf->zl_end(), trans_elems.begin()+te_sz );
+        std::inplace_merge( trans_elems.begin(), trans_elems.begin()+te_sz, 
+                    trans_elems.end(), 
+                    [](const vtx_z a, const vtx_z b){return a.z<b.z;} ); 
+      }
     }
     if ( sf->outline() && model->numSurf() ) {
       draw_elements(sf);
     }
   }
+  draw_sorted_elements( trans_elems );
+
   draw_iso_lines();
 
 
@@ -427,8 +441,18 @@ void TBmeshWin::draw_iso_surfaces()
 }
 
 
-// draw filled surface elements
-void TBmeshWin::draw_surfaces(Surfaces* sf)
+
+/**
+ * @brief if transparency, sort elements by z-depth
+ *        if opaque, draw the surface
+ *
+ * @param sf     surface
+ * @param sindex index into surface list of \p sf
+ *
+ * @return whether surface contains opaque elements
+ */
+bool
+TBmeshWin::draw_surfaces(Surfaces* sf, short sindex)
 {
   int stride = 1;
 
@@ -445,11 +469,54 @@ void TBmeshWin::draw_surfaces(Surfaces* sf)
                sf->fillcolor()[3]<OPAQUE_LIMIT;
   if( on_tr ) translucency(true);
 
-  sf->draw( sf->fillcolor(), cs, showData?data:NULL, stride, 
+  sf->sort( stride, on_tr, sindex );
+  if( !on_tr ) 
+    sf->draw( sf->fillcolor(), cs, showData?data:NULL,
  		dataopac->dop+Surface, 
-		facetshading?NULL:model->vertex_normals(sf), on_tr );
+		facetshading?NULL:model->vertex_normals(sf) );
 
-  if ( on_tr ) translucency(false);
+  if ( on_tr ) 
+    translucency(false);
+
+  glPopAttrib();
+  return on_tr;
+}
+
+
+/**
+ * @brief Draw elements which have been sorted by z depth
+ *
+ * @param elems sorted element list
+ */
+void TBmeshWin::draw_sorted_elements( vector<vtx_z> &elems)
+{
+  if( !elems.size() ) return;
+
+  glPushAttrib(GL_POLYGON_BIT);
+  glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+  GLboolean lightson; 
+  glGetBooleanv( GL_LIGHTING, &lightson );
+
+  bool showData=datadst&Surface_flg && have_data!=NoData; 
+  translucency( true );
+  bool tris = true;
+  int prev_s = -1;
+  const GLfloat *vn=NULL;
+  Surfaces* sf;
+
+  glBegin(GL_TRIANGLES);
+  for( auto &e : elems ) {
+    if( e.s != prev_s ) {
+      sf =  model->surface(e.s);
+      prev_s = e.s;
+      sf->set_material();
+      vn = facetshading?NULL:model->vertex_normals(sf); 
+    }
+    sf->draw_elem( e.i, sf->fillcolor(), cs, showData?data:NULL,
+ 		dataopac->dop+Surface, vn, tris );
+  }
+  glEnd();
+  translucency( false );
   glPopAttrib();
   glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 }
@@ -468,9 +535,11 @@ void TBmeshWin::draw_elements(Surfaces* sf)
 
   if ( renderMode == GL_RENDER )
     sf->draw( sf->outlinecolor(), cs, datacol?data:NULL,
-              model->stride(SurfEle), dataopac->dop+SurfEle, NULL	);
+              dataopac->dop+SurfEle, NULL	);
   else
     sf->register_vertices( ptDrawn );
+
+  glPopAttrib();
 }
 
 

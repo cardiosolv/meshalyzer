@@ -42,47 +42,48 @@ class Model
     int          add_region_surfaces( void );
     int          add_cnnx_from_elem( string );
     inline int   reg_first( int s, Object_t t ){return _region[s]->first(t); }
-    Surfaces* surface(int s){ return _surface[s]; }
-	void      surfKill( int s );
-    RRegion*   region(int s){ return _region[s]; }
+    Surfaces*    surface(int s){ return _surface[s]; }
+	void         surfKill( int s );
+    RRegion*     region(int s){ return _region[s]; }
     const GLfloat*  pts(int t=0)const {return pt.pt(0);} // in future, pts move
     int    number( Object_t );
     const int*   volEle(int a=0)   const { return _vol[a]->obj(0); }
-    int    numVol(){ return _numVol; }
+    int          numVol(){ return _numVol; }
     SurfaceElement*  element(int s,int a=0) const{ return _surface[s]->ele(a); }
     const int*   cable(int a=0)   const { return _cable->obj(a); }
     const int*   cnnx(int a=0)    const { return _cnnx->obj(a); }
-    float  maxdim()         const { return _maxdim; }
-    void   draw_tet( int, bool, DATA_TYPE* );
-    void   hilight( HiLiteInfoWin*, int * );
-    void   showobj( Object_t obj, bool *, bool f );
-    bool   showobj( Object_t o, int s ) {return _region[s<0?0:s]->show(o);}
-    inline bool visibility( int s ){return _region[s<0?0:s]->visible();}
+    float        maxdim()         const { return _maxdim; }
+    void         draw_tet( int, bool, DATA_TYPE* );
+    void         hilight( HiLiteInfoWin*, int * );
+    void         showobj( Object_t obj, bool *, bool f );
+    bool         showobj( Object_t o, int s ) {return _region[s<0?0:s]->show(o);}
+    inline bool  visibility( int s ){return _region[s<0?0:s]->visible();}
     inline GLfloat opacity( int s )
                          { return (_region[s<0?0:s]->get_color(Surface))[3]; }
     GLfloat* get_color( Object_t obj, int s=0 );
-    void  set_color( Object_t obj, int s, float r, float g, float b, float a );
-    void  set_mat( int s, float d, float sp, float sh, float b=0.5 );
-    void  get_mat( int s, float &d, float &sp, float &sh, float &b );
-    void  visibility( int, bool a );
-    void  opacity( int s, float opac );
-    void  randomize_color( Object_t obj );
-    void  hilight_info( HiLiteInfoWin*, int*, DATA_TYPE *d=NULL );
-    void  stride( Object_t o, int s ){_outstride[o]=s;}
-    int   stride( Object_t o ) const {return _outstride[o]; }
-    const GLfloat* pt_offset() const {return pt.offset();}
-    bool  base1() const {return _base1; }
-    const GLfloat* vertex_normals(Surfaces*);
-    int   maxtm(){ return _numtm-1 ; }
-    void  threeD( Object_t o, int r, bool b ){ _region[r<0?0:r]->threeD(o,b); }
-    bool  threeD( Object_t o, int r ){ return _region[r<0?0:r]->threeD(o); }
-    void  size( Object_t o, int r, float s ){ _region[r<0?0:r]->size(o, s); }
-    float size( Object_t o, int r ){ return _region[r<0?0:r]->size(o); }
-    float max_size( Object_t o );
-    string file()const{return _file;}
-    bool  twoD(){return _2D; }
-    Quaternion syncRefRot( void ) {return _refRot; }
-    void       syncRefRot( const Quaternion &q  ) { _refRot = q; }
+    void         set_color( Object_t obj, int s, float r, float g, float b, float a );
+    void         set_mat( int s, float d, float sp, float sh, float b=0.5 );
+    void         get_mat( int s, float &d, float &sp, float &sh, float &b );
+    void         visibility( int, bool a );
+    void         opacity( int s, float opac );
+    void         randomize_color( Object_t obj );
+    void         hilight_info( HiLiteInfoWin*, int*, DATA_TYPE *d=NULL );
+    void         stride( Object_t o, int s ){_outstride[o]=s;}
+    int          stride( Object_t o ) const {return _outstride[o]; }
+    const        GLfloat* pt_offset() const {return pt.offset();}
+    bool         base1() const {return _base1; }
+    const        GLfloat* vertex_normals(Surfaces*);
+    const        GLfloat* elem_vertex_normals(Surfaces*, int e);
+    int          maxtm(){ return _numtm-1 ; }
+    void         threeD( Object_t o, int r, bool b ){ _region[r<0?0:r]->threeD(o,b); }
+    bool         threeD( Object_t o, int r ){ return _region[r<0?0:r]->threeD(o); }
+    void         size( Object_t o, int r, float s ){ _region[r<0?0:r]->size(o, s); }
+    float        size( Object_t o, int r ){ return _region[r<0?0:r]->size(o); }
+    float        max_size( Object_t o );
+    string       file()const{return _file;}
+    bool         twoD(){return _2D; }
+    Quaternion   syncRefRot( void ) {return _refRot; }
+    void         syncRefRot( const Quaternion &q  ) { _refRot = q; }
 
     PPoint             pt;
     Connection*      _cnnx=NULL;

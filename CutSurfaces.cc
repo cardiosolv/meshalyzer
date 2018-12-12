@@ -5,7 +5,7 @@
 
 const int ADD_INC = 1000;
 
-CutSurfaces::CutSurfaces() : _norm(NULL),_ptarr(NULL), _interp(NULL)
+CutSurfaces::CutSurfaces() 
 {
   fillcolor( 1., 0, 0.1 );
   outlinecolor( 0.125, 0.8, 0.7 );

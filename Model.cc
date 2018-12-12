@@ -585,9 +585,6 @@ void Model::find_max_dim_and_bounds()
       if ( fabs(p[i+j]-offset[j])>_maxdim ) 
         _maxdim = fabs(p[i+j]-offset[j]);
       
-  if( _vertnrml != NULL ) delete _vertnrml;
-  _vertnrml= new GLfloat[3*pt.num()];
-
   int i=0;
   for( ; i<pt.num(); i++ )
     if( pt.pt(i)[2] )

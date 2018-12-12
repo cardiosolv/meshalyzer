@@ -31,9 +31,9 @@ class CutSurfaces : public Surfaces
     }
     GLfloat* norm( int e ){ return _norm+3*e; }
   protected:
-    GLfloat      **_ptarr;
-    GLfloat      *_norm;
-    Interpolator<DATA_TYPE> **_interp;
+    GLfloat      **_ptarr = NULL;
+    GLfloat      *_norm   = NULL;
+    Interpolator<DATA_TYPE> **_interp = NULL;
 };
 
 #endif

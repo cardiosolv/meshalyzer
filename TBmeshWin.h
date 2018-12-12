@@ -192,8 +192,9 @@ class TBmeshWin:public Fl_Gl_Tb_Window
 
     bool	  lightson = true;				// light or not
     void      illuminate(GLfloat);			// light the model
-    void      draw_surfaces(Surfaces *);
+    bool      draw_surfaces(Surfaces *, short);
     void      draw_elements(Surfaces *);
+    void      draw_sorted_elements( vector<vtx_z> &elems );
     void      draw_cables(RRegion *);
     void      draw_cnnx(RRegion *);
     void      draw_vertices(RRegion *);
