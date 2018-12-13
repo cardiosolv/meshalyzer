@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0400
+version 1.0304
 header_name {.h}
 code_name {.cc}
 decl {\#include <set>} {public local
@@ -46,42 +46,46 @@ class TimeLink {open
   Function {TimeLink( set<int>& lnks ):linkages_(lnks),msqId_(0),MSQ_KEY_PATH("/home")} {open
   } {
     Fl_Window window {
-      label TimeLink open
-      xywh {798 119 290 410} type Double box ENGRAVED_BOX color 27 visible
+      label TimeLink open selected
+      xywh {1494 178 290 440} type Double box ENGRAVED_BOX color 27 visible
     } {
       Fl_Group {} {open
-        xywh {10 10 270 195} box GTK_UP_BOX color 14 align 65
+        xywh {10 43 270 195} box GTK_UP_BOX color 14 align 65
       } {
-        Fl_Browser meshList {selected
-          xywh {20 25 250 105} type Hold selection_color 88
+        Fl_Browser meshList {
+          xywh {20 58 250 105} type Hold selection_color 88
         }
         Fl_Button {} {
           label {link selected}
           callback {link();}
-          xywh {55 140 170 25} color 6
+          xywh {55 173 170 25} color 6
         }
         Fl_Button {} {
           label refresh
           callback {list_mesh_pids();}
-          xywh {55 170 170 25} color 19
+          xywh {55 203 170 25} color 19
         }
       }
       Fl_Group {} {open
-        xywh {10 215 270 155} box GTK_UP_BOX color 10
+        xywh {10 248 270 155} box GTK_UP_BOX color 10
       } {
         Fl_Browser linkList {
-          xywh {15 220 250 110} type Multi selection_color 1
+          xywh {15 253 250 110} type Multi selection_color 1
         }
         Fl_Button {} {
           label {Unlink selected}
           callback {unlink();}
-          xywh {55 335 170 25}
+          xywh {55 368 170 25}
         }
       }
       Fl_Button {} {
         label close
         callback {window->hide();}
-        xywh {45 375 190 25} box GTK_UP_BOX
+        xywh {45 408 190 25} box GTK_UP_BOX
+      }
+      Fl_Output pid {
+        label PID
+        xywh {87 11 115 24} labelfont 1 labelcolor 7
       }
     }
     code {CreateMessageQueue();} {}

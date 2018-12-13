@@ -50,6 +50,9 @@ decl {\#define MAX_INIT_VECS 200000} {private local
 decl {\#include "Model.h"} {public local
 }
 
+decl {\#include <string>} {private local
+}
+
 decl {\#include <set>} {private local
 }
 
@@ -88,7 +91,7 @@ class Controls {} {
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1526 202 350 645} type Double box UP_BOX
+      xywh {1249 202 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -236,8 +239,11 @@ if( fn != NULL ){
           MenuItem {} {
             label Link
             callback {mwtb->tmLink->list_mesh_pids();
-mwtb->tmLink->window->show();}
+mwtb->tmLink->window->show();
+mwtb->tmLink->pid->value(std::to_string(getpid()).c_str());} selected
             xywh {0 0 30 20} divider
+            code0 {\#include <sys/types.h>}
+            code1 {\#include <unistd.h>}
           }
           MenuItem {} {
             label Quit
@@ -2803,8 +2809,7 @@ delete sel;}
     }
     code {win->label(objnames[obj]);
 nreg = mwtb->contwin->reglist->nitems();
-update();} {selected
-    }
+update();} {}
   }
   decl {TBmeshWin *mwtb;} {private local
   }
