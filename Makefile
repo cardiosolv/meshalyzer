@@ -1,8 +1,8 @@
 HOSTMACHINE := $(shell uname)
 include make.conf
 
-#VTK_LIBDIR     =/usr/lib64
-#VTK_INCDIR     =/usr/include/vtk-8.1
+VTK_LIBDIR     =/usr/lib64
+VTK_INCDIR     =/usr/include/vtk-8.1
 
 FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)
@@ -59,7 +59,7 @@ CPPFLAGS += -DLOGGING_ENABLED
 endif
 
 #the files in OS_files contain OSMESA dependent clauses
-OS_files= main.o Frame.o
+OS_files:=$(patsubst %.cc,%.o,$(shell grep -l OSMESA *.cc))
 OS_OBJS=$(filter-out $(OS_files),$(OBJS)) $(OS_files:.o=_os.o)
 
 all: meshalyzer
