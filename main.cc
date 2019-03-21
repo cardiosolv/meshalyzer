@@ -1,4 +1,3 @@
-//#include <GLee.h>
 #include "trimesh.h"
 #include "isosurf.h"
 #include <string>

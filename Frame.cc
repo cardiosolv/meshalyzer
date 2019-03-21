@@ -1,13 +1,24 @@
-#include "GLee.h"
-#include "Frame.h"
 
 #ifdef OSMESA
 #include <GL/osmesa.h>
-#endif 
+#else
 #define COUT_ERROR(A) if(gle==A)cout<<#A<<endl;
+#include <GL/glew.h>
+static bool initglew = false;
+#endif 
 
+#include "Frame.h"
 Frame :: Frame( TBmeshWin *t ) : _tbwm(t)
 {
+#ifndef OSMESA
+  if( !initglew ) {
+    initglew = true;
+    GLenum err = glewInit();
+    if (GLEW_OK != err) {
+      cerr << "GLEW problem -- aborting!" << endl;
+    }
+  }
+#endif
 }
 
 

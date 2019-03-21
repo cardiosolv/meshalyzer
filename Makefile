@@ -1,8 +1,8 @@
 HOSTMACHINE := $(shell uname)
 include make.conf
 
-VTK_LIBDIR     =/usr/lib64
-VTK_INCDIR     =/usr/include/vtk-8.1
+#VTK_LIBDIR     =/usr/lib64
+#VTK_INCDIR     =/usr/include/vtk-8.1
 
 FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)
@@ -40,7 +40,7 @@ endif
   LIB_EXT   = .so
 endif
 
-COMMON_LIBS  = -lpng -lpthread -lm -lz $(LIB_HDF5) 
+COMMON_LIBS  = -lGLEW -lpng -lpthread -lm -lz $(LIB_HDF5) 
 LIBS         =  $(FLTK_LD_FLAGS) $(COMMON_LIBS) 
 CPPFLAGS     =  $(FLTK_INC) $(COMMON_INC)
 CXXFLAGS     = -std=c++11 -g -O$(DEBUG_LEVEL) $(OMP_FLAG) -MMD -DNOMINMAX  
