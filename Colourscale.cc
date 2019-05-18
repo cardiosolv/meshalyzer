@@ -1,5 +1,7 @@
 #include "Colourscale.h"
 #include <iostream>
+#include <vector>
+
 Colourscale :: Colourscale( int ts, CScale_t tcs ) : scaletype(tcs)
 {
   size( ts );
@@ -363,6 +365,22 @@ void Colourscale :: scale( CScale_t cs )
         cmap[i][0] = ((float) viridis_light[INTERP(i,n-1,255)][0] / 255.0);
         cmap[i][1] = ((float) viridis_light[INTERP(i,n-1,255)][1] / 255.0);
         cmap[i][2] = ((float) viridis_light[INTERP(i,n-1,255)][2] / 255.0);
+      }
+      break;
+    case CS_DISTINCT:
+      // cheap Latin Hypercube Sampling of RGB colorspace
+      srand(1);
+      const float min_br = 0.3;
+      const float max_br = 1.;
+      vector<float> rgb[3];
+      for ( i = 0; i < n; i++ ) 
+        rgb[0][i] = rgb[1][i] = rgb[2][i] = min_br + (max_br-min_br)/n*(i+0.5);
+      for ( i=0; i<n; i++ ) {
+        for( int j=0; j<3; j++ ) {
+          int ri = rand()%(n-i);
+          cmap[i][j] = rgb[j][ri];
+          rgb[j].erase(rgb[j].begin()+ri);
+        }
       }
       break;
   }

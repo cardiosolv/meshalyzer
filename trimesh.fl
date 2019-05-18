@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0305
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -84,14 +84,15 @@ winny->size_range(50,50,1600,1600,5,5,1);} {}
   } {}
 }
 
-class Controls {} {
+class Controls {open
+} {
   decl {friend class ObjProps;} {private local
   }
   Function {Controls()} {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1249 202 350 645} type Double box UP_BOX
+      xywh {1413 160 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -240,7 +241,7 @@ if( fn != NULL ){
             label Link
             callback {mwtb->tmLink->list_mesh_pids();
 mwtb->tmLink->window->show();
-mwtb->tmLink->pid->value(std::to_string(getpid()).c_str());} selected
+mwtb->tmLink->pid->value(std::to_string(getpid()).c_str());}
             xywh {0 0 30 20} divider
             code0 {\#include <sys/types.h>}
             code1 {\#include <unistd.h>}
@@ -776,7 +777,7 @@ cc=pickcolor(VolEle, "Voxele colour",cc);}
         }
       }
       Fl_Group regiondisp {
-        label Region open
+        label Region
         xywh {10 120 330 145} box ENGRAVED_BOX align 17
       } {
         Fl_Light_Button vertbut {
@@ -857,7 +858,7 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
@@ -1807,7 +1808,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
         }
         Fl_Choice cstype {
-          label {colour scale}
+          label {colour scale} open
           xywh {230 500 105 25} down_box BORDER_BOX labelsize 10 align 2
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
@@ -1881,6 +1882,12 @@ mwtb->redraw();}
             callback {mwtb->cs->scale(CS_VIRIDIS_LIGHT);
               mwtb->redraw();}
             tooltip {Viridis Bright} image {viridis_light.xpm} xywh {20 20 100 20}
+          }
+          MenuItem {} {
+            label Distinct
+            callback {mwtb->cs->scale(CS_DISTINCT);
+              mwtb->redraw();} selected
+            xywh {0 0 33 21}
           }
         }
         Fl_Button {} {
@@ -2322,7 +2329,8 @@ if( fname==NULL ) {
 ifstream mfin(fn);
 restore_state( mfin );} {}
   }
-  Function {restore_state(istream &mshzf)} {} {
+  Function {restore_state(istream &mshzf)} {open
+  } {
     code {int BUFLEN=1024;
 char buf[BUFLEN];
 float r, g, b, a;
@@ -2588,8 +2596,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
       mwtb->auxGrid->color( SurfEle, c );
       mshzf >> c[0] >> c[1] >> c[2] >> c[3];
       mwtb->auxGrid->color( VolEle, c );
-      mshzf.getline( buf,BUFLEN );
     }
+    mshzf.getline( buf,BUFLEN );
     continue;
   }
   TEST_VAR( mwtb->isosurfwin->isolineVal0, var, val )
@@ -2740,11 +2748,10 @@ class ProgInfo {} {
   }
 }
 
-class ObjProps {open
-} {
+class ObjProps {} {
   Function {ObjProps( TBmeshWin* wtb, Object_t o ):mwtb(wtb),obj(o)} {open
   } {
-    Fl_Window win {open
+    Fl_Window win {
       xywh {1044 451 220 245} type Single box ENGRAVED_BOX hide
     } {
       Fl_Check_Button thrD {
@@ -2807,7 +2814,7 @@ delete sel;}
         xywh {5 205 125 30} color 133
       }
     }
-    code {win->label(objnames[obj]);
+    code {win->copy_label(objnames[obj]);
 nreg = mwtb->contwin->reglist->nitems();
 update();} {}
   }
