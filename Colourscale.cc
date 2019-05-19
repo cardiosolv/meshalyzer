@@ -370,7 +370,7 @@ void Colourscale :: scale( CScale_t cs )
     case CS_DISTINCT:
       // cheap Latin Hypercube Sampling of RGB colorspace
       srand(1);
-      const float min_br = 0.2;
+      const float min_br = 0.1;
       const float max_br = 1.;
       vector<float> rgb[3];
       for ( i = 0; i < 3; i++ ) 
