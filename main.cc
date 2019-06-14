@@ -580,25 +580,33 @@ main( int argc, char *argv[] )
         altdir += argv[i];
         win.trackballwin->add_surface(altdir.c_str());
       }
-    } else if ( strstr( argv[i], ".datH5:nodal/" ) != NULL )
+    } else if ( strstr( argv[i], ".datH5:nodal/" ) != NULL ) {
       win.trackballwin->get_data(argv[i], control.tmslider );
-    else if ( strstr( argv[i], ".dat" )    != NULL )
+      control.add_recent(argv[i],HDF5);
+    } else if ( strstr( argv[i], ".dat" )    != NULL ) {
       win.trackballwin->get_data(argv[i]);
-    else if ( strstr( argv[i], ".xfrm" ) != NULL )
+      control.add_recent(argv[i],ASCII);
+    } else if ( strstr( argv[i], ".xfrm" ) != NULL )
       xfrm_pos = i;
     else if ( strstr( argv[i], ".mshz" ) != NULL )
       mshz_pos = i;
     else if ( strstr( argv[i], ".vpts" )    != NULL ||
-              strstr( argv[i], ":vector/" ) != NULL )
+              strstr( argv[i], ":vector/" ) != NULL ){
       vectordata = !win.trackballwin->getVecData(control.tmslider, argv[i]);
-    else if ( strstr( argv[i], ".pts_t" )    != NULL  ||
+      control.add_recent(argv[i],VECT);
+    } else if ( strstr( argv[i], ".pts_t" )    != NULL  ||
               strstr( argv[i], ":auxGrid/" ) != NULL ) {
-      if( !win.trackballwin->readAuxGrid( control.tmslider, argv[i]) )
+      if( !win.trackballwin->readAuxGrid( control.tmslider, argv[i]) ) {
         control.auxgridgrp->activate();
-    } else if ( strstr( argv[i], ".dynpt" )  != NULL )
+        control.add_recent(argv[i],AUX);
+      }
+    } else if ( strstr( argv[i], ".dynpt" )  != NULL ){
       win.trackballwin->read_dynamic_pts( argv[i], control.tmslider );
-    else
+      control.add_recent(argv[i],DYN_PTS);
+    } else {
       win.trackballwin->get_data(argv[i], control.tmslider );
+      control.add_recent(argv[i],IGB);
+    }
   }
   if( mshz_pos >= 0 ) control.restore_state( argv[mshz_pos] );
   if( xfrm_pos >= 0 ) win.trackballwin->trackball.read( argv[xfrm_pos] );

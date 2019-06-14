@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0400
+version 1.0305
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -9,6 +9,9 @@ decl {\#include <FL/gl.h>} {public local
 }
 
 decl {\#include <vector>} {private local
+}
+
+decl {\#include<list>} {public global
 }
 
 decl {\#include <algorithm>} {private local
@@ -24,6 +27,12 @@ decl {class IsoSurface;} {public local
 }
 
 decl {class ObjProps;} {public local
+}
+
+decl {\#define MaxRecentSz 10} {private local
+}
+
+decl {enum DATA_SET_TYPE { ASCII, IGB, AUX, DYN_PTS, HDF5, VECT };} {public global
 }
 
 decl {\#define SAVE_WIDGET(f,a) f<<\#a<<" = "<<double(a->value())<<endl;} {private local
@@ -86,21 +95,23 @@ winny->size_range(50,50,1600,1600,5,5,1);} {}
 
 class Controls {open
 } {
+  decl {std::list<pair <string,Fl_Callback*>>recentLst;} {private local
+  }
   decl {friend class ObjProps;} {private local
   }
   Function {Controls()} {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1413 160 350 645} type Double box UP_BOX
+      xywh {2015 87 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File
+          label File open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -134,31 +145,44 @@ Fl::check();
 write_surfaces(ns-nsa);}
             xywh {0 0 30 20} divider
           }
-          MenuItem {} {
+          MenuItem readASCIIbut {
             label {Read ASCII data}
-            callback {char *fn=fl_file_chooser("Data file","*{out,dat}*",NULL);
-if(fn != NULL) mwtb->get_data(fn,tmslider);
+            user_data NULL
+            callback {char *fn;
+if( !v ) 
+  fn = fl_file_chooser("Data file","*{out,dat}*",NULL);
+else
+  fn = (char *)v;   
+if(fn != NULL) {
+  mwtb->get_data(fn,tmslider);
+  add_recent(fn, ASCII );
+}
 mincolval->value(mwtb->cs->min());
 maxcolval->value(mwtb->cs->max());}
             xywh {0 0 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
           }
-          MenuItem {} {
+          MenuItem readIGBbut {
             label {Read IGB data}
-            callback {char *fn=fl_file_chooser("Data file","*igb*",NULL);
+            callback {char *fn;
+if( !v ) 
+  fn = fl_file_chooser("Data file","*igb*",NULL);
+else
+  fn = (char *)v;
 if(fn != NULL) {
   fl_cursor(FL_CURSOR_WAIT);
   Fl::check();
   mwtb->get_data(fn,tmslider);
   fl_cursor(FL_CURSOR_DEFAULT);
   Fl::check();
+  add_recent( fn, IGB );
 }
 mincolval->value(mwtb->cs->min());
 maxcolval->value(mwtb->cs->max());}
             xywh {20 20 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
           }
-          MenuItem {} {
+          MenuItem readVECbut {
             label {Read Vector Data}
             callback {if( !mwtb->getVecData(tmslider) ) {
   vectorgrp->activate();
@@ -166,9 +190,13 @@ maxcolval->value(mwtb->cs->max());}
 }}
             xywh {0 0 100 20}
           }
-          MenuItem {} {
+          MenuItem readAUXbut {
             label {Read Aux Grid}
-            callback {char *fn = fl_file_chooser( "Auxiliary Grid", "*.pts_t", NULL );
+            callback {char *fn;
+if( v ) 
+  fn = (char *)v;
+else
+  fn = fl_file_chooser( "Auxiliary Grid", "*.pts_t", NULL );
 if( fn && !mwtb->readAuxGrid(tmslider,fn) ) {
   auxgridgrp->activate();
   tabwidget->value(auxgridgrp);
@@ -185,22 +213,40 @@ if( fn && !mwtb->readAuxGrid(tmslider,fn) ) {
      auxDataGrp->deactivate();auxvertval->value(0); 
    } 
    auxhivert->value(0);
+   add_recent( fn, AUX );
 }}
             xywh {0 0 100 20}
           }
-          MenuItem {} {
+          MenuItem readDYNPTSbut {
             label {Read Dyn Pts}
-            callback {char *fn = fl_file_chooser("Dynamic Points", "*.dynpt", NULL );
-if( fn ) mwtb->read_dynamic_pts( fn, tmslider );}
+            callback {char *fn;
+if( v )
+  fn = (char*)v;
+else
+  fn = fl_file_chooser("Dynamic Points", "*.dynpt", NULL );
+if( fn ){
+  mwtb->read_dynamic_pts( fn, tmslider );
+  add_recent( fn, DYN_PTS );
+}}
             xywh {0 0 30 20}
           }
           MenuItem hdfreadbut {
             label {Read  HDF5 Data}
             callback {\#ifdef USE_HDF5
-HDF5DataBrowser *brow =  new HDF5DataBrowser( fl_file_chooser("Choose HDF5 data file", "*.datH5", NULL ), mwtb );
+char *fn;
+if( v ) 
+  fn = (char *)v;
+else
+  fn =  fl_file_chooser("Choose HDF5 data file", "*.datH5", NULL );
+HDF5DataBrowser *brow =  new HDF5DataBrowser( fn, mwtb );
+add_recent( HDF5 );
 \#endif}
             xywh {0 0 30 20}
           }
+          Submenu recentFiles {
+            label {Recent...} open selected
+            xywh {0 0 63 21} divider
+          } {}
           MenuItem read_recalibrate {
             label {Recalibrate on read}
             tooltip {Recalibrate colour scale when reading a new data file} xywh {0 0 100 20} type Toggle value 1
@@ -1772,7 +1818,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {open
+      Fl_Group colorscalegrp {
         xywh {10 490 330 60} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup
@@ -1808,7 +1854,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
         }
         Fl_Choice cstype {
-          label {colour scale} open selected
+          label {colour scale} open
           xywh {230 500 105 25} down_box BORDER_BOX labelsize 10 align 2
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
@@ -1895,7 +1941,7 @@ mwtb->redraw();}
           tooltip {sync colours} image {broadcast.png} xywh {315 525 20 20}
         }
       }
-      Fl_Group animate_group {open
+      Fl_Group animate_group {
         xywh {10 555 330 85} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
@@ -2329,8 +2375,7 @@ if( fname==NULL ) {
 ifstream mfin(fn);
 restore_state( mfin );} {}
   }
-  Function {restore_state(istream &mshzf)} {open
-  } {
+  Function {restore_state(istream &mshzf)} {} {
     code {int BUFLEN=1024;
 char buf[BUFLEN];
 float r, g, b, a;
@@ -2730,6 +2775,62 @@ if( vd->size()/int(vecstride->value())>MAX_INIT_VECS ) {
   int stride = vd->size()/(MAX_INIT_VECS)+1;
   vecstride->value(stride);
   vd->stride(stride);
+}} {}
+  }
+  decl {\#include <FL/Fl_Multi_Label.H>} {private local
+  }
+  Function {add_recent(  char *fn, DATA_SET_TYPE dst )} {open
+  } {
+    code {for( auto &p : recentLst )  
+  if( p.first==fn ) {
+   recentLst.remove( p );
+   break;
+  }
+  
+if( recentLst.size()==MaxRecentSz ) 
+  recentLst.pop_back();
+
+Fl_Callback *cbf=NULL;
+switch( dst ) {
+  case ASCII:
+  	cbf = (Fl_Callback*)cb_readASCIIbut;
+  	break;
+  case IGB:
+  	cbf =  (Fl_Callback*)cb_readIGBbut;
+  	break;
+  case DYN_PTS:
+  	cbf = (Fl_Callback*)cb_readDYNPTSbut;
+  	break;
+  case AUX:
+  	cbf = (Fl_Callback*)cb_readAUXbut;
+  	break;
+  case VECT:
+  	cbf =  (Fl_Callback*)readVECbut;
+  	break;
+}
+recentLst.push_front( pair<string,Fl_Callback*>(fn,cbf) );
+
+string submenu("File/Recent...");
+mainbar->clear_submenu(mainbar->find_index(submenu.c_str()));
+submenu += "/";
+
+for( auto &p : recentLst ){
+  void *data=strdup(p.first.c_str());
+  string mfname;
+  if( p.first[0] != '\\\\' ) 
+    for( auto c : p.first ) {
+      if( c == '/' ) mfname.append( string("\\\\") );
+      mfname.append( &c, 1 );
+    }
+  int mi = mainbar->add( (submenu+mfname).c_str(), 0, p.second, data );
+  //Fl_Menu_Item *item = (Fl_Menu_Item *)mainbar->menu() + mi;
+  //item->labeltype(_FL_MULTI_LABEL);
+  //Fl_Multi_Label *ml = new Fl_Multi_Label;
+  //ml->labela = submenu.c_str();
+  //ml->labelb = mfname.c_str();
+  //ml->typea = FL_NORMAL_LABEL;
+  //ml->typeb = FL_NORMAL_LABEL;
+  //ml->label( item );
 }} {}
   }
 }

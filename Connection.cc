@@ -135,10 +135,10 @@ void Connection::draw( int p0, int p1, GLfloat *colour, Colourscale* cs,
 	  if( _3D ) {
 		
         cs->colourize( data[n0], a0 );
-        draw_sphere(  _pt->pt(n0), 0.98*_size );
+        draw_sphere(  _pt->pt(n0), 0.99*_size );
         if( !facetshade) 
 		  cs->colourize( data[n1], a1 );
-        draw_sphere(  _pt->pt(n1), 0.98*_size );
+        draw_sphere(  _pt->pt(n1), 0.99*_size );
 
 		if( facetshade )
           cs->colourize( data[n0] );

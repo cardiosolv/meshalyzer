@@ -230,6 +230,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     double _branch_range[2];
     DeadDataGUI *deadData;
     bool   _axes=false;
+    bool   _eleBasedData=false;
 };
 
 #include "DataOpacity.h"
