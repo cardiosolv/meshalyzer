@@ -103,7 +103,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {2015 87 350 645} type Double box UP_BOX
+      xywh {2015 64 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -243,10 +243,13 @@ add_recent( HDF5 );
 \#endif}
             xywh {0 0 30 20}
           }
-          Submenu recentFiles {
-            label {Recent...} open selected
-            xywh {0 0 63 21} divider
-          } {}
+          MenuItem {} {
+            label {Recent...} selected
+            xywh {0 0 33 21} divider
+            code0 {o->flags|=FL_SUBMENU_POINTER;}
+            code1 {o->user_data(new Fl_Menu_Item[MaxRecentSz+1]);}
+            code2 {memset( o->user_data(),0,sizeof(Fl_Menu_Item));}
+          }
           MenuItem read_recalibrate {
             label {Recalibrate on read}
             tooltip {Recalibrate colour scale when reading a new data file} xywh {0 0 100 20} type Toggle value 1
@@ -2811,27 +2814,28 @@ switch( dst ) {
 recentLst.push_front( pair<string,Fl_Callback*>(fn,cbf) );
 
 string submenu("File/Recent...");
-mainbar->clear_submenu(mainbar->find_index(submenu.c_str()));
-submenu += "/";
+const Fl_Menu_Item *recent = mainbar->menu()+mainbar->find_index(submenu.c_str());
+Fl_Menu_Item *recentSM = (Fl_Menu_Item *)(recent->user_data());
 
-for( auto &p : recentLst ){
+int i = 0;
+for( auto &p : recentLst ) {
   void *data=strdup(p.first.c_str());
-  string mfname;
-  if( p.first[0] != '\\\\' ) 
+  string mfname = p.first;
+  if( p.first[0] != '/' ) {
+    mfname.clear();
     for( auto c : p.first ) {
       if( c == '/' ) mfname.append( string("\\\\") );
       mfname.append( &c, 1 );
     }
-  int mi = mainbar->add( (submenu+mfname).c_str(), 0, p.second, data );
-  //Fl_Menu_Item *item = (Fl_Menu_Item *)mainbar->menu() + mi;
-  //item->labeltype(_FL_MULTI_LABEL);
-  //Fl_Multi_Label *ml = new Fl_Multi_Label;
-  //ml->labela = submenu.c_str();
-  //ml->labelb = mfname.c_str();
-  //ml->typea = FL_NORMAL_LABEL;
-  //ml->typeb = FL_NORMAL_LABEL;
-  //ml->label( item );
-}} {}
+  }
+  memset( recentSM+i, 0, sizeof(recentSM[0]) );
+  recentSM[i].flags = 0;
+  recentSM[i].callback( p.second, data );
+  recentSM[i].label( strdup(mfname.c_str()) );
+  recentSM[i].labelcolor( FL_DARK_RED );
+  i++;
+}
+memset( recentSM+i, 0, sizeof(recentSM[0]) );} {}
   }
 }
 
