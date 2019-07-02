@@ -693,7 +693,6 @@ int TBmeshWin::handle( int event )
         return 1;
         break;
       case 'o':   // optimize colour scale
-        //get_data( dataBuffer->file().c_str(), contwin->tmslider );
         optimize_cs();
         contwin->mincolval->value(cs->min());
         contwin->maxcolval->value(cs->max());
@@ -907,6 +906,7 @@ void TBmeshWin :: opacity( int s, float opac )
  *  if the file is too big to fit into memory, use a threaded reader
  *
  * \param fn filename
+ *
  */
 DataReaderEnum TBmeshWin::getReaderType( const char *fn )
 {
@@ -926,8 +926,15 @@ DataReaderEnum TBmeshWin::getReaderType( const char *fn )
     return AllInMem;
 }
 
-
-void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
+/** read in a data file 
+ *
+ * \param fn     file name
+ * \param mslide time slider widget
+ *
+ * \returns non-zero iff no error
+ */
+int
+TBmeshWin :: get_data( const char *fn, Myslider *mslide )
 {
   DataClass<DATA_TYPE>* newDataBuffer=NULL;
 
@@ -947,22 +954,22 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
   } 
   catch( CompressedFileExc cf ) {
     fl_alert( "Please uncompress data file: %s", cf.file.c_str() );
-    return;
+    return 1;
   }
   catch ( PointMismatch pm ) {
     fl_alert( "%s\nPoints number mismatch: expected %d but got %d", fn, pm.expected, pm.got );  
-    return;
+    return 2;
   }
   catch (...) {
     fl_alert("Unable to open data file: %s", fn );
-    return;
+    return 3;
   }
 
   if( max_time(ScalarDataGrid)>0 && newDataBuffer->max_tm()>0 && 
                                          newDataBuffer->max_tm()!=max_time() ) {
     fl_alert("%s","Incompatible number of frames in data" );
     delete newDataBuffer;
-    return;
+    return 4;
   }
 
   if ( dataBuffer != NULL ) delete dataBuffer;
@@ -974,7 +981,7 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
   else if ( numframes == 1 )
     have_data = Static;
   else
-    return;
+    return 0;
   if ( tm>=numframes )
     tm = 0;
   data = dataBuffer->slice(tm);
@@ -1007,6 +1014,8 @@ void TBmeshWin :: get_data( const char *fn, Myslider *mslide )
     timeplot();
 
   redraw();
+
+  return 0;
 }
 
 void TBmeshWin :: optimize_cs( void )
@@ -1483,6 +1492,9 @@ void TBmeshWin::output_pdf( char *fn, bool PDF )
 {
   GLint  format;
 
+#ifdef HAVE_GL2PS
+
+  // gl2ps does not work
 
   if ( PDF ) {
     fl_alert("Warning: Transparency may not appear correctly");
@@ -1510,6 +1522,7 @@ void TBmeshWin::output_pdf( char *fn, bool PDF )
     state = gl2psEndPage();
   }
   fclose( fp );
+#endif
 }
 
 

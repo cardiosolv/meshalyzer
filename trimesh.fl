@@ -153,12 +153,10 @@ if( !v )
   fn = fl_file_chooser("Data file","*{out,dat}*",NULL);
 else
   fn = (char *)v;   
-if(fn != NULL) {
-  mwtb->get_data(fn,tmslider);
-  add_recent(fn, ASCII );
-}
+if(fn && !mwtb->get_data(fn,tmslider) ) 
+    add_recent(fn, ASCII );
 mincolval->value(mwtb->cs->min());
-maxcolval->value(mwtb->cs->max());}
+maxcolval->value(mwtb->cs->max());} selected
             xywh {0 0 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
           }
@@ -172,10 +170,10 @@ else
 if(fn != NULL) {
   fl_cursor(FL_CURSOR_WAIT);
   Fl::check();
-  mwtb->get_data(fn,tmslider);
+  int ret = mwtb->get_data(fn,tmslider);
   fl_cursor(FL_CURSOR_DEFAULT);
   Fl::check();
-  add_recent( fn, IGB );
+  if( !ret ) add_recent( fn, IGB );
 }
 mincolval->value(mwtb->cs->min());
 maxcolval->value(mwtb->cs->max());}
@@ -244,7 +242,7 @@ add_recent( HDF5 );
             xywh {0 0 30 20}
           }
           MenuItem {} {
-            label {Recent...} selected
+            label {Recent...}
             xywh {0 0 33 21} divider
             code0 {o->flags|=FL_SUBMENU_POINTER;}
             code1 {o->user_data(new Fl_Menu_Item[MaxRecentSz+1]);}
@@ -1821,7 +1819,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {
+      Fl_Group colorscalegrp {open
         xywh {10 490 330 60} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup

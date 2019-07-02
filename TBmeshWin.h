@@ -82,7 +82,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     inline void undatify( Object_t obj ){if(obj==All)datadst=0;else datadst&=~ObjFlg[obj];redraw();}
     Colourscale *cs;
     int add_surface( const char * );   	// add a surface
-    void get_data( const char *, Myslider* mslider=NULL );	// get data file
+    int get_data( const char *, Myslider* mslider=NULL );	// get data file
     inline void bgd( float w ){bc[0]=bc[1]=bc[2]=w;valid(0);redraw();}
     const GLfloat* bgd(){return bc;}
     void optimize_cs( void );		// calibrate colour scale

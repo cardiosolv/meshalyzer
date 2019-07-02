@@ -1,5 +1,7 @@
 #include "DrawingObjects.h"
+#if HAVE_GL2PS
 #include "gl2ps.h"
+#endif
 #include "Vector3D.h"
 #include "VecData.h"
 
@@ -45,13 +47,17 @@ void DrawingObj :: translucency( bool b )
   if ( b==true ) {
     glPushAttrib(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glDepthMask(GL_FALSE);
+#if HAVE_GL2PS
     gl2psEnable(GL2PS_BLEND);
+#endif
     glEnable(GL_BLEND);
   } else {
     GLint sd;
     glGetIntegerv(GL_ATTRIB_STACK_DEPTH, &sd );
     if ( sd ) glPopAttrib();
+#if HAVE_GL2PS
     gl2psDisable(GL2PS_BLEND);
+#endif
   }
 }
 

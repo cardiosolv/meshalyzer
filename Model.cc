@@ -696,12 +696,9 @@ void Model::determine_regions()
 }
 
 
-/** add surface by selecting 2D elements from .elem file
+/** add conections by selecting them from .elem file
  *
- *  A surface will be created for each different region specified.
- *  Also, all elements without a region specified will form a surface.
- *
- *  \param base model name
+ *  \param fname element file
  */
 int Model::add_cnnx_from_elem( string fname )
 {
@@ -723,7 +720,7 @@ int Model::add_cnnx_from_elem( string fname )
 	if( !strncmp(buff,"Ln",2) ) {
       if( !(numcx%10000) )
         cnnx = (int *)realloc( cnnx, (numcx/10000+1)*2*sizeof(int) );
-	  if(sscanf( buff,"%s %d %d %s", etype, cnnx+2*numcx, cnnx+2*numcx+1, reg)<5 )
+	  if(sscanf( buff,"%s %d %d %s", etype, cnnx+2*numcx, cnnx+2*numcx+1, reg)<4 )
 		strcpy(reg,"EMPTY");
 	} else
 	  continue;  //ignore volume elements
@@ -902,7 +899,7 @@ int Model::add_region_surfaces()
       nleft /= 2;
 #pragma omp parallel for num_threads(nleft)
       for( int s=0; s<nleft; s++ ) {
-        for(faceset::iterator sn=facetree[s+add].begin(); sn!=facetree[s+add].end(); sn++) { 
+        for(auto sn=facetree[s+add].begin(); sn!=facetree[s+add].end(); sn++) { 
           faceset::iterator iter = facetree[s].find(*sn);
           if (iter != facetree[s].end()) {
             facetree[s].erase(iter);
@@ -922,8 +919,7 @@ int Model::add_region_surfaces()
       _surface.back()->num( facetree[0].size() );
 
       int e=0;
-      for(faceset::iterator iter=facetree[0].begin();
-                            iter!=facetree[0].end(); ++iter) {
+      for(auto iter=facetree[0].begin(); iter!=facetree[0].end(); ++iter) {
 
         Face newface = *iter;
         if( newface.nnode == 3 ) {
