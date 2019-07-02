@@ -10,7 +10,9 @@
 #ifdef __WIN32__
 #  include <GL/glext.h>
 #endif
+#ifdef HAVE_GL2PS
 #include "gl2ps.h"
+#endif
 #ifdef USE_HDF5
 #include <ch5/ch5.h>
 #endif
@@ -158,7 +160,9 @@ void TBmeshWin :: draw()
     }
     glDepthFunc( GL_LEQUAL );
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#ifdef HAVE_GL2PS
     gl2psBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+#endif
     glViewport(0,0,w(),h());
     glClearColor( bc[0], bc[1], bc[2], bgd_trans?0:1 );
     if ( renderMode == GL_SELECT ) {		// for picking and vertex list
@@ -369,7 +373,9 @@ void TBmeshWin :: draw()
   if ( _axes ) TBmeshWin::draw_axes( model->pt.offset() );
 
   glDepthMask(GL_TRUE);
+#ifdef HAVE_GL2PS
   gl2psEnable(GL2PS_BLEND);
+#endif
   glEnable(GL_BLEND);
 
   if( vecdata != NULL ) vecdata->draw(tm,model->maxdim());
@@ -1551,7 +1557,9 @@ void TBmeshWin::draw_clip_plane( int cp )
   glDisable(GL_LIGHTING);
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   glDepthMask(GL_FALSE);
+#ifdef HAVE_GL2PS
   gl2psEnable(GL2PS_BLEND);
+#endif
   glEnable(GL_BLEND);
   for ( int i=0; i<NUM_CP; i++ ) glDisable(CLIP_PLANE[i]);
 
@@ -1640,13 +1648,17 @@ bool translucency( bool b )
   if ( b ) {
     glPushAttrib(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     glDepthMask(GL_FALSE);
+#ifdef HAVE_GL2PS
     gl2psEnable(GL2PS_BLEND);
+#endif
     glEnable(GL_BLEND);
   } else {
     GLint sd;
     glGetIntegerv(GL_ATTRIB_STACK_DEPTH, &sd );
     if ( sd ) glPopAttrib();
+#ifdef HAVE_GL2PS
     gl2psDisable(GL2PS_BLEND);
+#endif
   }
   return b;
 }
