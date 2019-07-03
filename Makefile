@@ -4,6 +4,7 @@ include make.conf
 #VTK_LIBDIR     =/usr/lib64
 #VTK_INCDIR     =/usr/include/vtk-8.1
 
+Cxx           :=$(shell fltk-config --cxx)
 FLTK_INC      := $(shell fltk-config --use-glut --use-gl --cxxflags)
 FLTK_LD_FLAGS := $(shell fltk-config --use-images --use-glut --use-gl --ldflags)
 COMMON_INC    := -I. -DOBJ_CLASS -D_REENTRANT
@@ -48,7 +49,7 @@ CXXFLAGS     = -std=c++11 -g -O$(DEBUG_LEVEL) $(OMP_FLAG) -MMD -DNOMINMAX
 # VTK
 ifdef VTK_LIBDIR
 COMMON_INC    += -DUSE_VTK -I$(VTK_INCDIR)
-VTK_LSLIBS     = $(shell ls $(VTK_LIBDIR)/libvtk*$(LIB_EXT) | grep -Ev '(Python)|(Java)|(TCL)|(Parallel)|(MPI)' )
+VTK_LSLIBS     = $(shell ls $(VTK_LIBDIR)/libvtk*$(LIB_EXT) | grep -Ev '(Python)|(Java)|(TCL)|(Parallel)|(MPI)|(Filters)|(Imaging)|(Interaction)|(Rendering)' )
 a              = $(subst $(VTK_LIBDIR)/lib,-l,$(VTK_LSLIBS) )
 VTK_LIBS       = $(subst $(LIB_EXT),,$(a) )
 LIBS          += $(VTK_LIBS)
