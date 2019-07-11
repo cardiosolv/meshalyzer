@@ -17,10 +17,10 @@ PNGwrite :: PNGwrite( FILE *out ) : fp(out)
   }
   setjmp(png_jmpbuf(png_ptr));
   png_init_io(png_ptr, fp);
-}
 
-PNGwrite :: ~PNGwrite( void )
-{}
+  for( int i=0; i<MAX_PNG_TEXT; i++ ) 
+    tptr[i].compression = PNG_TEXT_COMPRESSION_NONE;
+}
 
 
 /** write the frame buffer to a PNG file
@@ -39,6 +39,9 @@ int PNGwrite :: write( void *data, int align )
     png_set_PLTE( png_ptr, info_ptr, cpalette, colour_depth );
 
   png_write_info(png_ptr, info_ptr);
+  for( int i=1; i<ntext; i++ ) 
+    free(strptr[i]);
+
   png_bytep row_pointers[height];
   int compsperpixel;
   if ( ctype == PNG_COLOR_TYPE_GRAY )
@@ -67,34 +70,24 @@ int PNGwrite :: write( void *data, int align )
 void
 PNGwrite :: description( const char* datafile, const char *colour_range, const char *tm ) 
 {
-  const int ntext = 4;
-
-  png_text tptr[ntext];
-  char *strptr[ntext];
-
-  for( int i=0; i<ntext; i++ ) {
-    tptr[i].compression = PNG_TEXT_COMPRESSION_NONE;
-  }
-
-  tptr[0].key         = "Software";
-  tptr[0].text        = "meshalyzer";
+  tptr[0].key         = software;
+  tptr[0].text        = meshalyz;
   
-  tptr[1].key         = "Description";
+  tptr[1].key         = descrip;
   strptr[1]           = strdup(colour_range);
   tptr[1].text        = strptr[1];
   
-  tptr[2].key         = "Data file";
+  tptr[2].key         = dfdesc;
   strptr[2]           = strdup(datafile);
   tptr[2].text        = strptr[2];
   
-  tptr[3].key         = "Data frame";
+  tptr[3].key         = dataframe;
   strptr[3]           = strdup(tm);
   tptr[3].text        = strptr[3];
   
-  png_set_text(png_ptr, info_ptr, tptr, strlen(datafile)?ntext:1 );
-  
-  for( int i=1; i<ntext; i++ ) 
-    free(strptr[i]);
+  ntext = strlen(datafile)?MAX_PNG_TEXT:1;
+
+  png_set_text(png_ptr, info_ptr, tptr, ntext);
 } 
 
 

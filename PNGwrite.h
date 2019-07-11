@@ -26,11 +26,13 @@
 
 using namespace std;
 
+#define MAX_PNG_TEXT 4
+
 class PNGwrite
 {
   public:
     PNGwrite( FILE * );
-    ~PNGwrite( void );
+    ~PNGwrite( void ){}
     int write( void *, int );
     inline void size( int w, int h){ width=w;height=h; }
     inline void depth( int d ){ colour_depth = d; }
@@ -48,5 +50,13 @@ class PNGwrite
     int ctype=PNG_COLOR_TYPE_RGB;
     int interlace_type=PNG_INTERLACE_NONE;
     int colour_depth=8;
+    char* software  = strdup("Software");
+    char* meshalyz  = strdup("meshalyzer");
+    char* descrip   = strdup("Description");
+    char* dfdesc    = strdup("Data File");
+    char* dataframe = strdup("Data Frame");
+    png_text tptr[MAX_PNG_TEXT];
+    char *strptr[MAX_PNG_TEXT];
+    int   ntext = 0;
 };
 #endif
