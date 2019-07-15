@@ -77,7 +77,7 @@ Frame :: write( int w, int h, string fname, int f0, int f1, int stride )
     if( !_tbwm->set_time(f) )
       break;
     string file=fname;
-    char strnum[8];
+    char strnum[256];
     sprintf( strnum, "%05d.png", f );
     file += strnum;
     dump( w, h, file );
