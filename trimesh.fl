@@ -107,7 +107,7 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {open
+      Fl_Menu_Bar mainbar {
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
@@ -156,7 +156,7 @@ else
 if(fn && !mwtb->get_data(fn,tmslider) ) 
     add_recent(fn, ASCII );
 mincolval->value(mwtb->cs->min());
-maxcolval->value(mwtb->cs->max());} selected
+maxcolval->value(mwtb->cs->max());}
             xywh {0 0 100 20}
             code0 {\#include <FL/Fl_File_Chooser.H>}
           }
@@ -1819,7 +1819,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {open
+      Fl_Group colorscalegrp {
         xywh {10 490 330 60} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup
@@ -1855,7 +1855,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
         }
         Fl_Choice cstype {
-          label {colour scale} open
+          label {colour scale}
           xywh {230 500 105 25} down_box BORDER_BOX labelsize 10 align 2
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
@@ -2084,7 +2084,8 @@ mwtb->trackball.Rotation(-view*M_PI_2,zaxis);
 
 mwtb->redraw();} {}
   }
-  Function {set_tet_region( Model *model)} {} {
+  Function {set_region_list( Model *model)} {selected
+  } {
     code {for( int i=0; i<model->_numReg; i++ ) {
   char text[256];
   sprintf( text, "%d", (model->region(i))->label() );
@@ -2363,7 +2364,8 @@ if( save_flyby ) {
   SAVE_WIDGET( mshzf, flyby->fb_tmadv );
 }} {}
   }
-  Function {restore_state( const char* fname = NULL)} {} {
+  Function {restore_state( const char* fname = NULL)} {open
+  } {
     code {const char *fn;
 
 if( fname==NULL ) {
@@ -2376,7 +2378,8 @@ if( fname==NULL ) {
 ifstream mfin(fn);
 restore_state( mfin );} {}
   }
-  Function {restore_state(istream &mshzf)} {} {
+  Function {restore_state(istream &mshzf)} {open
+  } {
     code {int BUFLEN=1024;
 char buf[BUFLEN];
 float r, g, b, a;
@@ -2709,7 +2712,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
 
   cerr << "Unknown variable specified: " << var << endl;
 }
-mwtb->lights(illBut->value());} {}
+mwtb->lights(illBut->value());
+mwtb->redraw();} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();

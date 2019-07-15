@@ -608,11 +608,13 @@ main( int argc, char *argv[] )
       control.add_recent(argv[i],IGB);
     }
   }
-  if( mshz_pos >= 0 ) control.restore_state( argv[mshz_pos] );
-  if( xfrm_pos >= 0 ) win.trackballwin->trackball.read( argv[xfrm_pos] );
 
+  control.set_region_list( win.trackballwin->model );
   win.trackballwin->cplane->calc_intercepts();
   win.trackballwin->show();
+
+  if( mshz_pos >= 0 ) control.restore_state( argv[mshz_pos] );
+  if( xfrm_pos >= 0 ) win.trackballwin->trackball.read( argv[xfrm_pos] );
 
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
     control.surflist->add( win.trackballwin->model->surface(i)->label().c_str(),
@@ -621,7 +623,6 @@ main( int argc, char *argv[] )
   if ( vectordata ) control.vectorgrp->activate();
   control.mincolval->value(win.trackballwin->cs->min());
   control.maxcolval->value(win.trackballwin->cs->max());
-  control.set_tet_region( win.trackballwin->model );
 
   if( !PNGfile && !flyby.size() )
     control.window->show();

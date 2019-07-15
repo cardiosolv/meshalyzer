@@ -637,8 +637,8 @@ void Model::determine_regions()
       _region[_numReg] = new RRegion( 
                              _vol, _numVol, pt.num(), new_region_label() );
       _numReg++;
-      for ( int i=0; i<_numVol; i++ )
-        if ( !hasEleRegion[i] ) _region[_numReg-1]->ele_member( _vol, i, true );
+      for ( int j=i; j<_numVol; j++ )
+        if ( !hasEleRegion[j] ) _region[_numReg-1]->ele_member( _vol, j, true );
      break;
     }
 
@@ -654,8 +654,8 @@ void Model::determine_regions()
       _region[_numReg] = new RRegion( pt.num(), _numVol, 
                                             new_region_label(), false );
       _numReg++;
-      for ( int i=0; i<pt.num(); i++ )
-        if ( !hasPtRegion[i] ) _region[_numReg-1]->pt_member( i, true );
+      for ( int j=i; j<pt.num(); j++ )
+        if ( !hasPtRegion[j] ) _region[_numReg-1]->pt_member( j, true );
       break;
     }
 
