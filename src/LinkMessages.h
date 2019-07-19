@@ -1,8 +1,8 @@
 #ifndef LINKMESSAGES_H
 #define LINKMESSAGES_H
 
-#include <Quaternion.h>
-#include <Vector3D.h>
+#include "Quaternion.h"
+#include "Vector3D.h"
 #include "Colourscale.h"
 
 namespace LinkMessage {

@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include <set>} {public local
@@ -35,7 +35,7 @@ decl {\#include <semaphore.h>} {private local
 decl {\#include <signal.h>} {private local
 }
 
-decl {\#include <LinkMessages.h>} {public global
+decl {\#include "LinkMessages.h"} {selected public global
 }
 
 decl {using namespace std;} {public global
@@ -46,8 +46,8 @@ class TimeLink {open
   Function {TimeLink( set<int>& lnks ):linkages_(lnks),msqId_(0),MSQ_KEY_PATH("/home")} {open
   } {
     Fl_Window window {
-      label TimeLink open selected
-      xywh {1494 178 290 440} type Double box ENGRAVED_BOX color 27 visible
+      label TimeLink open
+      xywh {1613 146 290 440} type Double box ENGRAVED_BOX color 27 visible
     } {
       Fl_Group {} {open
         xywh {10 43 270 195} box GTK_UP_BOX color 14 align 65

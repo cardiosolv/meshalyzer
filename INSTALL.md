@@ -15,11 +15,13 @@ Except for fltk, using your package manager is recommended for installing these 
 
 ## Compiling ##
 
-1. If VTK is installed, edit the **Makefile** to set the `VTK_INC` and `VTK_DIR` variables to point to the directories containing the VTK header files and libraries, respectively. Comment them out otherwise.
+1. If VTK is installed, edit the **make.conf** to set the `VTK_INC` and `VTK_DIR` variables to point to the directories containing the VTK header files and libraries, respectively. Comment them out otherwise.
 
 1. Type "make"
 
 2. For the windowless version, type "make mesalyzer"
+
+3. The compiled executables will be found in the **src/** directory.
 
 3. Copy the binaries to a suitable location
 
