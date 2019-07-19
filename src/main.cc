@@ -432,6 +432,8 @@ static struct option longopts[] = {
 int
 main( int argc, char *argv[] )
 {
+  Fl::scheme("gleam");
+
 #ifdef USE_HDF5
   H5Eset_auto1(NULL, NULL);// silence HDF errors
 #endif
@@ -613,16 +615,15 @@ main( int argc, char *argv[] )
   win.trackballwin->cplane->calc_intercepts();
   win.trackballwin->show();
 
-  if( mshz_pos >= 0 ) control.restore_state( argv[mshz_pos] );
-  if( xfrm_pos >= 0 ) win.trackballwin->trackball.read( argv[xfrm_pos] );
-
   for ( int i=0; i<win.trackballwin->model->numSurf(); i++ ) {
-    control.surflist->add( win.trackballwin->model->surface(i)->label().c_str(),
-                                                                        1 );
+    control.surflist->add(win.trackballwin->model->surface(i)->label().c_str(), 1);
   }
   if ( vectordata ) control.vectorgrp->activate();
   control.mincolval->value(win.trackballwin->cs->min());
   control.maxcolval->value(win.trackballwin->cs->max());
+
+  if( mshz_pos >= 0 ) control.restore_state( argv[mshz_pos] );
+  if( xfrm_pos >= 0 ) win.trackballwin->trackball.read( argv[xfrm_pos] );
 
   if( !PNGfile && !flyby.size() )
     control.window->show();

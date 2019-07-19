@@ -905,12 +905,12 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
           label Highlight open
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -1451,7 +1451,7 @@ mwtb->redraw();}
         }
         Fl_Group auxgridgrp {
           label {Aux Grid} open
-          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
+          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
         } {
           Fl_Light_Button auxgriddispbut {
             label On
@@ -1483,7 +1483,7 @@ mwtb->redraw();}
               }
               MenuItem {} {
                 callback {mwtb->auxGrid->cs.scale(CS_BL_RAINBOW);
-mwtb->redraw();}
+mwtb->redraw();} selected
                 image {blrainbow.xpm} xywh {10 10 100 20}
               }
               MenuItem {} {
@@ -1811,7 +1811,7 @@ mwtb->redraw();}
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
-          Fl_Light_Button {} {
+          Fl_Light_Button auxclip {
             label Clip
             callback {mwtb->auxGrid->clip(o->value());
 mwtb->redraw();}
@@ -2084,8 +2084,7 @@ mwtb->trackball.Rotation(-view*M_PI_2,zaxis);
 
 mwtb->redraw();} {}
   }
-  Function {set_region_list( Model *model)} {selected
-  } {
+  Function {set_region_list( Model *model)} {} {
     code {for( int i=0; i<model->_numReg; i++ ) {
   char text[256];
   sprintf( text, "%d", (model->region(i))->label() );
@@ -2140,7 +2139,8 @@ cc->opacity->value(col[3]);
 cc->window->show();
 return cc;} {}
   }
-  Function {save_state()} {} {
+  Function {save_state()} {open
+  } {
     code {char *fn = fl_file_chooser("meshalyzer state file","*.mshz",NULL);
 if( fn==NULL) return;
 string xfn( fn );
@@ -2148,7 +2148,8 @@ if( xfn.rfind(".mshz") == string::npos ) xfn += ".mshz";
 ofstream mshzf( xfn.c_str() );
 save_state( mshzf );} {}
   }
-  Function {save_state( ostream &mshzf, bool save_flyby = true )} {} {
+  Function {save_state( ostream &mshzf, bool save_flyby = true )} {open
+  } {
     code {mshzf << "TRACKBALL ======" << endl;
 mwtb->trackball.save(mshzf);
 mshzf << "CLIPPING ======" << endl;
@@ -2232,6 +2233,7 @@ SAVE_WIDGET(mshzf,surffillbut);
 // Aux Grid tab
 SAVE_WIDGET(mshzf,auxgriddispbut);
 SAVE_WIDGET(mshzf,auxcstype);
+SAVE_WIDGET(mshzf,auxclip);
 SAVE_WIDGET(mshzf,auxmincolval);
 SAVE_WIDGET(mshzf,auxmaxcolval);
 SAVE_WIDGET(mshzf,auxnumcolev);
