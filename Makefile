@@ -1,4 +1,4 @@
-all:
+all: obj
 	cd src && $(MAKE)
 
 mesalyzer:
@@ -6,4 +6,7 @@ mesalyzer:
 
 clean :
 	cd src && $(MAKE) clean
+
+obj: 
+	mkdir obj
 
