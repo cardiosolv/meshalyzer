@@ -1621,7 +1621,7 @@ void TBmeshWin::record_events( char* fn )
   }
   ostringstream msg;
   msg << num << " frames output";
-  fl_alert( msg.str().c_str() );
+  fl_alert( "%s", msg.str().c_str() );
 }
 
 

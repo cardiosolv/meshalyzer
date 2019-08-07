@@ -148,7 +148,7 @@ void IsoLine::auxMesh( const char *fname )
   FILE *dout = fopen( datfile.c_str(), "w" );
 
   int ptoff = 0;
-  fprintf( eout, "1\n%d\n", _polygon.size() );
+  fprintf( eout, "1\n%d\n", (int) _polygon.size() );
   fprintf( dout, "1\n%d\n", numpt );
   for( int i=0; i<_polygon.size(); i++ ) {
     fprintf( eout, "%s", _polygon[i]->ptsPerObj()==2?"Ln":"Qd" );

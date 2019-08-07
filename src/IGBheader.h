@@ -10,8 +10,21 @@
 #include <cctype>
 #include <assert.h>
 #include <float.h>
-#include <limits.h>
+#include <limits>
+#include <algorithm>
+#include <type_traits>
 #include "short_float.h"
+
+template<class T>
+typename std::enable_if<!std::numeric_limits<T>::is_integer, bool>::type
+    almost_equal(T x, T y, int ulp = 4)
+{
+    // the machine epsilon has to be scaled to the magnitude of the values used
+    // and multiplied by the desired precision in ULPs (units in the last place)
+    return std::abs(x-y) <= std::numeric_limits<T>::epsilon() * std::abs(x+y) * ulp
+        // unless the result is subnormal
+        || std::abs(x-y) < std::numeric_limits<T>::min();
+}
 
 #define NALLOC 100
 
@@ -44,8 +57,10 @@
 #define     IGB_VEC4_f    18 /* -- 4 X float ------------------------------ */
 #define     IGB_VEC4_d    19 /* -- 4 X double ----------------------------- */
 #define     IGB_HFLOAT    20 /* -- half float ----------------------------- */
+#define     IGB_VEC9_f    21 /* -- 9 X foat ------------------------------- */
+#define     IGB_VEC9_d    22 /* -- 9 X double ----------------------------- */
 #define	    IGB_MIN_TYPE  1
-#define	    IGB_MAX_TYPE  20
+#define	    IGB_MAX_TYPE  22
 
 #define Byte hByte
 
@@ -72,7 +87,7 @@
 #define ERR_UNPRINTABLE_CHAR   3
 #define ERR_IGB_SYNTAX         4
 #define ERR_UNDEFINED_X_Y_TYPE 5
-#define ERR_SIZE_REDEFINED     6 
+#define ERR_SIZE_REDEFINED     6
 #define ERR_SIZE_NOT_DEFINED   7
 #define WARN_DIM_INCONSISTENT  256
 
@@ -116,7 +131,7 @@ struct S_Complex
 {
   Float	real, imag;
 };
-struct D_Complex	
+struct D_Complex
 {
   Double	real, imag;
 };
@@ -158,8 +173,8 @@ T IGB_convert_buffer_datum( IGBheader*, void *buf, int a );
 class IGBheader
 {
   private:
-    void* file;				   	  //!< file ptr to read/write header
-    bool gzipping;		  	 	  // are we gzipping data?
+    void* file=NULL;				   	  //!< file ptr to read/write header
+    bool gzipping=false;		  	 	  // are we gzipping data?
     int   v_x=0, v_y=0, v_z=1, v_t=1;  //!< dimensions --------------------
     int   v_type=0;               //!< type arithmetique -------------
     int   v_taille ;              //!< taille des pixels (type STRUCTURE)
@@ -345,7 +360,7 @@ class IGBheader
 };
 
 
-/** write out a number of time slices 
+/** write out a number of time slices
  *
  * \param dp[in] buffer of data
  * \param numt    number of time slices
@@ -361,12 +376,12 @@ IGBheader::write_data( T* dp, int numt, char *buf )
     buf = new char[slicesize];
     alloc_buf = true;
   }
-  
-  int numprimitive = slice_sz()*num_components(); 
-  for ( int a=0; a<numprimitive; a++ ) 
+
+  int numprimitive = slice_sz()*num_components();
+  for ( int a=0; a<numprimitive; a++ )
     to_bin<T>( buf+a*data_size(), dp[a] );
 
-  if( gzipping ) 
+  if( gzipping )
     gzwrite( (gzFile)file, buf, slicesize );
   else
     fwrite( buf, 1, slicesize, (FILE*)file );
@@ -375,7 +390,7 @@ IGBheader::write_data( T* dp, int numt, char *buf )
 }
 
 
-/** read in a number of time slices 
+/** read in a number of time slices
  *
  * \param dp[out] values read
  * \param numt    number of time slices
@@ -395,9 +410,9 @@ IGBheader::read_data( T* dp, int numt, char *buf )
     buf = new char[slicesize];
     alloc_buf = true;
   }
-  
+
   int numread;
-  if( gzipping ) 
+  if( gzipping )
     numread = gzread( (gzFile)(file), buf, slicesize )/data_size();
   else
     numread = fread(  buf, slice_sz()*numt, data_size(), (FILE *)(file) );
@@ -406,9 +421,10 @@ IGBheader::read_data( T* dp, int numt, char *buf )
 
   int numprimitive = numread*num_components(); // adjust vector types
 
+#pragma omp parallel for
   for ( int a=0; a<numprimitive; a++ )
     dp[a] = convert_buffer_datum<T>( buf, a );
-  
+
   if ( alloc_buf ) delete[] buf;
   return numread;
 }
@@ -441,11 +457,13 @@ T IGBheader::convert_buffer_datum( void *buf, int a )
     case IGB_FLOAT:
     case IGB_VEC3_f:
     case IGB_VEC4_f:
+    case IGB_VEC9_f:
       datum = ((float *)buf)[a];
       break;
     case IGB_DOUBLE:
     case IGB_VEC3_d:
     case IGB_VEC4_d:
+    case IGB_VEC9_d:
       datum = ((double *)buf)[a];
       break;
     case IGB_INT:
@@ -466,14 +484,14 @@ T IGBheader::convert_buffer_datum( void *buf, int a )
   return datum=from_raw(datum);
 }
 
-/** 
- * \def CONVERT_TYPE(D,m,M,B) 
+/**
+ * \def CONVERT_TYPE(D,m,M,B)
  *      convert the value stored in variable \b datum to type \a D,
- *      clipping it to the range [\a m, \a M] and store it in the location 
+ *      clipping it to the range [\a m, \a M] and store it in the location
  *      pointed to by \a B
  */
 #define CONVERT_TYPE(D,m,M,B) { if(datum<m)datum=m;else if(datum>M)datum=M; \
-                D a0 = (D)datum; *((D*)(B))=a0;}; 
+                D a0 = (D)datum; *((D*)(B))=a0;};
 
 /** convert the data to the binary representation
  *
@@ -481,7 +499,7 @@ T IGBheader::convert_buffer_datum( void *buf, int a )
  * \param d     datum
  */
 template<class T>
-void 
+void
 IGBheader::to_bin( void *buf, T d )
 {
   double datum=to_raw(d);
@@ -503,6 +521,7 @@ IGBheader::to_bin( void *buf, T d )
           break;
       case IGB_VEC3_f:
       case IGB_VEC4_f:
+      case IGB_VEC9_f:
           assert(0);
           break;
       case IGB_DOUBLE:
@@ -510,6 +529,7 @@ IGBheader::to_bin( void *buf, T d )
           break;
       case IGB_VEC3_d:
       case IGB_VEC4_d:
+      case IGB_VEC9_d:
           assert(0);
           break;
       case IGB_INT:
@@ -522,7 +542,7 @@ IGBheader::to_bin( void *buf, T d )
           CONVERT_TYPE( unsigned short, 0, USHRT_MAX, buf )
           break;
       case IGB_HFLOAT:
-          float fdatum; 
+          float fdatum;
           CONVERT_TYPE( float, HFLT_MIN, HFLT_MAX, &fdatum )
           *((short_float*)buf) = shortFromFloat(fdatum);
           break;

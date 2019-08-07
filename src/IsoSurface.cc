@@ -159,7 +159,7 @@ IsoSurface::saveAux( const char *fname )
   string elemfile = basename+".elem_t";
   FILE *eout = fopen( elemfile.c_str(), "w" );
   int ptoff = 0;
-  fprintf( eout, "1\n%d\n", polygon.size() );
+  fprintf( eout, "1\n%d\n", (int) polygon.size() );
   for( int i=0; i<polygon.size(); i++ ) {
     fprintf( eout, "%s", polygon[i]->ptsPerObj()==3?"Tr":"Qd" );
     for( int j=0;j<polygon[i]->ptsPerObj();j++ ) 

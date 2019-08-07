@@ -1607,10 +1607,10 @@ bool Model::read_elem_file( const char *fname )
     }
   }
   if( ne+surfe+new_cnnx.size()<nele) {
-	fprintf( stderr, "Warning: truncated element file? stated elements: %d, "
-			         " surface elements read: %d, volume elements read: %d,"
-                     "line elments read: %d\n",
-			            nele, surfe, ne, new_cnnx.size() );
+    fprintf( stderr, "Warning: truncated element file? stated elements: %d, "
+             " surface elements read: %d, volume elements read: %d,"
+             "line elments read: %d\n",
+             nele, surfe, ne, (int) new_cnnx.size() );
   }
   if( ne != _numVol ) { 
 	_numVol=ne;

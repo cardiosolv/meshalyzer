@@ -5,7 +5,8 @@
 #include<iostream>
 #include "IGBheader.h"
 #include <assert.h>
-#include <math.h>
+#include <cmath>
+#include <float.h>
 
 using namespace std;
 
@@ -224,13 +225,13 @@ const char    *Header_Type[] =
     "", "byte", "char", "short", "long", "float", "double", "complex",
     "double_complex", "rgba", "structure", "pointer", "list","int","uint",
     "ushort",
-	"vec3f","vec3d","vec4f","vec4d","hfloat"
+	"vec3f","vec3d","vec4f","vec4d","hfloat","vec9f","vec9d"
   };
 
 
 /** list of deprecated keywords */
 const char  *deprecated[] = {
-    "fac_x", "fac_y", "fac_z", "fac_t" 
+    "fac_x", "fac_y", "fac_z", "fac_t"
   };
 
 //* size of the stored data, not the variable type
@@ -238,16 +239,16 @@ unsigned short   Data_Size[] =
   {
     0, sizeof(Byte), sizeof(char), sizeof(short), sizeof(long), sizeof(float),
     sizeof(double), 0, 0, 0, 0, sizeof(void *), 0, sizeof(int), sizeof(UInt),
-    sizeof(unsigned short),	
+    sizeof(unsigned short),
     3*sizeof(float), 3*sizeof(double), 4*sizeof(float), 4*sizeof(double),
-    sizeof(short_float)
+    sizeof(short_float), 9*sizeof(float), 9*sizeof(double)
   };
 
 
 /** the number of components for each data type */
-int Num_Components[] = 
-  { 
-    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 3, 3, 4, 4, 1
+int Num_Components[] =
+  {
+    0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 3, 3, 4, 4, 1, 9, 9
   };
 
 
@@ -274,10 +275,9 @@ is_deprecated( char *s ) {
   return false;
 }
 
-
 #define MAKE_CONSISTENT( D ) \
   if( bool_dim_##D && bool_inc_##D && bool_##D ) \
-    if(  v_dim_##D != v_inc_##D * (v_##D-1) ) { \
+    if(  !almost_equal(v_dim_##D, v_inc_##D * (v_##D-1) ) ) { \
       fprintf( stderr, "Adjusting dim_%s to make dimensions consistent\n", #D ); \
       v_dim_##D = v_inc_##D * (v_##D-1);\
     }
@@ -286,7 +286,7 @@ is_deprecated( char *s ) {
 IGBheader::IGBheader( FILE *f, bool _read, bool quiet )
 {
   fileptr(f);
-  if( _read ) 
+  if( _read )
     if( read( quiet ) )
       throw 1;
 }
@@ -295,7 +295,7 @@ IGBheader::IGBheader( FILE *f, bool _read, bool quiet )
 IGBheader::IGBheader( gzFile f, bool _read, bool quiet )
 {
   fileptr(f);
-  if( _read ) 
+  if( _read )
     if( read( quiet ) )
       throw 1;
 }
@@ -420,7 +420,7 @@ int IGBheader::write()
     sprintf(&items[n_items][0], "dim_x:%g ", v_dim_x);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
-  } 
+  }
   if (bool_inc_x) {
     sprintf(&items[n_items][0], "dim_x:%g ", v_inc_x);
     l_item[n_items] = strlen(&items[n_items][0]);
@@ -430,7 +430,7 @@ int IGBheader::write()
     sprintf(&items[n_items][0], "dim_y:%g ", v_dim_y);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
-  } 
+  }
   if (bool_inc_y) {
     sprintf(&items[n_items][0], "dim_y:%g ", v_inc_y);
     l_item[n_items] = strlen(&items[n_items][0]);
@@ -440,7 +440,7 @@ int IGBheader::write()
     sprintf(&items[n_items][0], "dim_z:%g ", v_dim_z);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
-  } 
+  }
   if (bool_inc_z) {
     sprintf(&items[n_items][0], "dim_z:%g ", v_inc_z);
     l_item[n_items] = strlen(&items[n_items][0]);
@@ -450,7 +450,7 @@ int IGBheader::write()
     sprintf(&items[n_items][0], "dim_t:%g ", v_dim_t);
     l_item[n_items] = strlen(&items[n_items][0]);
     n_items++;
-  } 
+  }
   if (bool_inc_t) {
     sprintf(&items[n_items][0], "inc_t:%g ", v_inc_t);
     l_item[n_items] = strlen(&items[n_items][0]);
@@ -625,7 +625,7 @@ int IGBheader::write()
   n_lignes++;
 
   /*
-     Determine le nombre de caracteres et de lignes supplementaires 
+     Determine le nombre de caracteres et de lignes supplementaires
      necessaires
    */
   int n_blocs   = 1 + (n_car_total-1)/1024;
@@ -709,7 +709,7 @@ int IGBheader::write()
   /*
   if (bool_vect_z) {
   	if (v_vect_z==NULL) {
-  		if (!Header_Quiet) 
+  		if (!Header_Quiet)
   			fprintf(stderr,"\nERREUR: vect_z nul\n");
   		sprintf(Header_Message,	"\nERREUR: vect_z nul\n");
   		return(0) ;
@@ -723,7 +723,7 @@ int IGBheader::write()
 }
 
 
-/** read in a header 
+/** read in a header
  *
  * \param quiet do not print warnings/errors
  *
@@ -1068,7 +1068,7 @@ int IGBheader::read( bool quiet )
   if ( bool_dim_x )
     if ( bool_inc_x ) {
       float dim_x = v_inc_x * v_x ;
-      if ( dim_x != v_dim_x ) {
+      if ( !almost_equal(dim_x, v_dim_x) ) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
@@ -1092,7 +1092,7 @@ int IGBheader::read( bool quiet )
   if ( bool_dim_y )
     if ( bool_inc_y ) {
       float dim_y = v_inc_y * v_y ;
-      if ( dim_y != v_dim_y ) {
+      if ( !almost_equal(dim_y, v_dim_y) ) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
@@ -1116,7 +1116,7 @@ int IGBheader::read( bool quiet )
   if ( bool_dim_z )
     if ( bool_inc_z ) {
       float dim_z = v_inc_z * v_z ;
-      if ( dim_z != v_dim_z ) {
+      if ( !almost_equal(dim_z, v_dim_z) ) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
@@ -1144,7 +1144,7 @@ int IGBheader::read( bool quiet )
   if ( bool_dim_t )
     if ( bool_inc_t ) {
       float dim_t = v_inc_t * (v_t-1) ;
-      if ( fabs(dim_t - v_dim_t) > v_inc_t ) {
+      if ( !almost_equal(dim_t, v_dim_t) ) {
         if (!Header_Quiet) {
           fprintf(stderr, "\nATTENTION:\n") ;
           fprintf(stderr,
@@ -1278,7 +1278,7 @@ void IGBheader::type( char *datatype )
 // simple wrapper for ftell/gztell
 long IGBheader::tell( void *f )
 {
-    if( gzipping ) 
+    if( gzipping )
       return gztell( (gzFile)f );
     else
       return ftell( (FILE*)f );

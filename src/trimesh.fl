@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0305
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -103,7 +103,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {2015 64 350 645} type Double box UP_BOX
+      xywh {1569 64 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -905,12 +905,12 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight open
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4 hide
+          label Highlight
+          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
@@ -1111,7 +1111,7 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface open
+          label Surface
           xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
@@ -1433,6 +1433,16 @@ mwtb->redraw();}
                   mwtb->redraw();}
                 image {viridis_light.xpm} xywh {20 20 100 20}
               }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_MAGMA);
+                  mwtb->redraw();}
+                image {magma.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->vecdata->cs->scale(CS_INFERNO);
+                  mwtb->redraw();}
+                image {inferno.xpm} xywh {20 20 100 20}
+              }
             }
             Fl_Button {} {
               label optimal
@@ -1450,8 +1460,8 @@ mwtb->redraw();}
           }
         }
         Fl_Group auxgridgrp {
-          label {Aux Grid} open
-          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 deactivate
+          label {Aux Grid}
+          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
             label On
@@ -1483,7 +1493,7 @@ mwtb->redraw();}
               }
               MenuItem {} {
                 callback {mwtb->auxGrid->cs.scale(CS_BL_RAINBOW);
-mwtb->redraw();} selected
+mwtb->redraw();}
                 image {blrainbow.xpm} xywh {10 10 100 20}
               }
               MenuItem {} {
@@ -1545,6 +1555,16 @@ mwtb->redraw();}
                 callback {mwtb->auxGrid->cs.scale(CS_VIRIDIS_LIGHT);
                 mwtb->redraw();}
                 image {viridis_light.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_MAGMA);
+                mwtb->redraw();}
+                image {magma.xpm} xywh {20 20 100 20}
+              }
+              MenuItem {} {
+                callback {mwtb->auxGrid->cs.scale(CS_INFERNO);
+                mwtb->redraw();}
+                image {inferno.xpm} xywh {20 20 100 20}
               }
             }
             Fl_Value_Input auxmincolval {
@@ -1819,7 +1839,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {
+      Fl_Group colorscalegrp {open
         xywh {10 490 330 60} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup
@@ -1855,7 +1875,7 @@ mwtb->redraw();}
           tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
         }
         Fl_Choice cstype {
-          label {colour scale}
+          label {colour scale} open
           xywh {230 500 105 25} down_box BORDER_BOX labelsize 10 align 2
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
@@ -1927,8 +1947,18 @@ mwtb->redraw();}
           }
           MenuItem {} {
             callback {mwtb->cs->scale(CS_VIRIDIS_LIGHT);
+              mwtb->redraw();} selected
+            tooltip Magma image {viridis_light.xpm} xywh {20 20 100 20}
+          }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_MAGMA);
               mwtb->redraw();}
-            tooltip {Viridis Bright} image {viridis_light.xpm} xywh {20 20 100 20}
+            tooltip Magma image {magma.xpm} xywh {20 20 100 20}
+          }
+          MenuItem {} {
+            callback {mwtb->cs->scale(CS_INFERNO);
+              mwtb->redraw();}
+            tooltip Inferno image {inferno.xpm} xywh {20 20 100 20}
           }
           MenuItem {} {
             label Distinct
