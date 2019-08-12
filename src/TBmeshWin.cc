@@ -1306,9 +1306,9 @@ TBmeshWin::readAuxGrid( void *vp, const char* agfile )
   AuxGrid* newAuxGrid;
 
   try {
-    if( dataBuffer )
-        newAuxGrid = new AuxGrid( agfile, auxGrid, dataBuffer->dt(), dataBuffer->t0() );
-    else
+    if( dataBuffer ) {
+        newAuxGrid = new AuxGrid( agfile, auxGrid, dataBuffer->t0(), dataBuffer->dt() );
+    }else
         newAuxGrid = new AuxGrid( agfile, auxGrid );
   } catch (...) {
     return 1;
