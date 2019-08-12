@@ -419,7 +419,7 @@ private:
  *
  * \throw 1 if any error in input
  */
-AuxGrid::AuxGrid( const char *fn, AuxGrid *ag )
+AuxGrid::AuxGrid( const char *fn, AuxGrid *ag, float t0, float dt ):_dt(dt),_t0(t0)
 {
   if( strstr( fn, ".pts_t" ) )
     _indexer = new AuxGridIndexer(fn);
@@ -466,7 +466,7 @@ AuxGrid::AuxGrid( const char *fn, AuxGrid *ag )
   if( _plottable ){
     _timeplot = new PlotWin("Aux Time Series");
     _sz_ts = _indexer->time_series(0,_time_series);
-    _timeplot->set_data( _sz_ts, 0, _time_series, 0 );
+    _timeplot->set_data( _sz_ts, 0, _time_series, 0, _dt, _t0 );
   }
 
   if( _indexer )
@@ -620,7 +620,7 @@ void AuxGrid::plot(int tm)
     return;
   _sz_ts = _indexer->time_series( _hiVert, _time_series );
   _timeplot->window->show();
-  _timeplot->set_data( _sz_ts, _hiVert, _time_series, tm );
+  _timeplot->set_data( _sz_ts, _hiVert, _time_series, tm, _dt, _t0 );
   _timeplot->window->redraw();
 } 
 
@@ -658,7 +658,7 @@ bool AuxGrid :: highlight_vertex( int n, float &val, bool update_plot )
     val = _indexer->_data[n];
     if( update_plot && _plottable && _timeplot->window->shown() ) {
       _sz_ts = _indexer->time_series( _hiVert, _time_series );
-      _timeplot->set_data( _sz_ts, _hiVert, _time_series, 0 );
+      _timeplot->set_data( _sz_ts, _hiVert, _time_series, 0, _dt, _t0 );
     }
     return true;
   }

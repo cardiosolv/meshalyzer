@@ -33,9 +33,11 @@ class AuxGrid {
         int          _sz_ts;               //!< size of time series
         double*      _time_series;
         bool         _clip      = false;   // is is clipped?
+        float        _t0;
+        float        _dt;
 
     public:
-        AuxGrid( const char *fn, AuxGrid *ag=NULL );
+        AuxGrid( const char *fn, AuxGrid *ag=NULL, float t0=0, float dt=1 );
         virtual ~AuxGrid();
 
         Colourscale cs;
