@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0304
+version 1.0305
 header_name {.h}
 code_name {.cc}
 decl {\#include "TBmeshWin.h"} {public local
@@ -25,8 +25,8 @@ class ClipPlane {open
   Function {ClipPlane( TBmeshWin *tb )} {open
   } {
     Fl_Window window {
-      label {Clipping Plane} open
-      xywh {405 64 575 685} type Double hide
+      label {Clipping Planes} open selected
+      xywh {405 64 575 685} type Double visible
     } {
       Fl_Box cporienter {
         label Box
@@ -497,44 +497,44 @@ tbmw->redraw();}
         }
       }
       Fl_Group {} {
-        label {Clipping plane}
-        xywh {70 520 70 160} box SHADOW_BOX
+        label {Clipping plane shown} open
+        xywh {20 550 145 65} box SHADOW_BOX
       } {
         Fl_Round_Button {} {
           label 1
           callback {select_cp(0);}
-          xywh {80 530 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {25 560 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
         Fl_Round_Button {} {
           label 2
           callback {select_cp(1);}
-          xywh {80 555 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {65 560 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
         Fl_Round_Button {} {
           label 3
           callback {select_cp(2);}
-          xywh {80 580 45 15} type Radio down_box ROUND_DOWN_BOX value 1 labelsize 18
+          xywh {110 560 45 15} type Radio down_box ROUND_DOWN_BOX value 1 labelsize 18
         }
         Fl_Round_Button {} {
           label 4
           callback {select_cp(3);}
-          xywh {80 605 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {25 585 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
         Fl_Round_Button {} {
           label 5
           callback {select_cp(4);}
-          xywh {80 630 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {65 585 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
         Fl_Round_Button {} {
           label 6
           callback {select_cp(5);}
-          xywh {80 650 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
+          xywh {110 585 45 15} type Radio down_box ROUND_DOWN_BOX labelsize 18
         }
       }
       Fl_Button {} {
         label {Sync Clipping Planes}
-        callback {tbmw->SendClipSyncMessage();} selected
-        image {broadcast.png} xywh {430 550 75 75} labelsize 12 align 128
+        callback {tbmw->SendClipSyncMessage();}
+        image {broadcast.png} xywh {430 545 75 75} labelsize 12 align 128
       }
     }
     code {tbmw = tb;
