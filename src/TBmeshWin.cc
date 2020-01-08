@@ -147,6 +147,12 @@ void TBmeshWin :: draw()
     glPolygonOffset( 2., 2. );
     glEnable( GL_DEPTH_TEST );
     glEnable(GL_NORMALIZE);
+    glCullFace(GL_FRONT);
+    if( backface_culling )
+        glEnable(GL_CULL_FACE);
+    else
+        glDisable(GL_CULL_FACE);
+
     if ( facetshading ) {			// faster but no anti-aliasing
       glDisable( GL_POINT_SMOOTH );
       glDisable( GL_LINE_SMOOTH );

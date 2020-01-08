@@ -107,11 +107,11 @@ class Controls {open
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
-      Fl_Menu_Bar mainbar {
+      Fl_Menu_Bar mainbar {open
         xywh {0 0 350 30} labelcolor 1
       } {
         Submenu {} {
-          label File open
+          label File
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -300,7 +300,7 @@ mwtb->tmLink->pid->value(std::to_string(getpid()).c_str());}
           }
         }
         Submenu imgmenu {
-          label Image
+          label Image open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -517,6 +517,12 @@ mwtb->redraw();}
               callback {mwtb->bgd(0);}
               xywh {20 20 100 20}
             }
+          }
+          MenuItem backfacecull {
+            label {Backface culling}
+            user_data backfacecull
+            callback {mwtb->cull(((Fl_Menu_Item*)v)->checked());} selected
+            xywh {0 0 100 20} type Toggle
           }
           MenuItem revdraworder {
             label {Reverse draw order}
@@ -905,7 +911,7 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {open
+      Fl_Tabs tabwidget {
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
@@ -1839,7 +1845,7 @@ mwtb->redraw();}
           }
         }
       }
-      Fl_Group colorscalegrp {open
+      Fl_Group colorscalegrp {
         xywh {10 490 330 60} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup
@@ -2188,6 +2194,7 @@ mshzf << "DATA_OPACITY ======" << endl;
 mwtb->dataopac->save(mshzf);
 
 SAVE_WIDGET(mshzf,read_recalibrate);
+SAVE_WIDGET(mshzf,backfacecull);
 SAVE_WIDGET(mshzf,revdraworder);
 SAVE_WIDGET(mshzf,norot);
 SAVE_WIDGET(mshzf,transBgd);
@@ -2540,6 +2547,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     continue;
   } 
   TEST_MENUVAR( read_recalibrate, var, val, mainbar )  
+  TEST_MENUVAR( backfacecull, var, val, mainbar )  
   TEST_MENUVAR( revdraworder, var, val, mainbar )  
   TEST_MENUVAR( norot, var, val, mainbar )  
   TEST_MENUVAR( transBgd, var, val, mainbar )  
@@ -2747,8 +2755,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   cerr << "Unknown variable specified: " << var << endl;
 }
 mwtb->lights(illBut->value());
-mwtb->redraw();} {selected
-    }
+mwtb->redraw();} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
