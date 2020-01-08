@@ -20,7 +20,7 @@
 \newcommand{\meshal}{\textbf{\emph{M\rb{-.25}{e}\rb{-.35}{s}\rb{-.45}{h}}}%
 \textsf{\rb{-0.3}{a}\rb{-.15}{l}y}%
 \texttt{\rb{.2}{\reflectbox{Z}}\rb{.1}{e}r}\xspace}
-
+\renewcommand{\floatpagefraction}{0.7}
 \begin{document}
 
 \begin{titlepage}
@@ -809,6 +809,13 @@ types chosen.
 
 Select the background colour.
 
+\subsection{Backface culling}
+
+If checked, do not bother with elements which are facing away from the screen. 
+Normally, they are eliminated because of depth checking. 
+This should result in faster rendering of large meshes as well as brighter images when transparency is used.
+However, with nonclosed surfaces, results may not be correct.
+
 \subsubsection{Reverse draw order}
 
 Draw the surfaces in the opposite order. This can be useful when surfaces
@@ -818,6 +825,10 @@ overlap and different perspectives are chosen.
 
 During off rotating with the trackball. This is automatically set for 1D and
 2D data.
+
+\subsection{Sync}
+Syncing transfers setting to different running instances of meshalyzer.
+See \S\ref{sec:link} for details.
 
 \subsection{Data Menu}
 
@@ -861,11 +872,11 @@ For each clipping plane, several different modes are available:
 		 will have data interpolated on to it. This surface will also be
 		 affected by the ``Surface Opacity.''
  \end{description}
-\begin{figure}[htb]
+\begin{figure}[htbp]
 \centerline{\includegraphics[width=12cm]{clip}}
 \caption{Clipping plane dialogue.}
 \end{figure}
-At the bottom of the widget is a graphical interface for moving the clipping plane. 
+At the bottom of the widget is a graphical interface for reorienting the clipping plane. 
 The desired plane must first be selected.
 
 \subsubsection{IsoSurfaces/IsoLines}
@@ -1035,9 +1046,14 @@ Different \meshal instances can be linked together so that some operations are a
 instances.
 To link instances of \meshal, click on ``File/Link'' which will open up a linking dialog 
 listing all running instances of \meshal.
+At the top is the Process ID of the current \meshal instance below which is a list of the
+currently running but unlinked \meshal instances.
+To link, select a process and press the ``link selected'' button.
+Linked processes are shown in the bottom list.
 Linking is bidirectional so that linking a new process includes it in the group of currently
 linked processes. As such, operations performed in any of the linked processes will be sent to
-all processes.
+all processes. 
+Unlinking is also bidirectional so unlinking it removes it entirely from the group.
 
 Currently, linking supports the following operations:
 \begin{description}
