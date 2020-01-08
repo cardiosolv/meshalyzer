@@ -147,7 +147,8 @@ void TBmeshWin :: draw()
     glPolygonOffset( 2., 2. );
     glEnable( GL_DEPTH_TEST );
     glEnable(GL_NORMALIZE);
-    glCullFace(GL_FRONT);
+    glFrontFace( GL_CW );
+    glCullFace(GL_BACK);
     if( backface_culling )
         glEnable(GL_CULL_FACE);
     else
