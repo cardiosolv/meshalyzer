@@ -124,6 +124,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     friend    class Sequence;
     void      facetshade( bool a ){ facetshading=a;valid(0);redraw(); }
     void      cull( bool a ){ backface_culling=a;valid(0);redraw(); }
+    void      bf_light( int a ){ lit_bf=a;valid(0);redraw(); }
     void      headlamp( bool a ){ headlamp_mode=a; redraw(); }
     void      surfVis( vector<int>&, bool );
     void      surfFilled( vector<int>&, bool );
@@ -216,6 +217,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     DataReaderEnum getReaderType( const char * );
     bool      facetshading = false;	// do not blend over surface elements
     bool      backface_culling = false;	// do not cull CW elements
+    int       lit_bf = 0; // ligth backface?
     bool      headlamp_mode = true;	// headlamp lighting mode
     CutSurfaces **_cutsurface;      // clipped surfaces
     IsoSurface *iso0 = NULL, *iso1 = NULL;

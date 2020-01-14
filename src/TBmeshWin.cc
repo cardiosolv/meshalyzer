@@ -1220,7 +1220,7 @@ TBmeshWin::illuminate( GLfloat max )
 
   GLfloat modamb[] = { am, am, am, 1. };
   glLightModelfv( GL_LIGHT_MODEL_AMBIENT, modamb );
-  glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, 0 );
+  glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, lit_bf ?1 : 0);
   glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
 
   // draw an arrow showing the light direction

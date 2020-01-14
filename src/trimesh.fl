@@ -521,8 +521,14 @@ mwtb->redraw();}
           MenuItem backfacecull {
             label {Backface culling}
             user_data backfacecull
-            callback {mwtb->cull(((Fl_Menu_Item*)v)->checked());} selected
+            callback {mwtb->cull(((Fl_Menu_Item*)v)->checked());}
             xywh {0 0 100 20} type Toggle
+          }
+          MenuItem backfacelight {
+            label {Light backface}
+            user_data backfacelight
+            callback {mwtb->bf_light(((Fl_Menu_Item*)v)->checked());}
+            xywh {10 10 100 20} type Toggle
           }
           MenuItem revdraworder {
             label {Reverse draw order}
@@ -2195,6 +2201,7 @@ mwtb->dataopac->save(mshzf);
 
 SAVE_WIDGET(mshzf,read_recalibrate);
 SAVE_WIDGET(mshzf,backfacecull);
+SAVE_WIDGET(mshzf,backfacelight);
 SAVE_WIDGET(mshzf,revdraworder);
 SAVE_WIDGET(mshzf,norot);
 SAVE_WIDGET(mshzf,transBgd);
@@ -2548,6 +2555,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   } 
   TEST_MENUVAR( read_recalibrate, var, val, mainbar )  
   TEST_MENUVAR( backfacecull, var, val, mainbar )  
+  TEST_MENUVAR( backfacelight, var, val, mainbar )  
   TEST_MENUVAR( revdraworder, var, val, mainbar )  
   TEST_MENUVAR( norot, var, val, mainbar )  
   TEST_MENUVAR( transBgd, var, val, mainbar )  
@@ -2755,7 +2763,8 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   cerr << "Unknown variable specified: " << var << endl;
 }
 mwtb->lights(illBut->value());
-mwtb->redraw();} {}
+mwtb->redraw();} {selected
+    }
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
