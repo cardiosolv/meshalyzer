@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0305
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -518,23 +518,27 @@ mwtb->redraw();}
               xywh {20 20 100 20}
             }
           }
-          MenuItem backfacecull {
-            label {Backface culling}
-            user_data backfacecull
-            callback {mwtb->cull(((Fl_Menu_Item*)v)->checked());}
-            xywh {0 0 100 20} type Toggle
-          }
-          MenuItem backfacelight {
-            label {Light backface}
-            user_data backfacelight
-            callback {mwtb->bf_light(((Fl_Menu_Item*)v)->checked());}
-            xywh {10 10 100 20} type Toggle
-          }
-          MenuItem revdraworder {
-            label {Reverse draw order}
-            user_data revdraworder
-            callback {mwtb->revdraworder(((Fl_Menu_Item*)v)->checked());}
-            xywh {0 0 100 20} type Toggle
+          Submenu {} {
+            label {Back faces} open
+            xywh {0 0 63 21}
+          } {
+            MenuItem bfcull {
+              label Cull
+              callback {mwtb->cull(1);}
+              xywh {0 0 33 21} type Radio
+            }
+            MenuItem bfunlit {
+              label Unlit
+              callback {mwtb->cull(0);
+mwtb->bf_light(0);}
+              xywh {0 0 33 21} type Radio value 1
+            }
+            MenuItem bflit {
+              label Lit
+              callback {mwtb->cull(0);
+mwtb->bf_light(1);}
+              xywh {0 0 33 21} type Radio
+            }
           }
           MenuItem norot {
             label {No rotation}
@@ -542,8 +546,14 @@ mwtb->redraw();}
             callback {mwtb->norot(((Fl_Menu_Item*)v)->checked());}
             xywh {0 0 30 20} type Toggle
           }
+          MenuItem revdraworder {
+            label {Reverse draw order}
+            user_data revdraworder
+            callback {mwtb->revdraworder(((Fl_Menu_Item*)v)->checked());}
+            xywh {0 0 100 20} type Toggle
+          }
           Submenu {} {
-            label Sync open
+            label Sync
             xywh {0 0 70 20}
           } {
             MenuItem {} {
@@ -580,7 +590,7 @@ mwtb->redraw();}
           }
         }
         Submenu {} {
-          label Data
+          label Data open
           xywh {0 0 100 20}
         } {
           MenuItem {} {
@@ -604,7 +614,7 @@ mwtb->redraw();}
             tooltip {Ignore ranges of data} xywh {0 0 34 20}
           }
           Submenu brcut {
-            label {Branch cut}
+            label {Branch cut} open
             tooltip {Do not interpolate over a branch cut} xywh {0 0 70 20}
           } {
             MenuItem brcutNone {
@@ -2200,8 +2210,9 @@ mshzf << "DATA_OPACITY ======" << endl;
 mwtb->dataopac->save(mshzf);
 
 SAVE_WIDGET(mshzf,read_recalibrate);
-SAVE_WIDGET(mshzf,backfacecull);
-SAVE_WIDGET(mshzf,backfacelight);
+SAVE_WIDGET(mshzf,bfcull);
+SAVE_WIDGET(mshzf,bfunlit);
+SAVE_WIDGET(mshzf,bflit);
 SAVE_WIDGET(mshzf,revdraworder);
 SAVE_WIDGET(mshzf,norot);
 SAVE_WIDGET(mshzf,transBgd);
@@ -2554,8 +2565,9 @@ while( mshzf.getline( buf, BUFLEN ) ) {
     continue;
   } 
   TEST_MENUVAR( read_recalibrate, var, val, mainbar )  
-  TEST_MENUVAR( backfacecull, var, val, mainbar )  
-  TEST_MENUVAR( backfacelight, var, val, mainbar )  
+  TEST_RADIO( bfcull, var, int(val), mainbar )
+  TEST_RADIO( bfunlit, var, int(val), mainbar )
+  TEST_RADIO( bflit, var, int(val), mainbar )
   TEST_MENUVAR( revdraworder, var, val, mainbar )  
   TEST_MENUVAR( norot, var, val, mainbar )  
   TEST_MENUVAR( transBgd, var, val, mainbar )  
