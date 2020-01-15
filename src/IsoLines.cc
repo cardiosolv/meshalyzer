@@ -39,7 +39,9 @@ IsoLine :: process( Surfaces *s, DATA_TYPE *dat, bool restricted )
     for( int j=0; j<s->num(); j++ ) {
       if( restricted && !s->visible() ) continue;
       int npoly;
-      MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly );
+      PPoint p;
+      EdgePtMap epm;
+      MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly, p, epm );
       if( npoly && _branch ) {
         const int*nodes= s->ele(j)->obj();
         DATA_TYPE edat[MAX_NUM_SURF_NODES];
@@ -79,7 +81,9 @@ IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
             idata[v] = s->interpolate( j, dat, v );
       }
       int npoly;
-      MultiPoint **lpoly = s->ele(j)->isosurf( idata, val, npoly );
+      PPoint p;
+      EdgePtMap epm;
+      MultiPoint **lpoly = s->ele(j)->isosurf( idata, val, npoly, p, epm );
       if( !npoly ||
           (_branch && cross_branch(idata,s->ele(j)->ptsPerObj(), _branch_range[0], _branch_range[1], _branch_tol)) )
           continue;

@@ -21,6 +21,9 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v,
   double brmin = branch ? branch[0]+BRANCH_TOL*(branch[1]-branch[0]) : 0;
   double brmax = branch ? branch[1]-BRANCH_TOL*(branch[1]-branch[0]) : 0;
 
+  PPoint iso_pts;
+  EdgePtMap ep_map;
+
 #pragma omp parallel for schedule(dynamic,100)
   for( int i=0; i<m->numVol(); i++ ) {
     if( member[i] ) {
@@ -38,7 +41,7 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v,
       }
 
       int npoly;
-      MultiPoint **lpoly = m->_vol[i]->isosurf( dat, _val, npoly );
+      MultiPoint **lpoly = m->_vol[i]->isosurf( dat, _val, npoly, iso_pts, ep_map );
 
       if (lpoly != NULL){
         for( int j=0; j<npoly; j++ )
@@ -52,7 +55,7 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v,
   }
     
   // determine the vertex normals for all the polygons
-  //determine_vert_norms(m->pt);
+  determine_vert_norms(iso_pts);
 }
 
 IsoSurface::~IsoSurface()
@@ -68,7 +71,8 @@ void IsoSurface::draw()
 {
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
   for( int i=0; i<polygon.size(); i++ ) {
-    polygon[i]->draw(0, 0, colour, NULL, NULL, 1, NULL, polygon[i]->ptnrml() );
+    //polygon[i]->draw(0, 0, colour, NULL, NULL, 1, NULL, polygon[i]->ptnrml() );
+    polygon[i]->draw(0, 0, colour, NULL, NULL, 1, NULL, _vertnorm );
   }
 }
 
@@ -94,7 +98,7 @@ void IsoSurface::determine_vert_norms(PPoint& pt)
     for ( int j=0; j<polygon[i]->ptsPerObj(); j++ ) {
       for ( int k=0; k<3; k++ ) 
 #pragma omp atomic
-        tvn[3*pnt[j]+k] += n[k];
+        tvn[3*pnt[j]+k] -= n[k];
       has_norm[pnt[j]] = true;
     }
   }

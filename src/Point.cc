@@ -221,6 +221,7 @@ PPoint :: add( GLfloat *p, int n )
 
   _allvis.resize( _n );
   _allvis.assign( _n, true );
+  _visible = &_allvis;
   setVis( true );
 }
 

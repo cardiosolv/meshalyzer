@@ -7,8 +7,6 @@
 
 enum lpint_enum{ BOTH_ON_PLANE, NO_INTERSECTION };
 
-static const int simple_index[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13};
-
 /** find the intersection of a plane with a line
  *
  *  \param a  first point of line
@@ -353,16 +351,16 @@ edge_interp( const GLfloat *p0, DATA_TYPE dat0, const GLfloat *p1,
  *      edge1_ node1 ... edgeN_node1 \#sides_poly1  edge0_node0 ...
  *      edgeN_node2
  *
- * \param dat    data for all the nodes
- * \param val    value for the isosurface
- * \param npoly  number of polygons
- * \param interp interpolation values
+ * \param      dat    data for all the nodes
+ * \param[in]  val    value for the isosurface
+ * \param[out] npoly  number of polygons
+ * \param[out] interp interpolation values
  *
  *  \return a list of element pointers
  *  \post   npoly is the number of elements in the list
  */
 MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
-        vector<Interpolator<DATA_TYPE>*> *interp )
+        PPoint &epts, EdgePtMap &epm ) 
 {
   // determine row index into table 
   unsigned int index=0;
@@ -388,40 +386,43 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
   for( int n=0; n<npoly; n++ ) {
     int      npts = poly[poly_start];         // \#nodes defining polygon
     GLfloat *pt   = new GLfloat[npts*3];      // local point list
+    int elePts[npts];
     for( int i=0; i<npts; i++ ) {
       int pindex  = poly_start+1+i*2;
       int n0 = _node[poly[pindex]];
       int n1 = _node[poly[pindex+1]];
-      float d = edge_interp( (*_pt)[n0], dat[n0], (*_pt)[n1], 
-                                             dat[n1], val, pt+3*i );
-
-      if( interp )
-        interp->push_back(new Interpolator<DATA_TYPE>( n0, n1, d )); 
+      Epair edge( min(n0,n1), max(n0,n1) );
+      if( !epm.count( edge ) ){
+        GLfloat pt[3];
+        float d   = edge_interp( (*_pt)[n0], dat[n0], (*_pt)[n1], 
+                                             dat[n1], val, pt );
+        epm[edge] = epts.num();
+        epts.add( pt, 1 );
+      }
+      elePts[i] = epm[edge];
     }
 	
-    PPoint   *pts = new PPoint;
-    pts->add( pt, npts );
-    pts->setVis(true);
-    pts->offset(_pt->offset());
+    epts.setVis(true);
+    epts.offset(_pt->offset());
 
     switch(poly[poly_start]) {
         case 1:
             assert(0);
             break;
         case 2:
-            isoele[n] = new Connection( pts );
+            isoele[n] = new Connection( &epts );
             break;
         case 3: 
-            isoele[n] = new Triangle( pts );
+            isoele[n] = new Triangle( &epts );
             break;
         case  4:
-            isoele[n] = new Quadrilateral( pts );
+            isoele[n] = new Quadrilateral( &epts );
             break;
         default:
-            isoele[n] = new PolyGon( pts, npts );
+            isoele[n] = new PolyGon( &epts, npts );
             break;
     }
-    isoele[n]->define( simple_index );
+    isoele[n]->define( elePts );
 
     if( poly[poly_start]>2 ) {                 // it is a surface element
       SurfaceElement *se = dynamic_cast<SurfaceElement*>(isoele[n]);

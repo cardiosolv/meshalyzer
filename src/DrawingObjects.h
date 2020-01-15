@@ -3,6 +3,9 @@
 
 #include "objects.h"
 #include <vector>
+#include <unordered_map>
+#include <utility>
+#include <algorithm>
 #include "drawgl.h"
 #include "Colourscale.h"
 #include "DataOpacity.h"
@@ -13,6 +16,18 @@
 #ifdef USE_HDF5
 #include <ch5/ch5.h>
 #endif
+struct hash_pair { 
+    template <class T1, class T2> 
+    size_t operator()(const pair<T1, T2>& p) const
+    { 
+        auto hash1 = hash<T1>{}(p.first); 
+        auto hash2 = hash<T2>{}(p.second); 
+        return hash1 ^ hash2; 
+    } 
+}; 
+
+typedef pair<int,int> Epair;
+typedef unordered_map< Epair, int, hash_pair > EdgePtMap;
 
 gzFile openFile( const char*, const char* );
 
@@ -102,8 +117,7 @@ class MultiPoint : public DrawingObj
     void    add( int *n );
     const   PPoint* pt(){ return _pt; }
     void    define( const int *nl, int n=1 );
-    MultiPoint **isosurf( DATA_TYPE *d, DATA_TYPE val, int &, 
-                                    vector<Interpolator<DATA_TYPE>*> *a=NULL );
+    MultiPoint **isosurf( DATA_TYPE *d, DATA_TYPE val, int &, PPoint &epts, EdgePtMap &epm );
     virtual const int*iso_polys(unsigned int)=0; 
     virtual int bytes()=0;
   protected:
