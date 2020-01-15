@@ -16,15 +16,15 @@ class IsoSurface {
 	    int tm() const { return _tm; }
         void saveAux( const char *fname );
     private: // 
-	    void determine_vert_norms(PPoint& pt);
+	    void determine_vert_norms();
 	
     private: // member variables
       vector<SurfaceElement*> polygon;
 	  GLfloat* _vertnorm;   //!< vertex normals
-	  int*     _vert;       //!< vertices for which normals are computed
       GLfloat   colour[4];  //!< color of surface
       double   _val;        //!< data value of surface
       int      _tm;         //!< time when surface calculated
+      PPoint   _pts;        //!< points of surface
 };
 
 #endif

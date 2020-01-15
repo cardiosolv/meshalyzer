@@ -93,7 +93,7 @@ class PPoint: public DrawingObj
     int     num_tm(){ return _dynPt? _dynPt->max_tm()+1:0; }
   private:
     GLfloat*     _pts=NULL;	       //!< point list
-    vector<bool>*_visible;         //!< points which get drawn
+    vector<bool>*_visible=NULL;    //!< points which get drawn
     GLfloat      _offset[3];       //!< centering offset
     bool         _base1=false;     //!< true for base 1
     vector<bool>_allvis;	       //!< all true

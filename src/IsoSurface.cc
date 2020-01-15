@@ -13,18 +13,18 @@
  * \param v      isovalue
  * \param member true if part of model
  * \param t      time
+ * \param branch branch cut information (NULL if none)
  */
 IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v, 
 		       vector<bool>&member, int t, double *branch )
-  :_vertnorm(NULL),_vert(NULL),_val(v),_tm(t)
+  :_vertnorm(NULL),_val(v),_tm(t)
 {
   double brmin = branch ? branch[0]+BRANCH_TOL*(branch[1]-branch[0]) : 0;
   double brmax = branch ? branch[1]-BRANCH_TOL*(branch[1]-branch[0]) : 0;
 
-  PPoint iso_pts;
   EdgePtMap ep_map;
 
-#pragma omp parallel for schedule(dynamic,100)
+#pragma omp parallel for schedule(dynamic,100) shared(ep_map, _pts, polygon)
   for( int i=0; i<m->numVol(); i++ ) {
     if( member[i] ) {
 
@@ -41,7 +41,7 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v,
       }
 
       int npoly;
-      MultiPoint **lpoly = m->_vol[i]->isosurf( dat, _val, npoly, iso_pts, ep_map );
+      MultiPoint **lpoly = m->_vol[i]->isosurf( dat, _val, npoly, _pts, ep_map );
 
       if (lpoly != NULL){
         for( int j=0; j<npoly; j++ )
@@ -54,8 +54,7 @@ IsoSurface::IsoSurface(Model* m, DATA_TYPE *dat, double v,
     }
   }
     
-  // determine the vertex normals for all the polygons
-  determine_vert_norms(iso_pts);
+  determine_vert_norms();
 }
 
 IsoSurface::~IsoSurface()
@@ -70,62 +69,40 @@ IsoSurface::~IsoSurface()
 void IsoSurface::draw()
 {
   glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-  for( int i=0; i<polygon.size(); i++ ) {
-    //polygon[i]->draw(0, 0, colour, NULL, NULL, 1, NULL, polygon[i]->ptnrml() );
+  for( int i=0; i<polygon.size(); i++ ) 
     polygon[i]->draw(0, 0, colour, NULL, NULL, 1, NULL, _vertnorm );
-  }
 }
 
 /******************************************************************************
- * \brief Determine the vertex normal vector of the \a polygon
+ * \brief Determine vertex normal vectors  of the surface
  *
  * \note Applying the Gourade shading by taking the average
  *       of all adjacent vertex normals
  *
- * \param polygon - the polygon to determine the vertex normal vector
- *
  ******************************************************************************/
-void IsoSurface::determine_vert_norms(PPoint& pt)
+void IsoSurface::determine_vert_norms()
 {
-  vector<bool> has_norm(pt.num());  // if elements attached to node
-  GLfloat *tvn = (GLfloat *)calloc(pt.num()*3,sizeof(GLfloat));
+  vector<bool> has_norm(_pts.num());      //!< does the vertex have a normal?
+  _vertnorm = new GLfloat[3*_pts.num()];
 
 #pragma omp parallel for
-  for ( int i = 0; i < polygon.size(); i++ ) {
+  for ( int i=0; i<polygon.size(); i++ ) {
     const GLfloat* n;
     if ( (n=polygon[i]->nrml(0)) == NULL ) continue;
     const int *pnt = polygon[i]->obj();
     for ( int j=0; j<polygon[i]->ptsPerObj(); j++ ) {
       for ( int k=0; k<3; k++ ) 
 #pragma omp atomic
-        tvn[3*pnt[j]+k] -= n[k];
+        _vertnorm[3*pnt[j]+k] += n[k];
       has_norm[pnt[j]] = true;
     }
   }
-  // count \# nodes in surface
-  int numvert = 0;
+
 #pragma omp parallel for
-  for ( int i=0; i<pt.num(); i++ ) {
-    if ( has_norm[i] ) {
-      normalize(tvn+i*3);
-#pragma omp atomic
-      numvert++;
-    }
+  for ( int i=0; i<_pts.num(); i++ ) {
+    if ( has_norm[i] ) 
+      normalize(_vertnorm+i*3);
   }
-
-  _vert = (int *)realloc(_vert, sizeof(int)*(numvert+1));
-  _vertnorm = new GLfloat[3*numvert];
-  numvert = 0;
-
-  for ( int i=0; i<pt.num(); i++ ) {
-    if ( has_norm[i] ) {
-      memcpy( _vertnorm+3*numvert, tvn+i*3, sizeof(GLfloat)*3 );
-      _vert[numvert++] = i;
-    }
-  }
-
-  _vert[numvert] = -1;
-  free(tvn);
 }
 
 

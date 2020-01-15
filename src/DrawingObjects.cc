@@ -351,13 +351,15 @@ edge_interp( const GLfloat *p0, DATA_TYPE dat0, const GLfloat *p1,
  *      edge1_ node1 ... edgeN_node1 \#sides_poly1  edge0_node0 ...
  *      edgeN_node2
  *
- * \param      dat    data for all the nodes
- * \param[in]  val    value for the isosurface
- * \param[out] npoly  number of polygons
- * \param[out] interp interpolation values
+ * \param        dat    data for all the nodes
+ * \param[in]    val    value for the isosurface
+ * \param[out]   npoly  number of polygons
+ * \param[inout] epts   points defining isosurface
+ * \param[inout] epm    map of edge nodes to isovalue intersection point (\p epts)
  *
  *  \return a list of element pointers
- *  \post   npoly is the number of elements in the list
+ *  \post   \pnpoly is the number of elements in the list
+ *  \post   \p epts and \p epm are updated with any new points created
  */
 MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
         PPoint &epts, EdgePtMap &epm ) 
@@ -385,8 +387,7 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
 
   for( int n=0; n<npoly; n++ ) {
     int      npts = poly[poly_start];         // \#nodes defining polygon
-    GLfloat *pt   = new GLfloat[npts*3];      // local point list
-    int elePts[npts];
+    int elePts[npts];                         // nodes defining the isoelement
     for( int i=0; i<npts; i++ ) {
       int pindex  = poly_start+1+i*2;
       int n0 = _node[poly[pindex]];
@@ -396,9 +397,14 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
         GLfloat pt[3];
         float d   = edge_interp( (*_pt)[n0], dat[n0], (*_pt)[n1], 
                                              dat[n1], val, pt );
-        epm[edge] = epts.num();
-        epts.add( pt, 1 );
+#pragma omp critical 
+        {
+          // create a new point and map the edge nodes to it
+          epm[edge] = epts.num();
+          epts.add( pt, 1 );
+        }
       }
+#pragma omp critical
       elePts[i] = epm[edge];
     }
 	

@@ -809,12 +809,18 @@ types chosen.
 
 Select the background colour.
 
-\subsection{Backface culling}
+\subsubsection{Backface}
 
-If checked, do not bother with elements which are facing away from the screen. 
-Normally, they are eliminated because of depth checking. 
-This should result in faster rendering of large meshes as well as brighter images when transparency is used.
-However, with nonclosed surfaces, results may not be correct.
+There are three ways to deal with back facing polygons:
+\begin{description}
+
+    \item[Cull] Do not draw any polygons facing the back. This is fine for closed surfaces,
+        and will speed up rendering, as well as make transparency brighter.
+    \item[Unlit] Back facing polygons will be unlit and dark. This saves lighting calculations on one side.
+        This has traditionally been the default.
+    \item [Lit] perform lighting calculation for both sides of the polygon. This is the slowest but the best. 
+        The intensity of the light for the backward facing polygons can be adjusted on the Surface color widget.
+\end{description}
 
 \subsubsection{Reverse draw order}
 
@@ -823,7 +829,7 @@ overlap and different perspectives are chosen.
 
 \subsubsection{No rotation}
 
-During off rotating with the trackball. This is automatically set for 1D and
+The trackball no longer performs rotations, only translation and scaling. This is automatically set for 1D and
 2D data.
 
 \subsection{Sync}
