@@ -375,31 +375,29 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
   }
 
   const int* poly        = iso_polys(index);
-  npoly                  = poly[0];// number of polygons to create
-  int       poly_start   = 1;      // first polygon defined after \#polygons
+  npoly                  = poly[0]; // number of polygons to create
   
   // do not continue if number of polygons are zero
-  if (!npoly) {
-    return NULL;
-  }
+  if (!npoly) return NULL;
   
-  MultiPoint **isoele = new MultiPoint *[poly[0]]; //element pointer list
+  int       poly_start   = 1;      // first polygon defined after \#polygons
+  MultiPoint **isoele    = new MultiPoint *[npoly]; //element pointer list
 
   for( int n=0; n<npoly; n++ ) {
-    int      npts = poly[poly_start];         // \#nodes defining polygon
+    int npts = poly[poly_start];              // \#nodes defining polygon
     int elePts[npts];                         // nodes defining the isoelement
     for( int i=0; i<npts; i++ ) {
-      int pindex  = poly_start+1+i*2;
-      int n0 = _node[poly[pindex]];
-      int n1 = _node[poly[pindex+1]];
-      Epair edge( min(n0,n1), max(n0,n1) );
+      int pindex = poly_start+1+i*2;
+      int n0     = _node[poly[pindex]];
+      int n1     = _node[poly[pindex+1]];
+      EdgePair edge( min(n0,n1), max(n0,n1) );
       if( !epm.count( edge ) ){
+        // create a new point and map the edge nodes to it
         GLfloat pt[3];
-        float d   = edge_interp( (*_pt)[n0], dat[n0], (*_pt)[n1], 
+        float d = edge_interp( (*_pt)[n0], dat[n0], (*_pt)[n1], 
                                              dat[n1], val, pt );
 #pragma omp critical 
         {
-          // create a new point and map the edge nodes to it
           epm[edge] = epts.num();
           epts.add( pt, 1 );
         }
@@ -434,8 +432,8 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
       SurfaceElement *se = dynamic_cast<SurfaceElement*>(isoele[n]);
       se->compute_normals(0,0);
 
-      GLfloat *ptnrml = new GLfloat[3*poly[poly_start]];
-      for( int i=0; i<poly[poly_start]; i++ ) {
+      GLfloat *ptnrml = new GLfloat[3*npts];
+      for( int i=0; i<npts; i++ ) {
         memcpy( ptnrml+3*i, se->nrml(), 3*sizeof(GLfloat) );
       }
       
@@ -448,8 +446,8 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
       if( dat[n0]>val )
         scale( norm, -1 );
 
-      if( dot( norm,  se->nrml() ) < 0 )
-        for( int ni=0; ni<poly[poly_start]; ni++ )
+      if( dot( norm, se->nrml() ) < 0 )
+        for( int ni=0; ni<npts; ni++ )
           scale( ptnrml+ni*3, -1 );
 
       se->vertnorm( ptnrml );

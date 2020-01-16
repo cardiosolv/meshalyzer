@@ -26,8 +26,8 @@ struct hash_pair {
     } 
 }; 
 
-typedef pair<int,int> Epair;
-typedef unordered_map< Epair, int, hash_pair > EdgePtMap;
+typedef pair<int,int> EdgePair;
+typedef unordered_map< EdgePair, int, hash_pair > EdgePtMap;
 
 gzFile openFile( const char*, const char* );
 
