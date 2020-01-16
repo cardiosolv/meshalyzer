@@ -14,7 +14,9 @@ class IsoSurface {
         double isoval(){ return _val; } 
         void color(const GLfloat *c){memmove(colour,c, 4*sizeof(GLfloat));}
 	    int tm() const { return _tm; }
-        void saveAux( const char *fname );
+        void saveAux( string, int pt_offset=0 );
+        int  npts(void) {return _pts.num();}
+        int  nele(void) {return polygon.size();}
     private: // 
 	    void determine_vert_norms();
 	

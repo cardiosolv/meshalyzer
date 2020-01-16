@@ -158,6 +158,7 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     void      ctr_on_vtx( int vtx );
     bool      anim_loop = false;
     void      axes( int v ) { _axes = v; redraw(); }
+    void      saveAux( char *fn, int s );
     friend class Controls;
     friend class HDF5DataBrowser;
     friend class Frame;
@@ -220,7 +221,6 @@ class TBmeshWin:public Fl_Gl_Tb_Window
     int       lit_bf = 0; // ligth backface?
     bool      headlamp_mode = true;	// headlamp lighting mode
     CutSurfaces **_cutsurface;      // clipped surfaces
-    IsoSurface *iso0 = NULL, *iso1 = NULL;
     IsoLine    *isoline = NULL;
     set<int>   timeLinks;           // other processes linked to this one
     bool       bgd_trans = false;   //!< transparent background

@@ -124,14 +124,6 @@ TBmeshWin::~TBmeshWin()
   if (model != NULL){
     delete model;
   }
-
-  if (iso0 != NULL){
-    delete iso0;
-  }
-
-  if (iso1 != NULL){
-    delete iso1;
-  }
 }
 
 void TBmeshWin :: draw()
@@ -408,51 +400,43 @@ void TBmeshWin::draw_iso_surfaces()
 
   bool on_tr;
 
-  if( isosurfwin->isoOn0->value() ) {
-    bool dirty =  isosurfwin->issDirty(0);
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
+  for( int s=0; s<2; s++ ) {
 
-    for ( int s=0; s<model->_numReg; s++ ) {
-      RRegion *reg = model->region(s);
-      if( reg->_iso0 && ( dirty || reg->_iso0->tm() != tm) ){
-        delete iso0;
-        reg->_iso0 = NULL;
+    if( !isosurfwin->isoOn(s) ) continue;
+
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    float bflight = isosurfwin->backlight(s);
+    GLfloat diffuseb[4], specularb[4], shinyf;
+    glGetMaterialfv( GL_FRONT, GL_DIFFUSE,  diffuseb );
+    glGetMaterialfv( GL_FRONT, GL_SPECULAR, specularb );
+    glGetMaterialfv( GL_FRONT, GL_SHININESS, &shinyf );
+    CSET( diffuseb,  diffuseb[0]*bflight,  diffuseb[3]  );
+    CSET( specularb, specularb[0]*bflight, specularb[3] );
+    glMaterialfv(GL_BACK,  GL_DIFFUSE,   diffuseb       );
+    glMaterialfv(GL_BACK,  GL_SPECULAR,  specularb      );
+    glMaterialf (GL_BACK,  GL_SHININESS, shinyf*bflight );
+
+    bool dirty =  isosurfwin->issDirty(s);
+
+    for ( int r=0; r<model->_numReg; r++ ) {
+      RRegion *reg = model->region(r);
+      IsoSurface*& iso = !s ? reg->_iso0 : reg->_iso1;
+
+      if( iso && ( dirty || iso->tm() != tm) ){
+        iso = NULL;
       }
-      if( reg->_iso0==NULL ) 
-        reg->_iso0 = new IsoSurface( model, data, isosurfwin->isoval0->value(),
+      if( iso==NULL ) 
+        iso = new IsoSurface( model, data, isosurfwin->isoval(s),
                 reg->ele_membership(), tm, _branch_cut?_branch_range:NULL );
-      reg->_iso0->color( isosurfwin->issColor(0) );
-      on_tr = translucency( reg->_iso0->color()[3]<OPAQUE_LIMIT );
-      reg->_iso0->draw();
+      iso->color( isosurfwin->issColor(s) );
+      on_tr = translucency( iso->color()[3]<OPAQUE_LIMIT );
+      iso->draw();
       if( on_tr ) translucency( false );
     } 
-    
+
     glPopAttrib();
   }
-
-  if( !isosurfwin->isoOn1->value() ) return;
-
-  bool dirty =  isosurfwin->issDirty(1);
-  glPushAttrib(GL_ALL_ATTRIB_BITS);
-
-  for ( int s=0; s<model->_numReg; s++ ) {
-    RRegion *reg = model->region(s);
-	if( reg->_iso1 && ( dirty || reg->_iso1->tm() != tm) ){
-	  delete iso1;
-	  reg->_iso1 = NULL;
-	}
-	if( reg->_iso1==NULL ) 
-	  reg->_iso1 = new IsoSurface( model, data, isosurfwin->isoval1->value(),
-			  reg->ele_membership(), tm, _branch_cut?_branch_range:NULL );
-	reg->_iso1->color( isosurfwin->issColor(1) );
-    on_tr = translucency( reg->_iso1->color()[3]<OPAQUE_LIMIT );
-	reg->_iso1->draw();
-    if( on_tr ) translucency( false );
-  } 
-
-  glPopAttrib();
 }
-
 
 
 /**
@@ -2173,4 +2157,48 @@ TBmeshWin :: ctr_on_vtx( int vtx )
   trackball.SetOrigin( -p[0], -p[1], -p[2] );
   trackball.SetTranslation( 0., 0., 0. );
   redraw();
+}
+
+
+/** 
+ * @brief save isosurface to file as auxilliary grid
+ *
+ * \param fn   filename
+ * \param surf which isosurface
+ */
+void
+TBmeshWin :: saveAux( char *fn, int surf )
+{
+  int numEle=0, numPt=0;
+  
+  for ( int r=0; r<model->_numReg; r++ ) {
+    IsoSurface *iso = !surf ? model->region(r)->_iso0 : model->region(r)->_iso1;
+    if( iso ) {
+      numEle += iso->nele();
+      numPt  += iso->npts();
+    }
+  }
+  if( !numPt ) return;
+  
+  string basename = fn;
+  size_t pos = basename.find( ".pts_t");
+  if( pos == basename.length()-6 )
+    basename.erase( pos );
+
+  string ptfile = basename+".pts_t";
+  FILE *pout = fopen( ptfile.c_str(), "w" );
+  fprintf( pout, "1\n%d\n", numPt );
+  fclose( pout );
+
+  string elemfile = basename+".elem_t";
+  FILE *eout = fopen( elemfile.c_str(), "w" );
+  fprintf( pout, "1\n%d\n", numEle );
+  fclose( eout );
+
+  int pt_offset = 0;
+  for ( int r=0; r<model->_numReg; r++ ) {
+    IsoSurface *iso = !surf ? model->region(r)->_iso0 : model->region(r)->_iso1;
+    iso->saveAux( basename, pt_offset );
+    pt_offset += iso->npts();
+  }
 }
