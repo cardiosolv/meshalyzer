@@ -263,6 +263,7 @@ void TBmeshWin :: draw()
     }
   }
 
+  draw_iso_surfaces( );
 
   // draw surfaces
   model->pt.setVis( true );
@@ -293,7 +294,6 @@ void TBmeshWin :: draw()
   }
   draw_sorted_elements( trans_elems );
 
-  draw_iso_surfaces( );
   draw_iso_lines();
 
 
@@ -409,11 +409,13 @@ void TBmeshWin::draw_iso_surfaces()
     float bflight = isosurfwin->backlight(s);
     GLfloat diffuseb[4], specularb[4];
     GLfloat shinyf=128;
+    CSET( diffuseb, 0.6, 1.  );
+    CSET( specularb, 0.75, 1. );
 
     glDisable(GL_COLOR_MATERIAL);
-    glGetMaterialfv( GL_FRONT, GL_DIFFUSE,  diffuseb );
-    glGetMaterialfv( GL_FRONT, GL_SPECULAR, specularb );
-    glGetMaterialfv( GL_FRONT, GL_SHININESS, &shinyf );
+    glMaterialfv(GL_FRONT,  GL_DIFFUSE,   diffuseb       );
+    glMaterialfv(GL_FRONT,  GL_SPECULAR,  specularb      );
+    glMaterialf (GL_FRONT,  GL_SHININESS, 80. );
 
     GLfloat db = diffuseb[0]*bflight;
     GLfloat sb = specularb[0]*bflight;
@@ -423,7 +425,7 @@ void TBmeshWin::draw_iso_surfaces()
     glMaterialfv(GL_BACK,  GL_DIFFUSE,   diffuseb       );
     glMaterialfv(GL_BACK,  GL_SPECULAR,  specularb      );
     glMaterialf (GL_BACK,  GL_SHININESS, shinyf*bflight );
-    glColorMaterial(GL_BACK, GL_AMBIENT_AND_DIFFUSE);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glEnable(GL_COLOR_MATERIAL);
 
     bool dirty =  isosurfwin->issDirty(s);
