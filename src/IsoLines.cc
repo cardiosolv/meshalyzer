@@ -33,15 +33,14 @@ int
 IsoLine :: process( Surfaces *s, DATA_TYPE *dat, bool restricted )
 {
   int num_lines=0;
+  EdgePtMap epm;
 
   for( int i=0; i<_nl; i++ ){
     double val = _nl==1? _v0: _v0 + i*(_v1-_v0)/(float)(_nl-1.);
     for( int j=0; j<s->num(); j++ ) {
       if( restricted && !s->visible() ) continue;
       int npoly;
-      PPoint p;
-      EdgePtMap epm;
-      MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly, p, epm );
+      MultiPoint **lpoly = s->ele(j)->isosurf( dat, val, npoly, _pts, epm );
       if( npoly && _branch ) {
         const int*nodes= s->ele(j)->obj();
         DATA_TYPE edat[MAX_NUM_SURF_NODES];
@@ -67,6 +66,7 @@ IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
 {
   int num_lines=0;
   DATA_TYPE *edat = NULL;
+  EdgePtMap epm;
 
   for( int i=0; i<_nl; i++ ){
     double val = _nl==1? _v0: _v0 + i*(_v1-_v0)/(float)(_nl-1.);
@@ -81,9 +81,7 @@ IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
             idata[v] = s->interpolate( j, dat, v );
       }
       int npoly;
-      PPoint p;
-      EdgePtMap epm;
-      MultiPoint **lpoly = s->ele(j)->isosurf( idata, val, npoly, p, epm );
+      MultiPoint **lpoly = s->ele(j)->isosurf( idata, val, npoly, _pts, epm );
       if( !npoly ||
           (_branch && cross_branch(idata,s->ele(j)->ptsPerObj(), _branch_range[0], _branch_range[1], _branch_tol)) )
           continue;
@@ -100,7 +98,6 @@ IsoLine :: process( CutSurfaces *s, DATA_TYPE *dat )
 IsoLine::~IsoLine()
 {
   for( int i=0; i<_polygon.size(); i++ ) {
-    delete _polygon[i]->pt();
     delete _polygon[i];
   }
 }
