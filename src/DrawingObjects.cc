@@ -391,16 +391,14 @@ MultiPoint ** MultiPoint::isosurf( DATA_TYPE *dat, DATA_TYPE val, int &npoly,
       int n0     = _node[poly[pindex]];
       int n1     = _node[poly[pindex+1]];
       EdgePair edge( min(n0,n1), max(n0,n1) );
-      if( !epm.count( edge ) ){
-        // create a new point and map the edge nodes to it
-        GLfloat pt[3];
-        float d = edge_interp( (*_pt)[n0], dat[n0], (*_pt)[n1], 
+      GLfloat pt[3];
+      // create a new point and map the edge nodes to it
+      float d = edge_interp( (*_pt)[n0], dat[n0], (*_pt)[n1], 
                                              dat[n1], val, pt );
 #pragma omp critical 
-        {
-          epm[edge] = epts.num();
-          epts.add( pt, 1 );
-        }
+      if( !epm.count( edge ) ){
+        epm[edge] = epts.num();
+        epts.add( pt, 1 );
       }
 #pragma omp critical
       elePts[i] = epm[edge];

@@ -30,6 +30,7 @@ class IsoLine {
     private:
         vector<MultiPoint *>  _polygon;
         vector<float>         _val;
+        PPoint                _pts;
         bool                  _branch=false; // do not interpolate over a value
         double                _branch_range[2];
         float                 _branch_tol=0.3;

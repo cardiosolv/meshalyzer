@@ -404,17 +404,29 @@ void TBmeshWin::draw_iso_surfaces()
 
     if( !isosurfwin->isoOn(s) ) continue;
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    //glPushAttrib(GL_ALL_ATTRIB_BITS);
+
     float bflight = isosurfwin->backlight(s);
-    GLfloat diffuseb[4], specularb[4], shinyf;
-    glGetMaterialfv( GL_FRONT, GL_DIFFUSE,  diffuseb );
-    glGetMaterialfv( GL_FRONT, GL_SPECULAR, specularb );
-    glGetMaterialfv( GL_FRONT, GL_SHININESS, &shinyf );
-    CSET( diffuseb,  diffuseb[0]*bflight,  diffuseb[3]  );
-    CSET( specularb, specularb[0]*bflight, specularb[3] );
+    GLfloat diffuseb[4], specularb[4];
+    GLfloat shinyf=128;
+    CSET( diffuseb, 0.6, 1.  );
+    CSET( specularb, 0.75, 1. );
+
+    glDisable(GL_COLOR_MATERIAL);
+    glMaterialfv(GL_FRONT,  GL_DIFFUSE,   diffuseb       );
+    glMaterialfv(GL_FRONT,  GL_SPECULAR,  specularb      );
+    glMaterialf (GL_FRONT,  GL_SHININESS, 80. );
+
+    GLfloat db = diffuseb[0]*bflight;
+    GLfloat sb = specularb[0]*bflight;
+    CSET( diffuseb,  db, 1.  );
+    CSET( specularb, sb, 1. );
+
     glMaterialfv(GL_BACK,  GL_DIFFUSE,   diffuseb       );
     glMaterialfv(GL_BACK,  GL_SPECULAR,  specularb      );
     glMaterialf (GL_BACK,  GL_SHININESS, shinyf*bflight );
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    glEnable(GL_COLOR_MATERIAL);
 
     bool dirty =  isosurfwin->issDirty(s);
 
@@ -434,7 +446,7 @@ void TBmeshWin::draw_iso_surfaces()
       if( on_tr ) translucency( false );
     } 
 
-    glPopAttrib();
+    //glPopAttrib();
   }
 }
 
