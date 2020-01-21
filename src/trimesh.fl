@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0400
+version 1.0305
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -103,7 +103,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1569 64 350 645} type Double box UP_BOX
+      xywh {1080 390 350 645} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -927,11 +927,11 @@ objprops[Cable]->win->show();}
           xywh {260 165 70 25} labelsize 12
         }
       }
-      Fl_Tabs tabwidget {
+      Fl_Tabs tabwidget {open
         xywh {10 270 330 220} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight
+          label Highlight selected
           xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
@@ -1133,55 +1133,55 @@ mwtb->redraw();}
           }
         }
         Fl_Group surfgrp {
-          label Surface
-          xywh {15 310 315 175} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
+          label Surface open
+          xywh {15 304 325 181} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label Visible
             callback {vector<int>lst;
 surfselected(lst);
 mwtb->surfVis(lst,static_cast<bool>(o->value()));}
-            xywh {140 395 55 30} value 1 selection_color 2 labelsize 12
+            xywh {255 310 80 30} value 1 selection_color 2 labelsize 12 align 16
           }
           Fl_Light_Button surfoutlinebut {
             label Outline
             callback {vector<int>lst;
 surfselected(lst);
 mwtb->surfOutline(lst,static_cast<bool>(o->value()));}
-            xywh {140 315 90 30}
+            xywh {185 350 65 30}
           }
           Fl_Light_Button surffillbut {
             label Filled
             callback {vector<int> lst;
 surfselected(lst);
 mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
-            xywh {240 315 90 30} value 1
+            xywh {185 388 65 30} value 1
           }
           Fl_Button {} {
             label {Outline colour}
             callback {static surfColourChoice *cc=NULL;
 cc=pick_surf_color( SurfEle, "Outline Colour",cc );}
-            tooltip {change colour and opacity} xywh {140 355 90 30} labelsize 12
+            tooltip {change colour and opacity} xywh {255 350 80 30} labelsize 12
           }
           Fl_Button {} {
             label {Fill colour}
             callback {static surfColourChoice *cc=NULL;
 cc=pick_surf_color( Surface, "Surface colour",cc );}
-            tooltip {change colour and opacity} xywh {240 355 90 30} labelsize 12
+            tooltip {change colour and opacity} xywh {255 388 80 30} labelsize 12
           }
           Fl_Check_Browser surflist {
-            label {apply to}
-            xywh {20 320 110 160} type Multi align 5
+            label {<- apply to}
+            xywh {20 304 160 141} type Multi align 11
           }
           Fl_Group {} {
             label Select
-            xywh {140 445 185 35} box ENGRAVED_FRAME labelsize 13
+            xywh {19 450 185 35} box ENGRAVED_FRAME labelsize 13 align 8
           } {
             Fl_Button {} {
               label all
               callback {surflist->check_all();
 update_surfGUI(0);}
-              xywh {145 450 55 25}
+              xywh {24 455 55 25}
             }
             Fl_Button {} {
               label invert
@@ -1194,7 +1194,7 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
     }
     surflist->checked(i, !surflist->checked(i));
 }}
-              xywh {205 450 55 25} color 0 labelfont 1 labelsize 12 labelcolor 49
+              xywh {84 455 55 25} color 0 labelfont 1 labelsize 12 labelcolor 49
             }
             Fl_Button {} {
               label shown
@@ -1207,12 +1207,12 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
     }
     surflist->checked(i,mwtb->model->surface(i-1)->visible());
 }}
-              xywh {265 450 55 25} color 4 labelfont 1 labelsize 12 labelcolor 49
+              xywh {144 455 55 25} color 4 labelfont 1 labelsize 12 labelcolor 49
             }
           }
           Fl_Menu_Button {} {
             label Delete
-            xywh {265 395 65 30} box GTK_UP_BOX color 88 labelsize 12 align 20
+            xywh {255 456 80 25} box GTK_UP_BOX color 88 labelsize 12 align 20
           } {
             MenuItem {} {
               label really
@@ -1257,7 +1257,7 @@ refresh_surflist(0);
 surflist->set_checked(sel+1);
 
 write_surfaces(0);}
-            tooltip {rename surface} xywh {200 395 60 30} labelsize 12
+            tooltip {rename surface} xywh {255 425 80 25} labelsize 12
           }
         }
         Fl_Group vectorgrp {
@@ -2775,8 +2775,7 @@ while( mshzf.getline( buf, BUFLEN ) ) {
   cerr << "Unknown variable specified: " << var << endl;
 }
 mwtb->lights(illBut->value());
-mwtb->redraw();} {selected
-    }
+mwtb->redraw();} {}
   }
   Function {surfselected(vector<int>& lst)} {} {
     code {lst.clear();
