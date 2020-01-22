@@ -1,5 +1,5 @@
 # data file for the Fltk User Interface Designer (fluid)
-version 1.0305
+version 1.0400
 header_name {.h}
 code_name {.cc}
 decl {\#include "Surfaces.h"} {public local
@@ -103,7 +103,7 @@ class Controls {open
   } {
     Fl_Window window {
       label {Meshalyzer Controls} open
-      xywh {1080 390 350 645} type Double box UP_BOX
+      xywh {654 158 350 705} type Double box UP_BOX
       code0 {\#include <FL/Fl_Color_Chooser.H>}
       code1 {\#include "VecData.h"} visible
     } {
@@ -854,14 +854,14 @@ cc=pickcolor(VolEle, "Voxele colour",cc);}
           callback {bool *selreg = regselected();
 mwtb->showobj(Vertex,selreg,static_cast<bool>(o->value()));
 delete[] selreg;}
-          xywh {160 141 100 25} when 1
+          xywh {160 140 100 25} when 1
         }
         Fl_Light_Button cabbut {
           label Cables
           callback {bool *selreg = regselected();
 mwtb->showobj(Cable,selreg,static_cast<bool>(o->value()));
 delete[] selreg;}
-          xywh {160 166 100 24}
+          xywh {160 165 100 25}
         }
         Fl_Light_Button cnnxbut {
           label Connections
@@ -928,55 +928,55 @@ objprops[Cable]->win->show();}
         }
       }
       Fl_Tabs tabwidget {open
-        xywh {10 270 330 220} align 0
+        xywh {10 270 330 260} align 0
       } {
         Fl_Group hilightgrp {
-          label Highlight selected
-          xywh {10 305 330 185} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
+          label Highlight open selected
+          xywh {10 305 330 225} color 11 labelfont 1 labelsize 12 labelcolor 121 align 4
         } {
           Fl_Value_Input tethi {
             label {VolEle:}
             callback {mwtb->highlight(VolEle,int((o->value())));}
-            xywh {100 345 85 25} labeltype NO_LABEL step 1
+            xywh {100 355 85 25} labeltype NO_LABEL step 1
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
           Fl_Value_Input elehi {
             label {:Surf Ele}
             callback {mwtb->highlight(SurfEle,static_cast<int>(o->value()));}
-            xywh {190 345 85 25} align 8 step 1
+            xywh {190 355 85 25} align 8 step 1
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
           Fl_Value_Input cnnxhi {
             label {Connection:}
             callback {mwtb->highlight(Cnnx,static_cast<int>(o->value()));}
-            xywh {100 375 85 25} step 1
+            xywh {100 385 85 25} step 1
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
           Fl_Value_Input cabhi {
             label {:Cable}
             callback {mwtb->highlight(Cable,static_cast<int>(o->value()));}
-            xywh {190 375 85 25} align 8 step 1
+            xywh {190 385 85 25} align 8 step 1
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
           Fl_Value_Input verthi {
             label {Vertex:}
             callback {mwtb->highlight(Vertex,int(o->value()));}
-            xywh {100 405 85 25} step 1
+            xywh {100 420 85 25} step 1
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
           Fl_Light_Button hilighton {
             label on
             callback {mwtb->set_hilight( static_cast<bool>(o->value()) );}
-            xywh {100 315 85 25}
+            tooltip {Highlight specific elements} xywh {100 325 85 25}
           }
           Fl_Choice attachtype {
             label attached open
-            tooltip {draw which objects associated with vertex} xywh {190 435 140 25} down_box BORDER_BOX align 2 when 1
+            tooltip {draw which objects associated with vertex} xywh {190 455 140 25} down_box BORDER_BOX align 2 when 1
           } {
             MenuItem {} {
               label {Filled Surf eles}
@@ -1007,19 +1007,19 @@ objprops[Cable]->win->show();}
           Fl_Button {} {
             label {current reg/surf}
             callback {highlight_region();}
-            tooltip {set all objects to 1st in currently selected surface} xywh {190 315 85 25} labelsize 10
+            tooltip {set all objects to 1st in currently selected surface} xywh {190 325 85 25} labelsize 10
           }
           Fl_Button {} {
             label {?}
             callback {mwtb->hiliteinfo();}
-            tooltip {display info on highlighted objects} xywh {290 315 30 25} box ROUND_UP_BOX color 133
+            tooltip {display info on highlighted objects} xywh {150 490 65 30} box ROUND_UP_BOX color 133 labelsize 18
           }
           Fl_Value_Output vertvalout {
             label {:value}
-            tooltip {vertex value} xywh {190 405 85 25} color 174 align 8
+            tooltip {vertex value} xywh {190 420 85 25} color 174 align 8
           }
           Fl_Choice hitettype {
-            tooltip {display style} xywh {15 345 85 25} down_box BORDER_BOX textsize 10
+            tooltip {display style} xywh {15 355 85 25} down_box BORDER_BOX textsize 10
           } {
             MenuItem {} {
               label {Vol Ele}
@@ -1038,37 +1038,37 @@ mwtb->redraw();}
             label {Pick Vertex}
             callback {o->color(128);
 mwtb->select_vertex();}
-            tooltip {select a vertex with mouse} xywh {15 435 80 25} color 131 labelsize 12
+            tooltip {select a vertex with mouse} xywh {15 455 80 25} color 131 labelsize 12
           }
           Fl_Button {} {
             label {Time series}
             callback {mwtb->timeplot();}
-            xywh {100 435 85 25} color 124
+            tooltip {Display time series for selected vertex} xywh {100 455 85 25} color 124
           }
           Fl_Button {} {
             label {Center Vertex}
             callback {mwtb->ctr_on_vtx((int)(verthi->value()));}
-            tooltip {center view on highlighted vertex} xywh {15 460 80 25} color 246 labelsize 12
+            tooltip {center view on highlighted vertex} xywh {15 490 80 25} color 246 labelsize 12
           }
         }
         Fl_Group lightgrp {
           label Lights
-          xywh {10 295 330 185} color 188 labelfont 1 labelsize 10 labelcolor 188 hide
+          xywh {10 300 330 225} color 188 labelfont 1 labelsize 10 labelcolor 188 hide
         } {
           Fl_Value_Slider lightx {
             label {X direction}
             callback {mwtb->redraw();}
-            tooltip {X component of light direction} xywh {15 330 140 20} type Horizontal selection_color 71 labelsize 12 minimum -1
+            tooltip {X component of light direction} xywh {15 360 140 20} type Horizontal selection_color 71 labelsize 12 minimum -1
           }
           Fl_Value_Slider lighty {
             label {Y direction}
             callback {mwtb->redraw();}
-            tooltip {Y component of light direction} xywh {15 370 140 20} type Horizontal selection_color 190 labelsize 12 minimum -1
+            tooltip {Y component of light direction} xywh {15 400 140 20} type Horizontal selection_color 190 labelsize 12 minimum -1
           }
           Fl_Value_Slider lightz {
             label {Z directtion}
             callback {mwtb->redraw();}
-            tooltip {z component of light direction} xywh {15 410 140 20} type Horizontal selection_color 244 labelsize 12 minimum -1 value 1
+            tooltip {z component of light direction} xywh {15 440 140 20} type Horizontal selection_color 244 labelsize 12 minimum -1 value 1
           }
           Fl_Button {} {
             label reset
@@ -1076,112 +1076,111 @@ mwtb->select_vertex();}
 lighty->value(0.);
 lightz->value(1);
 mwtb->redraw();}
-            tooltip {reset light direction to default} xywh {165 305 60 20} labelsize 12
+            tooltip {reset light direction to default} xywh {175 315 60 25} labelsize 12
           }
           Fl_Light_Button showLightDir {
             label {show direction}
             callback {mwtb->redraw();}
-            tooltip {draw an arrow indicating the light direction} xywh {125 450 100 25} labelsize 12
+            tooltip {draw an arrow indicating the light direction} xywh {125 490 100 25} labelsize 12
           }
           Fl_Button {} {
             label {zero X}
             callback {lightx->value(0);
 mwtb->redraw();}
-            tooltip {set x component to 0} xywh {15 305 35 20} labelsize 10
+            tooltip {set x component to 0} xywh {15 315 35 25} labelsize 10
           }
           Fl_Button {} {
             label {zero Y}
             callback {lighty->value(0);
 mwtb->redraw();}
-            tooltip {set y component to 0} xywh {60 305 35 20} labelsize 10
+            tooltip {set y component to 0} xywh {65 315 35 25} labelsize 10
           }
           Fl_Button {} {
             label {zero Z}
             callback {lightz->value(0);
 mwtb->redraw();}
-            tooltip {set z component to 0} xywh {105 305 35 20} labelsize 10
+            tooltip {set z component to 0} xywh {115 315 35 25} labelsize 10
           }
           Fl_Light_Button illBut {
             label Illuminate
             callback {mwtb->lights((bool)o->value());}
-            tooltip {turn on light} xywh {15 450 100 25} value 1 labelsize 12
+            tooltip {turn on light} xywh {15 490 100 25} value 1 labelsize 12
           }
           Fl_Value_Slider ambientslide {
             label Amb
             callback {mwtb->redraw();}
-            tooltip {ambient lighting component level} xywh {175 330 25 95} selection_color 3 labelsize 12
+            tooltip {ambient lighting component level} xywh {175 355 25 110} selection_color 3 labelsize 12
           }
           Fl_Light_Button facetshadBut {
             label {facet shading}
             callback {mwtb->facetshade( (bool)(o->value()) );}
-            tooltip {do not blend colours over surface} xywh {235 450 100 25} labelsize 12
+            tooltip {do not blend colours over surface} xywh {235 490 100 25} labelsize 12
           }
           Fl_Light_Button {} {
             label fixed
             callback {mwtb->headlamp(o->value());}
-            tooltip {Fixed light - headlamp mode} xywh {240 305 60 20} value 1 labelsize 12 align 148
+            tooltip {Fixed light - headlamp mode} xywh {255 315 60 25} value 1 labelsize 12 align 148
           }
           Fl_Value_Slider specularslide {
             label Spec
             callback {mwtb->redraw();}
-            tooltip {specular lighting component level} xywh {235 330 25 95} selection_color 6 labelsize 12 value 0.75
+            tooltip {specular lighting component level} xywh {235 355 25 110} selection_color 6 labelsize 12 value 0.75
           }
           Fl_Value_Slider diffuseslide {
             label Diff
             callback {mwtb->redraw();}
-            tooltip {specular lighting component level} xywh {295 330 25 95} selection_color 6 labelsize 12 value 0.6
+            tooltip {specular lighting component level} xywh {295 355 25 110} selection_color 6 labelsize 12 value 0.6
           }
         }
         Fl_Group surfgrp {
           label Surface open
-          xywh {15 304 325 181} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
+          xywh {15 304 325 221} color 93 labelfont 1 labelsize 12 labelcolor 90 hide
         } {
           Fl_Light_Button surfvisbut {
             label Visible
             callback {vector<int>lst;
 surfselected(lst);
 mwtb->surfVis(lst,static_cast<bool>(o->value()));}
-            xywh {255 310 80 30} value 1 selection_color 2 labelsize 12 align 16
+            xywh {255 310 80 25} value 1 selection_color 2 labelsize 12 align 16
           }
           Fl_Light_Button surfoutlinebut {
             label Outline
             callback {vector<int>lst;
 surfselected(lst);
 mwtb->surfOutline(lst,static_cast<bool>(o->value()));}
-            xywh {185 350 65 30}
+            xywh {255 345 80 25} color 181 labelsize 12
           }
           Fl_Light_Button surffillbut {
             label Filled
             callback {vector<int> lst;
 surfselected(lst);
 mwtb->surfFilled(lst,static_cast<bool>(o->value()));}
-            xywh {185 388 65 30} value 1
+            xywh {255 410 80 20} value 1 color 245 labelsize 12
           }
           Fl_Button {} {
             label {Outline colour}
             callback {static surfColourChoice *cc=NULL;
 cc=pick_surf_color( SurfEle, "Outline Colour",cc );}
-            tooltip {change colour and opacity} xywh {255 350 80 30} labelsize 12
+            tooltip {change colour and opacity} xywh {255 370 80 30} color 181 selection_color 48 labelsize 12
           }
           Fl_Button {} {
             label {Fill colour}
             callback {static surfColourChoice *cc=NULL;
 cc=pick_surf_color( Surface, "Surface colour",cc );}
-            tooltip {change colour and opacity} xywh {255 388 80 30} labelsize 12
+            tooltip {change colour and opacity} xywh {255 430 80 30} color 245 labelsize 12
           }
           Fl_Check_Browser surflist {
-            label {<- apply to}
-            xywh {20 304 160 141} type Multi align 11
+            xywh {15 310 235 161} type Multi align 11
           }
           Fl_Group {} {
             label Select
-            xywh {19 450 185 35} box ENGRAVED_FRAME labelsize 13 align 8
+            xywh {45 477 186 48} box ENGRAVED_FRAME labelsize 13 align 17
           } {
             Fl_Button {} {
               label all
               callback {surflist->check_all();
 update_surfGUI(0);}
-              xywh {24 455 55 25}
+              xywh {50 494 55 25}
             }
             Fl_Button {} {
               label invert
@@ -1194,7 +1193,7 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
     }
     surflist->checked(i, !surflist->checked(i));
 }}
-              xywh {84 455 55 25} color 0 labelfont 1 labelsize 12 labelcolor 49
+              xywh {110 494 55 25} color 0 labelfont 1 labelsize 12 labelcolor 49
             }
             Fl_Button {} {
               label shown
@@ -1207,12 +1206,12 @@ for( int i=1; i<=surflist->nitems(); i++ ) {
     }
     surflist->checked(i,mwtb->model->surface(i-1)->visible());
 }}
-              xywh {144 455 55 25} color 4 labelfont 1 labelsize 12 labelcolor 49
+              xywh {170 494 55 25} color 4 labelfont 1 labelsize 12 labelcolor 49
             }
           }
           Fl_Menu_Button {} {
             label Delete
-            xywh {255 456 80 25} box GTK_UP_BOX color 88 labelsize 12 align 20
+            xywh {255 501 80 24} box GTK_UP_BOX color 88 labelsize 12 align 20
           } {
             MenuItem {} {
               label really
@@ -1257,34 +1256,34 @@ refresh_surflist(0);
 surflist->set_checked(sel+1);
 
 write_surfaces(0);}
-            tooltip {rename surface} xywh {255 425 80 25} labelsize 12
+            tooltip {rename surface} xywh {255 470 80 25} labelsize 12
           }
         }
         Fl_Group vectorgrp {
           label Vectors
-          xywh {15 315 315 175} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
+          xywh {15 313 315 212} color 75 labelfont 1 labelsize 12 labelcolor 146 hide deactivate
         } {
           Fl_Light_Button veconbut {
             label Vectors
             callback {mwtb->vecdata->display(o->value());
 mwtb->redraw();}
-            tooltip {display vectors?} xywh {20 325 75 25} value 1
+            tooltip {display vectors?} xywh {20 323 75 25} value 1
           }
           Fl_Roller veclength {
             label {Arrow Size}
             callback {mwtb->vecdata->length(o->value());
 mwtb->redraw();}
-            tooltip {scale all vectors} xywh {100 325 150 25} type Horizontal labelsize 12 labelcolor 7 align 8 maximum 100 step 0.01 value 1
+            tooltip {scale all vectors} xywh {120 320 150 30} type Horizontal labelsize 12 labelcolor 7 align 8 maximum 100 step 0.01 value 1
           }
           Fl_Button veccolor {
             label colour
             callback {mwtb->vecdata->colourize();
 mwtb->redraw();}
-            tooltip {fixed colour} xywh {245 360 75 25}
+            tooltip {fixed colour} xywh {235 370 90 25}
           }
           Fl_Menu_Button veclengthdeterm {
-            label Length
-            tooltip {determinant of vector length} xywh {20 360 90 25}
+            label Length open
+            tooltip {determinant of vector length} xywh {20 369 90 25}
           } {
             MenuItem veclenmag {
               label {Vector mag}
@@ -1307,7 +1306,7 @@ mwtb->redraw();}
           }
           Fl_Menu_Button veccoldeterm {
             label Colour
-            tooltip {determinant of vector colour} xywh {130 360 90 25}
+            tooltip {determinant of vector colour} xywh {130 370 90 25}
           } {
             MenuItem veccolmag {
               label {Vector mag}
@@ -1342,46 +1341,46 @@ mwtb->redraw();}
             label stride
             callback {mwtb->vecdata->stride(o->value());
 mwtb->redraw();}
-            xywh {25 441 35 24} labelcolor 7 align 2 when 8 minimum 1 maximum 100000 step 1 value 1
+            xywh {25 476 35 25} labelcolor 7 align 2 when 8 minimum 1 maximum 100000 step 1 value 1
           }
           Fl_Check_Button vecstoch {
             label Stochastic
             callback {mwtb->vecdata->stoch_stride(o->value());
 mwtb->redraw();}
-            xywh {120 435 75 25} down_box DOWN_BOX labelcolor 7
+            xywh {120 470 75 25} down_box DOWN_BOX labelcolor 7
           }
           Fl_Check_Button vecheads {
             label Heads
             callback {mwtb->vecdata->heads(o->value());
 mwtb->redraw();}
-            xywh {120 465 90 15} down_box DOWN_BOX value 1 labelcolor 7
+            xywh {120 495 90 25} down_box DOWN_BOX value 1 labelcolor 7
           }
           Fl_Value_Input vecstart {
             label start
             callback {mwtb->vecdata->start(o->value());
 mwtb->redraw();}
-            xywh {75 442 35 24} labelcolor 7 align 2 maximum 10000 step 1
+            xywh {75 476 35 24} labelcolor 7 align 2 maximum 10000 step 1
             code1 {\#include "MyValueInput.h"}
             class MyValueInput
           }
-          Fl_Group veccolgroup {
-            xywh {20 390 305 100} labelfont 1
+          Fl_Group veccolgroup {open
+            xywh {20 421 305 104} labelfont 1
           } {
             Fl_Value_Input veccolmin {
               label {min:}
               callback {mwtb->vecdata->cs->calibrate(o->value(),mwtb->vecdata->cs->max());
 mwtb->redraw();}
-              xywh {245 438 80 22} labelsize 12 labelcolor 7 when 8 textsize 12
+              xywh {245 473 80 25} labelsize 12 labelcolor 7 when 8 textsize 12
             }
             Fl_Value_Input veccolmax {
               label {max:}
               callback {mwtb->vecdata->cs->calibrate(mwtb->vecdata->cs->min(),o->value());
 mwtb->redraw();}
-              xywh {245 463 80 22} labelsize 12 labelcolor 7 when 8 textsize 12
+              xywh {245 503 80 22} labelsize 12 labelcolor 7 when 8 textsize 12
             }
             Fl_Choice veccstype {
               label {colour scale}
-              xywh {215 395 110 30} down_box BORDER_BOX labelsize 10 labelcolor 7 align 2
+              xywh {215 421 110 25} down_box BORDER_BOX labelsize 10 labelcolor 7 align 2
               code0 {\#include "Colourscale.h"}
               code1 {o->value(1);}
             } {
@@ -1472,39 +1471,31 @@ mwtb->redraw();}
 veccolmin->value(mwtb->vecdata->cs->min());
 veccolmax->value(mwtb->vecdata->cs->max());
 mwtb->redraw();}
-              tooltip {calibrate for current time} xywh {125 395 75 30} box ROUND_UP_BOX labelsize 12
+              tooltip {calibrate for current time} xywh {125 421 75 25} box ROUND_UP_BOX labelsize 12
             }
             Fl_Light_Button vecautocal {
               label {auto cs}
               callback {mwtb->vecdata->auto_cs(o->value());}
-              tooltip {calibrate every new time} xywh {20 400 80 25}
+              tooltip {calibrate every new time} xywh {20 421 80 25}
             }
           }
         }
         Fl_Group auxgridgrp {
           label {Aux Grid} open
-          xywh {15 305 320 180} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
+          xywh {15 305 325 215} box UP_BOX color 60 labelfont 1 labelsize 12 labelcolor 60 align 4 hide deactivate
         } {
           Fl_Light_Button auxgriddispbut {
             label On
             callback {mwtb->auxGrid->display( o->value() );
 mwtb->redraw();}
-            xywh {25 310 35 20} value 1 labelsize 10
+            xywh {25 330 35 20} value 1 labelsize 10
           }
           Fl_Group auxDataGrp {open
-            xywh {20 310 310 55}
+            xywh {25 320 310 65}
           } {
-            Fl_Button {} {
-              label optimal
-              callback {mwtb->auxGrid->optimize_cs(tmslider->value());
-auxmincolval->value(mwtb->auxGrid->cs.min());
-auxmaxcolval->value(mwtb->auxGrid->cs.max());
-mwtb->redraw();}
-              tooltip {calibrate for current time} xywh {100 310 45 20} box ROUND_UP_BOX labelsize 10
-            }
             Fl_Choice auxcstype {
               label {colour scale}
-              xywh {195 345 90 20} down_box BORDER_BOX labelsize 10 align 2
+              xywh {200 365 90 20} down_box BORDER_BOX labelsize 10 align 2
               code0 {\#include "Colourscale.h"}
               code1 {o->value(1);}
             } {
@@ -1593,38 +1584,46 @@ mwtb->redraw();}
               label min
               callback {mwtb->auxGrid->cs.calibrate(o->value(),mwtb->auxGrid->cs.max());
 mwtb->redraw();}
-              xywh {20 345 65 20} labelsize 10 align 2 when 4 textsize 10
+              xywh {25 365 65 20} labelsize 10 align 2 when 4 textsize 10
             }
             Fl_Value_Input auxmaxcolval {
               label max
               callback {mwtb->auxGrid->cs.calibrate(mwtb->auxGrid->cs.min(),o->value());
 mwtb->redraw();}
-              xywh {90 345 65 20} labelsize 10 align 2 when 4 textsize 10
+              xywh {95 365 65 20} labelsize 10 align 2 when 4 textsize 10
             }
             Fl_Value_Input auxnumcolev {
               label levels
               callback {mwtb->auxGrid->cs.size((int)(o->value()));
 mwtb->redraw();}
-              tooltip {colourmap size} xywh {160 345 30 20} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
+              tooltip {colourmap size} xywh {165 365 30 20} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
             }
             Fl_Light_Button auxautocalibratebut {
               label auto
               callback {mwtb->auxGrid->autocolor(o->value());}
-              tooltip {autoscale every timestep} xywh {290 345 40 20} labelsize 10 align 16
+              tooltip {autoscale every timestep} xywh {295 365 40 20} labelsize 10 align 16
             }
             Fl_Button plotAuxTS {
               label Plot
               callback {mwtb->auxGrid->plot(tmslider->value());}
-              tooltip {show time series for highlighted point} xywh {305 310 25 20} labelsize 10 deactivate
+              tooltip {show time series for highlighted point} xywh {310 330 25 20} labelsize 10 deactivate
             }
             Fl_Value_Output auxvertval {
               label {hi value:}
-              tooltip {value of highlighted vertex} xywh {195 311 70 18} color 17 selection_color 0 labelsize 10 align 2 textsize 10
+              tooltip {value of highlighted vertex} xywh {200 330 70 20} color 17 selection_color 0 labelsize 10 align 2 textsize 10
+            }
+            Fl_Button {} {
+              label optimal
+              callback {mwtb->auxGrid->optimize_cs(tmslider->value());
+auxmincolval->value(mwtb->auxGrid->cs.min());
+auxmaxcolval->value(mwtb->auxGrid->cs.max());
+mwtb->redraw();}
+              tooltip {calibrate for current time} xywh {105 330 45 20} box ROUND_UP_BOX labelsize 10
             }
           }
           Fl_Group {} {
-            label Vertex
-            xywh {65 375 255 30} labelsize 12 align 4
+            label Vertex open
+            xywh {65 375 255 45} labelsize 12 align 4
           } {
             Fl_Button auxptcolor {
               label color
@@ -1633,22 +1632,22 @@ mwtb->redraw();}
 if( !cc )
   cc = new AuxColourChoice(mwtb->auxGrid->color(Vertex),Vertex,mwtb);
 cc->window->show();}
-              xywh {65 380 55 20}
+              xywh {65 400 55 20}
             }
             Fl_Light_Button auxptdat {
               label data
               callback {mwtb->auxGrid->datify(Vertex,o->value());
 mwtb->redraw();}
-              xywh {125 380 50 20}
+              xywh {125 400 50 20}
             }
             Fl_Value_Input auxptsize {
               label {size:}
               callback {mwtb->auxGrid->size(Vertex,o->value());
 mwtb->redraw();}
-              xywh {205 380 55 20} labelsize 12 maximum 1e+06 step 5 value 5
+              xywh {205 400 55 20} labelsize 12 maximum 1e+06 step 5 value 5
             }
             Fl_Choice auxptstyle {
-              xywh {260 380 50 20} down_box BORDER_BOX labelsize 10 align 8
+              xywh {260 400 50 20} down_box BORDER_BOX labelsize 10 align 8
               code0 {o->value(2);}
             } {
               MenuItem {} {
@@ -1674,30 +1673,30 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Lines
-            xywh {65 405 255 25} labelsize 12 align 4
+            label Lines open
+            xywh {65 405 255 40} labelsize 12 align 4
           } {
             Fl_Button auxlinecolor {
               label color
               callback {static AuxColourChoice *cc=NULL;
 if( !cc ) cc =new AuxColourChoice(mwtb->auxGrid->color(Cnnx),Cnnx,mwtb);
 cc->window->show();}
-              xywh {65 405 55 20}
+              xywh {65 425 55 20}
             }
             Fl_Light_Button auxlinedat {
               label data
               callback {mwtb->auxGrid->datify(Cnnx,o->value());
 mwtb->redraw();}
-              xywh {125 405 50 20}
+              xywh {125 425 50 20}
             }
             Fl_Value_Input auxlinewidth {
               label {size:}
               callback {mwtb->auxGrid->size(Cnnx,o->value());
 mwtb->redraw();}
-              xywh {205 405 55 20} labelsize 12 maximum 10000 step 5 value 5
+              xywh {205 425 55 20} labelsize 12 maximum 10000 step 5 value 5
             }
             Fl_Choice auxlinestyle {open
-              xywh {260 405 50 20} down_box BORDER_BOX labelsize 12 align 8
+              xywh {260 425 50 20} down_box BORDER_BOX labelsize 12 align 8
               code0 {o->value(2);}
             } {
               MenuItem {} {
@@ -1723,8 +1722,8 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label Surface
-            xywh {65 430 265 20} labelsize 12 align 4
+            label Surface open
+            xywh {65 430 265 40} labelsize 12 align 4
           } {
             Fl_Button auxsurfcolor {
               label color
@@ -1732,22 +1731,22 @@ mwtb->redraw();}
 if(!cc)
 cc = new AuxColourChoice(mwtb->auxGrid->color(SurfEle),SurfEle,mwtb);
 cc->window->show();}
-              xywh {65 430 55 20}
+              xywh {65 450 55 20}
             }
             Fl_Light_Button auxsurfdat {
               label data
               callback {mwtb->auxGrid->datify(Surface,o->value());
 mwtb->redraw();}
-              xywh {125 430 50 20}
+              xywh {125 450 50 20}
             }
             Fl_Value_Input auxsurfline {
               label {size:}
               callback {mwtb->auxGrid->size(SurfEle,o->value());
 mwtb->redraw();}
-              xywh {205 430 55 20} labelsize 12 maximum 100000 step 5 value 10
+              xywh {205 450 55 20} labelsize 12 maximum 100000 step 5 value 10
             }
             Fl_Choice auxsurfstyle {open
-              xywh {260 430 50 20} down_box BORDER_BOX align 8
+              xywh {260 450 50 20} down_box BORDER_BOX align 8
               code0 {o->value(2);}
             } {
               MenuItem {} {
@@ -1773,8 +1772,8 @@ mwtb->redraw();}
             }
           }
           Fl_Group {} {
-            label VoxEle
-            xywh {65 454 245 22} labelsize 12 align 4
+            label VoxEle open
+            xywh {65 454 245 41} labelsize 12 align 4
           } {
             Fl_Button auxvolcolor {
               label color
@@ -1782,22 +1781,22 @@ mwtb->redraw();}
 if(!cc)
 cc=new AuxColourChoice(mwtb->auxGrid->color(VolEle),VolEle,mwtb);
 cc->window->show();}
-              xywh {65 455 55 20}
+              xywh {65 475 55 20}
             }
             Fl_Light_Button auxvoldat {
               label data
               callback {mwtb->auxGrid->datify(VolEle,o->value());
 mwtb->redraw();}
-              xywh {125 455 50 20}
+              xywh {125 475 50 20}
             }
             Fl_Value_Input auxvolline {
               label {size:}
               callback {mwtb->auxGrid->size(VolEle,o->value());
 mwtb->redraw();}
-              xywh {205 455 55 20} labelsize 12 maximum 10000 step 5 value 10
+              xywh {205 475 55 20} labelsize 12 maximum 10000 step 5 value 10
             }
             Fl_Choice auxvolstyle {open
-              xywh {260 455 50 20} down_box BORDER_BOX align 8
+              xywh {260 475 50 20} down_box BORDER_BOX align 8
               code0 {o->value(1);}
             } {
               MenuItem {} {
@@ -1841,7 +1840,7 @@ if( o->value() ) {
   plotAuxTS->deactivate();
 }
 mwtb->redraw();}
-            tooltip {turn on highlighting} xywh {270 310 30 20} labelsize 10
+            tooltip {turn on highlighting} xywh {275 330 30 20} labelsize 10
           }
           Fl_Value_Input auxhivert {
             label Hilight
@@ -1849,7 +1848,7 @@ mwtb->redraw();}
 if( mwtb->auxGrid->highlight_vertex(o->value(),val) )
   auxvertval->value(val);
 mwtb->redraw();}
-            tooltip {vertex to highlight and display time series if present} xywh {145 310 45 19} labelsize 10 align 2 step 1 textsize 10 deactivate
+            tooltip {vertex to highlight and display time series if present} xywh {150 330 45 20} labelsize 10 align 2 step 1 textsize 10 deactivate
             code0 {\#include "MyValueInput.h"}
             class MyValueInput
           }
@@ -1857,12 +1856,12 @@ mwtb->redraw();}
             label Clip
             callback {mwtb->auxGrid->clip(o->value());
 mwtb->redraw();}
-            xywh {65 310 35 20} box THIN_UP_BOX labelsize 10
+            xywh {65 330 35 20} box THIN_UP_BOX labelsize 10
           }
         }
       }
       Fl_Group colorscalegrp {
-        xywh {10 490 330 60} box ENGRAVED_BOX when 0
+        xywh {10 535 330 70} box ENGRAVED_BOX when 0
         code0 {\#include "ColourGroup.h"}
         class ColourGroup
       } {
@@ -1871,34 +1870,34 @@ mwtb->redraw();}
           callback {mwtb->optimize_cs();
 mincolval->value(mwtb->cs->min());
 maxcolval->value(mwtb->cs->max());}
-          tooltip {calibrate for current time} xywh {15 500 45 20} box ROUND_UP_BOX labelsize 10
+          tooltip {calibrate for current time} xywh {25 540 75 25} box ROUND_UP_BOX labelsize 10
         }
         Fl_Value_Input mincolval {
           label min
           callback {mwtb->cs->calibrate(o->value(),mwtb->cs->max());
 mwtb->redraw();}
-          xywh {65 500 65 25} labelsize 10 align 2 when 4 textsize 12
+          xywh {130 540 65 25} labelsize 10 when 4 textsize 12
         }
         Fl_Value_Input maxcolval {
           label max
           callback {mwtb->cs->calibrate(mwtb->cs->min(),o->value());
 mwtb->redraw();}
-          xywh {130 500 65 25} labelsize 10 align 2 when 4 textsize 12
+          xywh {130 570 65 25} labelsize 10 when 4 textsize 12
         }
         Fl_Value_Input numcolev {
           label levels
           callback {mwtb->cs->size((int)(o->value()));
 mwtb->redraw();}
-          tooltip {colourmap size} xywh {195 500 30 25} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
+          tooltip {colourmap size} xywh {195 540 30 25} labelsize 10 align 2 when 4 minimum 4 maximum 252 step 1 value 64 textsize 12
         }
         Fl_Light_Button autocalibratebut {
           label auto
           callback {mwtb->autocolour(o->value());}
-          tooltip {autoscale every timestep} xywh {15 528 45 15} labelsize 10 align 16
+          tooltip {autoscale every timestep} xywh {35 575 55 20} labelsize 12 align 16
         }
         Fl_Choice cstype {
           label {colour scale}
-          xywh {230 500 105 25} down_box BORDER_BOX labelsize 10 align 2
+          xywh {230 540 105 25} down_box BORDER_BOX labelsize 10 align 2
           code0 {\#include "Colourscale.h"}
           code1 {o->value(1);}
         } {
@@ -1991,47 +1990,47 @@ mwtb->redraw();}
         }
         Fl_Button {} {
           callback {mwtb->SendColourSyncMessage();}
-          tooltip {sync colours} image {broadcast.png} xywh {315 525 20 20}
+          tooltip {sync colours} image {broadcast.png} xywh {255 580 45 20}
         }
       }
-      Fl_Group animate_group {
-        xywh {10 555 330 85} box ENGRAVED_BOX
+      Fl_Group animate_group {open
+        xywh {10 609 330 86} box ENGRAVED_BOX
       } {
         Fl_Box tmslider {
           label time
           callback {mwtb->set_time(int(o->value()));}
-          tooltip {time displayed} xywh {17 570 220 25} box UP_BOX align 1
+          tooltip {time displayed} xywh {17 630 220 25} box UP_BOX align 1
           code0 {\#include "Myslider.h"}
           class Myslider
         }
         Fl_Button {} {
           label {@>|}
           callback {mwtb->animate_skip( int(frameskip->value()),this );}
-          tooltip {start playing animation until end} xywh {245 560 25 35} labelcolor 71
+          tooltip {start playing animation until end} xywh {245 624 25 31} labelcolor 71
         }
         Fl_Button {} {
           label {@||}
           callback {mwtb->animate_skip(0,this);}
-          tooltip {stop animation} xywh {276 560 25 35} labelcolor 1
+          tooltip {stop animation} xywh {276 624 25 31} labelcolor 1
         }
         Fl_Counter frameskip {
           label {\#frames}
           callback {mwtb->animate_skip(int(frameskip->value()),NULL);}
-          tooltip {\#frames to  increment} xywh {71 605 130 20} align 4 step 1 value 1
+          tooltip {\#frames to  increment} xywh {71 665 130 20} align 4 step 1 value 1
         }
         Fl_Value_Input animdelay {
           label {delay:}
           callback {mwtb->animate_delay(o->value()/1000.);}
-          tooltip {delay between frames (ms )} xywh {250 606 55 20} maximum 2000 step 5 value 10
+          tooltip {delay between frames (ms )} xywh {250 665 55 20} maximum 2000 step 5 value 10
         }
         Fl_Button tsync_but {
           callback {mwtb->SendTimeSyncMessage();}
-          tooltip {sync time} image {broadcast.png} xywh {309 600 26 30} resizable
+          tooltip {sync time} image {broadcast.png} xywh {309 660 26 30} resizable
         }
         Fl_Button {} {
           label {@>>}
           callback {mwtb->animate_skip( int(frameskip->value()),this,true );}
-          tooltip {start looping animation} xywh {306 560 25 35} labelcolor 71
+          tooltip {start looping animation} xywh {306 624 24 31} labelcolor 71
         }
       }
     }
