@@ -1,9 +1,11 @@
 # meshalyzer
 
-Meshalyzer is a graphical program for display time dependent data on 3D finite elment meshes. Of course, it can show static data on fewer dimensions as well. 
-It is developed to be compatible with the cardiac simulation environment [carpEntry](http://carp.medunigraz.at/carputils). 
+**This project has moved to [git.opencarp.org](https://git.opencarp.org/openCARP/meshalyzer/).**
 
-It uses its own file formats which are simple and easily converted to/from more popiular formats like VTK.
+Meshalyzer is a graphical program for display time dependent data on 3D finite elment meshes. Of course, it can show static data on fewer dimensions as well. 
+It is developed to be compatible with [openCARP](http://www.opencarp.org). 
+
+It uses its own file formats which are simple and easily converted to/from more popular formats like VTK.
 
 ## Features
 
